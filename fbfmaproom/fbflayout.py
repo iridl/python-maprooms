@@ -4,9 +4,7 @@ from dash import dash_table as table
 import dash_leaflet as dlf
 import dash_leaflet.express as dlx
 import dash_bootstrap_components as dbc
-
-SEVERITY_COLORS = ["#fdfd96", "#ffb347", "#ff6961"]
-
+from dataclasses import dataclass
 
 def app_layout():
     return html.Div(
@@ -402,221 +400,12 @@ def table_layout():
             html.Div(id="log"),
             dcc.Loading(
                 [
-                    table.DataTable(
+                    html.Table(
                         id="table",
-                        page_action="none",
-                        style_table={
+                        style={
                             "height": "650px",
                             "maxHeight": "650px",
                         },
-                        # note: this CSS option will automatically prefix the
-                        # generated CSS rule with a selector specific to the
-                        # current DOM object (in this case #table). I (Kevin)
-                        # have verified this with the DOM inspector.
-                        css=[
-                            {
-                                # this is a work around to get around a visual artifact
-                                # that otherwise appears. We need a single left side border
-                                # that applies to the container DOM object holding both the
-                                # fixed and scrolling parts of the table.
-                                "selector": "div.dash-spreadsheet-container",
-                                "rule": "border-left: 1px solid rgb(150, 150, 150)",
-                            },
-                            {
-                                "selector": "div.dash-fixed-row tr:first-child",
-                                "rule": "display: none",
-                            },
-                            {
-                                "selector": "div.dash-fixed-row tr:last-child",
-                                "rule": "border-bottom: 2px solid rgb(150, 150, 150)",
-                            },
-                        ],
-                        style_cell={
-                            "whiteSpace": "normal",
-                            "height": "auto",
-                            "textAlign": "center",
-                            # We eliminate the left side border and manually specify
-                            # the other three for the aforementioned reason.
-                            "border-left": "0px",
-                            "border-top": "1px solid rgb(150, 150, 150)",
-                            "border-bottom": "1px solid rgb(150, 150, 150)",
-                            "border-right": "1px solid rgb(150, 150, 150)",
-                            "backgroundColor": "rgb(248, 248, 248)",
-                        },
-                        fixed_rows={
-                            "headers": True,
-                            "data": 6,
-                        },
-                        tooltip_conditional=[
-                            {
-                                "if": {"row_index": 0, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "Drought was forecasted and a ‘bad year’ occurred",
-                            },
-                            {
-                                "if": {"row_index": 1, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "Drought was forecasted but a ‘bad year’ did not occur",
-                            },
-                            {
-                                "if": {"row_index": 2, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "No drought was forecasted but a ‘bad year’ occurred",
-                            },
-                            {
-                                "if": {"row_index": 3, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "No drought was forecasted, and no ‘bad year’ occurred",
-                            },
-                            {
-                                "if": {"row_index": 4, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "Gives the percentage of worthy-action and worthy-inactions",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "The year whose forecast is displayed on the map",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "enso_state"},
-                                "type": "markdown",
-                                "value": "Displays whether an El Nino, Neutral or La Nina state occurred during the year",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "forecast"},
-                                "type": "markdown",
-                                "value": "Displays all the historical flexible forecast for the selected issue month and location",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "rain_rank"},
-                                "type": "markdown",
-                                "value": "Presents the ranking of the rainfall for the year compared to all the years",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "bad_year"},
-                                "type": "markdown",
-                                "value": "Historical drought years based on farmers recollection",
-                            },
-                        ],
-                        tooltip_delay=0,
-                        tooltip_duration=None,
-                        style_data_conditional=[
-                            {
-                                "if": {
-                                    "row_index": [0, 1, 2, 3, 4, 5],
-                                },
-                                "font-weight": "bold",
-                            },
-                            {
-                                "if": {
-                                    "row_index": [0, 1, 2, 3, 4],
-                                },
-                                "color": "rgb(251, 101, 57)",
-                                "backgroundColor": "rgb(255, 255, 255)",
-                            },
-                            {
-                                "if": {
-                                    "row_index": [0, 1, 2, 3, 4],
-                                    "column_id": "year_label",
-                                },
-                                "color": "rgb(67, 104, 176)",
-                            },
-                            {
-                                "if": {
-                                    "row_index": 5,
-                                },
-                                "backgroundColor": "rgb(241, 241, 241)",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_obs} = 1 && {severity} = 0",
-                                    "column_id": "obs_rank",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[0],
-                                "color": "black",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_obs} = 1 && {severity} = 1",
-                                    "column_id": "obs_rank",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[1],
-                                "color": "black",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_obs} = 1 && {severity} = 2",
-                                    "column_id": "obs_rank",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[2],
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_pnep} = 1 && {severity} = 0",
-                                    "column_id": "forecast",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[0],
-                                "color": "black",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_pnep} = 1 && {severity} = 1",
-                                    "column_id": "forecast",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[1],
-                                "color": "black",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_pnep} = 1 && {severity} = 2",
-                                    "column_id": "forecast",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[2],
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{enso_state} = 'El Niño'",
-                                    "column_id": "enso_state",
-                                },
-                                "backgroundColor": "rgb(172, 23, 25)",
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{enso_state} = 'La Niña'",
-                                    "column_id": "enso_state",
-                                },
-                                "backgroundColor": "rgb(24, 101, 152)",
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{enso_state} = 'Neutral'",
-                                    "column_id": "enso_state",
-                                },
-                                "backgroundColor": "rgb(98, 98, 98)",
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{bad_year} = 'Bad'",
-                                    "column_id": "bad_year",
-                                },
-                                "backgroundColor": "rgb(64, 9, 101)",
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{bad_year} = ''",
-                                    "column_id": "bad_year",
-                                },
-                                "backgroundColor": "rgb(230, 230, 250)",
-                                "color": "white",
-                            },
-                        ],
                     ),
                 ],
                 type="dot",
@@ -637,3 +426,18 @@ def table_layout():
             "padding-right": "10px",
         },
     )
+
+
+@dataclass
+class ColorPair:
+    fg: str # foreground
+    bg: str # background
+
+
+SEVERITY_COLORS = [
+    ColorPair("black", "#fdfd96"),
+    ColorPair("black", "#ffb347"),
+    ColorPair("white", "#ff6961"),
+]
+
+

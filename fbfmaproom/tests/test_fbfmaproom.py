@@ -22,7 +22,7 @@ def test_from_month_since_360Day():
     assert fbfmaproom.from_month_since_360Day(735.5) == DT360(2021, 4, 16)
 
 def test_generate_tables():
-    main_df, summary_df, prob_thresh = fbfmaproom.generate_tables(
+    main_df, summary_df, thresholds = fbfmaproom.generate_tables(
         country_key='ethiopia',
         obs_dataset_key='rain',
         season_config={
@@ -86,17 +86,13 @@ def test_generate_tables():
             'Bad', '', '', '', '', '', '', 'Bad', '', '', '',
             '', '', '', '', 'Bad', ''
         ],
-        worst_obs=[
-            0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1,
-            1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0
-        ],
-        worst_pnep=[
-            0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1,
-            1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0
-        ],
-        severity=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0
+        forecast_numeric=[
+            34.036846, 26.84371, 34.275295, 32.347477, 36.428505, 31.376135, 32.212322,
+            33.347603, 38.258884, 38.258804, 37.052757, 30.61248,  36.068275, 41.856205,
+            34.0954,   42.46017,  36.144985, 36.93086,  35.872562, 31.448317, 35.4979,
+            40.69789,  40.95002,  28.682444, 35.03906,  33.82416,  35.923187, 37.54364,
+            29.528564, 39.904465, 27.96153,  28.823236, 34.679913, 35.844246, 31.127577,
+            35.4181,   38.823475, 38.869564, 36.086605
         ],
     )).set_index("time")
     pd.testing.assert_frame_equal(main_df, expected_main, check_index_type=False)
@@ -116,7 +112,29 @@ def test_generate_tables():
         expected_summary.set_index("year_label")
     )
 
-    assert np.isclose(prob_thresh, 37.052727)
+    np.testing.assert_equal(
+        (main_df["obs_rank"] <= thresholds["obs"]).values,
+        [
+            False, False, False, False, True, False, False, False,
+            False, False, True, False, True, True, False, False, False,
+            True, False, True, True, True, True, False, False, False,
+            False, False, False, True, False, False, False, False, False,
+            False, False, True, False
+        ]
+    )
+    print(main_df.columns)
+    np.testing.assert_equal(
+        (main_df["forecast_numeric"] >= thresholds["pnep"]).values,
+        [
+            False, False, False, False, False, False, False, False,
+            True, True, True, False, False, True, False, True, False,
+            False, False, False, False, True, True, False, False,
+            False, False, True, False, True, False, False, False,
+            False, False, False, True, True, False
+        ],
+    )
+
+    assert np.isclose(thresholds["pnep"], 37.052727)
 
 # overlaps with test_generate_tables, but this one uses synthetic
 # data. Merge them?
@@ -139,13 +157,10 @@ def test_augment_table_data():
         }
     )
     freq = 34
-    aug, summ, prob = fbfmaproom.augment_table_data(main_df, freq)
+    aug, summ, thresholds = fbfmaproom.augment_table_data(main_df, freq)
 
-    expected_aug = pd.DataFrame(main_df)
+    expected_aug = main_df.copy()
     expected_aug["obs_rank"] = [np.nan, np.nan, 2, 4, 3, 1]
-    expected_aug["worst_obs"] = [np.nan, np.nan, 0, 0, 0, 1]
-    expected_aug["forecast"] = ["nan", "19.61", "29.27", "33.80", "12.31", "1.00"]
-    expected_aug["worst_pnep"] = [np.nan, 0, 0, 1, 0, 0]
     pd.testing.assert_frame_equal(expected_aug, aug, check_column_type=True)
 
     expected_summ = pd.DataFrame(dict(
@@ -156,7 +171,16 @@ def test_augment_table_data():
     ))
     pd.testing.assert_frame_equal(expected_summ, summ)
 
-    assert np.isclose(prob, 33.800949)
+    np.testing.assert_equal(
+        (aug["obs_rank"] <= thresholds["obs"]).values,
+        [False, False, False, False, False, True]
+    )
+    np.testing.assert_equal(
+        (aug["pnep"] >= thresholds["pnep"]).values,
+        [False, False, False, True, False, False]
+    )
+    assert np.isclose(thresholds["pnep"], 33.800949)
+
 
 def test_pnep_tile_url_callback_yesdata():
     url, is_alert = fbfmaproom.pnep_tile_url_callback.__wrapped__(
