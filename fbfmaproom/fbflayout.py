@@ -11,6 +11,14 @@ SEVERITY_COLORS = ["#fdfd96", "#ffb347", "#ff6961"]
 def app_layout():
     return html.Div(
         [
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("Warning")),
+                    dbc.ModalBody(id="modal-body")
+                ],
+                id="modal",
+                centered=True,
+            ),
             dcc.Location(id="location", refresh=True),
             map_layout(),
             logo_layout(),

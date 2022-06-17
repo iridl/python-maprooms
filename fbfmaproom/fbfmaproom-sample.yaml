@@ -535,6 +535,7 @@ countries:
         zoom: 6
         rotation: 0
         marker: [8.025, 17.025]
+        onload_warning: "Watch out!"
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom

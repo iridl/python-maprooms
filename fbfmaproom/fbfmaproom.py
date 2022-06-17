@@ -604,6 +604,8 @@ def country(pathname: str) -> str:
     Output("bad_years", "value"),
     Output("obs_datasets", "options"),
     Output("obs_datasets", "value"),
+    Output("modal", "is_open"),
+    Output("modal-body", "children"),
     Input("location", "pathname"),
 )
 def _(pathname):
@@ -640,6 +642,7 @@ def _(pathname):
     obs_datasets_value = [datasets_config["defaults"]["observations"]]
     bad_years_options = obs_datasets_options
     bad_years_value = datasets_config["defaults"]["bad_years"]
+    warning = c.get("onload_warning")
 
     return (
         f"{PFX}/custom/{c['logo']}",
@@ -655,6 +658,8 @@ def _(pathname):
         bad_years_value,
         obs_datasets_options,
         obs_datasets_value,
+        warning is not None,
+        warning,
     )
 
 @SERVER.route(f"{PFX}/custom/<path:relpath>")
