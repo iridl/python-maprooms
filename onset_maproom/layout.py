@@ -135,220 +135,230 @@ def navbar_layout():
 def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
     return dbc.Container(
         [
-            html.H5(
+            html.Div(
                 [
-                    CONFIG["onset_and_cessation_title"],
-                ]
-            ),
-            html.P(
-                f"""
-                The Maproom explores current and historical rainy season onset
-                {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                 dates based on user-defined definitions.
-                The date when the rainy season starts with germinating rains
-                is critical to agriculture planification, in particular for planting.
-                """
-            ),
-            html.P(
-                """
-                The default map shows whether germinating rains have occured
-                as of now (or the most recent rainfall data), and if so: when.
-                Dates are expressed in days since an Early Start date
-                configurable via the controls below
-                (see more details on onset date definition and other map controls below).
-                """
-            ),
-            html.P(
-                f"""
-                The default local information shows first whether
-                the germinating rains have occured or not and when.
-                Graphics of historical onset
-                {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                dates are presented in the form of time series
-                and probability of exceeding.
-                Pick another point with the controls below
-                or by clicking on the map.
-                """
-            ),
-            Block("Pick a point",
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            dbc.FormFloating([dbc.Input(
-                                id = "latInput",
-                                min=lat_min,
-                                max=lat_max,
-                                type="number",
-                            ),
-                            dbc.Label(lat_label, style={"font-size": "80%"})]),
-                        ),
-                        dbc.Col(
-                            dbc.FormFloating([dbc.Input(
-                                id = "lngInput",
-                                min=lon_min,
-                                max=lon_max,
-                                type="number",
-                            ),
-                            dbc.Label(lon_label, style={"font-size": "80%"})]),
-                        ),
-                        dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
-                    ],
-                ),
-            ),
-            #Block(
-            #    "Date",
-            #    dbc.Select(
-            #        id="date_input",
-            #        value="onset",
-            #        bs_size="sm",
-            #        options=[
-            #            {"label": "Onset", "value": "onset"},
-            #            {"label": "Cessation", "value": "cessation"},
-            #        ],
-            #    ),
-            #),
-            Block(
-                "Ask the map:",
-                dbc.Select(
-                    id="map_choice",
-                    value="monit",
-                    # bs_size="sm",
-                    options=[
-                        {"label": "Has germinating rain occured?", "value": "monit"},
-                        {"label": "When to prepare for planting?", "value": "mean"},
-                        {"label": "Climatological Standard deviation", "value": "stddev"},
-                        {"label": "How risky to plant...", "value": "pe"},
-                    ],
-                ),
-                html.P(
-                    Sentence(
-                        Number("probExcThresh1", 30, min=0),
-                        html.Span(id="pet_units"),
-                        "?"
+                    html.H5(
+                        [
+                            CONFIG["onset_and_cessation_title"],
+                        ]
                     ),
-                    id="pet_input_wrapper"
-                )
+                    html.P(
+                        f"""
+                        The Maproom explores current and historical rainy season onset
+                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
+                         dates based on user-defined definitions.
+                        The date when the rainy season starts with germinating rains
+                        is critical to agriculture planification, in particular for planting.
+                        """
+                    ),
+                    html.P(
+                        """
+                        The default map shows whether germinating rains have occured
+                        as of now (or the most recent rainfall data), and if so: when.
+                        Dates are expressed in days since an Early Start date
+                        configurable via the controls below
+                        (see more details on onset date definition and other map controls below).
+                        """
+                    ),
+                    html.P(
+                        f"""
+                        The default local information shows first whether
+                        the germinating rains have occured or not and when.
+                        Graphics of historical onset
+                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
+                        dates are presented in the form of time series
+                        and probability of exceeding.
+                        Pick another point with the controls below
+                        or by clicking on the map.
+                        """
+                    ),
+                    html.P(
+                        f"""
+                        By enabling the exploration of the current and historical onset
+                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
+                         dates, the Maproom allows to monitor
+                        and understand the spatial and temporal variability of how seasons unfold and
+                        therefore characterize the risk for a successful
+                        agricultural campaign.
+                        """
+                    ),
+                    html.P(
+                        """
+                        The definition of the onset can be set up in the Controls above
+                        and is looking at a significantly wet event (e.g. 20mm in 3 days),
+                        called the germinating rains, that is not followed by a dry spell
+                        (e.g. 7-day dry spell in the following 21 days).
+                        The actual date is the first wet day of the wet event.
+                        The onset date is computed on-the-fly for each year according to the definition,
+                        and is expressed in days since an early start date
+                        (e.g. Jun. 1st). The search for the onset date is made
+                        from that early start date and for a certain number of
+                        following days (e.g. 60 days). The early start date
+                        serves as a reference and should be picked so that it
+                        is ahead of the expected onset date.
+                        """
+                    ),
+                    html.H6("""Has germinating rain occured?"""),
+                    html.P(
+                        """
+                        Shows the result of the germinating rain date search
+                        (i.e. near-real time thus without checking of follow-up dry spells)
+                        from the most recent Early Start to now (or the last day with available rainfall data).
+                        """
+                    ),
+                    html.H6("""When to prepare for planting?"""),
+                    html.P(
+                        """
+                        Shows the average onset date over all years of available data.
+                        """
+                    ),
+                    html.H6("""How risky to plant..."""),
+                    html.P(
+                        """
+                        Shows the probability of the onset date to be past a certain date,
+                        through all the years of available data.
+                        """
+                    ),
+                    html.P(
+                        """
+                        Note that if the criteria to define the onset date are
+                        not met within the search period, the analysis will
+                        return a missing value. And if the analysis returns 0
+                        (days since the early start), it is likely that the
+                        onset has already occured and thus that the
+                        early start date picked is within the rainy season.
+                        """
+                    ),
+                    html.H5("Dataset Documentation"),
+                    html.P(
+                        f"""
+                        Reconstructed gridded rainfall from {CONFIG["institution"]}.
+                        The time series were created by combining
+                        quality-controlled station observations in 
+                        {CONFIG["institution"]}’s archive with satellite rainfall estimates.
+                        """
+                    ),
+                ],
+                style={"position":"relative","height":"30vh", "overflow":"scroll"}, #,"height":"20%"
             ),
-            Block(
-                "Onset Date Search Period",
-                Sentence(
-                    "From Early Start date of",
-                    Date("search_start_", 1, CONFIG["default_search_month"]),
-                    "and within the next",
-                    Number("searchDays", 90, min=0, max=9999), "days",
-                ),
+            html.H3("Controls Panel",style={"padding":"1rem 1rem"}),
+            html.Div(
+                [
+                    Block("Pick a point",
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id = "latInput",
+                                        min=lat_min,
+                                        max=lat_max,
+                                        type="number",
+                                    ),
+                                    dbc.Label(lat_label, style={"font-size": "80%"})]),
+                                ),
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id = "lngInput",
+                                        min=lon_min,
+                                        max=lon_max,
+                                        type="number",
+                                    ),
+                                    dbc.Label(lon_label, style={"font-size": "80%"})]),
+                                ),
+                                dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
+                            ],
+                        ),
+                    ),
+                    #Block(
+                    #    "Date",
+                    #    dbc.Select(
+                    #        id="date_input",
+                    #        value="onset",
+                    #        bs_size="sm",
+                    #        options=[
+                    #            {"label": "Onset", "value": "onset"},
+                    #            {"label": "Cessation", "value": "cessation"},
+                    #        ],
+                    #    ),
+                    #),
+                    Block(
+                        "Ask the map:",
+                        dbc.Select(
+                            id="map_choice",
+                            value="monit",
+                            # bs_size="sm",
+                            options=[
+                                {"label": "Has germinating rain occured?", "value": "monit"},
+                                {"label": "When to prepare for planting?", "value": "mean"},
+                                {"label": "Climatological Standard deviation", "value": "stddev"},
+                                {"label": "How risky to plant...", "value": "pe"},
+                            ],
+                        ),
+                        html.P(
+                            Sentence(
+                                Number("probExcThresh1", 30, min=0),
+                                html.Span(id="pet_units"),
+                                "?"
+                            ),
+                            id="pet_input_wrapper"
+                        )
+                    ),
+                    Block(
+                        "Onset Date Search Period",
+                        Sentence(
+                            "From Early Start date of",
+                            Date("search_start_", 1, CONFIG["default_search_month"]),
+                            "and within the next",
+                            Number("searchDays", 90, min=0, max=9999), "days",
+                        ),
+                    ),
+                    Block(
+                        "Wet Day Definition",
+                        Sentence(
+                            "Rainfall amount greater than",
+                            Number("wetThreshold", 1, min=0, max=99999),
+                            "mm",
+                        ),
+                    ),
+                    Block(
+                        "Onset Date Definition",
+                        Sentence(
+                            "First spell of",
+                            Number("runningDays", CONFIG["default_running_days"], min=0, max=999),
+                            "days that totals",
+                            Number("runningTotal", 20, min=0, max=99999),
+                            "mm or more and with at least",
+                            Number("minRainyDays", CONFIG["default_min_rainy_days"], min=0, max=999),
+                            "wet day(s) that is not followed by a",
+                            Number("dryDays", 7, min=0, max=999),
+                            "-day dry spell within the next",
+                            Number("drySpell", 21, min=0, max=9999),
+                            "days",
+                        ),
+                    ),
+                    Block(
+                        "Cessation Date Definition",
+                        Sentence(
+                            "First date after",
+                            Date("start_cess_", 1, "Sep"),
+                            "in",
+                            Number("searchDaysCess", 90, min=0, max=99999),
+                            "days when the soil water balance falls below",
+                            Number("waterBalanceCess", 5, min=0, max=999),
+                            "mm for a period of",
+                            Number("drySpellCess", 3, min=0, max=999),
+                            "days",
+                        ),
+                        ison=CONFIG["ison_cess_date_hist"]
+                    ),
+                ],
+                style={"position":"relative","height":"70vh", "overflow":"scroll"},
             ),
-            Block(
-                "Wet Day Definition",
-                Sentence(
-                    "Rainfall amount greater than",
-                    Number("wetThreshold", 1, min=0, max=99999),
-                    "mm",
-                ),
-            ),
-            Block(
-                "Onset Date Definition",
-                Sentence(
-                    "First spell of",
-                    Number("runningDays", CONFIG["default_running_days"], min=0, max=999),
-                    "days that totals",
-                    Number("runningTotal", 20, min=0, max=99999),
-                    "mm or more and with at least",
-                    Number("minRainyDays", CONFIG["default_min_rainy_days"], min=0, max=999),
-                    "wet day(s) that is not followed by a",
-                    Number("dryDays", 7, min=0, max=999),
-                    "-day dry spell within the next",
-                    Number("drySpell", 21, min=0, max=9999),
-                    "days",
-                ),
-            ),
-            Block(
-                "Cessation Date Definition",
-                Sentence(
-                    "First date after",
-                    Date("start_cess_", 1, "Sep"),
-                    "in",
-                    Number("searchDaysCess", 90, min=0, max=99999),
-                    "days when the soil water balance falls below",
-                    Number("waterBalanceCess", 5, min=0, max=999),
-                    "mm for a period of",
-                    Number("drySpellCess", 3, min=0, max=999),
-                    "days",
-                ),
-                ison=CONFIG["ison_cess_date_hist"]
-            ),
-            html.P(
-                f"""
-                By enabling the exploration of the current and historical onset
-                {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                 dates, the Maproom allows to monitor
-                and understand the spatial and temporal variability of how seasons unfold and
-                therefore characterize the risk for a successful
-                agricultural campaign.
-                """
-            ),
-            html.P(
-                """
-                The definition of the onset can be set up in the Controls above
-                and is looking at a significantly wet event (e.g. 20mm in 3 days),
-                called the germinating rains, that is not followed by a dry spell
-                (e.g. 7-day dry spell in the following 21 days).
-                The actual date is the first wet day of the wet event.
-                The onset date is computed on-the-fly for each year according to the definition,
-                and is expressed in days since an early start date
-                (e.g. Jun. 1st). The search for the onset date is made
-                from that early start date and for a certain number of
-                following days (e.g. 60 days). The early start date
-                serves as a reference and should be picked so that it
-                is ahead of the expected onset date.
-                """
-            ),
-            html.H6("""Has germinating rain occured?"""),
-            html.P(
-                """
-                Shows the result of the germinating rain date search
-                (i.e. near-real time thus without checking of follow-up dry spells)
-                from the most recent Early Start to now (or the last day with available rainfall data).
-                """
-            ),
-            html.H6("""When to prepare for planting?"""),
-            html.P(
-                """
-                Shows the average onset date over all years of available data.
-                """
-            ),
-            html.H6("""How risky to plant..."""),
-            html.P(
-                """
-                Shows the probability of the onset date to be past a certain date,
-                through all the years of available data.
-                """
-            ),
-            html.P(
-                """
-                Note that if the criteria to define the onset date are
-                not met within the search period, the analysis will
-                return a missing value. And if the analysis returns 0
-                (days since the early start), it is likely that the
-                onset has already occured and thus that the
-                early start date picked is within the rainy season.
-                """
-            ),
-            html.H5("Dataset Documentation"),
-            html.P(
-                f"""
-                Reconstructed gridded rainfall from {CONFIG["institution"]}.
-                The time series were created by combining
-                quality-controlled station observations in 
-                {CONFIG["institution"]}’s archive with satellite rainfall estimates.
-                """
-            ),
-        ],
+        ], #end container
         fluid=True,
         className="scrollable-panel p-3",
-        style={"padding-bottom": "1rem", "padding-top": "1rem"},
+        style={"overflow":"scroll","height":"100vh","padding-bottom": "1rem", "padding-top": "1rem"},
     )
-
 
 def map_layout(center_of_the_map):
     return dbc.Container(
