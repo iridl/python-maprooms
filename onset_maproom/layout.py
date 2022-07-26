@@ -81,6 +81,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
+                                style={"overflow":"scroll","height":"50vh"},
                                 className="g-0",
                             ),
                         ],
@@ -450,7 +451,7 @@ def map_layout(center_of_the_map):
                 zoom=CONFIG["zoom"],
                 style={
                     "width": "100%",
-                    "height": "50vh",
+                    "height": "45vh",
                 },
             ),
             html.H6(
@@ -458,40 +459,45 @@ def map_layout(center_of_the_map):
             )
         ],
         fluid=True,
-        style={"padding": "0rem"},
+        style={"padding": "1rem"},
     )
 
 
 def results_layout():
-    return dbc.Tabs(
-        [
-            dbc.Tab(
+    return html.Div( 
+        [   
+            dbc.Tabs(
                 [
-                    html.H6(id="germination_sentence"),
-                    dbc.Spinner(dcc.Graph(id="onsetDate_plot")),
-                    dbc.Spinner(dcc.Graph(id="probExceed_onset")),
+                    dbc.Tab(
+                        [
+                            html.H6(id="germination_sentence"),
+                            dbc.Spinner(dcc.Graph(id="onsetDate_plot")),
+                            dbc.Spinner(dcc.Graph(id="probExceed_onset")),
+                        ],
+                        label="Onset Date",
+                    ),
+                    dbc.Tab(
+                        [
+                            dbc.Spinner(dcc.Graph(id="cessDate_plot")),
+                            dbc.Spinner(dcc.Graph(id="probExceed_cess")),
+                        ],
+                        id="cess_dbct",
+                        label="Cessation Date",
+                    ),
                 ],
-                label="Onset Date",
-            ),
-            dbc.Tab(
-                [
-                    dbc.Spinner(dcc.Graph(id="cessDate_plot")),
-                    dbc.Spinner(dcc.Graph(id="probExceed_cess")),
-                ],
-                id="cess_dbct",
-                label="Cessation Date",
-            ),
-        ],
-        className="mt-4",
+                className="mt-4",
+            )
+        
+            # return html.Img(
+            #     style={"width": "600px"},
+            #     src=(
+            #         "https://iridl.ldeo.columbia.edu/dlcharts/render/"
+            #         "905cdac6e87a58586967e115a18e615d01530ddd?_wd=1200px&_ht=600px"
+            #         "&_langs=en&_mimetype=image%2Fpng"
+            #         "&region=bb%3A39.375%3A7.125%3A39.625%3A7.375%3Abb"
+            #         "&waterBalanceCess=3&drySpellCess=10&plotrange2=15"
+            #     ),
+            # )
+        ], #end div
+        style={"height":"60vh"}
     )
-
-    # return html.Img(
-    #     style={"width": "600px"},
-    #     src=(
-    #         "https://iridl.ldeo.columbia.edu/dlcharts/render/"
-    #         "905cdac6e87a58586967e115a18e615d01530ddd?_wd=1200px&_ht=600px"
-    #         "&_langs=en&_mimetype=image%2Fpng"
-    #         "&region=bb%3A39.375%3A7.125%3A39.625%3A7.375%3Abb"
-    #         "&waterBalanceCess=3&drySpellCess=10&plotrange2=15"
-    #     ),
-    # )
