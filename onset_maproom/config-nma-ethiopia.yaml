@@ -52,7 +52,7 @@ name_adm3: Woredas
 
 # Onset_and_Cessation
 app_title: Growing Season Maproom
-onset_and_cessation_title: Planting and Harvest Decision Support Maproom
+onset_and_cessation_title: Planting Date Decision Support Maproom
 default_search_month: Jun
 default_running_days: 5
 default_min_rainy_days: 3
