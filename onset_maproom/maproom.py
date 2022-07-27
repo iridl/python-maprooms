@@ -586,8 +586,8 @@ def onset_tile(tz, tx, ty):
     x_min = pingrid.tile_left(tx, tz)
     x_max = pingrid.tile_left(tx + 1, tz)
     # row numbers increase as latitude decreases
-    y_max = pingrid.tile_bottom_mercator(ty, tz)
-    y_min = pingrid.tile_bottom_mercator(ty + 1, tz)
+    y_max = pingrid.tile_top_mercator(ty, tz)
+    y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
     precip = rr_mrg.precip
 

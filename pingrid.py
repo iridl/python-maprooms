@@ -14,6 +14,7 @@ from queuepool.psycopg2cm import ConnectionManagerExtended
 from queuepool.pool import Pool
 import rasterio.features
 import rasterio.transform
+import shapely.geometry
 from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipoint import MultiPoint
@@ -171,9 +172,9 @@ def tile_left(tx: int, tz: int) -> float:
 #     return ty * 180 / 2 ** tz - 90
 
 
-def tile_bottom_mercator(ty: int, tz: int) -> float:
+def tile_top_mercator(ty: int, tz: int) -> float:
     """"Maps a row number in the spherical Mercator tile grid at scale z
-    to the latitude of the bottom edge of that row in degrees.
+    to the latitude of the top edge of that row in degrees.
     """
     a = math.pi - 2 * math.pi * ty / 2 ** tz
     return np.rad2deg(mercator_to_rad(a))
@@ -181,9 +182,9 @@ def tile_bottom_mercator(ty: int, tz: int) -> float:
 
 def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
     """Given a function that maps a tile coordinate (row or column number)
-    to the minimum of that tile (bottom or left edge) in degrees, returns
-    the lower and upper bound of each pixel within the tile along that
-    dimension.
+    to the start of that tile (top or left edge) in degrees, returns
+    the bounds of each pixel within the tile along that dimension.
+
     """
     assert n >= 1 and tz >= 0 and 0 <= tx < 2 ** tz
     a = g(tx, tz)
@@ -195,9 +196,14 @@ def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
 
 def tile(da, tx, ty, tz, clipping=None, test_tile=False):
     z = produce_data_tile(da, tx, ty, tz)
+    if z is None:
+        return empty_tile()
+
     im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
     im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
     if clipping is not None:
+        if callable(clipping):
+            clipping = clipping()
         draw_attrs = DrawAttrs(
             BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
         )
@@ -205,6 +211,7 @@ def tile(da, tx, ty, tz, clipping=None, test_tile=False):
         im = produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
     if test_tile:
         im = produce_test_tile(im, f"{tz}x{tx},{ty}")
+
     return image_resp(im)
 
 
@@ -242,11 +249,18 @@ def produce_data_tile(
         np.double,
     )
     y = np.fromiter(
-        (a + (b - a) / 2.0 for a, b in pixel_extents(tile_bottom_mercator, ty, tz, tile_height)),
+        (a + (b - a) / 2.0 for a, b in pixel_extents(tile_top_mercator, ty, tz, tile_height)),
         np.double,
     )
-    interp = create_interp(da)
-    z = interp([y, x])
+    tile_bbox = shapely.geometry.box(x[0], y[0], x[-1], y[-1])
+    lon = da['lon']
+    lat = da['lat']
+    da_bbox = shapely.geometry.box(lon[0], lat[0], lon[-1], lat[-1])
+    if tile_bbox.intersects(da_bbox):
+        interp = create_interp(da)
+        z = interp([y, x])
+    else:
+        z = None
     return z
 
 
@@ -353,7 +367,7 @@ def produce_shape_tile(
     tile_width = im.shape[1]
 
     x0, x1 = list(pixel_extents(tile_left, tx, tz, 1))[0]
-    y0, y1 = list(pixel_extents(tile_bottom_mercator, ty, tz, 1))[0]
+    y0, y1 = list(pixel_extents(tile_top_mercator, ty, tz, 1))[0]
 
     x_ratio = tile_width / (x1 - x0)
     y0_mercator = deg_to_mercator(y0)

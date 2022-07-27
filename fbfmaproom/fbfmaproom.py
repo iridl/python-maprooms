@@ -1014,7 +1014,7 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
 
     da = select_forecast(country_key, forecast_key, issue_month0, target_month0, target_year, freq)
     p = tuple(CONFIG["countries"][country_key]["marker"])
-    clipping, _ = retrieve_geometry(country_key, p, "0", None)
+    clipping = lambda: retrieve_geometry(country_key, p, "0", None)[0]
     resp = pingrid.tile(da, tx, ty, tz, clipping)
     return resp
 
