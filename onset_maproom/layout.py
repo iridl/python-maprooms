@@ -81,20 +81,19 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height":"50vh"},
+                                style={"overflow":"scroll","height":"55vh"},
                                 className="g-0",
                             ),
                         ],
                         sm=12,
                         md=8,
-                        style={"background-color": "white"},
                     ),
                 ],
                 className="g-0",
             ),
         ],
         fluid=True,
-        style={"padding-left": "0px", "padding-right": "0px"},
+        style={"padding-left": "1px", "padding-right": "1px"},
     )
 
 
@@ -449,6 +448,7 @@ def map_layout(center_of_the_map):
                 id="map",
                 center=center_of_the_map,
                 zoom=CONFIG["zoom"],
+                minZoom = CONFIG["zoom"] - 1,
                 style={
                     "width": "100%",
                     "height": "45vh",
@@ -499,5 +499,4 @@ def results_layout():
             #     ),
             # )
         ], #end div
-        style={"height":"60vh"}
     )
