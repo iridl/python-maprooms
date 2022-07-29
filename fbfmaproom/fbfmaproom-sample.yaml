@@ -80,8 +80,10 @@ countries:
                   from public.fbf_vulnerability where adm0_name = 'Malawi' group by 1, 2
         datasets:
             defaults:
-                observations: rain
-                bad_years: bad-years
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years
             observations:
                 rain:
                     label: Rain
@@ -171,8 +173,10 @@ countries:
 
         datasets:
             defaults:
-                observations: rain
-                bad_years: bad-years
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years
             observations:
                 rain:
                     label: Rain
@@ -254,8 +258,10 @@ countries:
 
         datasets:
             defaults:
-                observations: enacts-precip-mon
-                bad_years: bad-years
+                predictors:
+                    - pnep
+                    - enacts-precip-mon
+                predictand: bad-years
             observations:
                 enacts-precip-mon:
                     label: ENACTS MON precip
@@ -391,8 +397,10 @@ countries:
 
         datasets:
             defaults:
-                observations: rain
-                bad_years: bad-years
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years
             observations:
                 rain:
                     label: Rain
@@ -528,8 +536,10 @@ countries:
 
         datasets:
             defaults:
-                observations: rain
-                bad_years: bad-years
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years
             observations:
                 rain:
                     label: Rain
@@ -697,8 +707,10 @@ countries:
 
         datasets:
             defaults:
-              observations: enacts-precip-jas
-              bad_years: bad-years
+              predictors:
+                - pnep
+                - chirp-spi-jj
+              predictand: bad-years
             observations:
                 enacts-precip-jas:
                     label: ENACTS Precip JAS
@@ -872,8 +884,10 @@ countries:
 
         datasets:
             defaults:
-                observations: rain
-                bad_years: bad-years
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years
             observations:
                 rain:
                     label: Rain
@@ -952,8 +966,10 @@ countries:
 
         datasets:
             defaults:
-                observations: rain
-                bad_years: bad-years
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years
             observations:
                 rain:
                     label: Rain
@@ -1043,8 +1059,10 @@ countries:
 
         datasets:
             defaults:
-                observations: rain
-                bad_years: bad-years-ag
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years-ag
             observations:
                 rain:
                     label: Rain
@@ -1179,8 +1197,10 @@ countries:
 
         datasets:
             defaults:
-                observations: rain
-                bad_years: bad-years-ag
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years-ag
             observations:
                 rain:
                     label: Rain

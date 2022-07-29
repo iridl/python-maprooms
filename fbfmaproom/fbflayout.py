@@ -73,7 +73,7 @@ def map_layout():
                         checked=True,
                     ),
                     dlf.Overlay(
-                        dlf.TileLayer(opacity=0.8, id="trigger_layer"),
+                        dlf.TileLayer(opacity=0.8, id="raster_layer"),
                         name="Forecast",
                         checked=True,
                     ),
@@ -120,7 +120,7 @@ def map_layout():
                 opacity=0.8,
             ),
             dlf.Colorbar(
-                id="trigger_colorbar",
+                id="raster_colorbar",
                 position="bottomleft",
                 width=300,
                 height=10,
@@ -186,8 +186,7 @@ def command_layout():
     return html.Div(
         [
             dcc.Store(id="geom_key"),
-            dcc.Store(id="prob_thresh"),
-            dcc.Input(id="trigger", type="hidden", value="pnep"),
+            dcc.Input(id="map_column", type="hidden", value="pnep"),
             html.Div(
                 [
                     label_with_tooltip(
@@ -291,8 +290,8 @@ def command_layout():
             html.Div(
                 [
                     label_with_tooltip(
-                        "Frequency of triggered forecasts",
-                        "The slider is used to set the frequency of forecast triggered",
+                        "Frequency of trigger events",
+                        "The slider is used to set the frequency of the trigger",
                     ),
                     dcc.Slider(
                         id="freq",
@@ -306,52 +305,6 @@ def command_layout():
                 style={
                     "position": "relative",
                     "width": "340px",
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                },
-            ),
-            html.Div(
-                [
-                    dcc.Loading(
-                        html.A(
-                            [
-                                dbc.Button(
-                                    "Gantt it!", color="info", id="gantt_button"
-                                ),
-                                dbc.Tooltip(
-                                    "Gantt it!- Early action activities planning tool in a format of a Gantt chart",
-                                    target="gantt_button",
-                                    className="tooltiptext",
-                                ),
-                            ],
-                            id="gantt",
-                            target="_blank",
-                        ),
-                        type="dot",
-                        parent_style={"height": "100%"},
-                        style={"opacity": 0.2},
-                    )
-                ],
-                style={
-                    "position": "relative",
-                    "width": "110px",
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                },
-            ),
-            html.Div(
-                [
-                    label_with_tooltip(
-                        "Probability threshold",
-                        "To trigger at the selected frequency, trigger when the forecast probability of drought is at least this high.",
-                    ),
-                    html.Div(id='prob_thresh_text'),
-                ],
-                style={
-                    "position": "relative",
-                    "width": "1px", # force it to wrap
                     "display": "inline-block",
                     "padding": "10px",
                     "verticalAlign": "top",
@@ -392,7 +345,7 @@ def table_layout():
             html.Div(
                 [
                     label_with_tooltip(
-                        "Baseline observations:",
+                        "Baseline observations",
                         "Column that serves as the baseline. Other columns will be "
                         "scored by how well they predict this one.",
                     ),
@@ -411,11 +364,11 @@ def table_layout():
             html.Div(
                 [
                     label_with_tooltip(
-                        "Other predictors:",
-                        "Other columns to display in the table"
+                        "Predictors",
+                        "Other datasets to display in the table"
                     ),
                     dcc.Dropdown(
-                        id="other_predictors",
+                        id="predictors",
                         clearable=False,
                         multi=True,
                     ),

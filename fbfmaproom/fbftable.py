@@ -31,11 +31,11 @@ def gen_select_header(col, options, value):
     )
 
 def gen_head(tcs, dfs):
+    col_width = 100 / len(tcs)
     return html.Thead(
         [
             html.Tr([
-                html.Th(head_cell(row[col], row['tooltip']) if i == 0 else row[col])
-                for i, col in enumerate(tcs.keys())
+                html.Th(row[col], style={'width': f"{col_width}%"}) for col in tcs.keys()
             ])
             for row in dfs.to_dict(orient="records")
         ] + [

@@ -1,5 +1,7 @@
 from cftime import Datetime360Day as DT360
 from dash import html
+import dash_bootstrap_components as dbc
+import datetime
 import io
 import numpy as np
 import pandas as pd
@@ -23,52 +25,60 @@ def test_from_month_since_360Day():
     assert fbfmaproom.from_month_since_360Day(735.5) == DT360(2021, 4, 16)
 
 def test_table_cb():
-    table, prob_thresh = fbfmaproom.table_cb.__wrapped__(
+    table = fbfmaproom.table_cb.__wrapped__(
         issue_month0 = 1,
         freq=30,
         mode='0',
         geom_key='ET05',
         pathname='/fbfmaproom/ethiopia',
         severity=0,
-        trigger_key="pnep",
         predictand_key="bad-years",
-        other_predictor_keys=['rain', 'ndvi', 'enso_state'],
-        season='season1',
+        predictor_keys=['pnep', 'rain', 'ndvi', 'enso_state'],
+        season_id='season1',
     )
-    assert np.isclose(prob_thresh, 31.033705)
 
     thead, tbody = table.children
-    assert len(thead.children) == 6
+    assert len(thead.children) == 8
     assert len(thead.children[0].children) == 6
 
-    assert thead.children[0].children[0].children[0].children == 'Worthy-action:'
-    assert thead.children[1].children[0].children[0].children == 'Act-in-vain:'
-    assert thead.children[2].children[0].children[0].children == 'Fail-to-act:'
-    assert thead.children[3].children[0].children[0].children == 'Worthy-Inaction:'
-    assert thead.children[4].children[0].children[0].children == 'Rate:'
+    assert thead.children[0].children[0].children == ''
+    trigger_a = thead.children[0].children[1].children
+    assert  isinstance(trigger_a, html.A)
+    assert isinstance(trigger_a.children[0], dbc.Button)
 
-    assert thead.children[5].children[5].children == "ENSO State"
-    assert thead.children[0].children[5].children == "3"
-    assert thead.children[1].children[5].children == "4"
-    assert thead.children[2].children[5].children == "12"
-    assert thead.children[3].children[5].children == "20"
-    assert thead.children[4].children[5].children == "58.97%"
+    assert thead.children[1].children[0].children[0].children == 'Worthy-action:'
+    assert thead.children[2].children[0].children[0].children == 'Act-in-vain:'
+    assert thead.children[3].children[0].children[0].children == 'Fail-to-act:'
+    assert thead.children[4].children[0].children[0].children == 'Worthy-Inaction:'
+    assert thead.children[5].children[0].children[0].children == 'Rate:'
+    assert thead.children[6].children[0].children[0].children == 'Threshold:'
+
+    assert thead.children[7].children[1].children[0].children == 'Forecast prob non-exc (percent)'
+    assert thead.children[6].children[1].children == '31.0'
+
+    assert thead.children[1].children[4].children == "3"
+    assert thead.children[2].children[4].children == "4"
+    assert thead.children[3].children[4].children == "12"
+    assert thead.children[4].children[4].children == "20"
+    assert thead.children[5].children[4].children == "58.97%"
+    assert thead.children[6].children[4].children == "El Niño" # threshold
+    assert thead.children[7].children[4].children == "ENSO State"
 
     assert len(tbody.children) == 40 # will break when we add a new year
 
     row = tbody.children[3]
     assert row.children[0].children == '2019'
     assert row.children[0].className == ''
-    assert row.children[5].children == 'El Niño'
-    assert row.children[5].className == 'cell-severity-0'
     assert row.children[1].children == '25.4'
     assert row.children[1].className == ''
-    assert row.children[3].children == '43.4'
-    assert row.children[3].className == ''
-    assert row.children[4].children == '0.2361'
-    assert row.children[4].className == 'cell-severity-0'
-    assert row.children[2].children == ''
+    assert row.children[2].children == '43.4'
     assert row.children[2].className == ''
+    assert row.children[3].children == '0.2361'
+    assert row.children[3].className == 'cell-severity-0'
+    assert row.children[4].children == 'El Niño'
+    assert row.children[4].className == 'cell-severity-0'
+    assert row.children[5].children == ''
+    assert row.children[5].className == ''
 
 
 # overlaps with test_generate_tables, but this one uses synthetic
@@ -113,7 +123,7 @@ def test_augment_table_data():
         },
     }
 
-    aug, summ, prob = fbfmaproom.augment_table_data(main_df, freq, table_columns, "pnep", "bad-years")
+    aug, summ, thresholds = fbfmaproom.augment_table_data(main_df, freq, table_columns, "bad-years")
 
     expected_aug = main_df.copy()
     expected_aug["worst_bad-years"] = [1, 0, 1, 0, 0, 1]
@@ -130,7 +140,9 @@ def test_augment_table_data():
     ))
     pd.testing.assert_frame_equal(expected_summ, summ)
 
-    assert np.isclose(prob, 33.800949)
+    assert np.isclose(thresholds["pnep"], 33.8009)
+    assert np.isclose(thresholds["rain"], 100)
+    assert np.isclose(thresholds["enso_state"], 3)
 
 def test_forecast_tile_url_callback_yesdata():
     url, is_alert, colormap = fbfmaproom.tile_url_callback.__wrapped__(
@@ -237,6 +249,171 @@ def test_pnep_percentile_straddle():
     assert np.isclose(d["probability"], 33.10532)
     assert d["triggered"] is True
 
+
+def test_trigger_check_pixel_trigger():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=ethiopia"
+            "&variable=pnep"
+            "&mode=pixel"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&thresh=10"
+            "&bounds=[[6.75, 43.75], [7, 44]]"
+        )
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["value"], 10.6954)
+    assert d["triggered"] is True
+
+def test_trigger_check_pixel_notrigger():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=ethiopia"
+            "&variable=pnep"
+            "&mode=pixel"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&thresh=20"
+            "&bounds=[[6.75, 43.75], [7, 44]]"
+        )
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["value"], 10.6954)
+    assert d["triggered"] is False
+
+def test_trigger_check_region():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=ethiopia"
+            "&variable=pnep"
+            "&mode=2"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&thresh=20"
+            "&region=(ET05,ET0505,ET050501)"
+        )
+    print(r.data)
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["value"], 9.333)
+    assert d["triggered"] is False
+
+def test_trigger_check_straddle():
+    "Lead time spans Jan 1"
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=malawi"
+            "&variable=pnep"
+            "&mode=0"
+            "&season=season1"
+            "&issue_month=10"
+            "&season_year=2021"
+            "&freq=30.0"
+            "&thresh=30.31437"
+            "&region=152"
+        )
+    print(r.data)
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["value"], 33.10532)
+    assert d["triggered"] is True
+
+
+def test_trigger_check_obs_pixel_trigger():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=ethiopia"
+            "&variable=rain"
+            "&mode=pixel"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&thresh=90"
+            "&bounds=[[6.75, 43.75], [7, 44]]"
+        )
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["value"], 87.529)
+    assert d["triggered"] is True
+
+def test_trigger_check_obs_pixel_notrigger():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=ethiopia"
+            "&variable=rain"
+            "&mode=pixel"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&thresh=20"
+            "&bounds=[[6.75, 43.75], [7, 44]]"
+        )
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["value"], 87.5290)
+    assert d["triggered"] is False
+
+def test_trigger_check_obs_region():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=ethiopia"
+            "&variable=pnep"
+            "&mode=2"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&thresh=20"
+            "&region=(ET05,ET0505,ET050501)"
+        )
+    print(r.data)
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["value"], 9.333)
+    assert d["triggered"] is False
+
+def test_trigger_check_forecast_future():
+    year = datetime.datetime.now().year + 2
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=ethiopia"
+            "&variable=pnep"
+            "&mode=pixel"
+            "&season=season1"
+            "&issue_month=1"
+            f"&season_year={year}"
+            "&freq=15"
+            "&thresh=20"
+            "&bounds=[[6.75, 43.75], [7, 44]]"
+        )
+    print(r.data)
+    assert r.status_code == 404
+
+def test_trigger_check_obs_future():
+    year = datetime.datetime.now().year + 2
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/trigger_check?country_key=ethiopia"
+            "&variable=pnep"
+            "&mode=2"
+            "&season=season1"
+            "&issue_month=1"
+            f"&season_year={year}"
+            "&freq=15"
+            "&thresh=20"
+            "&region=(ET05,ET0505,ET050501)"
+        )
+    print(r.data)
+    assert r.status_code == 404
 
 def test_stats():
     with fbfmaproom.SERVER.test_client() as client:
