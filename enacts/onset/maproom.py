@@ -448,6 +448,7 @@ def onset_plots(
             error_fig,
             germ_sentence
         )  # dash.no_update to leave the plat as-is and not show no data display
+    onset_delta = onset_delta.dropna(dim="T")
     onset_date_graph = pgo.Figure()
     onset_date_graph.add_trace(
         pgo.Bar(
