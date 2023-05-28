@@ -66,7 +66,6 @@ def is_valid_root(path):
 
 def fill_config(config):
     """Replaces parts of the config dictionary with objects"""
-    config["enso_ds"] = ObsDataset(**config["enso_ds"])
     for country in config["countries"].values():
         for key, dataset in country["datasets"]["observations"].items():
             country["datasets"]["observations"][key] = ObsDataset(**dataset)
@@ -106,14 +105,60 @@ class Dataset:
             self._units = self.open().attrs.get('units')
         return self._units
 
+    def open(self, val_min=None, val_max=None):
+        path = data_path(self.path)
+        try:
+            ds = xr.open_zarr(path, consolidated=False)
+        except Exception as e:
+            raise Exception(f"Couldn't open {path}") from e
+        ds = ds.rename({
+            v: k
+            for k, v in self.var_names.items()
+            if v is not None and v != k
+        })
+        da = ds["value"]
+
+
+        if val_min is None:
+            val_min = self.range[0]
+        if val_max is None:
+            val_max = self.range[1]
+        da.attrs["colormap"] = self.colormap
+        da.attrs["scale_min"] = val_min
+        da.attrs["scale_max"] = val_max
+        return da
+
 
 class ObsDataset(Dataset):
     def __init__(self, *, lower_is_worse, **kwargs):
         super().__init__(**kwargs)
         self.lower_is_worse = lower_is_worse
 
-    def open(self):
-        return open_obs_from_config(self)
+    def open(self, val_min=0.0, val_max=1000.0):
+        da = super().open(val_min, val_max)
+        if da.dtype == 'timedelta64[ns]':
+            da = (da / np.timedelta64(1, 'D')).astype(float)
+        return da
+
+    def select(self, target_month0, target_year=None):
+        da = self.open()
+        if target_year is not None:
+            target_date = (
+                cftime.Datetime360Day(target_year, 1, 1) +
+                pd.Timedelta(target_month0 * 30, unit='days')
+            )
+            da = da.sel(time=target_date)
+
+        with warnings.catch_warnings():
+            # ds.where in xarray 2022.3.0 uses deprecated numpy
+            # functionality. A recent change deletes the offending line;
+            # see if this catch_warnings can be removed once that's
+            # released.
+            # https://github.com/pydata/xarray/commit/3a320724100ab05531d8d18ca8cb279a8e4f5c7f
+            warnings.filterwarnings("ignore", category=DeprecationWarning, module='numpy.core.fromnumeric')
+            da = da.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
+
+        return da
 
 
 class ForecastDataset(Dataset):
@@ -125,8 +170,56 @@ class ForecastDataset(Dataset):
         super().__init__(**kwargs)
         self.is_poe = is_poe
 
-    def open(self):
-        return open_forecast_from_config(self)
+    def open(self, val_min=0.0, val_max=100.0):
+        return super().open(val_min, val_max)
+
+    def select(self, issue_month0, target_month0, target_year=None, freq=None):
+        l = (target_month0 - issue_month0) % 12
+
+        da = self.open()
+
+        issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
+        da = da.sel(issue=issue_dates)
+
+        # Now that we have only one issue month, each target date uniquely
+        # identifies a single forecast, so we can replace the issue date
+        # coordinate with a target_date coordinate.
+        l_delta = pd.Timedelta(l * 30, unit='days')
+        da = da.assign_coords(
+            target_date=("issue", (da["issue"] + l_delta).data)
+        ).swap_dims({"issue": "target_date"}).drop_vars("issue")
+
+        if "lead" in da.coords:
+            da = da.sel(lead=l)
+
+        if target_year is not None:
+            target_date = (
+                cftime.Datetime360Day(target_year, 1, 1) +
+                pd.Timedelta(target_month0 * 30, unit='days')
+            )
+            try:
+                da = da.sel(target_date=target_date)
+            except KeyError:
+                raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
+
+        if freq is not None:
+            if self.is_poe:
+                # Forecasts are always expressed as the probability of a
+                # bad year, so probability of exceedance for variables for
+                # which higher is worse, and probability of non-exceedance
+                # for variables for which lower is worse. When the slider
+                # is set to n, it means to select the n% worst years, so
+                # if it's a probability of exceedance we select the
+                # probability of exceeding the (100-n)th percentile, and
+                # if it's a probability of non-exceedance we select the
+                # probability of not exceeding the nth percentile.
+                percentile = 100 - freq
+            else:
+                percentile = freq
+            da = da.sel(pct=percentile, drop=True)
+
+        return da
+
 
 
 
@@ -139,9 +232,8 @@ def table_columns(dataset_config, predictor_keys, predictand_key,
         tooltip=None,
         type=ColType.SPECIAL,
     )
-    for key in predictor_keys:
+    for key in predictor_keys + [predictand_key]:
         tcs[key] = make_column(key, dataset_config)
-    tcs[predictand_key] = make_column(predictand_key, dataset_config)
 
     return tcs
 
@@ -237,55 +329,6 @@ APP.layout = fbflayout.app_layout()
 
 def data_path(relpath):
     return Path(CONFIG["data_root"], relpath)
-
-
-def open_data_array(
-    cfg,
-    val_min=None,
-    val_max=None,
-):
-    path = data_path(cfg.path)
-    try:
-        ds = xr.open_zarr(path, consolidated=False)
-    except Exception as e:
-        raise Exception(f"Couldn't open {path}") from e
-    ds = ds.rename({
-        v: k
-        for k, v in cfg.var_names.items()
-        if v is not None and v != k
-    })
-    da = ds["value"]
-
-
-    if val_min is None:
-        val_min = cfg.range[0]
-    if val_max is None:
-        val_max = cfg.range[1]
-    da.attrs["colormap"] = cfg.colormap
-    da.attrs["scale_min"] = val_min
-    da.attrs["scale_max"] = val_max
-    return da
-
-
-def open_forecast(country_key, forecast_key):
-    cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
-    return open_forecast_from_config(cfg)
-
-
-def open_forecast_from_config(ds_config):
-    return open_data_array(ds_config, val_min=0.0, val_max=100.0)
-
-
-def open_obs(country_key, obs_key):
-    cfg = CONFIG["countries"][country_key]["datasets"]["observations"][obs_key]
-    return open_obs_from_config(cfg)
-
-
-def open_obs_from_config(ds_config):
-    da = open_data_array(ds_config, val_min=0.0, val_max=1000.0)
-    if da.dtype == 'timedelta64[ns]':
-        da = (da / np.timedelta64(1, 'D')).astype(float)
-    return da
 
 
 def from_month_since_360Day(months):
@@ -443,98 +486,18 @@ def subquery_unique(base_query, key, field):
     return df.iloc[0][field]
 
 
-def select_forecast(country_key, forecast_key, issue_month0, target_month0,
-                    target_year=None, freq=None):
-    l = (target_month0 - issue_month0) % 12
-
-    cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
-    da = open_forecast_from_config(cfg)
-
-    issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
-    da = da.sel(issue=issue_dates)
-
-    # Now that we have only one issue month, each target date uniquely
-    # identifies a single forecast, so we can replace the issue date
-    # coordinate with a target_date coordinate.
-    l_delta = pd.Timedelta(l * 30, unit='days')
-    da = da.assign_coords(
-        target_date=("issue", (da["issue"] + l_delta).data)
-    ).swap_dims({"issue": "target_date"}).drop_vars("issue")
-
-    if "lead" in da.coords:
-        da = da.sel(lead=l)
-
-    if target_year is not None:
-        target_date = (
-            cftime.Datetime360Day(target_year, 1, 1) +
-            pd.Timedelta(target_month0 * 30, unit='days')
-        )
-        try:
-            da = da.sel(target_date=target_date)
-        except KeyError:
-            raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
-
-    if freq is not None:
-        if cfg.is_poe:
-            # Forecasts are always expressed as the probability of a
-            # bad year, so probability of exceedance for variables for
-            # which higher is worse, and probability of non-exceedance
-            # for variables for which lower is worse. When the slider
-            # is set to n, it means to select the n% worst years, so
-            # if it's a probability of exceedance we select the
-            # probability of exceeding the (100-n)th percentile, and
-            # if it's a probability of non-exceedance we select the
-            # probability of not exceeding the nth percentile.
-            percentile = 100 - freq
-        else:
-            percentile = freq
-        da = da.sel(pct=percentile, drop=True)
-
-    return da
-
-
-
-def select_obs(country_key, obs_keys, target_month0, target_year=None):
-    ds = xr.Dataset(
-        data_vars={
-            obs_key: open_obs(country_key, obs_key)
-            for obs_key in obs_keys
-        }
-    )
-    if target_year is not None:
-        target_date = (
-            cftime.Datetime360Day(target_year, 1, 1) +
-            pd.Timedelta(target_month0 * 30, unit='days')
-        )
-        try:
-            ds = ds.sel(time=target_date)
-        except KeyError:
-            raise NotFoundError(f'No value for {" ".join(obs_keys)} on {target_date}') from None
-
-    with warnings.catch_warnings():
-        # ds.where in xarray 2022.3.0 uses deprecated numpy
-        # functionality. A recent change deletes the offending line;
-        # see if this catch_warnings can be removed once that's
-        # released.
-        # https://github.com/pydata/xarray/commit/3a320724100ab05531d8d18ca8cb279a8e4f5c7f
-        warnings.filterwarnings("ignore", category=DeprecationWarning, module='numpy.core.fromnumeric')
-        ds = ds.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
-
-    return ds
-
-
 def fundamental_table_data(country_key, table_columns,
                            season_config, issue_month0, freq, mode,
                            geom_key):
     year_min = season_config["start_year"]
     season_length = season_config["length"]
     target_month0 = season_config["target_month"]
+    datasets = CONFIG["countries"][country_key]["datasets"]
 
     forecast_ds = xr.Dataset(
         data_vars={
-            forecast_key: select_forecast(
-                country_key, forecast_key, issue_month0, target_month0,
-                freq=freq
+            forecast_key: datasets["forecasts"][forecast_key].select(
+                issue_month0, target_month0, freq=freq
             ).rename({'target_date':"time"})
             for forecast_key, col in table_columns.items()
             if col["type"] is ColType.FORECAST
@@ -544,13 +507,15 @@ def fundamental_table_data(country_key, table_columns,
 
     forecast_ds = value_for_geom(forecast_ds, country_key, geom_key, shape)
 
-    obs_keys = [key for key, col in table_columns.items()
-                if col["type"] is ColType.OBS]
-    obs_ds = select_obs(country_key, obs_keys, target_month0)
+    obs_das = [
+        datasets["observations"][col_key].select(target_month0).rename(col_key)
+        for col_key, col in table_columns.items()
+        if col["type"] is ColType.OBS
+    ]
     obs_ds = xr.merge(
         [
             value_for_geom(da, country_key, geom_key, shape)
-            for da in obs_ds.data_vars.values()
+            for da in obs_das
         ]
     )
 
@@ -955,7 +920,7 @@ def forecast_selectors(season, col_name, pathname, qstring):
     season_conf = country_conf["seasons"][season]
 
     year_min = season_conf["start_year"]
-    fcst = open_forecast(country_key, col_name)
+    fcst = country_conf["datasets"]["forecasts"][col_name].open()
     latest_issue = fcst["issue"].max().item()
     if season_conf["target_month"] < latest_issue.month:
         year_max = latest_issue.year + 1
@@ -1205,11 +1170,11 @@ def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_k
         if map_is_forecast:
             # Check if we have the requested data so that if we don't, we
             # can explain why the map is blank.
-            select_forecast(country_key, map_col_key, issue_month0, target_month0, target_year, freq)
+            ds_configs["forecasts"][map_col_key].select(issue_month0, target_month0, target_year, freq)
             tile_url = f"{TILE_PFX}/forecast/{map_col_key}/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month0}/{freq}"
         else:
-            # As for select_forecast above
-            select_obs(country_key, [map_col_key], target_month0, target_year)
+            # As for forecast select above
+            ds_configs["observations"][map_col_key].select(target_month0, target_year)
             tile_url = f"{TILE_PFX}/obs/{map_col_key}/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}"
         error = False
 
@@ -1305,8 +1270,8 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
     season_config = config["seasons"][season_id]
     target_month0 = season_config["target_month"]
 
-    da = select_forecast(country_key, forecast_key, issue_month0, target_month0, target_year, freq)
-    p = tuple(CONFIG["countries"][country_key]["marker"])
+    da = config["datasets"]["forecasts"][forecast_key].select(issue_month0, target_month0, target_year, freq)
+    p = tuple(config["marker"])
     if config.get("clip", True):
         clipping = lambda: geometry_containing_point(country_key, p, "0")[0]
     else:
@@ -1319,9 +1284,9 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
     f"{TILE_PFX}/obs/<obs_key>/<int:tz>/<int:tx>/<int:ty>/<country_key>/<season_id>/<int:target_year>"
 )
 def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
-    season_config = CONFIG["countries"][country_key]["seasons"][season_id]
-    target_month0 = season_config["target_month"]
-    da = select_obs(country_key, [obs_key], target_month0, target_year)[obs_key]
+    config = CONFIG["countries"][country_key]
+    target_month0 = config["seasons"][season_id]["target_month"]
+    da = config["datasets"]["observations"][obs_key].select(target_month0, target_year)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     clipping, _ = geometry_containing_point(country_key, p, "0")
     resp = pingrid.tile(da, tx, ty, tz, clipping)
@@ -1450,12 +1415,11 @@ def trigger_check():
     shape = region_shape(mode, country_key, geom_key)
 
     if var_is_forecast:
-        data = select_forecast(country_key, var, issue_month0,
-                               target_month0, season_year, freq)
+        data = config["datasets"]["forecasts"][var].select(
+            issue_month0, target_month0, season_year, freq
+        )
     else:
-        data = select_obs(
-            country_key, [var], target_month0, season_year
-        )[var]
+        data = config["datasets"]["observations"][var].select(target_month0, season_year)
     if 'lon' in data.coords:
         data = pingrid.average_over(data, shape, all_touched=True)
 
