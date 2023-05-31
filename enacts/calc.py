@@ -367,7 +367,8 @@ def cess_date_step(cess_yesterday, dry_spell_length, dry_spell_length_thresh):
 
 
 def cess_date(
-    daily_data, 
+    daily_data,
+    is_soil_moisture,
     dry_thresh, 
     dry_spell_length_thresh,
     et=None,
@@ -384,6 +385,8 @@ def cess_date(
     ----------
     daily_data : DataArray
         Array of daily soil moisture or daily rainfall.
+    is_soil_moisture : boolean
+        True if `daily_data` is soil moisture, False if it is rainfall.
     dry_thresh : float
         Soil moisture threshold to determine a dry day.
     dry_spell_length_thresh : int
@@ -417,13 +420,22 @@ def cess_date(
     --------
     """
     # Initializing
-    spell_length = (
-        daily_data.isel({time_dim: 0}) < dry_thresh
-    ).astype("timedelta64[D]")
+    if is_soil_moisture:
+        sm = daily_data.isel({time_dim: 0})
+    else:
+        if sminit is None or et is None or taw is None:
+            raise Exception("sminit, et and taw can not be None")
+        else:
+            sm = water_balance_step(sminit, daily_data.isel({time_dim: 0}), et, taw)
+    spell_length = (sm < dry_thresh).astype("timedelta64[D]")
     cess_delta = xr.DataArray(np.timedelta64("NaT", "D"))
     # Loop
     for t in daily_data[time_dim][1:]:
-        dry_day = daily_data.sel({time_dim: t}) < dry_thresh
+        if is_soil_moisture:
+            sm = daily_data.sel({time_dim: t})
+        else:
+            sm = water_balance_step(sm, daily_data.isel({time_dim: t}), et, taw)
+        dry_day = sm < dry_thresh
         spell_length = (spell_length + dry_day.astype("timedelta64[D]")) * dry_day
         cess_delta = cess_date_step(
             cess_delta,
@@ -805,6 +817,7 @@ def seasonal_cess_date(
         .groupby(grouped_daily_data["seasons_starts"])
         .map(
             cess_date,
+            is_soil_moisture=True,
             dry_thresh=dry_thresh,
             dry_spell_length_thresh=dry_spell_length_thresh,
         )

@@ -17,7 +17,7 @@ import urllib
 import datetime
 
 import xarray as xr
-from . import agronomy as ag
+import agronomy as ag
 
 import psycopg2
 from psycopg2 import sql

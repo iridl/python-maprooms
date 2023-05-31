@@ -546,7 +546,7 @@ def test_cess_date():
          [0, 0, 2, 0, 0]],
         dims=["X", "T"], coords={"T": t}
     )
-    cess_delta = calc.cess_date(daily_sm, 1, 3)
+    cess_delta = calc.cess_date(daily_sm, True, 1, 3)
     expected = xr.DataArray(
         [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
     ).astype("timedelta64[D]")
@@ -558,6 +558,7 @@ def test_cess_date():
 def call_cess_date(data):
     cessations = calc.cess_date(
         daily_data=data,
+        is_soil_moisture=True,
         dry_thresh=5,
         dry_spell_length_thresh=3,
     )
