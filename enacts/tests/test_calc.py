@@ -555,6 +555,37 @@ def test_cess_date():
     assert np.array_equal(cess_delta.squeeze("T"), expected, equal_nan=True)
 
 
+def test_cess_date_rain():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-05", freq="1D")
+    daily_rain = xr.DataArray(
+        [[7, 5, 5, 5, 5],
+         [5, 5, 5, 5, 7],
+         [7, 5, 5, 5, 3],
+         [7, 5 ,5 ,3 ,5],
+         [7, 5, 3, 5 ,5],
+         [7, 3, 5, 5, 5],
+         [5, 5, 5, 5, 5],
+         [5, 5, 7, 3, 5]],
+        dims=["X", "T"], coords={"T": t}
+    )
+    cess_delta = calc.cess_date(
+        daily_rain,
+        False,
+        1,
+        3,
+        et=xr.DataArray(5),
+        taw=xr.DataArray(10),
+        sminit=xr.DataArray(0),
+    )
+    expected = xr.DataArray(
+        [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
+    ).astype("timedelta64[D]")
+
+    assert cess_delta["T"] == daily_rain["T"][0]
+    assert np.array_equal(cess_delta.squeeze("T"), expected, equal_nan=True)
+
+
 def call_cess_date(data):
     cessations = calc.cess_date(
         daily_data=data,

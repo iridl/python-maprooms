@@ -434,7 +434,7 @@ def cess_date(
         if is_soil_moisture:
             sm = daily_data.sel({time_dim: t})
         else:
-            sm = water_balance_step(sm, daily_data.isel({time_dim: t}), et, taw)
+            sm = water_balance_step(sm, daily_data.sel({time_dim: t}), et, taw)
         dry_day = sm < dry_thresh
         spell_length = (spell_length + dry_day.astype("timedelta64[D]")) * dry_day
         cess_delta = cess_date_step(
