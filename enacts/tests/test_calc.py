@@ -576,7 +576,7 @@ def test_cess_date_rain():
         3,
         et=xr.DataArray(5),
         taw=xr.DataArray(10),
-        sminit=xr.DataArray(0),
+        sminit=0,
     )
     expected = xr.DataArray(
         [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
