@@ -571,11 +571,11 @@ def test_cess_date_rain():
     )
     cess_delta = calc.cess_date(
         daily_rain,
-        False,
-        1,
-        3,
-        et=xr.DataArray(5),
-        taw=xr.DataArray(10),
+        is_soil_moisture=False,
+        dry_thresh=1,
+        dry_spell_length_thresh=3,
+        et=5,
+        taw=10,
         sminit=0,
     )
     expected = xr.DataArray(
