@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from controls import Block, Sentence, DateNoYear, Number
+from controls import Block, Sentence, DateNoYear, Number, Select
 
 import numpy as np
 from pathlib import Path
@@ -278,13 +278,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                     ),
                     Block("Ask the map:",
-                        dbc.Select(
-                            id="map_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
-                            options=[
-                                {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["map_text"].items()
-                            ],
+                        Select(
+                            "map_choice",
+                            [key for key, val in CONFIG["map_text"].items()],
+                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
                         ),
                         html.P(
                             Sentence(

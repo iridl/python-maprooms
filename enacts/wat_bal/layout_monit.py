@@ -3,7 +3,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from controls import Block, Sentence, DateNoYear, Number, Text
+from controls import Block, Sentence, DateNoYear, Number, Text, Select
 import calc
 import numpy as np
 from pathlib import Path
@@ -312,14 +312,10 @@ def controls_layout(
                         ),
                     ),
                     Block("Water Balance Outputs to display",
-                        dbc.Select(
-                            id="map_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
-                            options=[
-                                {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["map_text"].items()
-                            ],
-                            style={"padding-top": "0px", "padding-bottom": "0px"},
+                        Select(
+                            "map_choice",
+                            [key for key, val in CONFIG["map_text"].items()],
+                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
                         ),
                     ),
                     Block(

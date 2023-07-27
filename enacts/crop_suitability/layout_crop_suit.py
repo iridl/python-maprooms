@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from controls import Block, Sentence, DateNoYear, Number
+from controls import Block, Sentence, DateNoYear, Number, Select
 
 import numpy as np
 from pathlib import Path
@@ -191,13 +191,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
             html.Div(
                 [
                     Block("Variable",
-                        dbc.Select(
-                            id="data_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
-                            options=[
-                                {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["map_text"].items()
-                            ],
+                        Select(
+                            "data_choice",
+                            [key for key, val in CONFIG["layers"].items()],
+                            labels=[val["menu_label"] for key, val in CONFIG["layers"].items()],
                         ),
                     ),
                     Block("Pick a point",
@@ -249,15 +246,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                                     dbc.Label("Year", style={"font-size": "80%"})]),
                                 ),
                                 dbc.Col(
-                                    dbc.FormFloating([dbc.Select(
-                                        id="target_season",
-                                        value=CONFIG["param_defaults"]["target_season"],
-                                        options=[
-                                            {"label":"Dec-Feb", "value":"DJF"},
-                                            {"label":"Mar-May", "value":"MAM"},
-                                            {"label":"Jun-Aug", "value":"JJA"},
-                                            {"label":"Sep-Nov", "value":"SON"},
-                                        ],
+                                    dbc.FormFloating([Select(
+                                        "target_season",
+                                        ["DJF", "MAM", "JJA", "SON"],
+                                        labels=["Dec-Feb", "Mar-May", "Jun-Aug", "Sep-Nov"],
                                     ),
                                     dbc.Label("Season", style={"font-size": "80%"})]),
                                 ),

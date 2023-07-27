@@ -22,7 +22,7 @@ def Text(id, default):
         dbc Input component with text inputs.
     """
     return [ dbc.Input(id=id, type="text",
-                       size="sm", className="m-1 d-inline-block w-auto", debounce=True, value=default) ]
+                       size="sm", class_name="m-0 p-0 d-inline-block w-auto", debounce=True, value=default) ]
 
 
 def Number(id, default, min=None, max=None, html_size=None):
@@ -48,7 +48,7 @@ def Number(id, default, min=None, max=None, html_size=None):
         dbc Input component with numerical inputs.
     """
     return [dbc.Input(id=id, type="number", min=min, max=max, html_size=html_size, size="sm",
-                     className="m-1 d-inline-block w-auto", debounce=True, value=str(default))]
+                     class_name="m-0 p-0 d-inline-block w-auto", debounce=True, value=str(default))]
 
 
 def Month(id, default):
@@ -69,7 +69,7 @@ def Month(id, default):
     dbc.Select : component
        dbc Select component with months of the year as options in dropdown.
     """
-    return dbc.Select(id=id, value=default, size="sm", className="m-1 d-inline-block w-auto",
+    return dbc.Select(id=id, value=default, size="sm", class_name="d-inline-block w-auto",
                       options=[
                            {"label": "January", "value": "Jan"},
                            {"label": "February", "value": "Feb"},
@@ -114,7 +114,7 @@ def DateNoYear(id, defaultDay, defaultMonth):
     idm = id + "month"
     return [
         dbc.Input(id=id + "day", type="number", min=1, max=31,
-                  size="sm", className="m-1 d-inline-block w-auto", debounce=True, value=str(defaultDay)),
+                  size="sm", class_name="m-0 p-0 d-inline-block w-auto", debounce=True, value=str(defaultDay)),
         Month(idm, defaultMonth)
     ]
 
@@ -149,12 +149,12 @@ def Sentence(*elems):
 
     for i in range(start, len(elems) - (1 if tail else 0), 2):
         assert (isinstance(elems[i], str) or isinstance(elems[i], html.Span))
-        groups.append(dbc.Label(elems[i], size="sm", className="m-1 d-inline-block", width="auto"))
+        groups.append(dbc.Label(elems[i], size="sm", class_name="m-0 p-0 d-inline-block w-auto"))
         groups.extend(elems[i + 1])
 
     if tail:
         assert (isinstance(elems[-1], str) or isinstance(elems[-1], html.Span))
-        groups.append(dbc.Label(elems[-1], size="sm", className="m-1 d-inline-block", width="auto"))
+        groups.append(dbc.Label(elems[-1], size="sm", class_name="m-0 p-0 d-inline-block w-auto"))
 
     return dbc.Form(groups)
 
@@ -190,8 +190,13 @@ def Block(title, *body, is_on=True, width="100%", border_color="grey"): #width o
             dbc.CardHeader(title),
             dbc.CardBody(body),
         ],
-        className="mb-4 ml-4 mr-4",
-        style={"display": the_display, "width": width, "border-color": border_color, "line-height": "0.5em"},
+        class_name="m-0 p-0",
+        style={
+            "display": the_display,
+             "width": width,
+             "border-color": border_color,
+             #"line-height": "0.5em",
+        },
     )
 
 def Options(options,labels=None):
@@ -268,5 +273,10 @@ def Select(id, options, labels=None, init=0):
     else:
         assert len(labels) == len(options), "The number of labels and values are not equal."
         opts = [dict(label=label, value=opt) for (label,opt) in zip(labels,options)]
-    return dbc.Select(id=id, value=options[init],
-                      className="m-1 d-inline-block w-auto", options=opts)
+    return dbc.Select(
+        id=id,
+        value=options[init],
+        class_name="d-inline-block w-auto",
+        options=opts,
+    )
+
