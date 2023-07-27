@@ -366,77 +366,50 @@ def cess_date_step(cess_yesterday, dry_spell_length, dry_spell_length_thresh):
     ) - np.timedelta64(1, "D")
 
 
-def cess_date(
+def cess_date_from_sm(
     daily_data,
-    is_soil_moisture,
     dry_thresh, 
     dry_spell_length_thresh,
-    et=None,
-    taw=None,
-    sminit=None,
     time_dim="T",
 ):
-    """Calculate cessation date.
-
-    Find first day of the first dry spell where: 
-        Soil moisture falls below `dry_thresh` for `min_dry_days` days.
-
-    Parameters
-    ----------
-    daily_data : DataArray
-        Array of daily soil moisture or daily rainfall.
-    is_soil_moisture : boolean
-        True if `daily_data` is soil moisture, False if it is rainfall.
-    dry_thresh : float
-        Soil moisture threshold to determine a dry day.
-    dry_spell_length_thresh : int
-        Minimum number of dry days in a row to be considered a dry spell.
-    et : DataArray, optional
-        Evapotranspiration used by `water_balance` if `daily_data` is rainfall.
-        Can be a single value with no dimensions or axes.
-    taw : DataArray, optional
-        Total available water used by `water_balance` if `daily_data` is rainfall.
-        Can be a single value with no dimensions or axes.
-    sminit : DataArray, optional
-        Soil moisture initialization used by `water_balance` if `daily_data` is rainfall.
-        If DataArray, must not have `time_dim` dim.
-        Can be a single value with no dimensions or axes.
-    time_dim : str, optional
-        Time coordinate in `soil_moisture` (default `time_dim`="T"). 
-    
-    Returns
-    -------
-    cess_delta : DataArray[np.timedelta64] 
-        Difference between first day of `daily_data` 
-        and cessation date.
-    
-    See Also
-    --------
-    water_balance
-
-    Notes
-    -----
-    Examples
-    --------
-    """
-    # Initializing
-    if is_soil_moisture:
-        sm = daily_data.isel({time_dim: 0})
-    else:
-        if sminit is None or et is None or taw is None:
-            raise Exception("sminit, et and taw can not be None")
-        sminit = xr.DataArray(sminit)
-        et = xr.DataArray(et)
-        taw = xr.DataArray(taw)
-        sm = water_balance_step(sminit, daily_data.isel({time_dim: 0}), et, taw)
-    spell_length = (sm < dry_thresh).astype("timedelta64[D]")
+    spell_length = np.timedelta64(0)
     cess_delta = xr.DataArray(np.timedelta64("NaT", "D"))
     # Loop
-    for t in daily_data[time_dim][1:]:
-        if is_soil_moisture:
-            sm = daily_data.sel({time_dim: t})
-        else:
-            sm = water_balance_step(sm, daily_data.sel({time_dim: t}), et, taw)
+    for t in daily_data[time_dim]:
+        sm = daily_data.sel({time_dim: t})
+        dry_day = sm < dry_thresh
+        spell_length = (spell_length + dry_day.astype("timedelta64[D]")) * dry_day
+        cess_delta = cess_date_step(
+            cess_delta,
+            spell_length,
+            np.timedelta64(dry_spell_length_thresh, "D"),
+        )
+    # Delta reference (and coordinate) back to first time point of daily_data
+    cess_delta = (
+        daily_data[time_dim][-1]
+        + cess_delta
+        - daily_data[time_dim][0].expand_dims(dim=time_dim)
+    )
+    return cess_delta
+
+def cess_date_from_rain(
+    daily_data,
+    dry_thresh, 
+    dry_spell_length_thresh,
+    et,
+    taw,
+    sminit,
+    time_dim="T",
+):
+    sm = xr.DataArray(sminit)
+    et = xr.DataArray(et)
+    taw = xr.DataArray(taw)
+
+    spell_length = np.timedelta64(0)
+    cess_delta = xr.DataArray(np.timedelta64("NaT", "D"))
+    # Loop
+    for t in daily_data[time_dim]:
+        sm = water_balance_step(sm, daily_data.sel({time_dim: t}), et, taw)
         dry_day = sm < dry_thresh
         spell_length = (spell_length + dry_day.astype("timedelta64[D]")) * dry_day
         cess_delta = cess_date_step(
@@ -818,8 +791,7 @@ def seasonal_cess_date(
         grouped_daily_data[soil_moisture.name]
         .groupby(grouped_daily_data["seasons_starts"])
         .map(
-            cess_date,
-            is_soil_moisture=True,
+            cess_date_from_sm,
             dry_thresh=dry_thresh,
             dry_spell_length_thresh=dry_spell_length_thresh,
         )
