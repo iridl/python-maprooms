@@ -367,33 +367,19 @@ def cess_date_step(cess_yesterday, dry_spell_length, dry_spell_length_thresh):
 
 
 def cess_date_from_sm(
-    daily_data,
+    daily_sm,
     dry_thresh, 
     dry_spell_length_thresh,
     time_dim="T",
 ):
-    spell_length = np.timedelta64(0)
-    cess_delta = xr.DataArray(np.timedelta64("NaT", "D"))
-    # Loop
-    for t in daily_data[time_dim]:
-        sm = daily_data.sel({time_dim: t})
-        dry_day = sm < dry_thresh
-        spell_length = (spell_length + dry_day.astype("timedelta64[D]")) * dry_day
-        cess_delta = cess_date_step(
-            cess_delta,
-            spell_length,
-            np.timedelta64(dry_spell_length_thresh, "D"),
-        )
-    # Delta reference (and coordinate) back to first time point of daily_data
-    cess_delta = (
-        daily_data[time_dim][-1]
-        + cess_delta
-        - daily_data[time_dim][0].expand_dims(dim=time_dim)
-    )
-    return cess_delta
+    def sm_func(_, t):
+        return daily_sm.sel({time_dim: t})
+
+    return _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, daily_sm[time_dim])
+
 
 def cess_date_from_rain(
-    daily_data,
+    daily_rain,
     dry_thresh, 
     dry_spell_length_thresh,
     et,
@@ -401,15 +387,26 @@ def cess_date_from_rain(
     sminit,
     time_dim="T",
 ):
-    sm = xr.DataArray(sminit)
+    sminit = xr.DataArray(sminit)
     et = xr.DataArray(et)
     taw = xr.DataArray(taw)
 
+    def sm_func(sm, t):
+        if sm is None:
+            sm = sminit
+        return water_balance_step(
+            sm, daily_rain.sel({time_dim: t}), et, taw
+        )
+
+    return _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, daily_rain[time_dim])
+
+
+def _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, time_coord):
     spell_length = np.timedelta64(0)
     cess_delta = xr.DataArray(np.timedelta64("NaT", "D"))
-    # Loop
-    for t in daily_data[time_dim]:
-        sm = water_balance_step(sm, daily_data.sel({time_dim: t}), et, taw)
+    sm = None
+    for t in time_coord:
+        sm = sm_func(sm, t)
         dry_day = sm < dry_thresh
         spell_length = (spell_length + dry_day.astype("timedelta64[D]")) * dry_day
         cess_delta = cess_date_step(
@@ -419,9 +416,9 @@ def cess_date_from_rain(
         )
     # Delta reference (and coordinate) back to first time point of daily_data
     cess_delta = (
-        daily_data[time_dim][-1]
+        time_coord[-1]
         + cess_delta
-        - daily_data[time_dim][0].expand_dims(dim=time_dim)
+        - time_coord[0].expand_dims(dim=time_coord.name)
     )
     return cess_delta
 

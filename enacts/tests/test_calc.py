@@ -587,7 +587,7 @@ def test_cess_date_rain():
 
 def call_cess_date(data):
     cessations = calc.cess_date_from_sm(
-        daily_data=data,
+        daily_sm=data,
         dry_thresh=5,
         dry_spell_length_thresh=3,
     )
