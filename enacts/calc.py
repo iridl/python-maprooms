@@ -425,11 +425,10 @@ def cess_date(
     else:
         if sminit is None or et is None or taw is None:
             raise Exception("sminit, et and taw can not be None")
-        else:
-            sminit = xr.DataArray(sminit)
-            et = xr.DataArray(et)
-            taw = xr.DataArray(taw)
-            sm = water_balance_step(sminit, daily_data.isel({time_dim: 0}), et, taw)
+        sminit = xr.DataArray(sminit)
+        et = xr.DataArray(et)
+        taw = xr.DataArray(taw)
+        sm = water_balance_step(sminit, daily_data.isel({time_dim: 0}), et, taw)
     spell_length = (sm < dry_thresh).astype("timedelta64[D]")
     cess_delta = xr.DataArray(np.timedelta64("NaT", "D"))
     # Loop
