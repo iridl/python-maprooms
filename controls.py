@@ -195,7 +195,6 @@ def Block(title, *body, is_on=True, width="100%", border_color="grey"): #width o
             "display": the_display,
              "width": width,
              "border-color": border_color,
-             #"line-height": "0.5em",
         },
     )
 
