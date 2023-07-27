@@ -276,7 +276,8 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                 dbc.Button(id="submit_lat_lng", children='Submit'),
                             ],
                         ),
-                        "Ask the map:",
+                    ),
+                    Block("Ask the map:",
                         dbc.Select(
                             id="map_choice",
                             value=list(CONFIG["map_text"].keys())[0],

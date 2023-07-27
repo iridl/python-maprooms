@@ -191,7 +191,7 @@ def Block(title, *body, is_on=True, width="100%", border_color="grey"): #width o
             dbc.CardBody(body),
         ],
         className="mb-4 ml-4 mr-4",
-        style={"display": the_display, "width": width, "border-color": border_color},
+        style={"display": the_display, "width": width, "border-color": border_color, "line-height": "0.5em"},
     )
 
 def Options(options,labels=None):

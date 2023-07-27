@@ -190,8 +190,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block("Data Layers",
-                        "Choose a data layer to view:",
+                    Block("Variable",
                         dbc.Select(
                             id="data_choice",
                             value=list(CONFIG["map_text"].keys())[0],
@@ -235,23 +234,33 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                                 dbc.Button(id="submit_coords", outline=True, color="primary", children='Submit lat lng'),
                             ],
                         ),
-                        "Map year:",
-                        dbc.Input(
-                            id="target_year",
-                            type="number",
-                            min=1981,
-                            max=year_max,
-                            value=year_max,
-                        ),
-                        "Season of interest:",
-                        dbc.Select(
-                            id="target_season",
-                            value= CONFIG["param_defaults"]["target_season"],
-                            options=[
-                                {"label":"Dec-Feb", "value":"DJF"},
-                                {"label":"Mar-May", "value":"MAM"},
-                                {"label":"Jun-Aug", "value":"JJA"},
-                                {"label":"Sep-Nov", "value":"SON"},
+                    ),
+                    Block("Map:",
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="target_year",
+                                        type="number",
+                                        min=1981,
+                                        max=CONFIG["param_defaults"]["target_year"],
+                                        value=CONFIG["param_defaults"]["target_year"],
+                                    ),
+                                    dbc.Label("Year", style={"font-size": "80%"})]),
+                                ),
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Select(
+                                        id="target_season",
+                                        value=CONFIG["param_defaults"]["target_season"],
+                                        options=[
+                                            {"label":"Dec-Feb", "value":"DJF"},
+                                            {"label":"Mar-May", "value":"MAM"},
+                                            {"label":"Jun-Aug", "value":"JJA"},
+                                            {"label":"Sep-Nov", "value":"SON"},
+                                        ],
+                                    ),
+                                    dbc.Label("Season", style={"font-size": "80%"})]),
+                                ),
                             ],
                         ),
                     ),
