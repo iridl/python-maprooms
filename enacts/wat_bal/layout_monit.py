@@ -3,7 +3,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from controls import Block, Sentence, DateNoYear, Number, Text, Select
+from controls import Block, Sentence, DateNoYear, Number, Text, Select, PickPoint
 import calc
 import numpy as np
 from pathlib import Path
@@ -270,46 +270,10 @@ def controls_layout(
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block("Pick a point",
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    dbc.FormFloating([
-                                        dbc.Input(
-                                            id="lat_input",
-                                            min=lat_min,
-                                            max=lat_max,
-                                            type="number",
-                                            style={"height": "auto", "padding-bottom": "0px"},
-                                        ),
-                                        dbc.Label("Latitude", style={"font-size": "80%"}),
-                                        dbc.Tooltip(
-                                            f"{lat_label}",
-                                            target="lat_input",
-                                            className="tooltiptext",
-                                        )
-                                    ]),
-                                ),
-                                dbc.Col(
-                                    dbc.FormFloating([
-                                        dbc.Input(
-                                            id = "lng_input",
-                                            min=lon_min,
-                                            max=lon_max,
-                                            type="number",
-                                            style={"height": "auto", "padding-bottom": "0px"},
-                                        ),
-                                        dbc.Label("Longitude", style={"font-size": "80%"}),
-                                        dbc.Tooltip(
-                                            f"{lon_label}",
-                                            target="lng_input",
-                                            className="tooltiptext",
-                                        )
-                                    ]),
-                                ),
-                                dbc.Button(id="submit_lat_lng", children='Submit', color="secondary"),
-                            ],
-                        ),
+                    Block(
+                        "Pick a point",
+                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
+                        width="w-auto",
                     ),
                     Block("Water Balance Outputs to display",
                         Select(

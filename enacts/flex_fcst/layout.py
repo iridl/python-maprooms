@@ -2,7 +2,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from controls import Block
+from controls import Block, PickPoint
 
 from . import cpt
 
@@ -311,6 +311,7 @@ def controls_layout():
                 at the clicked location.
                 """
             ),
+<<<<<<< HEAD
             Block("Pick a point",
                 dbc.Row(
                     [
@@ -341,6 +342,12 @@ def controls_layout():
                         dbc.Button(id="submit_lat_lng", children='Submit'),
                     ],
                 ),
+=======
+            Block(
+                "Pick a point",
+                PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
+                width="w-auto",
+>>>>>>> eefead1 (Pick a Point now in controls.py)
             ),
         ],
         fluid=True,

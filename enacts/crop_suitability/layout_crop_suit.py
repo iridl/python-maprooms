@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from controls import Block, Sentence, DateNoYear, Number, Select
+from controls import Block, Sentence, DateNoYear, Number, Select, PickPoint
 
 import numpy as np
 from pathlib import Path
@@ -197,40 +197,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                             labels=[val["menu_label"] for key, val in CONFIG["layers"].items()],
                         ),
                     ),
-                    Block("Pick a point",
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id = "lat_input",
-                                        min=lat_min,
-                                        max=lat_max,
-                                        type="number",
-                                    ),
-                                    dbc.Label("Latitude", style={"font-size": "80%"}),
-                                    dbc.Tooltip(
-                                        f"{lat_label}",
-                                        target="lat_input",
-                                        className="tooltiptext",
-                                    )]),
-                                ),
-                                dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id = "lng_input",
-                                        min=lon_min,
-                                        max=lon_max,
-                                        type="number",
-                                    ),
-                                    dbc.Label("Longitude", style={"font-size": "80%"}),
-                                    dbc.Tooltip(
-                                        f"{lon_label}",
-                                        target="lng_input",
-                                        className="tooltiptext",
-                                    )]),
-                                ),
-                                dbc.Button(id="submit_coords", outline=True, color="primary", children='Submit lat lng'),
-                            ],
-                        ),
+                    Block(
+                        "Pick a point",
+                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
+                        width="w-auto",
                     ),
                     Block("Map:",
                         dbc.Row(

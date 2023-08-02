@@ -279,3 +279,39 @@ def Select(id, options, labels=None, init=0):
         options=opts,
     )
 
+def PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label):
+
+    return dbc.Row(
+        [
+            dbc.Col(
+                dbc.FormFloating([
+                    dbc.Input(
+                        id="lat_input",
+                        min=lat_min,
+                        max=lat_max,
+                        type="number",
+                        style={"width": "120px"},
+                    ),
+                    dbc.Label("Latitude", style={"font-size": "80%"}),
+                    dbc.Tooltip(f"{lat_label}", target="lat_input", className="tooltiptext")
+                ]),
+            ),
+            dbc.Col(
+                dbc.FormFloating([
+                    dbc.Input(
+                        id="lng_input",
+                        min=lon_min,
+                        max=lon_max,
+                        type="number",
+                        style={"width": "120px"},
+                    ),
+                    dbc.Label("Longitude", style={"font-size": "80%"}),
+                    dbc.Tooltip(f"{lon_label}", target="lng_input", className="tooltiptext")
+                ]),
+            ),
+            dbc.Col(dbc.Button(id="submit_lat_lng", children="GO")),
+        ],
+        class_name="g-0",
+        justify="start",
+    )
+
