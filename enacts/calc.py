@@ -372,6 +372,32 @@ def cess_date_from_sm(
     dry_spell_length_thresh,
     time_dim="T",
 ):
+    """Calculate cessation date from daily soil moisture.
+
+    A cessation date is found at the first day of the first dry spell
+    where a dry spell is defined as at least `dry_spell_length_thresh` consecutive days
+    of soil moisture `daily_sm` less than `dry_thresh` .
+    
+    Parameters
+    ----------
+    daily_sm : DataArray
+        Array of daily soil moisture values.
+    dry_thresh : float
+        A dry day is when soil mositure `daily_sm` is lesser than `dry_thresh` .
+    dry_spell_length_thresh : int
+        A dry spell is at least `dry_spell_length_thresh` dry days.
+    time_dim : str, optional
+        Time coordinate in `daily_sm` (default `time_dim` ="T").   
+
+    Returns
+    -------
+    cess_delta : DataArray[np.timedelta64]
+        Difference between first day of `daily_sm` and cessation date.
+
+    See Also
+    --------
+    cess_date_step, cess_date_from_rain
+    """
     def sm_func(_, t):
         return daily_sm.sel({time_dim: t})
 
@@ -387,6 +413,52 @@ def cess_date_from_rain(
     sminit,
     time_dim="T",
 ):
+    """Calculate cessation date from daily rainfall.
+
+    A cessation date is found at the first day of the first dry spell
+    where a dry spell is defined as at least `dry_spell_length_thresh` consecutive days
+    of soil moisture less than `dry_thresh` .
+    Soil moisture is estimated through a simple water balance model
+    driven by rainfall `daily_rain` , evapotranspiration `et`, soil capacity `taw`
+    and initislized at soil moisture value `sminit` .
+    
+    Parameters
+    ----------
+    daily_rain : DataArray
+        Array of daily rainfall.
+    dry_thresh : float
+        A dry day is when soil mositure is lesser than `dry_thresh` .
+    dry_spell_length_thresh : int
+        A dry spell is at least `dry_spell_length_thresh` dry days.
+    et : DataArray
+        Evapotranspiration.
+    taw : DataArray
+        Total available water.
+    sminit : DataArray
+        Soil moisture initialization. If DataArray, must not have `time_dim` dim.
+    time_dim : str, optional
+        Time coordinate in `daily_rain` (default `time_dim` ="T").   
+
+    Returns
+    -------
+    cess_delta : DataArray[np.timedelta64]
+        Difference between first day of `daily_rain` and cessation date.
+
+    See Also
+    --------
+    cess_date_step, water_balance_step, cess_date_from_sm
+
+    Notes
+    -----
+    Cessation date is typically derived from soil moisture.
+    However, soil moisture data is rare, while rainfall data is plenty.
+    This function is identical to cess_date_from_sm except that at each time step,
+    soil moisture is estimated by water_balance_step.
+    The result would be the same as applying water_balance to `daily_rain`
+    to estimate soil moisture and use that in cess_date_from_sm.
+    Using cess_date_from_rain instead would be more efficient
+    if the user wishes not to keep the intermediary result of estimated soil moisture.
+    """
     sminit = xr.DataArray(sminit)
     et = xr.DataArray(et)
     taw = xr.DataArray(taw)
