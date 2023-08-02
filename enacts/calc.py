@@ -792,7 +792,7 @@ def seasonal_onset_date(
     # + seasonal_onset_date.onset_delta
     return seasonal_onset_date
 
-def seasonal_cess_date(
+def seasonal_cess_date_from_sm(
     soil_moisture,
     search_start_day,
     search_start_month,
@@ -873,6 +873,63 @@ def seasonal_cess_date(
     # seasonal_onset_date = seasonal_onset_date[time_dim]
     # + seasonal_onset_date.onset_delta
     return seasonal_cess_date
+
+
+def seasonal_cess_date_from_rain(
+    daily_rain,
+    search_start_day,
+    search_start_month,
+    search_days,
+    dry_thresh,
+    dry_spell_length_thresh,
+    et,
+    taw,
+    sminit,
+    time_dim="T"
+):
+    # Deal with leap year cases
+    if search_start_day == 29 and search_start_month == 2:
+        search_start_day = 1
+        search_start_month = 3
+
+    # Find an acceptable end_day/_month
+    first_end_date = sel_day_and_month(
+        daily_rain[time_dim], search_start_day, search_start_month
+    )[0] + np.timedelta64(
+        search_days,
+        "D",
+    )
+
+    end_day = first_end_date.dt.day.values
+
+    end_month = first_end_date.dt.month.values
+
+    # Apply daily grouping by season
+    grouped_daily_data = daily_tobegroupedby_season(
+        daily_rain, search_start_day, search_start_month, end_day, end_month
+    )
+    # Apply cess_date
+    seasonal_data = (
+        grouped_daily_data[daily_rain.name]
+        .groupby(grouped_daily_data["seasons_starts"])
+        .map(
+            cess_date_from_rain,
+            dry_thresh=dry_thresh,
+            dry_spell_length_thresh=dry_spell_length_thresh,
+            et=et,
+            taw=taw,
+            sminit=sminit,
+        )
+    ).rename("cess_delta")
+    # Get the seasons ends
+    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
+    seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
+
+    # Tip to get dates from timedelta search_start_day
+    # seasonal_onset_date = seasonal_onset_date[time_dim]
+    # + seasonal_onset_date.onset_delta
+    return seasonal_cess_date
+
 
 def seasonal_sum(
     daily_data,
