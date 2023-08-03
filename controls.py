@@ -113,8 +113,9 @@ def DateNoYear(id, defaultDay, defaultMonth):
     """
     idm = id + "month"
     return [
-        dbc.Input(id=id + "day", type="number", min=1, max=31,
-                  size="sm", class_name="m-0 p-0 d-inline-block w-auto", debounce=True, value=str(defaultDay)),
+        dbc.Input(id=id + "day", type="number", min=1, max=31, size="sm",
+            class_name="m-0 pl-1 d-inline-block", debounce=True, value=str(defaultDay),
+            style={"width": "60px"}),
         Month(idm, defaultMonth)
     ]
 
