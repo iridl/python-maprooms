@@ -187,8 +187,8 @@ def Block(title, *body, is_on=True, width="100%", border_color="grey"): #width o
         the_display = "none"
     return dbc.Card(
         [
-            dbc.CardHeader(title),
-            dbc.CardBody(body),
+            dbc.CardHeader(title, class_name="m-0 p-0"),
+            dbc.CardBody(body, class_name="m-0 p-0"),
         ],
         class_name="m-0 p-0",
         style={
@@ -291,8 +291,10 @@ def PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label):
                         max=lat_max,
                         type="number",
                         style={"width": "120px"},
+                        class_name="m-0 p-0",
+                        placeholder=lat_min,
                     ),
-                    dbc.Label("Latitude", style={"font-size": "80%"}),
+                    dbc.Label("Latitude", class_name="m-0 p-0"),
                     dbc.Tooltip(f"{lat_label}", target="lat_input", className="tooltiptext")
                 ]),
             ),
@@ -304,12 +306,14 @@ def PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label):
                         max=lon_max,
                         type="number",
                         style={"width": "120px"},
+                        class_name="m-0 p-0",
+                        placeholder=lon_min,
                     ),
-                    dbc.Label("Longitude", style={"font-size": "80%"}),
+                    dbc.Label("Longitude", class_name="m-0 p-0"),
                     dbc.Tooltip(f"{lon_label}", target="lng_input", className="tooltiptext")
                 ]),
             ),
-            dbc.Col(dbc.Button(id="submit_lat_lng", children="GO")),
+            dbc.Col(dbc.Button(id="submit_lat_lng", children="GO", class_name="m-1 p-1"), align="center"),
         ],
         class_name="g-0",
         justify="start",
