@@ -292,31 +292,31 @@ def controls_layout(
                             "crop cultivars: initiated at",
                         ),
                         Sentence(
-                            Number("kc_init", CONFIG["kc_v"][0], min=0, max=2, html_size=4),
+                            Number("kc_init", CONFIG["kc_v"][0], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc_init_length", CONFIG["kc_l"][0], min=0, max=99, html_size=2),
+                            Number("kc_init_length", CONFIG["kc_l"][0], min=0, max=99, width="4em"),
                             "days of initialization to",
                         ),
                         Sentence(
-                            Number("kc_veg", CONFIG["kc_v"][1], min=0, max=2, html_size=4),
+                            Number("kc_veg", CONFIG["kc_v"][1], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc_veg_length", CONFIG["kc_l"][1], min=0, max=99, html_size=2),
+                            Number("kc_veg_length", CONFIG["kc_l"][1], min=0, max=99, width="4em"),
                             "days of growth to",
                         ),
                         Sentence(
-                            Number("kc_mid", CONFIG["kc_v"][2], min=0, max=2, html_size=4),
+                            Number("kc_mid", CONFIG["kc_v"][2], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc_mid_length", CONFIG["kc_l"][2], min=0, max=99, html_size=2),
+                            Number("kc_mid_length", CONFIG["kc_l"][2], min=0, max=99, width="4em"),
                             "days of mid-season to",
                         ),
                         Sentence(
-                            Number("kc_late", CONFIG["kc_v"][3], min=0, max=2, html_size=4),
+                            Number("kc_late", CONFIG["kc_v"][3], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc_late_length", CONFIG["kc_l"][3], min=0, max=99, html_size=2),
+                            Number("kc_late_length", CONFIG["kc_l"][3], min=0, max=99, width="4em"),
                             "days of late-season to",
                         ),
                         Sentence(
-                            Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
+                            Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, width="5em"),
                         ),
                         dbc.Button(
                             id="submit_kc",
@@ -337,7 +337,7 @@ def controls_layout(
                                 other_year_default,
                                 min=other_year_min,
                                 max=other_year_max,
-                                html_size=5
+                                width="120px"
                             ),
                         ),
                         Sentence(
@@ -346,31 +346,31 @@ def controls_layout(
                             "crop cultivars: initiated at",
                         ),
                         Sentence(
-                            Number("kc2_init", CONFIG["kc_v"][0], min=0, max=2, html_size=4),
+                            Number("kc2_init", CONFIG["kc_v"][0], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc2_init_length", CONFIG["kc_l"][0], min=0, max=99, html_size=2),
+                            Number("kc2_init_length", CONFIG["kc_l"][0], min=0, max=99, width="4em"),
                             "days of initialization to",
                         ),
                         Sentence(
-                            Number("kc2_veg", CONFIG["kc_v"][1], min=0, max=2, html_size=4),
+                            Number("kc2_veg", CONFIG["kc_v"][1], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc2_veg_length", CONFIG["kc_l"][1], min=0, max=99, html_size=2),
+                            Number("kc2_veg_length", CONFIG["kc_l"][1], min=0, max=99, width="4em"),
                             "days of growth to",
                         ),
                         Sentence(
-                            Number("kc2_mid", CONFIG["kc_v"][2], min=0, max=2, html_size=4),
+                            Number("kc2_mid", CONFIG["kc_v"][2], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc2_mid_length", CONFIG["kc_l"][2], min=0, max=99, html_size=2),
+                            Number("kc2_mid_length", CONFIG["kc_l"][2], min=0, max=99, width="4em"),
                             "days of mid-season to",
                         ),
                         Sentence(
-                            Number("kc2_late", CONFIG["kc_v"][3], min=0, max=2, html_size=4),
+                            Number("kc2_late", CONFIG["kc_v"][3], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc2_late_length", CONFIG["kc_l"][3], min=0, max=99, html_size=2),
+                            Number("kc2_late_length", CONFIG["kc_l"][3], min=0, max=99, width="4em"),
                             "days of late-season to",
                         ),
                         Sentence(
-                            Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
+                            Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, width="5em"),
                         ),
                         dbc.Button(
                             id="submit_kc2",

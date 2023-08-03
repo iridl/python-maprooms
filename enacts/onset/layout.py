@@ -255,7 +255,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh_onset", 30,  min=0),
+                                Number("prob_exc_thresh_onset", 30, min=0, width="5em"),
                                 html.Span(id="pet_units1"),
                                 "?"
                             ),
@@ -263,14 +263,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh_length", 90,  min=0),
+                                Number("prob_exc_thresh_length", 90, min=0, width="5em"),
                                 "days?",
                             ),
                             id="pet_input_wrap_length"
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh_tot", 200,  min=0),
+                                Number("prob_exc_thresh_tot", 200, min=0, width="6em"),
                                 "mm?"
                             ),
                             id="pet_input_wrap_tot"
@@ -282,14 +282,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             "From Early Start date of",
                             DateNoYear("search_start_", 1, CONFIG["default_search_month"]),
                             "and within the next",
-                            Number("search_days", 90, min=0, max=9999), "days",
+                            Number("search_days", 90, min=0, max=9999, width="5em"), "days",
                         ),
                     ),
                     Block(
                         "Wet Day Definition",
                         Sentence(
                             "Rainfall amount greater than",
-                            Number("wet_threshold", 1, min=0, max=99999),
+                            Number("wet_threshold", 1, min=0, max=99999, width="5em"),
                             "mm",
                         ),
                     ),
@@ -297,15 +297,15 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Onset Date Definition",
                         Sentence(
                             "First spell of",
-                            Number("running_days", CONFIG["default_running_days"], min=0, max=999),
+                            Number("running_days", CONFIG["default_running_days"], min=0, max=999, width="4em"),
                             "days that totals",
-                            Number("running_total", 20, min=0, max=99999),
+                            Number("running_total", 20, min=0, max=99999, width="5em"),
                             "mm or more and with at least",
-                            Number("min_rainy_days", CONFIG["default_min_rainy_days"], min=0, max=999),
+                            Number("min_rainy_days", CONFIG["default_min_rainy_days"], min=0, max=999, width="4em"),
                             "wet day(s) that is not followed by a",
-                            Number("dry_days", 7, min=0, max=999),
+                            Number("dry_days", 7, min=0, max=999, width="4em"),
                             "-day dry spell within the next",
-                            Number("dry_spell", 21, min=0, max=9999),
+                            Number("dry_spell", 21, min=0, max=9999, width="4em"),
                             "days",
                         ),
                     ),
@@ -315,11 +315,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             "First date after",
                             DateNoYear("cess_start_", 1, CONFIG["default_search_month_cess"]),
                             "in",
-                            Number("cess_search_days", 90, min=0, max=99999),
+                            Number("cess_search_days", 90, min=0, max=99999, width="5em"),
                             "days when the soil moisture falls below",
-                            Number("cess_soil_moisture", 5, min=0, max=999),
+                            Number("cess_soil_moisture", 5, min=0, max=999, width="5em"),
                             "mm for a period of",
-                            Number("cess_dry_spell", 3, min=0, max=999),
+                            Number("cess_dry_spell", 3, min=0, max=999, width="5em"),
                             "days",
                         ),
                         is_on=CONFIG["ison_cess_date_hist"]

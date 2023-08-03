@@ -230,9 +230,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Optimum seasonal total rainfall",
                         Sentence(
                             "Total rainfall amount between",
-                            Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999, html_size=4),
+                            Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999, width="6em"),
                             "and",
-                            Number("upper_wet_threshold", CONFIG["param_defaults"]["upper_wet_thresh"], min=0, max=99999, html_size=4),
+                            Number("upper_wet_threshold", CONFIG["param_defaults"]["upper_wet_thresh"], min=0, max=99999, width="6em"),
                             "mm",
                         ),
                     ),
@@ -240,9 +240,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Temperature tolerance",
                         Sentence(
                             "Temperature range between",
-                            Number("minimum_temp", CONFIG["param_defaults"]["min_temp"], min=-99, max=999, html_size=2),
+                            Number("minimum_temp", CONFIG["param_defaults"]["min_temp"], min=-99, max=999, width="6em"),
                             "and",
-                            Number("maximum_temp", CONFIG["param_defaults"]["max_temp"], min=-99, max=99999, html_size=2),
+                            Number("maximum_temp", CONFIG["param_defaults"]["max_temp"], min=-99, max=99999, width="6em"),
                             "C",
                         ),
                     ),
@@ -250,7 +250,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Optimal daily temperature amplitude",
                         Sentence(
                             "An average daily temperature amplitude of:",
-                            Number("temp_range", CONFIG["param_defaults"]["temp_range"], min=0, max=99999, html_size=2),
+                            Number("temp_range", CONFIG["param_defaults"]["temp_range"], min=0, max=99999, width="4em"),
                             "C",
                         ),
                     ),
@@ -266,12 +266,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Wet days",
                         Sentence(
                             "The minimum number of wet days within a season:",
-                            Number("min_wet_days", CONFIG["param_defaults"]["min_wet_days"], min=0, max=99999, html_size=3),
+                            Number("min_wet_days", CONFIG["param_defaults"]["min_wet_days"], min=0, max=99999, width="5em"),
                             "days",
                         ),
                         Sentence(
                             "Where a wet day is defined as a day with rainfall more than:",
-                            Number("wet_day_def", CONFIG["param_defaults"]["wet_day_def"], min=0, max=9999, html_size=3),
+                            Number("wet_day_def", CONFIG["param_defaults"]["wet_day_def"], min=0, max=9999, width="5em"),
                             "mm",
                         ),
                     ),

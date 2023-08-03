@@ -25,7 +25,7 @@ def Text(id, default):
                        size="sm", class_name="m-0 p-0 d-inline-block w-auto", debounce=True, value=default) ]
 
 
-def Number(id, default, min=None, max=None, html_size=None):
+def Number(id, default, min=None, max=None, width="auto"):
     """Provides input for a number in a range.
 
     Auto-generates a dash bootstrap components
@@ -41,14 +41,17 @@ def Number(id, default, min=None, max=None, html_size=None):
         Minimum value the user can select from. Default is None.
     max : float, optional
         Maximum value the user can select from. Defautl is None.
+    width : string, optional
+        to control horizontal expansion of control. Accepts CSS entries. Default is "auto"
 
     Returns
     -------
     dbc.Input : component
         dbc Input component with numerical inputs.
     """
-    return [dbc.Input(id=id, type="number", min=min, max=max, html_size=html_size, size="sm",
-                     class_name="m-0 p-0 d-inline-block w-auto", debounce=True, value=str(default))]
+    return [dbc.Input(id=id, type="number", min=min, max=max, size="sm",
+        class_name="m-0 pl-1 d-inline-block", debounce=True, value=str(default),
+        style={"width": width})]
 
 
 def Month(id, default):
@@ -115,7 +118,7 @@ def DateNoYear(id, defaultDay, defaultMonth):
     return [
         dbc.Input(id=id + "day", type="number", min=1, max=31, size="sm",
             class_name="m-0 pl-1 d-inline-block", debounce=True, value=str(defaultDay),
-            style={"width": "60px"}),
+            style={"width": "4em"}),
         Month(idm, defaultMonth)
     ]
 
