@@ -202,29 +202,30 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
                         width="w-auto",
                     ),
-                    Block("Map:",
+                    Block("Map for a Year and a Season:",
                         dbc.Row(
                             [
                                 dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id="target_year",
-                                        type="number",
+                                    Number(
+                                        "target_year",
+                                        CONFIG["param_defaults"]["target_year"],
                                         min=1981,
                                         max=CONFIG["param_defaults"]["target_year"],
-                                        value=CONFIG["param_defaults"]["target_year"],
+                                        width="6em",
                                     ),
-                                    dbc.Label("Year", style={"font-size": "80%"})]),
                                 ),
                                 dbc.Col(
-                                    dbc.FormFloating([Select(
+                                    Select(
                                         "target_season",
                                         ["DJF", "MAM", "JJA", "SON"],
                                         labels=["Dec-Feb", "Mar-May", "Jun-Aug", "Sep-Nov"],
                                     ),
-                                    dbc.Label("Season", style={"font-size": "80%"})]),
                                 ),
                             ],
+                            class_name="g-0",
+                            justify="start",
                         ),
+                        width="w-auto",
                     ),
                     Block(
                         "Optimum seasonal total rainfall",
