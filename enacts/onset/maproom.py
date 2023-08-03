@@ -554,14 +554,16 @@ def cess_plots(
             return error_fig, error_fig, tab_style
         precip.load()
         try:
-            soil_moisture = calc.water_balance(precip, 5, 60, 0)["soil_moisture"]
-            cess_delta = calc.seasonal_cess_date(
-                soil_moisture,
+            cess_delta = calc.seasonal_cess_date_from_rain(
+                precip,
                 int(cess_start_day),
                 calc.strftimeb2int(cess_start_month),
                 int(cess_search_days),
                 int(cess_soil_moisture),
                 int(cess_dry_spell),
+                5,
+                60,
+                60./3.,
                 time_dim="T",
             )
             isnan = np.isnan(cess_delta["cess_delta"]).all()
@@ -698,14 +700,16 @@ def length_plots(
             )
             return error_fig, error_fig, tab_style
         try:
-            soil_moisture = calc.water_balance(precip, 5, 60, 0)["soil_moisture"]
-            cess_delta = calc.seasonal_cess_date(
-                soil_moisture,
+            cess_delta = calc.seasonal_cess_date_from_rain(
+                precip,
                 int(cess_start_day),
                 calc.strftimeb2int(cess_start_month),
                 int(cess_search_days),
                 int(cess_soil_moisture),
                 int(cess_dry_spell),
+                5,
+                60,
+                60./3.,
                 time_dim="T",
             )
             isnan = np.isnan(cess_delta["cess_delta"]).all()
@@ -850,16 +854,16 @@ def onset_tile(tz, tx, ty):
             dry_spell_search,
         )
         if ("length" in map_choice) | ("total" in map_choice):
-            soil_moisture = calc.water_balance(
-                precip_tile, 5, 60, 0
-            )["soil_moisture"]
-            cess_dates = calc.seasonal_cess_date(
-                soil_moisture,
+            cess_dates = calc.seasonal_cess_date_from_rain(
+                precip_tile,
                 cess_start_day,
                 cess_start_month1,
                 cess_search_days,
                 cess_soil_moisture,
                 cess_dry_spell,
+                5,
+                60,
+                60./3.,
             )
             if "length" in map_choice:
                 if cess_dates["T"][0] < onset_dates["T"][0]:
