@@ -193,8 +193,8 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                     Block("Variable",
                         Select(
                             "data_choice",
-                            [key for key, val in CONFIG["layers"].items()],
-                            labels=[val["menu_label"] for key, val in CONFIG["layers"].items()],
+                            [key for key, val in CONFIG["map_text"].items()],
+                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
                         ),
                     ),
                     Block(
@@ -208,9 +208,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                                 dbc.Col(
                                     Number(
                                         "target_year",
-                                        CONFIG["param_defaults"]["target_year"],
+                                        year_max,
                                         min=1981,
-                                        max=CONFIG["param_defaults"]["target_year"],
+                                        max=year_max,
                                         width="6em",
                                     ),
                                 ),
