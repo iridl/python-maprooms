@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from controls import Block, Sentence, DateNoYear, Number, Select, PickPoint
+from fieldsets import Block, Sentence, DateNoYear, Number, Select, PickPoint
 
 import numpy as np
 from pathlib import Path
@@ -243,7 +243,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
             html.Div(
                 [
                     Block(
-                        "Pick a point",
+                        "Pick Latitude/Longitude",
                         PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
                         width="w-auto",
                     ),
