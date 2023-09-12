@@ -420,7 +420,7 @@ def cess_date_from_rain(
     of soil moisture less than `dry_thresh` .
     Soil moisture is estimated through a simple water balance model
     driven by rainfall `daily_rain` , evapotranspiration `et`, soil capacity `taw`
-    and initislized at soil moisture value `sminit` .
+    and initialized at soil moisture value `sminit` .
     
     Parameters
     ----------
@@ -763,13 +763,13 @@ def seasonal_onset_date(
     end_month = first_end_date.dt.month.values
 
     # Apply daily grouping by season
-    grouped_daily_data = daily_tobegroupedby_season(
+    seasonally_labeled_daily_data = daily_tobegroupedby_season(
         daily_rain, search_start_day, search_start_month, end_day, end_month
     )
     # Apply onset_date
     seasonal_data = (
-        grouped_daily_data[daily_rain.name]
-        .groupby(grouped_daily_data["seasons_starts"])
+        seasonally_labeled_daily_data[daily_rain.name]
+        .groupby(seasonally_labeled_daily_data["seasons_starts"])
         .map(
             onset_date,
             wet_thresh=wet_thresh,
@@ -784,7 +784,7 @@ def seasonal_onset_date(
         .rename({"seasons_starts": time_dim})
     )
     # Get the seasons ends
-    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
+    seasons_ends = seasonally_labeled_daily_data["seasons_ends"].rename({"group": time_dim})
     seasonal_onset_date = xr.merge([seasonal_data, seasons_ends])
 
     # Tip to get dates from timedelta search_start_day
@@ -852,13 +852,13 @@ def seasonal_cess_date_from_sm(
     end_month = first_end_date.dt.month.values
 
     # Apply daily grouping by season
-    grouped_daily_data = daily_tobegroupedby_season(
+    seasonally_labeled_daily_data = daily_tobegroupedby_season(
         soil_moisture, search_start_day, search_start_month, end_day, end_month
     )
     # Apply cess_date
     seasonal_data = (
-        grouped_daily_data[soil_moisture.name]
-        .groupby(grouped_daily_data["seasons_starts"])
+        seasonally_labeled_daily_data[soil_moisture.name]
+        .groupby(seasonally_labeled_daily_data["seasons_starts"])
         .map(
             cess_date_from_sm,
             dry_thresh=dry_thresh,
@@ -866,7 +866,7 @@ def seasonal_cess_date_from_sm(
         )
     ).rename("cess_delta")
     # Get the seasons ends
-    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
+    seasons_ends = seasonally_labeled_daily_data["seasons_ends"].rename({"group": time_dim})
     seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
 
     # Tip to get dates from timedelta search_start_day
@@ -905,13 +905,13 @@ def seasonal_cess_date_from_rain(
     end_month = first_end_date.dt.month.values
 
     # Apply daily grouping by season
-    grouped_daily_data = daily_tobegroupedby_season(
+    seasonally_labeled_daily_data = daily_tobegroupedby_season(
         daily_rain, search_start_day, search_start_month, end_day, end_month
     )
     # Apply cess_date
     seasonal_data = (
-        grouped_daily_data[daily_rain.name]
-        .groupby(grouped_daily_data["seasons_starts"])
+        seasonally_labeled_daily_data[daily_rain.name]
+        .groupby(seasonally_labeled_daily_data["seasons_starts"])
         .map(
             cess_date_from_rain,
             dry_thresh=dry_thresh,
@@ -922,7 +922,7 @@ def seasonal_cess_date_from_rain(
         )
     ).rename("cess_delta")
     # Get the seasons ends
-    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
+    seasons_ends = seasonally_labeled_daily_data["seasons_ends"].rename({"group": time_dim})
     seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
 
     # Tip to get dates from timedelta search_start_day
@@ -973,16 +973,16 @@ def seasonal_sum(
     Examples
     --------
     """
-    grouped_daily_data = daily_tobegroupedby_season(
+    seasonally_labeled_daily_data = daily_tobegroupedby_season(
         daily_data, start_day, start_month, end_day, end_month
     )
     seasonal_data = (
-        grouped_daily_data[daily_data.name]
-        .groupby(grouped_daily_data["seasons_starts"])
+        seasonally_labeled_daily_data[daily_data.name]
+        .groupby(seasonally_labeled_daily_data["seasons_starts"])
         .sum(dim=time_dim, skipna=True, min_count=min_count)
         #        .rename({"seasons_starts": time_dim})
     )
-    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
+    seasons_ends = seasonally_labeled_daily_data["seasons_ends"].rename({"group": time_dim})
     summed_seasons = xr.merge([seasonal_data, seasons_ends])
     return summed_seasons
 
