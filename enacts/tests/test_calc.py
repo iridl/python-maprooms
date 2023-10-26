@@ -351,7 +351,6 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
         sminit=0,
         time_dim="T"
     ).to_array(name="soil moisture").squeeze("variable", drop=True)
-    print(wb.where((wb["T"].dt.day == 31) & (wb["T"].dt.month == 8), drop=True))
     cessds = calc.seasonal_cess_date_from_sm(
         soil_moisture=wb,
         search_start_day=1,
