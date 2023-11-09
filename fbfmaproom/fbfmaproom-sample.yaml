@@ -381,7 +381,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep
+                    - pnep-v2
                     - enacts-precip-mon
                 predictand: bad-years
             observations:
@@ -465,8 +465,8 @@ countries:
                     format: number0
             forecasts:
                 pnep:
-                    label: Forecast prob non-exc
-                    description: NextGen forecast probability of non-exceedance of the selected percentile
+                    label: Forecast prob non-exc v1
+                    description: NextGen forecast probability of non-exceedance of selected percentile, configuration selected in 2022
                     path: madagascar/pnep-ond.zarr
                     var_names:
                         value: pne
@@ -475,6 +475,19 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2
+                    description: NextGen forecast probability of non-exceedance of selected percentile, configuration selected in July 2023
+                    path: madagascar/pnep-ond-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
                     colormap: pne_25
                     is_poe: no
             vuln:
