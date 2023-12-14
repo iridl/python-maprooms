@@ -21,8 +21,14 @@ def Text(id, default):
     dbc.Input : component
         dbc Input component with text inputs.
     """
-    return [ dbc.Input(id=id, type="text",
-                       size="sm", class_name="m-0 p-0 d-inline-block w-auto", debounce=True, value=default) ]
+    return [ dbc.Input(
+        id=id,
+        type="text",
+        size="sm",
+        class_name="m-0 p-0 d-inline-block w-auto",
+        debounce=True,
+        value=default,
+    ) ]
 
 
 def Number(id, default, min=None, max=None, width="auto"):
@@ -49,9 +55,16 @@ def Number(id, default, min=None, max=None, width="auto"):
     dbc.Input : component
         dbc Input component with numerical inputs.
     """
-    return [dbc.Input(id=id, type="number", min=min, max=max, size="sm",
-        class_name="m-0 pl-1 d-inline-block", debounce=True, value=str(default),
-        style={"width": width})]
+    return [ dbc.Input(
+        id=id,
+        type="number",
+        min=min,
+        max=max,
+        class_name="ps-1 pe-0 py-0 d-inline-block",
+        debounce=True,
+        value=str(default),
+        style={"font-size": "10pt", "width": width},
+    ) ]
 
 
 def Month(id, default):
@@ -72,21 +85,24 @@ def Month(id, default):
     dbc.Select : component
        dbc Select component with months of the year as options in dropdown.
     """
-    return dbc.Select(id=id, value=default, size="sm", class_name="d-inline-block w-auto",
-                      options=[
-                           {"label": "January", "value": "Jan"},
-                           {"label": "February", "value": "Feb"},
-                           {"label": "March", "value": "Mar"},
-                           {"label": "April", "value": "Apr"},
-                           {"label": "May", "value": "May"},
-                           {"label": "June", "value": "Jun"},
-                           {"label": "July", "value": "Jul"},
-                           {"label": "August", "value": "Aug"},
-                           {"label": "September", "value": "Sep"},
-                           {"label": "October", "value": "Oct"},
-                           {"label": "November", "value": "Nov"},
-                           {"label": "December", "value": "Dec"},
-                       ])
+    options = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    labels = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+    init = options.index(default)
+    return Select(id, options, labels=labels, init=init)
+
 
 def DateNoYear(id, defaultDay, defaultMonth):
     """Provides a selector for date.
@@ -114,12 +130,11 @@ def DateNoYear(id, defaultDay, defaultMonth):
     --------
     Month
     """
+    idd = id + "day"
     idm = id + "month"
     return [
-        dbc.Input(id=id + "day", type="number", min=1, max=31, size="sm",
-            class_name="m-0 pl-1 d-inline-block", debounce=True, value=str(defaultDay),
-            style={"width": "4em"}),
-        Month(idm, defaultMonth)
+        Number(idd, defaultDay, min=1, max=31, width="4em")[0],
+        Month(idm, defaultMonth),
     ]
 
 def Sentence(*elems):
@@ -153,17 +168,17 @@ def Sentence(*elems):
 
     for i in range(start, len(elems) - (1 if tail else 0), 2):
         assert (isinstance(elems[i], str) or isinstance(elems[i], html.Span))
-        groups.append(dbc.Label(elems[i], size="sm", class_name="m-0 p-0 d-inline-block w-auto"))
+        groups.append(dbc.Label(elems[i], class_name="m-0"))
         groups.extend(elems[i + 1])
 
     if tail:
         assert (isinstance(elems[-1], str) or isinstance(elems[-1], html.Span))
-        groups.append(dbc.Label(elems[-1], size="sm", class_name="m-0 p-0 d-inline-block w-auto"))
+        groups.append(dbc.Label(elems[-1], class_name="m-0"))
 
-    return dbc.Form(groups)
+    return dbc.Form(groups, class_name="py-0 d-inline-block", style={"font-size": "10pt"})
 
-def Block(title, *body, is_on=True, width="100%", border_color="grey"): #width of the block in its container
-    """Separates out components in individual Cards
+def Block(title, *body, is_on=True, width="auto", border_color="grey"):
+    """Separates out components in individual Fieldsets
 
     Auto-generates a formatted block with a card header and body.
 
@@ -189,20 +204,51 @@ def Block(title, *body, is_on=True, width="100%", border_color="grey"): #width o
         the_display = "inline-block"
     else:
         the_display = "none"
-    return dbc.Card(
+    return html.Fieldset(
         [
-            dbc.CardHeader(title, class_name="m-0 p-0"),
-            dbc.CardBody(body, class_name="m-0 p-0"),
+            html.Legend(
+                title,
+                className="position-absolute top-0 start-0 translate-middle-y",
+                style={
+                    "font-size": "10pt",
+                    "border-style": "outset",
+                    "border-width": "2px",
+                    "border-top-width": "0px",
+                    "border-left-width": "0px",
+                    "-moz-border-radius": "4px",
+                    "border-radius": "4px",
+                    "background-color": "WhiteSmoke",
+                    "border-color": "LightGrey",
+                    "padding-bottom": "1px",
+                    "padding-left": "2px",
+                    "padding-right": "2px",
+                    "width": "auto",
+                }
+            ),
+            html.Div(
+                body,
+                className="pt-2 mt-0",
+                style={
+                    "padding-left": "4px",
+                    "padding-right": "4px",
+                    "padding-bottom": "4px",
+                    "margin": "2px",
+                    "-moz-border-radius": "8px",
+                    "border-radius": "8px",
+                    "border-style": "inset",
+                    "background-color": "LightGrey",
+                    "border-color": border_color,
+                },
+            ),
         ],
-        class_name="m-0 p-0",
+        className="p-0 mt-2 position-relative",
         style={
             "display": the_display,
-             "width": width,
-             "border-color": border_color,
+            "width": width,
         },
     )
 
-def Options(options,labels=None):
+def Options(options, labels=None):
     """ Creates options for definition of different Dash components.
 
     Creates a dictionary of 'labels' and 'values'
@@ -279,8 +325,9 @@ def Select(id, options, labels=None, init=0):
     return dbc.Select(
         id=id,
         value=options[init],
-        class_name="d-inline-block w-auto",
+        class_name="d-inline-block w-auto py-0",
         options=opts,
+        style={"font-size": "10pt"},
     )
 
 def PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label):
@@ -288,36 +335,36 @@ def PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label):
     return dbc.Row(
         [
             dbc.Col(
-                dbc.FormFloating([
+                [
                     dbc.Input(
                         id="lat_input",
                         min=lat_min,
                         max=lat_max,
                         type="number",
-                        style={"width": "10em"},
-                        class_name="m-0 p-0",
+                        style={"font-size": "10pt", "width": "8em"},
+                        class_name="ps-1 pe-0 py-0",
                         placeholder=lat_min,
                     ),
-                    dbc.Label("Latitude", class_name="m-0 p-0"),
                     dbc.Tooltip(f"{lat_label}", target="lat_input", className="tooltiptext")
-                ]),
+                ],
             ),
             dbc.Col(
-                dbc.FormFloating([
+                [
                     dbc.Input(
                         id="lng_input",
                         min=lon_min,
                         max=lon_max,
                         type="number",
-                        style={"width": "10em"},
-                        class_name="m-0 p-0",
+                        style={"font-size": "10pt", "width": "8em"},
+                        class_name="ps-1 pe-0 py-0",
                         placeholder=lon_min,
                     ),
-                    dbc.Label("Longitude", class_name="m-0 p-0"),
                     dbc.Tooltip(f"{lon_label}", target="lng_input", className="tooltiptext")
-                ]),
+                ],
             ),
-            dbc.Col(dbc.Button(id="submit_lat_lng", children="GO", class_name="m-1 p-1"), align="center"),
+            dbc.Col(dbc.Button(
+                id="submit_lat_lng", children="OK", class_name="p-0", style={"font-size": "10pt"}
+            )),
         ],
         class_name="g-0",
         justify="start",

@@ -3,7 +3,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from controls import Block, Sentence, DateNoYear, Number, Text
+from controls import Block, Sentence, DateNoYear, Number, Text, Select, PickPoint
 import calc
 import numpy as np
 from pathlib import Path
@@ -270,56 +270,16 @@ def controls_layout(
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block("Pick a point",
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    dbc.FormFloating([
-                                        dbc.Input(
-                                            id="lat_input",
-                                            min=lat_min,
-                                            max=lat_max,
-                                            type="number",
-                                            style={"height": "auto", "padding-bottom": "0px"},
-                                        ),
-                                        dbc.Label("Latitude", style={"font-size": "80%"}),
-                                        dbc.Tooltip(
-                                            f"{lat_label}",
-                                            target="lat_input",
-                                            className="tooltiptext",
-                                        )
-                                    ]),
-                                ),
-                                dbc.Col(
-                                    dbc.FormFloating([
-                                        dbc.Input(
-                                            id = "lng_input",
-                                            min=lon_min,
-                                            max=lon_max,
-                                            type="number",
-                                            style={"height": "auto", "padding-bottom": "0px"},
-                                        ),
-                                        dbc.Label("Longitude", style={"font-size": "80%"}),
-                                        dbc.Tooltip(
-                                            f"{lon_label}",
-                                            target="lng_input",
-                                            className="tooltiptext",
-                                        )
-                                    ]),
-                                ),
-                                dbc.Button(id="submit_lat_lng", children='Submit', color="secondary"),
-                            ],
-                        ),
+                    Block(
+                        "Pick a point",
+                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
+                        width="w-auto",
                     ),
                     Block("Water Balance Outputs to display",
-                        dbc.Select(
-                            id="map_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
-                            options=[
-                                {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["map_text"].items()
-                            ],
-                            style={"padding-top": "0px", "padding-bottom": "0px"},
+                        Select(
+                            "map_choice",
+                            [key for key, val in CONFIG["map_text"].items()],
+                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
                         ),
                     ),
                     Block(
@@ -332,31 +292,31 @@ def controls_layout(
                             "crop cultivars: initiated at",
                         ),
                         Sentence(
-                            Number("kc_init", CONFIG["kc_v"][0], min=0, max=2, html_size=4),
+                            Number("kc_init", CONFIG["kc_v"][0], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc_init_length", CONFIG["kc_l"][0], min=0, max=99, html_size=2),
+                            Number("kc_init_length", CONFIG["kc_l"][0], min=0, max=99, width="4em"),
                             "days of initialization to",
                         ),
                         Sentence(
-                            Number("kc_veg", CONFIG["kc_v"][1], min=0, max=2, html_size=4),
+                            Number("kc_veg", CONFIG["kc_v"][1], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc_veg_length", CONFIG["kc_l"][1], min=0, max=99, html_size=2),
+                            Number("kc_veg_length", CONFIG["kc_l"][1], min=0, max=99, width="4em"),
                             "days of growth to",
                         ),
                         Sentence(
-                            Number("kc_mid", CONFIG["kc_v"][2], min=0, max=2, html_size=4),
+                            Number("kc_mid", CONFIG["kc_v"][2], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc_mid_length", CONFIG["kc_l"][2], min=0, max=99, html_size=2),
+                            Number("kc_mid_length", CONFIG["kc_l"][2], min=0, max=99, width="4em"),
                             "days of mid-season to",
                         ),
                         Sentence(
-                            Number("kc_late", CONFIG["kc_v"][3], min=0, max=2, html_size=4),
+                            Number("kc_late", CONFIG["kc_v"][3], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc_late_length", CONFIG["kc_l"][3], min=0, max=99, html_size=2),
+                            Number("kc_late_length", CONFIG["kc_l"][3], min=0, max=99, width="4em"),
                             "days of late-season to",
                         ),
                         Sentence(
-                            Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
+                            Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, width="5em"),
                         ),
                         dbc.Button(
                             id="submit_kc",
@@ -377,7 +337,7 @@ def controls_layout(
                                 other_year_default,
                                 min=other_year_min,
                                 max=other_year_max,
-                                html_size=5
+                                width="120px"
                             ),
                         ),
                         Sentence(
@@ -386,31 +346,31 @@ def controls_layout(
                             "crop cultivars: initiated at",
                         ),
                         Sentence(
-                            Number("kc2_init", CONFIG["kc_v"][0], min=0, max=2, html_size=4),
+                            Number("kc2_init", CONFIG["kc_v"][0], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc2_init_length", CONFIG["kc_l"][0], min=0, max=99, html_size=2),
+                            Number("kc2_init_length", CONFIG["kc_l"][0], min=0, max=99, width="4em"),
                             "days of initialization to",
                         ),
                         Sentence(
-                            Number("kc2_veg", CONFIG["kc_v"][1], min=0, max=2, html_size=4),
+                            Number("kc2_veg", CONFIG["kc_v"][1], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc2_veg_length", CONFIG["kc_l"][1], min=0, max=99, html_size=2),
+                            Number("kc2_veg_length", CONFIG["kc_l"][1], min=0, max=99, width="4em"),
                             "days of growth to",
                         ),
                         Sentence(
-                            Number("kc2_mid", CONFIG["kc_v"][2], min=0, max=2, html_size=4),
+                            Number("kc2_mid", CONFIG["kc_v"][2], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc2_mid_length", CONFIG["kc_l"][2], min=0, max=99, html_size=2),
+                            Number("kc2_mid_length", CONFIG["kc_l"][2], min=0, max=99, width="4em"),
                             "days of mid-season to",
                         ),
                         Sentence(
-                            Number("kc2_late", CONFIG["kc_v"][3], min=0, max=2, html_size=4),
+                            Number("kc2_late", CONFIG["kc_v"][3], min=0, max=2, width="5em"),
                             "through",
-                            Number("kc2_late_length", CONFIG["kc_l"][3], min=0, max=99, html_size=2),
+                            Number("kc2_late_length", CONFIG["kc_l"][3], min=0, max=99, width="4em"),
                             "days of late-season to",
                         ),
                         Sentence(
-                            Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
+                            Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, width="5em"),
                         ),
                         dbc.Button(
                             id="submit_kc2",

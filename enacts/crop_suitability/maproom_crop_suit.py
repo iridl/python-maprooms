@@ -234,7 +234,7 @@ def write_hover_adm_label(adm_loc):
     Output("loc_marker", "position"),
     Output("lat_input", "value"),
     Output("lng_input", "value"),
-    Input("submit_coords","n_clicks"),
+    Input("submit_lat_lng","n_clicks"),
     Input("map", "click_lat_lng"),
     State("lat_input", "value"),
     State("lng_input", "value")
