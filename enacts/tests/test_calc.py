@@ -351,7 +351,7 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
         sminit=0,
         time_dim="T"
     ).to_array(name="soil moisture").squeeze("variable", drop=True)
-    cessds = calc.seasonal_cess_date(
+    cessds = calc.seasonal_cess_date_from_sm(
         soil_moisture=wb,
         search_start_day=1,
         search_start_month=9,
@@ -373,6 +373,24 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
         ),
         equal_nan=True,  
     )
+
+def test_seasonal_cess_date_from_rain_keeps_returning_same_outputs():
+
+    precip = data_test_calc.multi_year_data_sample()
+    cessds = calc.seasonal_cess_date_from_rain(
+        daily_rain=precip,
+        search_start_day=1,
+        search_start_month=9,
+        search_days=90,
+        dry_thresh=5,
+        dry_spell_length_thresh=3,
+        et=5,
+        taw=60,
+        sminit=33.57026932, # from previous test sm output on 8/31/2000
+    )
+    cess = (cessds.cess_delta + cessds["T"]).squeeze()
+
+    assert cess[0] == pd.to_datetime("2000-09-21T00:00:00.000000000")
 
 def test_seasonal_onset_date():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
@@ -459,7 +477,7 @@ def test_seasonal_cess_date():
         sminit=0,
         time_dim="T"
     ).to_array(name="soil moisture")
-    cessds = calc.seasonal_cess_date(
+    cessds = calc.seasonal_cess_date_from_sm(
         soil_moisture=wb,
         search_start_day=1,
         search_start_month=9,
@@ -482,6 +500,57 @@ def test_seasonal_cess_date():
             )
         )
     ).all()
+
+
+def test_seasonal_cess_date_from_rain():
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.where(
+        (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
+        | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
+        | (synthetic_precip["T"] == pd.to_datetime("2000-03-31"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-04-30"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-05-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-05-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-03"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-16"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-17"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-18"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-03")),
+        7,
+        synthetic_precip,
+    ).rename("synthetic_precip")    
+    cessds = calc.seasonal_cess_date_from_rain(
+        daily_rain=synthetic_precip,
+        search_start_day=1,
+        search_start_month=9,
+        search_days=90,
+        dry_thresh=5,
+        dry_spell_length_thresh=3,
+        et=5,
+        taw=60,
+        sminit=0,
+    )
+    cess = (cessds.cess_delta + cessds["T"]).squeeze()
+    assert (
+        cess
+        == pd.to_datetime(
+            xr.DataArray(
+                [
+                    "2000-09-01T00:00:00.000000000",
+                    "2001-09-01T00:00:00.000000000",
+                    "2002-09-01T00:00:00.000000000",
+                    "2003-09-01T00:00:00.000000000",
+                    "2004-09-01T00:00:00.000000000",
+                ],dims=["T"],coords={"T": cess["T"]},
+            )
+        )
+    ).all()
+
 
 
 def precip_sample():
@@ -546,7 +615,7 @@ def test_cess_date():
          [0, 0, 2, 0, 0]],
         dims=["X", "T"], coords={"T": t}
     )
-    cess_delta = calc.cess_date(daily_sm, 1, 3)
+    cess_delta = calc.cess_date_from_sm(daily_sm, 1, 3)
     expected = xr.DataArray(
         [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
     ).astype("timedelta64[D]")
@@ -555,9 +624,39 @@ def test_cess_date():
     assert np.array_equal(cess_delta.squeeze("T"), expected, equal_nan=True)
 
 
+def test_cess_date_rain():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-05", freq="1D")
+    daily_rain = xr.DataArray(
+        [[7, 5, 5, 5, 5],
+         [5, 5, 5, 5, 7],
+         [7, 5, 5, 5, 3],
+         [7, 5 ,5 ,3 ,5],
+         [7, 5, 3, 5 ,5],
+         [7, 3, 5, 5, 5],
+         [5, 5, 5, 5, 5],
+         [5, 5, 7, 3, 5]],
+        dims=["X", "T"], coords={"T": t}
+    )
+    cess_delta = calc.cess_date_from_rain(
+        daily_rain,
+        dry_thresh=1,
+        dry_spell_length_thresh=3,
+        et=5,
+        taw=10,
+        sminit=0,
+    )
+    expected = xr.DataArray(
+        [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
+    ).astype("timedelta64[D]")
+
+    assert cess_delta["T"] == daily_rain["T"][0]
+    assert np.array_equal(cess_delta.squeeze("T"), expected, equal_nan=True)
+
+
 def call_cess_date(data):
-    cessations = calc.cess_date(
-        daily_data=data,
+    cessations = calc.cess_date_from_sm(
+        daily_sm=data,
         dry_thresh=5,
         dry_spell_length_thresh=3,
     )
