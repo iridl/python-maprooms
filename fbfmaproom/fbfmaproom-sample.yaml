@@ -1292,6 +1292,17 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                bad-years-v3:
+                    label: Drought humanitarian ranking v3
+                    description: Drought ranking of expert committee humanitarian data review (v3)
+                    path: ethiopia/southern-oromia/bad-years-v3-ond.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
@@ -1934,6 +1945,17 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                bad-years-v3:
+                    label: Drought humanitarian ranking v3
+                    description: Drought ranking of expert committee humanitarian data review (v3)
+                    path: djibouti/bad-years-v3-jas.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
@@ -2051,6 +2073,17 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                bad-years-v3:
+                    label: Drought humanitarian ranking v3
+                    description: Drought ranking of expert committee humanitarian data review (v3)
+                    path: djibouti/bad-years-v3-mam.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
@@ -2181,6 +2214,17 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                bad-years-v3:
+                    label: Drought humanitarian ranking v3
+                    description: Drought ranking of expert committee humanitarian data review (v3)
+                    path: djibouti/bad-years-v3-ond.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
