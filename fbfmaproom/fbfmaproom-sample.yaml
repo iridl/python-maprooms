@@ -1292,10 +1292,10 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
-                bad-years-v3:
-                    label: Drought humanitarian ranking v3
-                    description: Drought ranking of expert committee humanitarian data review (v3)
-                    path: ethiopia/southern-oromia/bad-years-v3-ond.zarr
+                bad-years-v2:
+                    label: Drought humanitarian ranking v2
+                    description: Drought ranking of expert committee humanitarian data review (v2)
+                    path: ethiopia/southern-oromia-bad-years-v3-ond.zarr
                     var_names:
                         value: rank
                         time: T
@@ -1945,9 +1945,9 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
-                bad-years-v3:
-                    label: Drought humanitarian ranking v3
-                    description: Drought ranking of expert committee humanitarian data review (v3)
+                bad-years-v2:
+                    label: Drought humanitarian ranking v2
+                    description: Drought ranking of expert committee humanitarian data review (v2)
                     path: djibouti/bad-years-v3-jas.zarr
                     var_names:
                         value: rank
@@ -2073,9 +2073,9 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
-                bad-years-v3:
-                    label: Drought humanitarian ranking v3
-                    description: Drought ranking of expert committee humanitarian data review (v3)
+                bad-years-v2:
+                    label: Drought humanitarian ranking v2
+                    description: Drought ranking of expert committee humanitarian data review (v2)
                     path: djibouti/bad-years-v3-mam.zarr
                     var_names:
                         value: rank
@@ -2214,9 +2214,9 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
-                bad-years-v3:
-                    label: Drought humanitarian ranking v3
-                    description: Drought ranking of expert committee humanitarian data review (v3)
+                bad-years-v2:
+                    label: Drought humanitarian ranking v2
+                    description: Drought ranking of expert committee humanitarian data review (v2)
                     path: djibouti/bad-years-v3-ond.zarr
                     var_names:
                         value: rank
