@@ -1945,16 +1945,38 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
-                bad-years-v2:
+                bad-years-rank-v2:
                     label: Reported bad years v2
                     description: Reported bad years(v2)
-                    path: djibouti/bad-years-v3-jas.zarr
+                    path: djibouti/bad-years-v2-jas.zarr
                     var_names:
                         value: rank
                         time: T
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                    units: rank
+                bad-years-hum_bady-v2:
+                    label: Bad Years for Humanitarian Sector 2024
+                    description: Bad Years for Humanitarian Sector (2024)
+                    path: djibouti/bad-years-v2-jas.zarr
+                    var_names:
+                        value: hum_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+                bad-years-nma_bady-v2:
+                    label: NMA Bad Year Classification 2024
+                    description: NMA Bad Year Classification (2024)
+                    path: djibouti/bad-years-v2-jas.zarr
+                    var_names:
+                        value: nma_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: nma_bady
                     units: rank
             forecasts:
                 pnep:
@@ -2073,16 +2095,38 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
-                bad-years-v2:
+                bad-years-rank-v2:
                     label: Reported bad years v2
                     description: Reported bad years (v2)
-                    path: djibouti/bad-years-v3-mam.zarr
+                    path: djibouti/bad-years-v2-mam.zarr
                     var_names:
                         value: rank
                         time: T
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                    units: rank
+                bad-years-hum_bady-v2:
+                    label: Bad Years for Humanitarian Sector 2024
+                    description: Bad Years for Humanitarian Sector (2024)
+                    path: djibouti/bad-years-v2-mam.zarr
+                    var_names:
+                        value: hum_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+                bad-years-nma_bady-v2:
+                    label: NMA Bad Year Classification 2024
+                    description: NMA Bad Year Classification (2024)
+                    path: djibouti/bad-years-v2-mam.zarr
+                    var_names:
+                        value: nma_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: nma_bady
                     units: rank
                 spi:
                     label: SPI
@@ -2214,16 +2258,38 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
-                bad-years-v2:
+                bad-years-rank-v2:
                     label: Reported bad years v2
                     description: Reported bad years (v2)
-                    path: djibouti/bad-years-v3-ond.zarr
+                    path: djibouti/bad-years-v2-ond.zarr
                     var_names:
                         value: rank
                         time: T
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                    units: rank
+                bad-years-hum_bady-v2:
+                    label: Bad Years for Humanitarian Sector 2024
+                    description: Bad Years for Humanitarian Sector (2024)
+                    path: djibouti/bad-years-v2-ond.zarr
+                    var_names:
+                        value: hum_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+                bad-years-nma_bady-v2:
+                    label: NMA Bad Year Classification 2024
+                    description: NMA Bad Year Classification (2024)
+                    path: djibouti/bad-years-v2-ond.zarr
+                    var_names:
+                        value: nma_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: nma_bady
                     units: rank
                 spi:
                     label: SPI

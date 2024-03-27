@@ -200,6 +200,17 @@ def format_enso(x):
         return "El Niño"
     assert False, f"Unknown enso state {x}"
 
+def format_nma_bady(x):
+    if np.isnan(x):
+        return ""
+    if np.isclose(x, 3):
+        return "Moderate Impact"
+    if np.isclose(x, 2):
+        return "Normal"
+    if np.isclose(x, 1):
+        return "High Impact"
+    assert False, f"Unknown nma_bady state {x}"
+
 
 format_funcs = {
     'number0': number_formatter(0),
@@ -210,6 +221,7 @@ format_funcs = {
     'timedelta_days': format_timedelta_days,
     'bad': format_bad,
     'enso': format_enso,
+    'nma_bady':format_nma_bady,
 }
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
