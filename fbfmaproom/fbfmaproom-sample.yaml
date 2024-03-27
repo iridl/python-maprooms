@@ -1946,8 +1946,8 @@ countries:
                     lower_is_worse: yes
                     format: number0
                 bad-years-v2:
-                    label: Drought humanitarian ranking v2
-                    description: Drought ranking of expert committee humanitarian data review (v2)
+                    label: Reported bad years v2
+                    description: Reported bad years(v2)
                     path: djibouti/bad-years-v3-jas.zarr
                     var_names:
                         value: rank
@@ -2074,8 +2074,8 @@ countries:
                     lower_is_worse: yes
                     format: number0
                 bad-years-v2:
-                    label: Drought humanitarian ranking v2
-                    description: Drought ranking of expert committee humanitarian data review (v2)
+                    label: Reported bad years v2
+                    description: Reported bad years (v2)
                     path: djibouti/bad-years-v3-mam.zarr
                     var_names:
                         value: rank
@@ -2215,8 +2215,8 @@ countries:
                     lower_is_worse: yes
                     format: number0
                 bad-years-v2:
-                    label: Drought humanitarian ranking v2
-                    description: Drought ranking of expert committee humanitarian data review (v2)
+                    label: Reported bad years v2
+                    description: Reported bad years (v2)
                     path: djibouti/bad-years-v3-ond.zarr
                     var_names:
                         value: rank
