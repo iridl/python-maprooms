@@ -1175,7 +1175,7 @@ countries:
                 predictors:
                     - pnep
                     - rain
-                predictand: bad-years
+                predictand: bad-years-v2
             observations:
                 rain:
                     label: Rain
@@ -1295,7 +1295,7 @@ countries:
                 bad-years-v2:
                     label: Drought humanitarian ranking v2
                     description: Drought ranking of expert committee humanitarian data review (v2)
-                    path: ethiopia/southern-oromia-bad-years-v3-ond.zarr
+                    path: ethiopia/southern-oromia-bad-years-v2-ond.zarr
                     var_names:
                         value: rank
                         time: T
