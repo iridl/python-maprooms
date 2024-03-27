@@ -1,0 +1,9 @@
+one  column for the years (year); a column for each season (in lowercase); the values in the season represent a rank.
+year,ond
+2000,6
+2003,5
+2008,3
+2011,2
+2015,4
+2021,1
+2022,7
