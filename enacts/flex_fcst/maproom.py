@@ -161,6 +161,7 @@ def register(FLASK, config):
             Output("lng_input", "max"),
             Output("lng_input_tooltip", "children"),
             Output("map", "center"),
+            Output("layers_control", "children"),
             State("lead_time_label", "style"),
             State("lead_time_control", "style"),
             Input("location", "pathname"),
@@ -218,13 +219,49 @@ def register(FLASK, config):
         lead_time_label_style = dict(lead_time_label_style, display=target_display)
         lead_time_control_style = dict(lead_time_control_style, display=target_display)
 
+        layers = [
+            dlf.BaseLayer(
+                dlf.TileLayer(
+                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+                ),
+                name="Street",
+                checked=False,
+            ),
+            dlf.BaseLayer(
+                dlf.TileLayer(
+                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                ),
+                name="Topo",
+                checked=True,
+            ),
+        ] + [
+            make_adm_overlay(
+                adm["name"],
+                adm["sql"],
+                adm["color"],
+                i+1,
+                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
+                is_checked=adm["is_checked"]
+            )
+            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
+        ] + [
+            dlf.Overlay(
+                dlf.TileLayer(
+                    opacity=1,
+                    id="tile_layer",
+                ),
+                name="Forecast",
+                checked=True,
+            ),
+        ]
         return (
             phys_units,
             start_dates, start_dates[-1],
             lead_time_label_style, lead_time_control_style,
             lat_min, lat_max, lat_label,
             lon_min, lon_max, lon_label,
-            center_of_the_map
+            center_of_the_map,
+            layers,
         )
 
     @APP.callback(
@@ -661,7 +698,7 @@ def register(FLASK, config):
 
 
     @APP.callback(
-        Output("layers_control", "children"),
+        Output("tile_layer", "url"),
         Output("forecast_warning", "is_open"),
         Input("proba", "value"),
         Input("variable", "value"),
@@ -670,7 +707,7 @@ def register(FLASK, config):
         Input("start_date","value"),
         Input("lead_time","value")
     )
-    def make_map(proba, variable, percentile, threshold, start_date, lead_time):
+    def set_tile_url(proba, variable, percentile, threshold, start_date, lead_time):
 
         try:
             if variable != "Percentile":
@@ -686,41 +723,7 @@ def register(FLASK, config):
         except:
             url_str= ""
             send_alarm = True
-        return [
-            dlf.BaseLayer(
-                dlf.TileLayer(
-                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-                ),
-                name="Street",
-                checked=False,
-            ),
-            dlf.BaseLayer(
-                dlf.TileLayer(
-                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                ),
-                name="Topo",
-                checked=True,
-            ),
-        ] + [
-            make_adm_overlay(
-                adm["name"],
-                adm["sql"],
-                adm["color"],
-                i+1,
-                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
-                is_checked=adm["is_checked"]
-            )
-            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
-        ] + [
-            dlf.Overlay(
-                dlf.TileLayer(
-                    url=url_str,
-                    opacity=1,
-                ),
-                name="Forecast",
-                checked=True,
-            ),
-        ], send_alarm
+        return url_str, send_alarm
 
 
     # Endpoints

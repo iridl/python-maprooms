@@ -359,10 +359,7 @@ def map_layout():
             dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
-                    dlf.LayerGroup(
-                        [dlf.Marker(id="loc_marker", position=(0, 0))],
-                        id="layers_group"
-                    ),
+                    dlf.Marker(id="loc_marker", position=(0, 0)),
                     dlf.ScaleControl(imperial=False, position="bottomleft"),
                     dlf.Colorbar(
                         id="fcst_colorbar",
