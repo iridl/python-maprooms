@@ -1975,6 +1975,88 @@ countries:
                 issue_months: [8]
                 start_year: 1996
 
+    guatemala-jja:
+        logo: Guatemala_IRI_120x48.png
+        resolution: [.1, .1]
+        center: [-89, 16]
+        zoom: 8
+        rotation: 0
+        marker:  [-90, 16]
+        origin: [0, 0]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Guatemala'
+              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
+                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
+
+            - name: Regional
+              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
+                  where adm0_name = 'Guatemala'
+              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
+                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
+
+            - name: District
+              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
+                  where adm0_name = 'Guatemala'
+              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
+                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep
+                    - rain
+                predictand: bad-years
+            observations:
+                rain:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    path: guatemala/rain-jja.zarr
+                    var_names:
+                        value: prcp_est
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                enso_state: *enso_3mo
+                bad-years:
+                    label: Reported bad years
+                    path: guatemala/bad-years.zarr
+                    var_names:
+                        value: bad
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
+            forecasts:
+                pnep:
+                    label: Forecast prob non-exc
+                    description: NextGen forecast probability of non-exceedance of selected percentile
+                    path: guatemala/pnep-jja.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: P
+                    colormap: pne_25
+                    is_poe: no
+            vuln:
+                colormap: vulnerability
+                range: [0.0, 5.0]
+        seasons:
+            season1:
+                label: JJA
+                target_month: 6.5
+                length: 3.0
+                issue_months: [4]
+                start_year: 1996
+
     djibouti:
         logo: Djibouti_IRI.svg
         resolution: [.25, .25]
