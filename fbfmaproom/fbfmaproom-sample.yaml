@@ -2025,7 +2025,7 @@ countries:
                 enso_state: *enso_3mo
                 bad-years:
                     label: Reported bad years
-                    path: guatemala/bad-years.zarr
+                    path: guatemala/bad-years-v3-jja.zarr
                     var_names:
                         value: bad
                         time: T
