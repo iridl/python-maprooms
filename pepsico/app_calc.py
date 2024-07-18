@@ -29,13 +29,23 @@ def read_data(scenario, model, variable):
 
 def seasonal_data(daily_data, season_center, start_year=None, end_year=None):
 
-    if ((year_end not None) and (season in [12, 1])):
-        year_end = year_end +1
+    if ((end_year != None) and (season_center in [12, 1])):
+        end_year = end_year + 1
+    season_months = [
+        season_center - 1 if season_center > 1 else 12,
+        season_center,
+        season_center + 1 if season_center < 12 else 1,
+    ]
     return (daily_data
         .sel(T=slice(f"{start_year}", f"{end_year}"))
+        #.where(lambda x: (
+        #    (x["T"].dt.month == season_months[0])
+        #    + (x["T"].dt.month == season_months[1])
+        #    + (x["T"].dt.month == season_months[2])
+        #), drop=True)
         .resample(T="1M").mean()
-        .rolling(T=3, center=True).mean()
-        .where(lambda x: x["T"].month == season_center)
+        .rolling(T=3, center=True).mean().dropna("T")
+        .where(lambda x: x["T"].dt.month == season_center, drop=True)
     )
 
 
@@ -49,4 +59,7 @@ def unit_conversion(variable):
         variable.attrs['units'] = 'Celsius'
     
     return variable
-    
+
+data = read_data("ssp126", "GFDL-ESM4", "pr")
+seas = seasonal_data(data, 2, 2061, 2090)
+print(seas)
