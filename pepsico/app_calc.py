@@ -30,8 +30,8 @@ def read_data(scenario, model, variable):
 def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_year=None):
 
     #NDF and DJF are considered part of the year of the 1st month
-    if ((end_year != None) and (start_month in [11, 12])):
-        end_year = end_year + 1
+    if ((end_year != None) and (start_month > end_month)):
+        end_year = str(int(end_year) + 1)
     #Reduce data size
     monthly_data = monthly_data.sel(T=slice(start_year, end_year))
     #Find edges of seasons
