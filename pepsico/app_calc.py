@@ -23,29 +23,54 @@ def read_data(scenario, model, variable):
 
     return xr.open_zarr(
         f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global'
-        f'/daily/{scenario}/{model}/zarr/{variable}'
+        f'/monthly/{scenario}/{model}/zarr/{variable}'
     )[variable]
 
 
-def seasonal_data(daily_data, season_center, start_year=None, end_year=None):
+def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_year=None):
 
-    if ((end_year != None) and (season_center in [12, 1])):
+    #NDF and DJF are considered part of the year of the 1st month
+    if ((end_year != None) and (start_month in [11, 12])):
         end_year = end_year + 1
-    season_months = [
-        season_center - 1 if season_center > 1 else 12,
-        season_center,
-        season_center + 1 if season_center < 12 else 1,
-    ]
-    return (daily_data
-        .sel(T=slice(f"{start_year}", f"{end_year}"))
-        #.where(lambda x: (
-        #    (x["T"].dt.month == season_months[0])
-        #    + (x["T"].dt.month == season_months[1])
-        #    + (x["T"].dt.month == season_months[2])
-        #), drop=True)
-        .resample(T="1M").mean()
-        .rolling(T=3, center=True).mean().dropna("T")
-        .where(lambda x: x["T"].dt.month == season_center, drop=True)
+    #Reduce data size
+    monthly_data = monthly_data.sel(T=slice(start_year, end_year))
+    #Find edges of seasons
+    start_edges = monthly_data["T"].where(
+        lambda x: x["T"].dt.month == start_month, drop=True,
+    )
+    end_edges = monthly_data["T"].where(
+        lambda x: x["T"].dt.month == end_month, drop=True,
+    )
+    #Select data and edges to avoid partial seasons at the edges of the edges
+    monthly_data = monthly_data.sel(T=slice(start_edges[0], end_edges[-1]))
+    start_edges = start_edges.sel(T=slice(start_edges[0], end_edges[-1]))
+    end_edges = (end_edges
+        .sel(T=slice(start_edges[0], end_edges[-1]))
+        .assign_coords(T=start_edges["T"])
+    )
+    #Reduce data size to months in seasons of interest
+    months_in_season = (
+        (monthly_data["T"] >= start_edges.rename({"T": "group"}))
+        & (monthly_data["T"] <= end_edges.rename({"T": "group"}))
+    ).sum(dim="group")
+    monthly_data = monthly_data.where(months_in_season == 1, drop=True)
+    #Create groups of months belonging to same season-year
+    seasons_groups = (monthly_data["T"].dt.month == start_month).cumsum() - 1
+    #and identified by seasons_starts
+    seasons_starts = (
+        start_edges.rename({"T": "toto"})[seasons_groups]
+        .drop_vars("toto")
+        .rename("seasons_starts")
+    )
+
+    return (monthly_data
+        #Seasonal averages
+        .groupby(seasons_starts).mean()
+        #Use T as standard name for time dim
+        .rename({"seasons_starts": "T"})
+        #add seasons_starts/-ends as coords
+        .assign_coords(seasons_ends=end_edges)
+        .assign_coords(seasons_starts=seasons_starts)
     )
 
 
@@ -59,7 +84,3 @@ def unit_conversion(variable):
         variable.attrs['units'] = 'Celsius'
     
     return variable
-
-data = read_data("ssp126", "GFDL-ESM4", "pr")
-seas = seasonal_data(data, 2, 2061, 2090)
-print(seas)
