@@ -214,11 +214,16 @@ def convert(
     if Path(output_path).is_dir() :
         current_zarr = calc.read_zarr_data(output_path)
         last_T_zarr = current_zarr["T"][-1]
-        T_nc = filename2datetime64(netcdf, time_res=time_res).where(lambda x: x > last_T_zarr.values, drop=True)
-        if size(T_nc) == 0 :
+        T_nc = [
+            filename2datetime64(netcdf[i], time_res=time_res)
+            for i in range(len(netcdf))
+        ]
+        T_nc = np.where(T_nc > last_T_zarr.values, T_nc, np.datetime64('nat'))
+        T_nc = T_nc[~np.isnat(T_nc)]
+        if len(T_nc) == 0 :
             print("There are no new nc time steps")
         else :
-            netcdf = netcdf[-1 * size(T_nc):]
+            netcdf = netcdf[-1 * len(T_nc):]
             print(f'appending nc to zarr from {last_T_zarr.values} to {T_nc[-1]}')
             nc2xr(
                 netcdf,
