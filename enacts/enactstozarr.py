@@ -214,15 +214,17 @@ def convert(
     if Path(output_path).is_dir() :
         current_zarr = calc.read_zarr_data(output_path)
         last_T_zarr = current_zarr["T"][-1]
-        last_T_nc = filename2datetime64(netcdf[-1], time_res=time_res)
-        if last_T_nc < last_T_zarr.values :
-            print(f'nc set ({last_T_nc}) ends before zarrs ({last_T_zarr})')
-            print("Not changing existing zarr")
-        elif last_T_nc == last_T_zarr.values :
-            print(f'both sets end same date: {last_T_nc}')
-            print("Not changing existing zarr")
+        T_nc = [
+            filename2datetime64(netcdf[i], time_res=time_res)
+            for i in range(len(netcdf))
+        ]
+        T_nc = np.where(T_nc > last_T_zarr.values, T_nc, np.datetime64('nat'))
+        T_nc = T_nc[~np.isnat(T_nc)]
+        if len(T_nc) == 0 :
+            print("There are no new nc time steps")
         else :
-            print(f'appending nc to zarr from {last_T_zarr.values} to {last_T_nc}')
+            netcdf = netcdf[-1 * len(T_nc):]
+            print(f'appending nc to zarr from {last_T_zarr.values} to {T_nc[-1]}')
             nc2xr(
                 netcdf,
                 var_name,
