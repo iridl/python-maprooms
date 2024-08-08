@@ -350,6 +350,14 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/home/.xchourio/.ACToday/.CPT/.NextGen/.Seasonal/.CHIRPS/.GTM-FbF/.NextGen/.FbF/.pne/S/%281%20Sep%29VALUES/P/grid://name//P/def//units//percent/def/5/5/95/:grid/replaceGRID/L/removeGRID/'
     ),
     (
+        'guatemala/rain-may-jja',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(May)/seasonalAverage//name//prcp_est/def/T/2/shiftGRID/',
+    ),
+    (
+        'guatemala/rain-jj-jja',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Jun-Jul)/seasonalAverage//name//prcp_est/def/T/.5/shiftGRID/',
+    ),
+    (
         'guatemala/rain-jja',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Jun-Aug)/seasonalAverage//name//prcp_est/def/',
     ),

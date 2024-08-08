@@ -2022,6 +2022,28 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
+                rain-jj:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    path: guatemala/rain-jj-jja.zarr
+                    var_names:
+                        value: prcp_est
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                rain-may:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    path: guatemala/rain-may-jja.zarr
+                    var_names:
+                        value: prcp_est
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
                 enso_state: *enso_3mo
                 bad-years:
                     label: Reported bad years
