@@ -179,6 +179,9 @@ def zarrify(path, datadir):
 
 if __name__ == '__main__':
     import argparse
+    import os
+
+    os.umask(0o002)
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset_name')
     parser.add_argument('--datadir', default=DEFAULT_ROOT)
