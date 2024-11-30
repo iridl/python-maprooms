@@ -6,16 +6,6 @@ import shutil
 
 import pingrid
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--cookiefile', type=os.path.expanduser)
-parser.add_argument(
-    '--datadir',
-    default='/data/aaron/fbf-candidate',
-    type=os.path.expanduser,
-)
-parser.add_argument('datasets', nargs='*')
-opts = parser.parse_args()
-
 base = "http://iridl.ldeo.columbia.edu"
 
 url_datasets = [
@@ -535,42 +525,55 @@ url_datasets = [
 ]
 
 
-selected_url_datasets = opts.datasets or [ds[0] for ds in url_datasets]
+if __name__ == '__main__':
+    os.umask(0o002)
 
-for dataset in url_datasets:
-    name = dataset[0]
-    pattern = dataset[1]
-    if len(dataset) == 3:
-        slices = dataset[2]
-    else:
-        slices = ({},)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--cookiefile', type=os.path.expanduser)
+    parser.add_argument(
+        '--datadir',
+        default='/data/aaron/fbf-candidate',
+        type=os.path.expanduser,
+    )
+    parser.add_argument('datasets', nargs='*')
+    opts = parser.parse_args()
 
-    if name not in selected_url_datasets:
-        continue
-    print(name)
-    for i, args in enumerate(slices):
-        ncfilepath = f'{opts.datadir}/{name}-{i}.nc'
-        leafdir = os.path.dirname(ncfilepath)
+    selected_url_datasets = opts.datasets or [ds[0] for ds in url_datasets]
 
-        if not os.path.exists(leafdir):
-            os.makedirs(leafdir)
-
-        if opts.cookiefile is None:
-            cookieopt = ""
+    for dataset in url_datasets:
+        name = dataset[0]
+        pattern = dataset[1]
+        if len(dataset) == 3:
+            slices = dataset[2]
         else:
-            cookieopt = f"-b {opts.cookiefile}"
+            slices = ({},)
 
-        url = pattern.format(**args)
-        os.system(f"curl {cookieopt} -o {ncfilepath} '{url}data.nc'")
-        assert os.path.exists(ncfilepath)
-    zarrpath = "%s/%s.zarr" % (opts.datadir, name)
-    print("Converting to zarr")
-    ds = pingrid.open_mfdataset([f'{opts.datadir}/{name}-{i}.nc' for i in range(len(slices))])
-    # TODO do this in Ingrid
-    if 'Y' in ds and ds['Y'][0] > ds['Y'][1]:
-        ds = ds.reindex(Y=ds['Y'][::-1])
-    if 'P' in ds:
-        ds = ds.chunk({'P': 1})
-    if os.path.exists(zarrpath):
-        shutil.rmtree(zarrpath)
-    ds.to_zarr(zarrpath)
+        if name not in selected_url_datasets:
+            continue
+        print(name)
+        for i, args in enumerate(slices):
+            ncfilepath = f'{opts.datadir}/{name}-{i}.nc'
+            leafdir = os.path.dirname(ncfilepath)
+
+            if not os.path.exists(leafdir):
+                os.makedirs(leafdir)
+
+            if opts.cookiefile is None:
+                cookieopt = ""
+            else:
+                cookieopt = f"-b {opts.cookiefile}"
+
+            url = pattern.format(**args)
+            os.system(f"curl {cookieopt} -o {ncfilepath} '{url}data.nc'")
+            assert os.path.exists(ncfilepath)
+        zarrpath = "%s/%s.zarr" % (opts.datadir, name)
+        print("Converting to zarr")
+        ds = pingrid.open_mfdataset([f'{opts.datadir}/{name}-{i}.nc' for i in range(len(slices))])
+        # TODO do this in Ingrid
+        if 'Y' in ds and ds['Y'][0] > ds['Y'][1]:
+            ds = ds.reindex(Y=ds['Y'][::-1])
+        if 'P' in ds:
+            ds = ds.chunk({'P': 1})
+        if os.path.exists(zarrpath):
+            shutil.rmtree(zarrpath)
+        ds.to_zarr(zarrpath)
