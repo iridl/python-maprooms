@@ -23,7 +23,7 @@ def read_data(scenario, model, variable):
 
     return xr.open_zarr(
         f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global'
-        f'/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
+        f'/monthly/{scenario}/{model}/zarr/{variable}'
     )[variable]
 
 

@@ -14,6 +14,8 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import FLASK, GLOBAL_CONFIG
+import app_calc as ac
+
 
 def register(FLASK, config):
     PFX = f"{GLOBAL_CONFIG['url_path_prefix']}/{config['core_path']}"
@@ -101,7 +103,7 @@ def register(FLASK, config):
         variable = "tasmin"
         data = xr.open_zarr(
             f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
+            f'/global/monthly/{scenario}/{model}/zarr/{variable}'
         )[variable]
         center_of_the_map = [
             ((data["Y"][int(data["Y"].size/2)].values)),
@@ -146,7 +148,7 @@ def register(FLASK, config):
         variable = "tasmin"
         data = xr.open_zarr(
             f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
+            f'/global/monthly/{scenario}/{model}/zarr/{variable}'
         )[variable]
         if dash.ctx.triggered_id == None:
             lat = data["Y"][int(data["Y"].size/2)].values
@@ -188,13 +190,30 @@ def register(FLASK, config):
         scenario = "ssp126"
         model = "GFDL-ESM4"
         variable = "tasmin"
-        data = xr.open_zarr(
-            f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
-        )[variable].isel(T=-1)
-        map_min = data.min().values
-        map_max = data.max().values
-        return CMAPS["rainbow"].to_dash_leaflet(), map_min, map_max
+        start_month = 1
+        end_month = 3
+        start_year = "2030"
+        end_year = "2035"
+        start_year_ref = "1991"
+        end_year_ref = "2020"
+        data = ( #ac.unit_conversion(
+            ac.seasonal_data(
+                ac.read_data(scenario, model, variable),
+                start_month, end_month,
+                start_year=start_year, end_year=end_year,
+            ).mean(dim="T")
+            - ac.seasonal_data(
+                ac.read_data("historical", model, variable),
+                start_month, end_month,
+                start_year=start_year_ref, end_year=end_year_ref,
+            ).mean(dim="T")
+        ).rename({"X": "lon", "Y": "lat"})
+        map_amp = max(abs(data.min().values), abs(data.min().values))
+        map_min = -1*map_amp
+        map_max = map_amp
+        return CMAPS["correlation"].rescaled(
+            -1*map_amp, map_amp
+        ).to_dash_leaflet(), map_min, map_max
 
 
     @APP.callback(
@@ -254,12 +273,27 @@ def register(FLASK, config):
         scenario = "ssp126"
         model = "GFDL-ESM4"
         variable = "tasmin"
-        data = xr.open_zarr(
-            f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
-        )[variable].isel(T=-1).rename({"X": "lon", "Y": "lat"})
-        data.attrs["colormap"] = CMAPS["rainbow"]
-        data.attrs["scale_min"] = data.min().values
-        data.attrs["scale_max"] = data.max().values
+        start_month = 1
+        end_month = 3
+        start_year = "2030"
+        end_year = "2035"
+        start_year_ref = "1991"
+        end_year_ref = "2020"
+        data = ( #ac.unit_conversion(
+            ac.seasonal_data(
+                ac.read_data(scenario, model, variable),
+                start_month, end_month,
+                start_year=start_year, end_year=end_year,
+            ).mean(dim="T")
+            - ac.seasonal_data(
+                ac.read_data("historical", model, variable),
+                start_month, end_month,
+                start_year=start_year_ref, end_year=end_year_ref,
+            ).mean(dim="T")
+        ).rename({"X": "lon", "Y": "lat"})
+        data_amp = max(abs(data.min().values), abs(data.min().values))
+        data.attrs["colormap"] = CMAPS["correlation"].rescaled(-1*data_amp, data_amp)
+        data.attrs["scale_min"] = -1*data_amp
+        data.attrs["scale_max"] = data_amp
         resp = pingrid.tile(data, tx, ty, tz)
         return resp
