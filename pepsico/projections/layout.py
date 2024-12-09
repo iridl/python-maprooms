@@ -86,7 +86,7 @@ def navbar_layout():
                 dbc.Row(
                     [
                         dbc.Col(
-                            dbc.NavbarBrand("Forecast", className="ml-2")
+                            dbc.NavbarBrand("CCA", className="ml-2")
                         ),
                     ],
                     align="center", style={"padding-left":"5px"},
@@ -217,27 +217,25 @@ def navbar_layout():
 def controls_layout():
     return dbc.Container(
         [
-            html.H5(["Forecast"]),
+            html.H5(["Climate Change Analysis"]),
             html.P(
                 """
-                This Maproom displays the full forecast distribution 
-                in different flavors.
+                This Maproom displays seasonal projected change of key climate
+                variables with respect to historical records.
+                """
+            ),
+            dcc.Loading(html.P(id="map_description"), type="dot"),
+            html.P(
+                """
+                Use the controls in the top banner to choose other variables, models,
+                scenarios, seasons, projected years and reference to compare with.
                 """
             ),
             html.P(
                 """
-                The map shows the probability of exceeding or non-exceeding
-                an observed historical percentile or a threshold in the variable physical units
-                for a given forecast (issue date and target period).
-                Use the controls in the top banner to choose presentation of the forecast to map
-                and to navigate through other forecast issues and targets.
-                """
-            ),
-            html.P(
-                """
-                Click the map to show forecast and observed
-                probability of exceeding and distribution
-                at the clicked location.
+                Click the map (or enter coordinates) to show historical seasonal time
+                series for this variable of this model, followed by a plume of
+                possible projected scenarios.
                 """
             ),
             Block("Pick a point",
@@ -337,7 +335,7 @@ def results_layout():
                         ]
                     )
                 ],
-                label="Local Forecast and Observations Distributions",
+                label="Local History and Projections",
             )
         ],
         className="mt-4",

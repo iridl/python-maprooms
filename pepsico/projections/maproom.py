@@ -212,7 +212,28 @@ def register(FLASK, config):
         )
 
 
-     @APP.callback(
+    @APP.callback(
+        Output("map_title", "children"),
+        Input("scenario", "value"),
+        Input("model", "value"),
+        Input("variable", "value"),
+        Input("start_month", "value"),
+        Input("end_month", "value"),
+        Input("start_year", "value"),
+        Input("end_year", "value"),
+        Input("start_year_ref", "value"),
+        Input("end_year"_ref, "value"),
+    )
+    def write_map_description(map_choice):
+        return (
+            f'The Map displays the {start_month}-{end_month} seasonal anomalies of '
+            f'{variable} from {model} model under {scenario} scenario projected for '
+            f'{start_year}-{end_year} with respect to historical {start_year_ref}-'
+            f'{end_year}'
+        )
+
+
+    @APP.callback(
         Output("map_title", "children"),
         Input("scenario", "value"),
         Input("model", "value"),
