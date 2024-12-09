@@ -180,25 +180,26 @@ def Sentence(*elems):
 def Block(title, *body, is_on=True, width="auto", border_color="grey"):
     """Separates out components in individual Fieldsets
 
-    Auto-generates a formatted block with a card header and body.
+    Auto-generates a formatted block with a fieldset header and body.
 
     Parameters
     ----------
     title : str
-        Title of the card to be displayed.
+        Title of the fieldset to be displayed.
     body : str, dbc
        Any number of elements which can be of various types to be
-       formatted as a sentence within the card body.
+       formatted as a sentence within the fieldset body.
     is_on : boolean, optional
-       Card is not displayed if False, default is True
+       Fieldset is not displayed if False, default is True
     width : str, optional
-        html style attribute value to determine width of the card within its parent container.
-        Default `width` ="100%".
+        html style attribute value to determine width of the filedset within its
+        parent container. Default `width` ="100%".
 
     Returns
     -------
-    dbc.Card : component
-       A dbc Card which has a pre-formatted title and body where the body can be any number of elements.
+    html.Fieldset : component
+       An html Fieldset which has a pre-formatted title and body where the body can
+       be any number of elements.
     """
     if is_on:
         the_display = "inline-block"
