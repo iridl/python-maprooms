@@ -76,11 +76,8 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
 def unit_conversion(variable):
     #if precipitation variable, change from kg to mm per day
-    if variable == 'pr':
+    if variable.name == 'pr':
         variable *= 86400
         variable.attrs['units'] = 'mm/day' #rename unit to converted
-    elif variable in ['tas', 'tasmin', 'tasmax']:
-        variable -= 273.15 
-        variable.attrs['units'] = 'Celsius'
     
     return variable

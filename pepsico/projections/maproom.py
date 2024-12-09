@@ -279,7 +279,7 @@ def register(FLASK, config):
         end_year = "2035"
         start_year_ref = "1991"
         end_year_ref = "2020"
-        data = ( #ac.unit_conversion(
+        data = ac.unit_conversion(
             ac.seasonal_data(
                 ac.read_data(scenario, model, variable),
                 start_month, end_month,
