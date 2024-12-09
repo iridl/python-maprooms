@@ -127,14 +127,14 @@ def register(FLASK, config):
         )
 
 
-   @APP.callback(
+    @APP.callback(
         Output("loc_marker", "position"),
         Output("lat_input", "value"),
         Output("lng_input", "value"),
         Input("submit_lat_lng","n_clicks"),
         Input("map", "click_lat_lng"),
         State("lat_input", "value"),
-        State("lng_input", "value")
+        State("lng_input", "value"),
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Reading
@@ -222,7 +222,7 @@ def register(FLASK, config):
         Input("start_year", "value"),
         Input("end_year", "value"),
         Input("start_year_ref", "value"),
-        Input("end_year"_ref, "value"),
+        Input("end_year_ref", "value"),
     )
     def write_map_description(map_choice):
         return (
@@ -243,7 +243,7 @@ def register(FLASK, config):
         Input("start_year", "value"),
         Input("end_year", "value"),
         Input("start_year_ref", "value"),
-        Input("end_year"_ref, "value"),
+        Input("end_year_ref", "value"),
     )
     def write_map_title(path):
         return (
