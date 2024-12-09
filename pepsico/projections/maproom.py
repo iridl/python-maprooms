@@ -189,6 +189,7 @@ def register(FLASK, config):
         ssp126 = ac.read_data("ssp126", model, variable)
         ssp370 = ac.read_data("ssp370", model, variable)
         ssp585 = ac.read_data("ssp585", model, variable)
+        # Should I make this a xr.ds?
         data_list = [histo, picont, ssp126, ssp370, spp585]
         try:
             if (data_list is None).any():
@@ -196,7 +197,7 @@ def register(FLASK, config):
                     error_msg="Data missing for this model or variable"
                 )
             else:
-                data_list = [var = pingrid.sel_snap(var, lat, lng) for var in data_list]
+                data_list[:] = [pingrid.sel_snap(var, lat, lng) for var in data_list]
                 if np.isnan(data_list).any():
                     return pingrid.error_fig(
                         error_msg="Data missing at this location"
@@ -204,9 +205,10 @@ def register(FLASK, config):
         except KerError:
             return pingrid.error_fig(error_msg="Grid box out of data domain")
 
-        data_list = [var = ac.unit_conversion(
-            ac.seasonal_data(var, start_month, end_month
-        )) for var in data_list]
+        data_list[:] = [
+            ac.unit_conversion(ac.seasonal_data(var, start_month, end_month))
+            for var in data_list
+        ]
         return pgo.Scatter(
             x=data_list[0]["T"].dt.strftime(STD_TIME_FORMAT),
             y=data_list[0].values,
@@ -315,17 +317,17 @@ def register(FLASK, config):
         end_year = "2035"
         start_year_ref = "1991"
         end_year_ref = "2020"
-        data = ac.unit_conversion(
-            ac.seasonal_data(
+        data = (
+            ac.unit_conversion(ac.seasonal_data(
                 ac.read_data(scenario, model, variable),
                 start_month, end_month,
                 start_year=start_year, end_year=end_year,
-            ).mean(dim="T")
-            - ac.seasonal_data(
+            ).mean(dim="T"))
+            - ac.unit_conversion(ac.seasonal_data(
                 ac.read_data("historical", model, variable),
                 start_month, end_month,
                 start_year=start_year_ref, end_year=end_year_ref,
-            ).mean(dim="T")
+            ).mean(dim="T"))
         ).rename({"X": "lon", "Y": "lat"})
         data_amp = max(abs(data.min().values), abs(data.min().values))
         data.attrs["colormap"] = CMAPS["correlation"].rescaled(-1*data_amp, data_amp)

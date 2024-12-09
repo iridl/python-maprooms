@@ -80,6 +80,6 @@ def unit_conversion(variable):
         variable *= 86400
         variable.attrs['units'] = 'mm/day' #rename unit to converted
     elif variable.name in ['tas', 'tasmin', 'tasmax']:
-        variable.name -= 273.15 
+        variable -= 273.15 
         variable.attrs['units'] = 'Celsius'
     return variable
