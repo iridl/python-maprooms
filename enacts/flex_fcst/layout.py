@@ -311,43 +311,10 @@ def controls_layout():
                 at the clicked location.
                 """
             ),
-<<<<<<< HEAD
-            Block("Pick a point",
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            dbc.FormFloating([dbc.Input(
-                                id = "lat_input",
-                                type="number",
-                            ),
-                            dbc.Label("Latitude", style={"font-size": "80%"}),
-                            dbc.Tooltip(
-                                id="lat_input_tooltip",
-                                target="lat_input",
-                                className="tooltiptext",
-                            )]),
-                        ),
-                        dbc.Col(
-                            dbc.FormFloating([dbc.Input(
-                                id = "lng_input",
-                                type="number",
-                            ),
-                            dbc.Label("Longitude", style={"font-size": "80%"}),
-                            dbc.Tooltip(
-                                id="lng_input_tooltip",
-                                target="lng_input",
-                                className="tooltiptext",
-                            )]),
-                        ),
-                        dbc.Button(id="submit_lat_lng", children='Submit'),
-                    ],
-                ),
-=======
             Block(
                 "Pick a point",
                 PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
                 width="w-auto",
->>>>>>> eefead1 (Pick a Point now in controls.py)
             ),
         ],
         fluid=True,
