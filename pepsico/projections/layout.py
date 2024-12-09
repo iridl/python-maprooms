@@ -331,7 +331,7 @@ def results_layout():
                         [
                             dbc.Col(
                                 dbc.Spinner(
-                                    dcc.Graph(id="cdf_graph"),
+                                    dcc.Graph(id="local_graph"),
                                 )
                             ),
                         ]

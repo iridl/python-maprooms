@@ -17,6 +17,9 @@ from globals_ import FLASK, GLOBAL_CONFIG
 import app_calc as ac
 
 
+STD_TIME_FORMAT = "%Y-%m-%d"
+HUMAN_TIME_FORMAT = "%-d %b %Y"
+
 def register(FLASK, config):
     PFX = f"{GLOBAL_CONFIG['url_path_prefix']}/{config['core_path']}"
     TILE_PFX = f"{PFX}/tile"
@@ -171,13 +174,48 @@ def register(FLASK, config):
 
 
     @APP.callback(
-        Output("cdf_graph", "figure"),
+        Output("local_graph", "figure"),
         Input("loc_marker", "position"),
+        Input("model", "value"),
+        Input("variable", "value"),
+        Input("start_month", "value"),
+        Input("end_month", "value"),
     )
-    def local_plots(marker_pos):
+    def local_plots(marker_pos, model, variable, start_month, end_month):
         lat = marker_pos[0]
         lng = marker_pos[1]
-        return pingrid.error_fig("REPLACE ME")
+        histo = ac.read_data("historical", model, variable)
+        picont = ac.read_data("picontrol", model, variable)
+        ssp126 = ac.read_data("ssp126", model, variable)
+        ssp370 = ac.read_data("ssp370", model, variable)
+        ssp585 = ac.read_data("ssp585", model, variable)
+        data_list = [histo, picont, ssp126, ssp370, spp585]
+        try:
+            if (data_list is None).any():
+                return pingrid.error_fig(
+                    error_msg="Data missing for this model or variable"
+                )
+            else:
+                data_list = [var = pingrid.sel_snap(var, lat, lng) for var in data_list]
+                if np.isnan(data_list).any():
+                    return pingrid.error_fig(
+                        error_msg="Data missing at this location"
+                    )
+        except KerError:
+            return pingrid.error_fig(error_msg="Grid box out of data domain")
+
+        data_list = [var = ac.unit_conversion(
+            ac.seasonal_data(var, start_month, end_month
+        )) for var in data_list]
+        return pgo.Scatter(
+            x=data_list[0]["T"].dt.strftime(STD_TIME_FORMAT),
+            y=data_list[0].values,
+            #customdata=customdata,
+            #hovertemplate=hovertemplate,
+            name=data_list[0].name,
+            line=pgo.scatter.Line(),#color=color, dash=dash),
+            connectgaps=False,
+        )
 
 
     @APP.callback(
@@ -196,7 +234,7 @@ def register(FLASK, config):
         end_year = "2035"
         start_year_ref = "1991"
         end_year_ref = "2020"
-        data = ( #ac.unit_conversion(
+        data = ac.unit_conversion(
             ac.seasonal_data(
                 ac.read_data(scenario, model, variable),
                 start_month, end_month,
@@ -261,8 +299,6 @@ def register(FLASK, config):
             ),
         ], send_alarm
 
-
-    # Endpoints
 
     @FLASK.route(
         f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>",
