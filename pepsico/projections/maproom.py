@@ -127,15 +127,7 @@ def register(FLASK, config):
         )
 
 
-    @APP.callback(
-        Output("map_title", "children"),
-        Input("location", "pathname"),
-    )
-    def write_map_title(path):
-        return "MAP TITLE"
-
-
-    @APP.callback(
+   @APP.callback(
         Output("loc_marker", "position"),
         Output("lat_input", "value"),
         Output("lng_input", "value"),
@@ -219,6 +211,25 @@ def register(FLASK, config):
             connectgaps=False,
         )
 
+
+     @APP.callback(
+        Output("map_title", "children"),
+        Input("scenario", "value"),
+        Input("model", "value"),
+        Input("variable", "value"),
+        Input("start_month", "value"),
+        Input("end_month", "value"),
+        Input("start_year", "value"),
+        Input("end_year", "value"),
+        Input("start_year_ref", "value"),
+        Input("end_year"_ref, "value"),
+    )
+    def write_map_title(path):
+        return (
+            f'{start_month}-{end_month} {start_year}-{end_year} '
+            f'{scenario} {model} {variable} anomalies repective to '
+            f'{start_year_ref}-{end_year_ref}'
+        )
 
     @APP.callback(
         Output("colorbar", "colorscale"),
