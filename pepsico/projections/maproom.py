@@ -15,6 +15,7 @@ from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import FLASK, GLOBAL_CONFIG
 import app_calc as ac
+import numpy as np
 
 
 STD_TIME_FORMAT = "%Y-%m-%d"
@@ -167,30 +168,37 @@ def register(FLASK, config):
 
     @APP.callback(
         Output("local_graph", "figure"),
-        Input("loc_marker", "position"),
-        Input("model", "value"),
-        Input("variable", "value"),
-        Input("start_month", "value"),
-        Input("end_month", "value"),
+        #Input("loc_marker", "position"),
+        #Input("model", "value"),
+        #Input("variable", "value"),
+        #Input("start_month", "value"),
+        #Input("end_month", "value"),
+        Input("location", "pathname"),
     )
-    def local_plots(marker_pos, model, variable, start_month, end_month):
-        lat = marker_pos[0]
-        lng = marker_pos[1]
+    def local_plots(path): #marker_pos, model, variable, start_month, end_month):
+        #lat = marker_pos[0]
+        #lng = marker_pos[1]
+        lat = 0
+        lng = 0
+        model = "GFDL-ESM4"
+        variable = "tasmin"
+        start_month = 1
+        end_month = 3
         histo = ac.read_data("historical", model, variable)
         picont = ac.read_data("picontrol", model, variable)
         ssp126 = ac.read_data("ssp126", model, variable)
         ssp370 = ac.read_data("ssp370", model, variable)
         ssp585 = ac.read_data("ssp585", model, variable)
         # Should I make this a xr.ds?
-        data_list = [histo, picont, ssp126, ssp370, spp585]
+        data_list = [histo, picont, ssp126, ssp370, ssp585]
         try:
-            if (data_list is None).any():
+            if any([var is None for var in data_list]):
                 return pingrid.error_fig(
                     error_msg="Data missing for this model or variable"
                 )
             else:
                 data_list[:] = [pingrid.sel_snap(var, lat, lng) for var in data_list]
-                if np.isnan(data_list).any():
+                if any([np.isnan(var).any() for var in data_list]):
                     return pingrid.error_fig(
                         error_msg="Data missing at this location"
                     )
@@ -201,19 +209,43 @@ def register(FLASK, config):
             ac.unit_conversion(ac.seasonal_data(var, start_month, end_month))
             for var in data_list
         ]
-        return pgo.Scatter(
-            x=data_list[0]["T"].dt.strftime(STD_TIME_FORMAT),
-            y=data_list[0].values,
-            #customdata=customdata,
-            #hovertemplate=hovertemplate,
-            name=data_list[0].name,
-            line=pgo.scatter.Line(),#color=color, dash=dash),
-            connectgaps=False,
+        if (end_month < start_month) :
+            start_format = "%b %Y - "
+        else:
+            start_format = "%b-"
+        if data_list[0].attrs["units"] == "Celsius" :
+            units = "˚C"
+        else:
+            units = data_list[0].attrs["units"]
+        local_graph = pgo.Figure()
+        local_graph.add_trace(
+            pgo.Scatter(
+                x=data_list[0]["T"].dt.strftime(STD_TIME_FORMAT),
+                y=data_list[0].values,
+                customdata=data_list[0]["seasons_ends"].dt.strftime("%B %Y"),
+                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
+                name=data_list[0].name,
+                line=pgo.scatter.Line(),#color=color, dash=dash),
+                connectgaps=False,
+            )
         )
+        local_graph.update_layout(
+            xaxis_title="Time",
+            yaxis_title=f'{data_list[0].attrs["long_name"]} ({units})',
+            title={
+                "text": (
+                    f'{data_list[0]["T"].dt.strftime("%b")[0].values}-'
+                    f'{data_list[0]["seasons_ends"].dt.strftime("%b")[0].values} '
+                    f'{variable} seasonal average from model {model}'
+                ),
+                "font": dict(size=14),
+            }
+        )
+        return local_graph
 
 
     @APP.callback(
-        Output("map_title", "children"),
+        Output("map_description", "children"),
         Input("scenario", "value"),
         Input("model", "value"),
         Input("variable", "value"),
