@@ -2,7 +2,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from controls import Block
+from fieldsets import Block, Select, Sentence, Month, Number
 
 from globals_ import GLOBAL_CONFIG
 
@@ -93,113 +93,138 @@ def navbar_layout():
                 ),
             ),
             dbc.NavbarToggler(id="navbar-toggler"),
-            html.Div(
-                [
-                    help_layout(
-                        "Probability",
-                        "probability_label",
-                        "Custom forecast probability choices",
-                    ),
-                ],
-                style={
-                    "color": "white", "position": "relative", "width": "95px",
-                    "display": "inline-block", "padding": "10px",
-                    "vertical-align": "top",
-                }
+            Block("Scenario",
+                Select(
+                    id="scenario",
+                    options=["picontrol", "ssp126", "ssp370", "ssp585"],
+                ),
             ),
-            html.Div(
-                [
-                    dcc.Dropdown(
-                        id="proba",
-                        clearable=False,
-                        options=[
-                            dict(label="exceeding", value="exceeding"),
-                            dict(label="non-exceeding", value="non-exceeding"),
-                        ],
-                        value="exceeding",
-                    )
-                ],
-                style={
-                    "position": "relative", "width": "150px",
-                    "display": "inline-block", "padding": "10px",
-                    "vertical-align": "top",
-                }
+            Block("Model",
+                Select(
+                    id="model",
+                    options=[
+                        "GFDL-ESM4",
+                        "IPSL-CM6A-LR",
+                        "MPI-ESM1-2-HR",
+                        "MRI-ESM2-0",
+                        "UKESM1-0-LL",
+                    ],
+                ),
             ),
-            html.Div(
-                [
-                    dcc.Dropdown(
-                        className="var",
-                        id="variable",
-                        clearable=False,
-                        options=[
-                            dict(label="Percentile", value="Percentile"),
-                            dict(label="Value", value="Value"),
-                        ],
-                        value="Percentile",
-                    )
-                ],
-                style={
-                    "position": "relative", "width": "200px",
-                    "display": "inline-block", "padding": "10px",
-                    "vertical-align": "top",
-                }
+            Block("Variable",
+                Select(
+                    id="variable",
+                    options=[
+                        "hurs",
+                        "huss",
+                        "pr",
+                        "prsn",
+                        "ps",
+                        "rlds",
+                        "sfcwind",
+                        "tas",
+                        "tasmax",
+                        "tasmin",
+                    ],
+                    labels=[
+                        "Near-Surface Relative Humidity",
+                        "Near-Surface Specific Humidity",
+                        "Precipitation",
+                        "Snowfall Flux",
+                        "Surface Air Pressure",
+                        "Surface Downwelling Longwave Radiation",
+                        "Near-Surface Wind Speed",
+                        "Near-Surface Air Temperature",
+                        "Daily Maximum Near-Surface Air Temperature",
+                        "Daily Minimum Near-Surface Air Temperature",
+                    ],
+                    init=2,
+                ),
             ),
-            html.Div(
-                [
-                    dcc.Dropdown(
-                        id="percentile",
-                        clearable=False,
-                        options=[
-                            dict(label="10", value=0.1),
-                            dict(label="15", value=0.15),
-                            dict(label="20", value=0.2),
-                            dict(label="25", value=0.25),
-                            dict(label="30", value=0.3),
-                            dict(label="35", value=0.35),
-                            dict(label="40", value=0.4),
-                            dict(label="45", value=0.45),
-                            dict(label="50", value=0.5),
-                            dict(label="55", value=0.55),
-                            dict(label="60", value=0.60),
-                            dict(label="65", value=0.65),
-                            dict(label="70", value=0.70),
-                            dict(label="75", value=0.75),
-                            dict(label="80", value=0.8),
-                            dict(label="85", value=0.85),
-                            dict(label="90", value=0.9),
-                        ],
-                        value=0.5,
-                    ),
-                    html.Div([" %-ile"], style={
-                        "color": "white", "font-size": "100%", "padding-top":"5px",
-                        "padding-left":"3px",
-                    })
-                ],
+            Block("Season",
+                Month(id="start_month", default="Jan"),
+                "-",
+                Month(id="end_month", default="Mar"),
             ),
-            html.Div(
-                [
-                    dbc.Input(
-                        id="threshold",
-                        type="number",
-                        className="my-1",
-                        debounce=True,
-                        value=0,
-                    ),
-                ],
-            ),
-            html.Div(
-                [
-                    help_layout(
-                        "Forecast Issued",
-                        "start_date_title",
-                        "Model start dates",
-                    ),
-                ],
-                style={
-                    "color": "white", "position": "relative", "width": "145px",
-                    "display": "inline-block", "padding": "10px",
-                    "vertical-align": "top",
-                }
+            Block("Projected Years", Sentence(
+                Number(
+                    id="start_year",
+                    default=2015,
+                    min=2015,
+                    max=2095,
+                    width="5em",
+                ),
+                "-",
+                Number(
+                    id="end_year",
+                    default=2019,
+                    min=2019,
+                    max=2099,
+                    width="5em",
+                ),
+            ),),
+            Block("Reference Years", Sentence(
+                Number(
+                    id="start_year_ref",
+                    default=1981,
+                    min=1951,
+                    max=1985,
+                    width="5em",
+                ),
+                "-",
+                Number(
+                    id="end_year_ref",
+                    default=2010,
+                    min=1980,
+                    max=2014,
+                    width="5em",
+                ),
+            ),),
+            Block("Pick a point",
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                dbc.Input(
+                                    id="lat_input",
+                                    type="number",
+                                    style={"font-size": "10pt", "width": "8em"},
+                                    class_name="ps-1 pe-0 py-0",
+                                    #placeholder=lat_min,
+                                ),
+                                dbc.Tooltip(
+                                    id="lat_input_tooltip",
+                                    target="lat_input",
+                                    className="tooltiptext",
+                                )
+                            ],
+                        ),
+                        dbc.Col(
+                            [
+                                dbc.Input(
+                                    id="lng_input",
+                                    type="number",
+                                    style={"font-size": "10pt", "width": "8em"},
+                                    class_name="ps-1 pe-0 py-0",
+                                    #placeholder=lon_min,
+                                ),
+                                dbc.Tooltip(
+                                    id="lng_input_tooltip",
+                                    target="lng_input",
+                                    className="tooltiptext",
+                                )
+                            ],
+                        ),
+                        dbc.Col(dbc.Button(
+                            id="submit_lat_lng",
+                            children="OK",
+                            class_name="p-0",
+                            style={"font-size": "10pt"},
+                        )),
+                    ],
+                    class_name="g-0",
+                    justify="start",
+                ),
             ),
             dbc.Alert(
                 "Something went wrong",
@@ -237,35 +262,6 @@ def controls_layout():
                 series for this variable of this model, followed by a plume of
                 possible projected scenarios.
                 """
-            ),
-            Block("Pick a point",
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            dbc.FormFloating([dbc.Input(
-                                id="lat_input", type="number",
-                            ),
-                            dbc.Label("Latitude", style={"font-size": "80%"}),
-                            dbc.Tooltip(
-                                id="lat_input_tooltip",
-                                target="lat_input",
-                                className="tooltiptext",
-                            )]),
-                        ),
-                        dbc.Col(
-                            dbc.FormFloating([dbc.Input(
-                                id="lng_input", type="number",
-                            ),
-                            dbc.Label("Longitude", style={"font-size": "80%"}),
-                            dbc.Tooltip(
-                                id="lng_input_tooltip",
-                                target="lng_input",
-                                className="tooltiptext",
-                            )]),
-                        ),
-                        dbc.Button(id="submit_lat_lng", children='Submit'),
-                    ],
-                ),
             ),
         ],
         fluid=True, className="scrollable-panel",

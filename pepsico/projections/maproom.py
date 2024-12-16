@@ -16,6 +16,7 @@ from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import FLASK, GLOBAL_CONFIG
 import app_calc as ac
 import numpy as np
+#from fieldsets import Block, PickPoint
 
 
 STD_TIME_FORMAT = "%Y-%m-%d"
@@ -98,6 +99,7 @@ def register(FLASK, config):
         Output("lng_input", "min"),
         Output("lng_input", "max"),
         Output("lng_input_tooltip", "children"),
+        #Output("pickapoint", "children"),
         Output("map", "center"),
         Input("location", "pathname"),
     )
@@ -124,6 +126,9 @@ def register(FLASK, config):
         
         return (
             lat_min, lat_max, lat_label, lon_min, lon_max, lon_label,
+            #Block("Pick a point",
+            #    PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
+            #),
             center_of_the_map,
         )
 
@@ -168,22 +173,17 @@ def register(FLASK, config):
 
     @APP.callback(
         Output("local_graph", "figure"),
-        #Input("loc_marker", "position"),
-        #Input("model", "value"),
-        #Input("variable", "value"),
-        #Input("start_month", "value"),
-        #Input("end_month", "value"),
-        Input("location", "pathname"),
+        Input("loc_marker", "position"),
+        Input("model", "value"),
+        Input("variable", "value"),
+        Input("start_month", "value"),
+        Input("end_month", "value"),
     )
-    def local_plots(path): #marker_pos, model, variable, start_month, end_month):
-        #lat = marker_pos[0]
-        #lng = marker_pos[1]
-        lat = 0
-        lng = 0
-        model = "GFDL-ESM4"
-        variable = "tasmin"
-        start_month = 1
-        end_month = 3
+    def local_plots(marker_pos, model, variable, start_month, end_month):
+        lat = marker_pos[0]
+        lng = marker_pos[1]
+        start_month = ac.strftimeb2int(start_month)
+        end_month = ac.strftimeb2int(end_month)
         histo = ac.read_data("historical", model, variable)
         picont = ac.read_data("picontrol", model, variable)
         ssp126 = ac.read_data("ssp126", model, variable)
@@ -256,12 +256,22 @@ def register(FLASK, config):
         Input("start_year_ref", "value"),
         Input("end_year_ref", "value"),
     )
-    def write_map_description(map_choice):
+    def write_map_description(
+        scenario,
+        model,
+        variable,
+        start_month,
+        end_month,
+        start_year,
+        end_year,
+        start_year_ref,
+        end_year_ref,
+    ):
         return (
             f'The Map displays the {start_month}-{end_month} seasonal anomalies of '
             f'{variable} from {model} model under {scenario} scenario projected for '
             f'{start_year}-{end_year} with respect to historical {start_year_ref}-'
-            f'{end_year}'
+            f'{end_year_ref}'
         )
 
 
@@ -277,7 +287,17 @@ def register(FLASK, config):
         Input("start_year_ref", "value"),
         Input("end_year_ref", "value"),
     )
-    def write_map_title(path):
+    def write_map_title(
+        scenario,
+        model,
+        variable,
+        start_month,
+        end_month,
+        start_year,
+        end_year,
+        start_year_ref,
+        end_year_ref,
+    ):
         return (
             f'{start_month}-{end_month} {start_year}-{end_year} '
             f'{scenario} {model} {variable} anomalies repective to '
@@ -288,28 +308,39 @@ def register(FLASK, config):
         Output("colorbar", "colorscale"),
         Output("colorbar", "min"),
         Output("colorbar", "max"),
-        Input("location", "pathname"),
+        Input("scenario", "value"),
+        Input("model", "value"),
+        Input("variable", "value"),
+        Input("start_month", "value"),
+        Input("end_month", "value"),
+        Input("start_year", "value"),
+        Input("end_year", "value"),
+        Input("start_year_ref", "value"),
+        Input("end_year_ref", "value"),
     )
-    def draw_colorbar(path):
-        scenario = "ssp126"
-        model = "GFDL-ESM4"
-        variable = "tasmin"
-        start_month = 1
-        end_month = 3
-        start_year = "2030"
-        end_year = "2035"
-        start_year_ref = "1991"
-        end_year_ref = "2020"
+    def draw_colorbar(
+        scenario,
+        model,
+        variable,
+        start_month,
+        end_month,
+        start_year,
+        end_year,
+        start_year_ref,
+        end_year_ref,
+    ):
+        start_month = ac.strftimeb2int(start_month)
+        end_month = ac.strftimeb2int(end_month)
         data = (
             ac.unit_conversion(ac.seasonal_data(
                 ac.read_data(scenario, model, variable),
                 start_month, end_month,
-                start_year=start_year, end_year=end_year,
+                start_year=str(start_year), end_year=str(end_year),
             ).mean(dim="T"))
             - ac.unit_conversion(ac.seasonal_data(
                 ac.read_data("historical", model, variable),
                 start_month, end_month,
-                start_year=start_year_ref, end_year=end_year_ref,
+                start_year=str(start_year_ref), end_year=str(end_year_ref),
             ).mean(dim="T"))
         ).rename({"X": "lon", "Y": "lat"})
         map_amp = max(abs(data.min().values), abs(data.min().values))
@@ -323,12 +354,34 @@ def register(FLASK, config):
     @APP.callback(
         Output("layers_control", "children"),
         Output("map_warning", "is_open"),
-        Input("location", "pathname"),
+        Input("scenario", "value"),
+        Input("model", "value"),
+        Input("variable", "value"),
+        Input("start_month", "value"),
+        Input("end_month", "value"),
+        Input("start_year", "value"),
+        Input("end_year", "value"),
+        Input("start_year_ref", "value"),
+        Input("end_year_ref", "value"),
     )
-    def make_map(path):
+    def make_map(
+        scenario,
+        model,
+        variable,
+        start_month,
+        end_month,
+        start_year,
+        end_year,
+        start_year_ref,
+        end_year_ref,
+    ):
         try:
             send_alarm = False
-            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}"
+            url_str = (
+                f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{scenario}/{model}/{variable}/"
+                f"{start_month}/{end_month}/{start_year}/{end_year}/{start_year_ref}/"
+                f"{end_year_ref}"
+            )
         except:
             url_str= ""
             send_alarm = True
@@ -360,37 +413,44 @@ def register(FLASK, config):
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(url=url_str, opacity=1),
-                name="Forecast",
+                name="Anomalies",
                 checked=True,
             ),
         ], send_alarm
 
 
     @FLASK.route(
-        f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>",
+        (
+            f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<scenario>/<model>/<variable>/"
+            f"<start_month>/<end_month>/<start_year>/<end_year>/<start_year_ref>/"
+            f"<end_year_ref>"
+        ),
         endpoint=f"{config['core_path']}"
     )
-    def fcst_tiles(tz, tx, ty):
+    def fcst_tiles(tz, tx, ty,
+        scenario,
+        model,
+        variable,
+        start_month,
+        end_month,
+        start_year,
+        end_year,
+        start_year_ref,
+        end_year_ref,
+    ):
         # Reading
-        scenario = "ssp126"
-        model = "GFDL-ESM4"
-        variable = "tasmin"
-        start_month = 1
-        end_month = 3
-        start_year = "2030"
-        end_year = "2035"
-        start_year_ref = "1991"
-        end_year_ref = "2020"
+        start_month = ac.strftimeb2int(start_month)
+        end_month = ac.strftimeb2int(end_month)
         data = (
             ac.unit_conversion(ac.seasonal_data(
                 ac.read_data(scenario, model, variable),
                 start_month, end_month,
-                start_year=start_year, end_year=end_year,
+                start_year=str(start_year), end_year=str(end_year),
             ).mean(dim="T"))
             - ac.unit_conversion(ac.seasonal_data(
                 ac.read_data("historical", model, variable),
                 start_month, end_month,
-                start_year=start_year_ref, end_year=end_year_ref,
+                start_year=str(start_year_ref), end_year=str(end_year_ref),
             ).mean(dim="T"))
         ).rename({"X": "lon", "Y": "lat"})
         data_amp = max(abs(data.min().values), abs(data.min().values))

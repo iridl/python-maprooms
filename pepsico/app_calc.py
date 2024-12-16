@@ -83,3 +83,40 @@ def unit_conversion(variable):
         variable -= 273.15 
         variable.attrs['units'] = 'Celsius'
     return variable
+
+
+# This is in enacts calc.py
+def strftimeb2int(strftimeb):
+    """Convert month values to integers (1-12) from strings.
+ 
+    Parameters
+    ----------
+    strftimeb : str
+        String value representing months of year.               
+    Returns
+    -------
+    strftimebint : int
+        Integer value corresponding to month.
+    See Also
+    --------
+    Notes
+    -----
+    Examples
+    --------
+    """
+    strftimeb_all = {
+        "Jan": 1,
+        "Feb": 2,
+        "Mar": 3,
+        "Apr": 4,
+        "May": 5,
+        "Jun": 6,
+        "Jul": 7,
+        "Aug": 8,
+        "Sep": 9,
+        "Oct": 10,
+        "Nov": 11,
+        "Dec": 12,
+    }
+    strftimebint = strftimeb_all[strftimeb]
+    return strftimebint
