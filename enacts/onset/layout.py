@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from fieldsets import Block, Sentence, DateNoYear, Number, Select, PickPoint
+from controls import Block, Sentence, DateNoYear, Number, Select, PickPoint
 
 import numpy as np
 from pathlib import Path
