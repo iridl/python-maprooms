@@ -177,7 +177,7 @@ def Sentence(*elems):
 
     return dbc.Form(groups, class_name="py-0 d-inline-block", style={"font-size": "10pt"})
 
-def Block(title, *body, is_on=True, width="auto", border_color="grey"):
+def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id=None):
     """Separates out components in individual Fieldsets
 
     Auto-generates a formatted block with a fieldset header and body.
@@ -205,27 +205,48 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey"):
         the_display = "inline-block"
     else:
         the_display = "none"
+    if button_id == None:
+        legend = html.Legend(
+            title,
+            className="position-absolute top-0 start-0 translate-middle-y",
+            style={
+                "font-size": "10pt",
+                "border-style": "outset",
+                "border-width": "2px",
+                "border-top-width": "0px",
+                "border-left-width": "0px",
+                "-moz-border-radius": "4px",
+                "border-radius": "4px",
+                "background-color": "WhiteSmoke",
+                "border-color": "LightGrey",
+                "padding-bottom": "1px",
+                "padding-left": "2px",
+                "padding-right": "2px",
+                "width": "auto",
+            }
+        )
+    else:
+        legend = dbc.Button(
+            id=button_id,
+            children=title,
+            class_name="position-absolute top-0 start-0 translate-middle-y",
+            style={
+                "font-size": "10pt",
+                "border-style": "outset",
+                "border-width": "2px",
+                "border-top-width": "0px",
+                "border-left-width": "0px",
+                "-moz-border-radius": "4px",
+                "border-radius": "4px",
+                "padding-bottom": "1px",
+                "padding-left": "2px",
+                "padding-right": "2px",
+                "width": "auto",
+            },
+        )
     return html.Fieldset(
         [
-            html.Legend(
-                title,
-                className="position-absolute top-0 start-0 translate-middle-y",
-                style={
-                    "font-size": "10pt",
-                    "border-style": "outset",
-                    "border-width": "2px",
-                    "border-top-width": "0px",
-                    "border-left-width": "0px",
-                    "-moz-border-radius": "4px",
-                    "border-radius": "4px",
-                    "background-color": "WhiteSmoke",
-                    "border-color": "LightGrey",
-                    "padding-bottom": "1px",
-                    "padding-left": "2px",
-                    "padding-right": "2px",
-                    "width": "auto",
-                }
-            ),
+            legend,
             html.Div(
                 body,
                 className="pt-2 mt-0",

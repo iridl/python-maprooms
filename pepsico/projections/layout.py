@@ -145,6 +145,7 @@ def navbar_layout():
                 Month(id="start_month", default="Jan"),
                 "-",
                 Month(id="end_month", default="Mar"),
+                button_id="submit_season",
             ),
             Block("Projected Years", Sentence(
                 Number(
@@ -162,7 +163,7 @@ def navbar_layout():
                     max=2099,
                     width="5em",
                 ),
-            ),),
+            ), button_id="submit_projy",),
             Block("Reference Years", Sentence(
                 Number(
                     id="start_year_ref",
@@ -179,7 +180,7 @@ def navbar_layout():
                     max=2014,
                     width="5em",
                 ),
-            ),),
+            ), button_id="submit_refy",),
             Block("Pick a point",
                 dbc.Row(
                     [
@@ -215,16 +216,11 @@ def navbar_layout():
                                 )
                             ],
                         ),
-                        dbc.Col(dbc.Button(
-                            id="submit_lat_lng",
-                            children="OK",
-                            class_name="p-0",
-                            style={"font-size": "10pt"},
-                        )),
                     ],
                     class_name="g-0",
                     justify="start",
                 ),
+                button_id="submit_lat_lng",
             ),
             dbc.Alert(
                 "Something went wrong",
