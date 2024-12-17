@@ -194,6 +194,9 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
     width : str, optional
         html style attribute value to determine width of the filedset within its
         parent container. Default `width` ="100%".
+    button_id : str, optional
+        name of id used to replace default Fieldset's Legend with a clickable button
+        Displays `title` 
 
     Returns
     -------
