@@ -181,44 +181,30 @@ def navbar_layout():
                     width="5em",
                 ),
             ), button_id="submit_refy",),
-            Block("Pick a point",
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                dbc.Input(
-                                    id="lat_input",
-                                    type="number",
-                                    style={"font-size": "10pt", "width": "8em"},
-                                    class_name="ps-1 pe-0 py-0",
-                                    #placeholder=lat_min,
-                                ),
-                                dbc.Tooltip(
-                                    id="lat_input_tooltip",
-                                    target="lat_input",
-                                    className="tooltiptext",
-                                )
-                            ],
-                        ),
-                        dbc.Col(
-                            [
-                                dbc.Input(
-                                    id="lng_input",
-                                    type="number",
-                                    style={"font-size": "10pt", "width": "8em"},
-                                    class_name="ps-1 pe-0 py-0",
-                                    #placeholder=lon_min,
-                                ),
-                                dbc.Tooltip(
-                                    id="lng_input_tooltip",
-                                    target="lng_input",
-                                    className="tooltiptext",
-                                )
-                            ],
-                        ),
-                    ],
-                    class_name="g-0",
-                    justify="start",
+            Block("Pick lat/lon",
+                dbc.Input(
+                    id="lat_input",
+                    type="number",
+                    style={"font-size": "10pt", "width": "8em"},
+                    class_name="ps-1 pe-0 py-0",
+                    #placeholder=lat_min,
+                ),
+                dbc.Tooltip(
+                    id="lat_input_tooltip",
+                    target="lat_input",
+                    className="tooltiptext",
+                ),
+                dbc.Input(
+                    id="lng_input",
+                    type="number",
+                    style={"font-size": "10pt", "width": "8em"},
+                    class_name="ps-1 pe-0 py-0",
+                    #placeholder=lon_min,
+                ),
+                dbc.Tooltip(
+                    id="lng_input_tooltip",
+                    target="lng_input",
+                    className="tooltiptext",
                 ),
                 button_id="submit_lat_lng",
             ),

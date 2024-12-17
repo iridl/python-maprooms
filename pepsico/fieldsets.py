@@ -192,8 +192,8 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
     is_on : boolean, optional
        Fieldset is not displayed if False, default is True
     width : str, optional
-        html style attribute value to determine width of the filedset within its
-        parent container. Default `width` ="100%".
+        html style attribute value to determine width of the fieldset within its
+        parent container. Default `width` ="auto".
     button_id : str, optional
         name of id used to replace default Fieldset's Legend with a clickable button
         Displays `title` 
@@ -257,7 +257,7 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
                     "padding-left": "4px",
                     "padding-right": "4px",
                     "padding-bottom": "4px",
-                    "margin": "2px",
+                    "margin": "0px",
                     "-moz-border-radius": "8px",
                     "border-radius": "8px",
                     "border-style": "inset",
@@ -270,6 +270,8 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
         style={
             "display": the_display,
             "width": width,
+            "max-width": "100%",
+            "white-space": "nowrap",
         },
     )
 
@@ -350,9 +352,9 @@ def Select(id, options, labels=None, init=0):
     return dbc.Select(
         id=id,
         value=options[init],
-        class_name="d-inline-block w-auto py-0",
+        class_name="d-inline-block w-auto py-0 pl-0 m-0",
         options=opts,
-        style={"font-size": "10pt"},
+        style={"font-size": "10pt", "max-width": "100%", "white-space": "nowrap"},
     )
 
 def PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label):
