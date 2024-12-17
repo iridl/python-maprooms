@@ -224,8 +224,52 @@ def register(FLASK, config):
                 y=data_list[0].values,
                 customdata=data_list[0]["seasons_ends"].dt.strftime("%B %Y"),
                 hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
-                name=data_list[0].name,
+                name="histo",
                 line=pgo.scatter.Line(),#color=color, dash=dash),
+                connectgaps=False,
+            )
+        )
+        local_graph.add_trace(
+            pgo.Scatter(
+                x=data_list[1]["T"].dt.strftime(STD_TIME_FORMAT),
+                y=data_list[1].values,
+                customdata=data_list[1]["seasons_ends"].dt.strftime("%B %Y"),
+                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
+                name="picontrol",
+                line=pgo.scatter.Line(color="green"),
+                connectgaps=False,
+            )
+        )
+        local_graph.add_trace(
+            pgo.Scatter(
+                x=data_list[2]["T"].dt.strftime(STD_TIME_FORMAT),
+                y=data_list[2].values,
+                customdata=data_list[3]["seasons_ends"].dt.strftime("%B %Y"),
+                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
+                name="ssp126",
+                line=pgo.scatter.Line(color="yellow"),
+                connectgaps=False,
+            )
+        )
+        local_graph.add_trace(
+            pgo.Scatter(
+                x=data_list[3]["T"].dt.strftime(STD_TIME_FORMAT),
+                y=data_list[3].values,
+                customdata=data_list[3]["seasons_ends"].dt.strftime("%B %Y"),
+                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
+                name="ssp370",
+                line=pgo.scatter.Line(color="orange"),
+                connectgaps=False,
+            )
+        )
+        local_graph.add_trace(
+            pgo.Scatter(
+                x=data_list[4]["T"].dt.strftime(STD_TIME_FORMAT),
+                y=data_list[4].values,
+                customdata=data_list[4]["seasons_ends"].dt.strftime("%B %Y"),
+                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
+                name="ssp585",
+                line=pgo.scatter.Line(color="red"),
                 connectgaps=False,
             )
         )
