@@ -171,6 +171,18 @@ def register(FLASK, config):
         return [lat, lng], lat, lng
 
 
+    def plot_ts(ts, name, color, start_format, units):
+        return pgo.Scatter(
+            x=ts["T"].dt.strftime(STD_TIME_FORMAT),
+            y=ts.values,
+            customdata=ts["seasons_ends"].dt.strftime("%B %Y"),
+            hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
+            name=name,
+            line=pgo.scatter.Line(color=color),
+            connectgaps=False,
+        )
+
+
     @APP.callback(
         Output("local_graph", "figure"),
         Input("loc_marker", "position"),
@@ -218,61 +230,21 @@ def register(FLASK, config):
         else:
             units = data_list[0].attrs["units"]
         local_graph = pgo.Figure()
-        local_graph.add_trace(
-            pgo.Scatter(
-                x=data_list[0]["T"].dt.strftime(STD_TIME_FORMAT),
-                y=data_list[0].values,
-                customdata=data_list[0]["seasons_ends"].dt.strftime("%B %Y"),
-                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
-                name="histo",
-                line=pgo.scatter.Line(),#color=color, dash=dash),
-                connectgaps=False,
-            )
-        )
-        local_graph.add_trace(
-            pgo.Scatter(
-                x=data_list[1]["T"].dt.strftime(STD_TIME_FORMAT),
-                y=data_list[1].values,
-                customdata=data_list[1]["seasons_ends"].dt.strftime("%B %Y"),
-                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
-                name="picontrol",
-                line=pgo.scatter.Line(color="green"),
-                connectgaps=False,
-            )
-        )
-        local_graph.add_trace(
-            pgo.Scatter(
-                x=data_list[2]["T"].dt.strftime(STD_TIME_FORMAT),
-                y=data_list[2].values,
-                customdata=data_list[3]["seasons_ends"].dt.strftime("%B %Y"),
-                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
-                name="ssp126",
-                line=pgo.scatter.Line(color="yellow"),
-                connectgaps=False,
-            )
-        )
-        local_graph.add_trace(
-            pgo.Scatter(
-                x=data_list[3]["T"].dt.strftime(STD_TIME_FORMAT),
-                y=data_list[3].values,
-                customdata=data_list[3]["seasons_ends"].dt.strftime("%B %Y"),
-                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
-                name="ssp370",
-                line=pgo.scatter.Line(color="orange"),
-                connectgaps=False,
-            )
-        )
-        local_graph.add_trace(
-            pgo.Scatter(
-                x=data_list[4]["T"].dt.strftime(STD_TIME_FORMAT),
-                y=data_list[4].values,
-                customdata=data_list[4]["seasons_ends"].dt.strftime("%B %Y"),
-                hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
-                name="ssp585",
-                line=pgo.scatter.Line(color="red"),
-                connectgaps=False,
-            )
-        )
+        local_graph.add_trace(plot_ts(
+            data_list[0], "histo", "blue", start_format, units
+        ))
+        local_graph.add_trace(plot_ts(
+            data_list[1], "picontrol", "green", start_format, units
+        ))
+        local_graph.add_trace(plot_ts(
+            data_list[2], "ssp126", "yellow", start_format, units
+        ))
+        local_graph.add_trace(plot_ts(
+            data_list[3], "ssp370", "orange", start_format, units
+        ))
+        local_graph.add_trace(plot_ts(
+            data_list[4], "ssp585", "red", start_format, units
+        ))
         local_graph.update_layout(
             xaxis_title="Time",
             yaxis_title=f'{data_list[0].attrs["long_name"]} ({units})',
