@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from controls import Block, Sentence, DateNoYear, Number
+from controls import Block, Sentence, DateNoYear, Number, Select, PickPoint
 
 import numpy as np
 from pathlib import Path
@@ -242,52 +242,20 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block("Pick a point",
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id = "lat_input",
-                                        min=lat_min,
-                                        max=lat_max,
-                                        type="number",
-                                    ),
-                                    dbc.Label("Latitude", style={"font-size": "80%"}),
-                                    dbc.Tooltip(
-                                        f"{lat_label}",
-                                        target="lat_input",
-                                        className="tooltiptext",
-                                    )]),
-                                ),
-                                dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id = "lng_input",
-                                        min=lon_min,
-                                        max=lon_max,
-                                        type="number",
-                                    ),
-                                    dbc.Label("Longitude", style={"font-size": "80%"}),
-                                    dbc.Tooltip(
-                                        f"{lon_label}",
-                                        target="lng_input",
-                                        className="tooltiptext",
-                                    )]),
-                                ),
-                                dbc.Button(id="submit_lat_lng", children='Submit'),
-                            ],
-                        ),
-                        "Ask the map:",
-                        dbc.Select(
-                            id="map_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
-                            options=[
-                                {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["map_text"].items()
-                            ],
+                    Block(
+                        "Pick Latitude/Longitude",
+                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
+                        width="w-auto",
+                    ),
+                    Block("Ask the map:",
+                        Select(
+                            "map_choice",
+                            [key for key, val in CONFIG["map_text"].items()],
+                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh_onset", 30,  min=0),
+                                Number("prob_exc_thresh_onset", 30, min=0, width="5em"),
                                 html.Span(id="pet_units1"),
                                 "?"
                             ),
@@ -295,14 +263,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh_length", 90,  min=0),
+                                Number("prob_exc_thresh_length", 90, min=0, width="5em"),
                                 "days?",
                             ),
                             id="pet_input_wrap_length"
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh_tot", 200,  min=0),
+                                Number("prob_exc_thresh_tot", 200, min=0, width="6em"),
                                 "mm?"
                             ),
                             id="pet_input_wrap_tot"
@@ -314,14 +282,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             "From Early Start date of",
                             DateNoYear("search_start_", 1, CONFIG["default_search_month"]),
                             "and within the next",
-                            Number("search_days", 90, min=0, max=9999), "days",
+                            Number("search_days", 90, min=0, max=9999, width="5em"), "days",
                         ),
                     ),
                     Block(
                         "Wet Day Definition",
                         Sentence(
                             "Rainfall amount greater than",
-                            Number("wet_threshold", 1, min=0, max=99999),
+                            Number("wet_threshold", 1, min=0, max=99999, width="5em"),
                             "mm",
                         ),
                     ),
@@ -329,15 +297,15 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Onset Date Definition",
                         Sentence(
                             "First spell of",
-                            Number("running_days", CONFIG["default_running_days"], min=0, max=999),
+                            Number("running_days", CONFIG["default_running_days"], min=0, max=999, width="4em"),
                             "days that totals",
-                            Number("running_total", 20, min=0, max=99999),
+                            Number("running_total", 20, min=0, max=99999, width="5em"),
                             "mm or more and with at least",
-                            Number("min_rainy_days", CONFIG["default_min_rainy_days"], min=0, max=999),
+                            Number("min_rainy_days", CONFIG["default_min_rainy_days"], min=0, max=999, width="4em"),
                             "wet day(s) that is not followed by a",
-                            Number("dry_days", 7, min=0, max=999),
+                            Number("dry_days", 7, min=0, max=999, width="4em"),
                             "-day dry spell within the next",
-                            Number("dry_spell", 21, min=0, max=9999),
+                            Number("dry_spell", 21, min=0, max=9999, width="4em"),
                             "days",
                         ),
                     ),
@@ -347,11 +315,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             "First date after",
                             DateNoYear("cess_start_", 1, CONFIG["default_search_month_cess"]),
                             "in",
-                            Number("cess_search_days", 90, min=0, max=99999),
+                            Number("cess_search_days", 90, min=0, max=99999, width="5em"),
                             "days when the soil moisture falls below",
-                            Number("cess_soil_moisture", 5, min=0, max=999),
+                            Number("cess_soil_moisture", 5, min=0, max=999, width="5em"),
                             "mm for a period of",
-                            Number("cess_dry_spell", 3, min=0, max=999),
+                            Number("cess_dry_spell", 3, min=0, max=999, width="5em"),
                             "days",
                         ),
                         is_on=CONFIG["ison_cess_date_hist"]

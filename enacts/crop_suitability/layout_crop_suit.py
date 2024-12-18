@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from controls import Block, Sentence, DateNoYear, Number
+from controls import Block, Sentence, DateNoYear, Number, Select, PickPoint
 
 import numpy as np
 from pathlib import Path
@@ -190,78 +190,50 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block("Data Layers",
-                        "Choose a data layer to view:",
-                        dbc.Select(
-                            id="data_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
-                            options=[
-                                {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["map_text"].items()
-                            ],
+                    Block("Variable",
+                        Select(
+                            "data_choice",
+                            [key for key, val in CONFIG["map_text"].items()],
+                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
                         ),
                     ),
-                    Block("Pick a point",
+                    Block(
+                        "Pick a point",
+                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
+                        width="w-auto",
+                    ),
+                    Block("Map for a Year and a Season:",
                         dbc.Row(
                             [
                                 dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id = "lat_input",
-                                        min=lat_min,
-                                        max=lat_max,
-                                        type="number",
+                                    Number(
+                                        "target_year",
+                                        year_max,
+                                        min=1981,
+                                        max=year_max,
+                                        width="6em",
                                     ),
-                                    dbc.Label("Latitude", style={"font-size": "80%"}),
-                                    dbc.Tooltip(
-                                        f"{lat_label}",
-                                        target="lat_input",
-                                        className="tooltiptext",
-                                    )]),
                                 ),
                                 dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id = "lng_input",
-                                        min=lon_min,
-                                        max=lon_max,
-                                        type="number",
+                                    Select(
+                                        "target_season",
+                                        ["DJF", "MAM", "JJA", "SON"],
+                                        labels=["Dec-Feb", "Mar-May", "Jun-Aug", "Sep-Nov"],
                                     ),
-                                    dbc.Label("Longitude", style={"font-size": "80%"}),
-                                    dbc.Tooltip(
-                                        f"{lon_label}",
-                                        target="lng_input",
-                                        className="tooltiptext",
-                                    )]),
                                 ),
-                                dbc.Button(id="submit_coords", outline=True, color="primary", children='Submit lat lng'),
                             ],
+                            class_name="g-0",
+                            justify="start",
                         ),
-                        "Map year:",
-                        dbc.Input(
-                            id="target_year",
-                            type="number",
-                            min=1981,
-                            max=year_max,
-                            value=year_max,
-                        ),
-                        "Season of interest:",
-                        dbc.Select(
-                            id="target_season",
-                            value= CONFIG["param_defaults"]["target_season"],
-                            options=[
-                                {"label":"Dec-Feb", "value":"DJF"},
-                                {"label":"Mar-May", "value":"MAM"},
-                                {"label":"Jun-Aug", "value":"JJA"},
-                                {"label":"Sep-Nov", "value":"SON"},
-                            ],
-                        ),
+                        width="w-auto",
                     ),
                     Block(
                         "Optimum seasonal total rainfall",
                         Sentence(
                             "Total rainfall amount between",
-                            Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999, html_size=4),
+                            Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999, width="6em"),
                             "and",
-                            Number("upper_wet_threshold", CONFIG["param_defaults"]["upper_wet_thresh"], min=0, max=99999, html_size=4),
+                            Number("upper_wet_threshold", CONFIG["param_defaults"]["upper_wet_thresh"], min=0, max=99999, width="6em"),
                             "mm",
                         ),
                     ),
@@ -269,9 +241,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Temperature tolerance",
                         Sentence(
                             "Temperature range between",
-                            Number("minimum_temp", CONFIG["param_defaults"]["min_temp"], min=-99, max=999, html_size=2),
+                            Number("minimum_temp", CONFIG["param_defaults"]["min_temp"], min=-99, max=999, width="6em"),
                             "and",
-                            Number("maximum_temp", CONFIG["param_defaults"]["max_temp"], min=-99, max=99999, html_size=2),
+                            Number("maximum_temp", CONFIG["param_defaults"]["max_temp"], min=-99, max=99999, width="6em"),
                             "C",
                         ),
                     ),
@@ -279,7 +251,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Optimal daily temperature amplitude",
                         Sentence(
                             "An average daily temperature amplitude of:",
-                            Number("temp_range", CONFIG["param_defaults"]["temp_range"], min=0, max=99999, html_size=2),
+                            Number("temp_range", CONFIG["param_defaults"]["temp_range"], min=0, max=99999, width="4em"),
                             "C",
                         ),
                     ),
@@ -295,12 +267,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Wet days",
                         Sentence(
                             "The minimum number of wet days within a season:",
-                            Number("min_wet_days", CONFIG["param_defaults"]["min_wet_days"], min=0, max=99999, html_size=3),
+                            Number("min_wet_days", CONFIG["param_defaults"]["min_wet_days"], min=0, max=99999, width="5em"),
                             "days",
                         ),
                         Sentence(
                             "Where a wet day is defined as a day with rainfall more than:",
-                            Number("wet_day_def", CONFIG["param_defaults"]["wet_day_def"], min=0, max=9999, html_size=3),
+                            Number("wet_day_def", CONFIG["param_defaults"]["wet_day_def"], min=0, max=9999, width="5em"),
                             "mm",
                         ),
                     ),
