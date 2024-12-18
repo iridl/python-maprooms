@@ -99,18 +99,16 @@ def register(FLASK, config):
         Output("lng_input", "min"),
         Output("lng_input", "max"),
         Output("lng_input_tooltip", "children"),
-        #Output("pickapoint", "children"),
         Output("map", "center"),
+        Output("map", "zoom"),
+        Input("region", "value"),
         Input("location", "pathname"),
     )
-    def initialize(path):
+    def initialize(region, path):
         scenario = "ssp126"
         model = "GFDL-ESM4"
         variable = "tasmin"
-        data = xr.open_zarr(
-            f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly/{scenario}/{model}/zarr/{variable}'
-        )[variable]
+        data = ac.read_data(scenario, model, variable, region)
         center_of_the_map = [
             ((data["Y"][int(data["Y"].size/2)].values)),
             ((data["X"][int(data["X"].size/2)].values)),
@@ -123,13 +121,10 @@ def register(FLASK, config):
         lon_max = str((data["X"][-1] + lon_res/2).values)
         lat_label = lat_min + " to " + lat_max + " by " + str(lat_res) + "˚"
         lon_label = lon_min + " to " + lon_max + " by " + str(lon_res) + "˚"
-        
+        zoom = {"SAMER": 3, "US-CA": 4, "SASIA": 4, "Thailand": 5}
         return (
             lat_min, lat_max, lat_label, lon_min, lon_max, lon_label,
-            #Block("Pick a point",
-            #    PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
-            #),
-            center_of_the_map,
+            center_of_the_map, zoom[region],
         )
 
 
@@ -139,19 +134,17 @@ def register(FLASK, config):
         Output("lng_input", "value"),
         Input("submit_lat_lng","n_clicks"),
         Input("map", "click_lat_lng"),
+        Input("region", "value"),
         State("lat_input", "value"),
         State("lng_input", "value"),
     )
-    def pick_location(n_clicks, click_lat_lng, latitude, longitude):
+    def pick_location(n_clicks, click_lat_lng, region, latitude, longitude):
         # Reading
         scenario = "ssp126"
         model = "GFDL-ESM4"
         variable = "tasmin"
-        data = xr.open_zarr(
-            f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly/{scenario}/{model}/zarr/{variable}'
-        )[variable]
-        if dash.ctx.triggered_id == None:
+        data = ac.read_data(scenario, model, variable, region)
+        if (dash.ctx.triggered_id == None or dash.ctx.triggered_id == "region"):
             lat = data["Y"][int(data["Y"].size/2)].values
             lng = data["X"][int(data["X"].size/2)].values
         else:
@@ -188,20 +181,21 @@ def register(FLASK, config):
         Input("loc_marker", "position"),
         Input("model", "value"),
         Input("variable", "value"),
+        Input("region", "value"),
         Input("submit_season","n_clicks"),
         State("start_month", "value"),
         State("end_month", "value"),
     )
-    def local_plots(marker_pos, model, variable, n_clicks, start_month, end_month):
+    def local_plots(marker_pos, model, variable, region, n_clicks, start_month, end_month):
         lat = marker_pos[0]
         lng = marker_pos[1]
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
-        histo = ac.read_data("historical", model, variable)
-        picont = ac.read_data("picontrol", model, variable)
-        ssp126 = ac.read_data("ssp126", model, variable)
-        ssp370 = ac.read_data("ssp370", model, variable)
-        ssp585 = ac.read_data("ssp585", model, variable)
+        histo = ac.read_data("historical", model, variable, region)
+        picont = ac.read_data("picontrol", model, variable, region)
+        ssp126 = ac.read_data("ssp126", model, variable, region)
+        ssp370 = ac.read_data("ssp370", model, variable, region)
+        ssp585 = ac.read_data("ssp585", model, variable, region)
         # Should I make this a xr.ds?
         data_list = [histo, picont, ssp126, ssp370, ssp585]
         try:
@@ -338,6 +332,7 @@ def register(FLASK, config):
         scenario,
         model,
         variable,
+        region,
         start_month,
         end_month,
         start_year,
@@ -346,12 +341,12 @@ def register(FLASK, config):
         end_year_ref,
     ):
         ref = ac.unit_conversion(ac.seasonal_data(
-            ac.read_data("historical", model, variable),
+            ac.read_data("historical", model, variable, region),
             start_month, end_month,
             start_year=str(start_year_ref), end_year=str(end_year_ref),
         ).mean(dim="T"))
         data = ac.unit_conversion(ac.seasonal_data(
-            ac.read_data(scenario, model, variable),
+            ac.read_data(scenario, model, variable, region),
             start_month, end_month,
             start_year=str(start_year), end_year=str(end_year),
         ).mean(dim="T"))
@@ -384,6 +379,7 @@ def register(FLASK, config):
         Input("scenario", "value"),
         Input("model", "value"),
         Input("variable", "value"),
+        Input("region", "value"),
         Input("submit_season","n_clicks"),
         Input("submit_projy","n_clicks"),
         Input("submit_refy","n_clicks"),
@@ -398,6 +394,7 @@ def register(FLASK, config):
         scenario,
         model,
         variable,
+        region,
         n_clicks,
         py_clicks,
         ry_clicks,
@@ -417,6 +414,7 @@ def register(FLASK, config):
             scenario,
             model,
             variable,
+            region,
             start_month,
             end_month,
             start_year,
@@ -434,6 +432,7 @@ def register(FLASK, config):
         Input("scenario", "value"),
         Input("model", "value"),
         Input("variable", "value"),
+        Input("region", "value"),
         Input("submit_season","n_clicks"),
         Input("submit_projy","n_clicks"),
         Input("submit_refy","n_clicks"),
@@ -448,6 +447,7 @@ def register(FLASK, config):
         scenario,
         model,
         variable,
+        region,
         n_clicks,
         py_clicks,
         ry_clicks,
@@ -461,7 +461,7 @@ def register(FLASK, config):
         try:
             send_alarm = False
             url_str = (
-                f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{scenario}/{model}/{variable}/"
+                f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{scenario}/{model}/{variable}/{region}/"
                 f"{start_month}/{end_month}/{start_year}/{end_year}/{start_year_ref}/"
                 f"{end_year_ref}"
             )
@@ -504,7 +504,7 @@ def register(FLASK, config):
 
     @FLASK.route(
         (
-            f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<scenario>/<model>/<variable>/"
+            f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<scenario>/<model>/<variable>/<region>/"
             f"<start_month>/<end_month>/<start_year>/<end_year>/<start_year_ref>/"
             f"<end_year_ref>"
         ),
@@ -514,6 +514,7 @@ def register(FLASK, config):
         scenario,
         model,
         variable,
+        region,
         start_month,
         end_month,
         start_year,
@@ -528,6 +529,7 @@ def register(FLASK, config):
             scenario,
             model,
             variable,
+            region,
             start_month,
             end_month,
             start_year,

@@ -19,12 +19,23 @@ import xarray as xr
 #-- then maybe some other things to beautify map tbd
 
 
-def read_data(scenario, model, variable):
-
+def read_data(scenario, model, variable, region):
+    if region == "US-CA":
+        xslice = slice(-154, -45)
+        yslice = slice(60, 15)
+    elif region == "SAMER":
+        xslice = slice(-86, -34)
+        yslice = slice(16, -60)
+    elif region == "SASIA":
+        xslice = slice(59, 94)
+        yslice = slice(42, 7)
+    elif region == "Thailand":
+        xslice = slice(85, 115)
+        yslice = slice(28, 2)
     return xr.open_zarr(
         f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global'
         f'/monthly/{scenario}/{model}/zarr/{variable}'
-    )[variable]
+    )[variable].sel(X=xslice, Y=yslice)
 
 
 def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_year=None):

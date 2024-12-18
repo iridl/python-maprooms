@@ -93,6 +93,19 @@ def navbar_layout():
                 ),
             ),
             dbc.NavbarToggler(id="navbar-toggler"),
+            Block("Region",
+                Select(
+                    id="region",
+                    options=["SAMER", "SASIA", "Thailand", "US-CA"],
+                    labels=[
+                        "South America",
+                        "South Asia",
+                        "Thailand",
+                        "United States and Canada",
+                    ],
+                    init=3,
+                ),
+            ),
             Block("Scenario",
                 Select(
                     id="scenario",
