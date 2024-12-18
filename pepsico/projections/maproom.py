@@ -345,7 +345,7 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        data = (
+        return (
             ac.unit_conversion(ac.seasonal_data(
                 ac.read_data(scenario, model, variable),
                 start_month, end_month,
@@ -357,11 +357,18 @@ def register(FLASK, config):
                 start_year=str(start_year_ref), end_year=str(end_year_ref),
             ).mean(dim="T"))
         ).rename({"X": "lon", "Y": "lat"})
-        map_amp = max(abs(data.min().values), abs(data.min().values))
-        map_min = -1*map_amp
-        map_max = map_amp
-        colorscale = CMAPS["correlation"].rescaled(-1*map_amp, map_amp)
-        return data, map_min, map_max, colorscale
+
+
+    def map_attributes(variable, data=None):
+        if variable in ["tas", "tasmin", "tasmax"]:
+            map_min = -8
+            map_max = 8
+        else:
+            assert (data is not None)
+            map_amp = max(abs(data.min().values), abs(data.min().values))
+            map_min = -1*map_amp
+            map_max = map_amp
+        return CMAPS["correlation"].rescaled(map_min, map_max), map_min, map_max
 
 
     @APP.callback(
@@ -395,9 +402,12 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        start_month = ac.strftimeb2int(start_month)
-        end_month = ac.strftimeb2int(end_month)
-        _, map_min, map_max, colorscale = seasonal_change(
+        if variable in ["tas", "tasmin", "tasmax"]:
+            colorscale, map_min, map_max = map_attributes(variable)
+        else:
+            start_month = ac.strftimeb2int(start_month)
+            end_month = ac.strftimeb2int(end_month)
+            data = seasonal_change(
             scenario,
             model,
             variable,
@@ -408,6 +418,7 @@ def register(FLASK, config):
             start_year_ref,
             end_year_ref,
         )
+            colorscale, map_min, map_max = map_attributes(variable, data=data)
         return colorscale.to_dash_leaflet(), map_min, map_max
 
 
@@ -507,7 +518,7 @@ def register(FLASK, config):
         # Reading
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
-        data, map_min, map_max, colorscale = seasonal_change(
+        data = seasonal_change(
             scenario,
             model,
             variable,
@@ -518,8 +529,8 @@ def register(FLASK, config):
             start_year_ref,
             end_year_ref,
         )
-        data.attrs["colormap"] = colorscale
-        data.attrs["scale_min"] = map_min
-        data.attrs["scale_max"] = map_max
+        (
+            data.attrs["colormap"], data.attrs["scale_min"], data.attrs["scale_max"]
+        ) = map_attributes(variable, data=data)
         resp = pingrid.tile(data, tx, ty, tz)
         return resp
