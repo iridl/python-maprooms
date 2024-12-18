@@ -333,6 +333,37 @@ def register(FLASK, config):
             f'{start_year_ref}-{end_year_ref}'
         )
 
+
+    def seasonal_change(
+        scenario,
+        model,
+        variable,
+        start_month,
+        end_month,
+        start_year,
+        end_year,
+        start_year_ref,
+        end_year_ref,
+    ):
+        data = (
+            ac.unit_conversion(ac.seasonal_data(
+                ac.read_data(scenario, model, variable),
+                start_month, end_month,
+                start_year=str(start_year), end_year=str(end_year),
+            ).mean(dim="T"))
+            - ac.unit_conversion(ac.seasonal_data(
+                ac.read_data("historical", model, variable),
+                start_month, end_month,
+                start_year=str(start_year_ref), end_year=str(end_year_ref),
+            ).mean(dim="T"))
+        ).rename({"X": "lon", "Y": "lat"})
+        map_amp = max(abs(data.min().values), abs(data.min().values))
+        map_min = -1*map_amp
+        map_max = map_amp
+        colorscale = CMAPS["correlation"].rescaled(-1*map_amp, map_amp)
+        return data, map_min, map_max, colorscale
+
+
     @APP.callback(
         Output("colorbar", "colorscale"),
         Output("colorbar", "min"),
@@ -366,24 +397,18 @@ def register(FLASK, config):
     ):
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
-        data = (
-            ac.unit_conversion(ac.seasonal_data(
-                ac.read_data(scenario, model, variable),
-                start_month, end_month,
-                start_year=str(start_year), end_year=str(end_year),
-            ).mean(dim="T"))
-            - ac.unit_conversion(ac.seasonal_data(
-                ac.read_data("historical", model, variable),
-                start_month, end_month,
-                start_year=str(start_year_ref), end_year=str(end_year_ref),
-            ).mean(dim="T"))
-        ).rename({"X": "lon", "Y": "lat"})
-        map_amp = max(abs(data.min().values), abs(data.min().values))
-        map_min = -1*map_amp
-        map_max = map_amp
-        return CMAPS["correlation"].rescaled(
-            -1*map_amp, map_amp
-        ).to_dash_leaflet(), map_min, map_max
+        _, map_min, map_max, colorscale = seasonal_change(
+            scenario,
+            model,
+            variable,
+            start_month,
+            end_month,
+            start_year,
+            end_year,
+            start_year_ref,
+            end_year_ref,
+        )
+        return colorscale.to_dash_leaflet(), map_min, map_max
 
 
     @APP.callback(
@@ -482,21 +507,19 @@ def register(FLASK, config):
         # Reading
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
-        data = (
-            ac.unit_conversion(ac.seasonal_data(
-                ac.read_data(scenario, model, variable),
-                start_month, end_month,
-                start_year=str(start_year), end_year=str(end_year),
-            ).mean(dim="T"))
-            - ac.unit_conversion(ac.seasonal_data(
-                ac.read_data("historical", model, variable),
-                start_month, end_month,
-                start_year=str(start_year_ref), end_year=str(end_year_ref),
-            ).mean(dim="T"))
-        ).rename({"X": "lon", "Y": "lat"})
-        data_amp = max(abs(data.min().values), abs(data.min().values))
-        data.attrs["colormap"] = CMAPS["correlation"].rescaled(-1*data_amp, data_amp)
-        data.attrs["scale_min"] = -1*data_amp
-        data.attrs["scale_max"] = data_amp
+        data, map_min, map_max, colorscale = seasonal_change(
+            scenario,
+            model,
+            variable,
+            start_month,
+            end_month,
+            start_year,
+            end_year,
+            start_year_ref,
+            end_year_ref,
+        )
+        data.attrs["colormap"] = colorscale
+        data.attrs["scale_min"] = map_min
+        data.attrs["scale_max"] = map_max
         resp = pingrid.tile(data, tx, ty, tz)
         return resp
