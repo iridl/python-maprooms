@@ -262,15 +262,15 @@ def controls_layout():
 def map_layout():
     return dbc.Container(
         [
-            html.H5(
+            dcc.Loading(html.H5(
                 id="map_title",
                 style={
                     "text-align":"center", "border-width":"1px",
                     "border-style":"solid", "border-color":"grey",
                     "margin-top":"3px", "margin-bottom":"3px",
                 },
-            ),
-            dlf.Map(
+            ),  type="dot"),
+            dcc.Loading(dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
@@ -300,7 +300,7 @@ def map_layout():
                 center=None,
                 zoom=GLOBAL_CONFIG["zoom"],
                 style={"width": "100%", "height": "50vh"},
-            ),
+            ),  type="dot"),
         ],
         fluid=True,
     )

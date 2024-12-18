@@ -266,9 +266,9 @@ def register(FLASK, config):
         Input("scenario", "value"),
         Input("model", "value"),
         Input("variable", "value"),
-        Input("submit_season","n_clicks"),
-        Input("submit_projy","n_clicks"),
-        Input("submit_refy","n_clicks"),
+        Input("submit_season", "n_clicks"),
+        Input("submit_projy", "n_clicks"),
+        Input("submit_refy", "n_clicks"),
         State("start_month", "value"),
         State("end_month", "value"),
         State("start_year", "value"),
@@ -358,9 +358,7 @@ def register(FLASK, config):
         data = data - ref
         if variable in ["hurs", "huss", "pr"]:
             data = 100. * data / ref
-            print(data)
             data["units"] = "%"
-            print(data)
         return data.rename({"X": "lon", "Y": "lat"})
 
 
