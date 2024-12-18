@@ -291,7 +291,7 @@ def register(FLASK, config):
         end_year_ref,
     ):
         return (
-            f'The Map displays the {start_month}-{end_month} seasonal anomalies of '
+            f'The Map displays the change in {start_month}-{end_month} seasonal average of '
             f'{variable} from {model} model under {scenario} scenario projected for '
             f'{start_year}-{end_year} with respect to historical {start_year_ref}-'
             f'{end_year_ref}'
@@ -329,7 +329,7 @@ def register(FLASK, config):
     ):
         return (
             f'{start_month}-{end_month} {start_year}-{end_year} '
-            f'{scenario} {model} {variable} anomalies repective to '
+            f'{scenario} {model} {variable} change from '
             f'{start_year_ref}-{end_year_ref}'
         )
 
@@ -490,7 +490,7 @@ def register(FLASK, config):
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(url=url_str, opacity=1),
-                name="Anomalies",
+                name="Change",
                 checked=True,
             ),
         ], send_alarm
