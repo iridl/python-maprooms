@@ -345,24 +345,32 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        return (
-            ac.unit_conversion(ac.seasonal_data(
-                ac.read_data(scenario, model, variable),
-                start_month, end_month,
-                start_year=str(start_year), end_year=str(end_year),
-            ).mean(dim="T"))
-            - ac.unit_conversion(ac.seasonal_data(
-                ac.read_data("historical", model, variable),
-                start_month, end_month,
-                start_year=str(start_year_ref), end_year=str(end_year_ref),
-            ).mean(dim="T"))
-        ).rename({"X": "lon", "Y": "lat"})
+        ref = ac.unit_conversion(ac.seasonal_data(
+            ac.read_data("historical", model, variable),
+            start_month, end_month,
+            start_year=str(start_year_ref), end_year=str(end_year_ref),
+        ).mean(dim="T"))
+        data = ac.unit_conversion(ac.seasonal_data(
+            ac.read_data(scenario, model, variable),
+            start_month, end_month,
+            start_year=str(start_year), end_year=str(end_year),
+        ).mean(dim="T"))
+        data = data - ref
+        if variable in ["hurs", "huss", "pr"]:
+            data = 100. * data / ref
+            print(data)
+            data["units"] = "%"
+            print(data)
+        return data.rename({"X": "lon", "Y": "lat"})
 
 
     def map_attributes(variable, data=None):
         if variable in ["tas", "tasmin", "tasmax"]:
             map_min = -8
             map_max = 8
+        elif variable in ["hurs", "huss", "pr"]:
+            map_min = -100
+            map_max = 100
         else:
             assert (data is not None)
             map_amp = max(abs(data.min().values), abs(data.min().values))
@@ -402,7 +410,7 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        if variable in ["tas", "tasmin", "tasmax"]:
+        if variable in ["tas", "tasmin", "tasmax", "hurs", "huss", "pr"]:
             colorscale, map_min, map_max = map_attributes(variable)
         else:
             start_month = ac.strftimeb2int(start_month)

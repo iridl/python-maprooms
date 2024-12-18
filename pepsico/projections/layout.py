@@ -245,6 +245,14 @@ def controls_layout():
                 possible projected scenarios.
                 """
             ),
+            html.P(
+                """
+                Change is expressed as the difference between average over projected
+                years and average over reference historical years (in the variables
+                units), except for precipitation and both humidity variables for
+                which it is the relative difference (in %).
+                """
+            ),
         ],
         fluid=True, className="scrollable-panel",
         style={"padding-bottom": "1rem", "padding-top": "1rem"},
