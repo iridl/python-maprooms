@@ -80,19 +80,18 @@ def help_layout(buttonname, id_name, message):
 
 
 def navbar_layout():
-    return dbc.Navbar(
+    return dbc.Nav(
         [
-            html.A(
+            dbc.NavItem([html.A(
                 dbc.Row(
                     [
                         dbc.Col(
                             dbc.NavbarBrand("CCA", className="ml-2")
                         ),
                     ],
-                    align="center", style={"padding-left":"5px"},
+                    align="center", style={"padding-left": "5px", "color": "white"},
                 ),
-            ),
-            dbc.NavbarToggler(id="navbar-toggler"),
+            )]),
             Block("Region",
                 Select(
                     id="region",
@@ -230,7 +229,7 @@ def navbar_layout():
                 style={"margin-bottom": "8px"},
             ),
         ],
-        sticky="top", color=IRI_GRAY, dark=True,
+        style={"background-color": IRI_GRAY},
     )
 
 

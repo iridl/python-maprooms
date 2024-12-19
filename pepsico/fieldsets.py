@@ -247,7 +247,7 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
                 "width": "auto",
             },
         )
-    return html.Fieldset(
+    return dbc.NavItem([html.Fieldset(
         [
             legend,
             html.Div(
@@ -273,7 +273,7 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
             "max-width": "100%",
             "white-space": "nowrap",
         },
-    )
+    )], class_name="p-0 m-1")
 
 def Options(options, labels=None):
     """ Creates options for definition of different Dash components.
