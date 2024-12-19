@@ -357,43 +357,20 @@ def Select(id, options, labels=None, init=0):
         style={"font-size": "10pt", "max-width": "100%", "white-space": "nowrap"},
     )
 
-def PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label):
-
-    return dbc.Row(
-        [
-            dbc.Col(
-                [
-                    dbc.Input(
-                        id="lat_input",
-                        min=lat_min,
-                        max=lat_max,
-                        type="number",
-                        style={"font-size": "10pt", "width": "8em"},
-                        class_name="ps-1 pe-0 py-0",
-                        placeholder=lat_min,
-                    ),
-                    dbc.Tooltip(f"{lat_label}", target="lat_input", className="tooltiptext")
-                ],
-            ),
-            dbc.Col(
-                [
-                    dbc.Input(
-                        id="lng_input",
-                        min=lon_min,
-                        max=lon_max,
-                        type="number",
-                        style={"font-size": "10pt", "width": "8em"},
-                        class_name="ps-1 pe-0 py-0",
-                        placeholder=lon_min,
-                    ),
-                    dbc.Tooltip(f"{lon_label}", target="lng_input", className="tooltiptext")
-                ],
-            ),
-            dbc.Col(dbc.Button(
-                id="submit_lat_lng", children="OK", class_name="p-0", style={"font-size": "10pt"}
-            )),
-        ],
-        class_name="g-0",
-        justify="start",
+def PickPoint(width="auto"):
+    return Block("Pick lat/lon",
+        Number(id="lat_input", width=width), "˚N",
+        dbc.Tooltip(
+            id="lat_input_tooltip",
+            target="lat_input",
+            className="tooltiptext",
+        ),
+        "-",
+        Number(id="lng_input", width=width), "˚E",
+        dbc.Tooltip(
+            id="lng_input_tooltip",
+            target="lng_input",
+            className="tooltiptext",
+        ),
+        button_id="submit_lat_lng",
     )
-

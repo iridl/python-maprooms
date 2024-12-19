@@ -2,7 +2,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from fieldsets import Block, Select, Sentence, Month, Number
+from fieldsets import Block, Select, PickPoint, Month, Number
 
 from globals_ import GLOBAL_CONFIG
 
@@ -195,22 +195,7 @@ def navbar_layout():
                 ),
                 button_id="submit_refy",
             ),
-            Block("Pick lat/lon",
-                Number(id="lat_input", width="8em"), "˚N",
-                dbc.Tooltip(
-                    id="lat_input_tooltip",
-                    target="lat_input",
-                    className="tooltiptext",
-                ),
-                "-",
-                Number(id="lng_input", width="8em"), "˚E",
-                dbc.Tooltip(
-                    id="lng_input_tooltip",
-                    target="lng_input",
-                    className="tooltiptext",
-                ),
-                button_id="submit_lat_lng",
-            ),
+            PickPoint(width="8em"),
             dbc.Alert(
                 "Something went wrong",
                 color="danger",
