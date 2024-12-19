@@ -1,4 +1,4 @@
-zoom: 2
+zoom: 4
 url_path_prefix: /python_maproom
 
 # DB configuration for the production docker environment. Override in
