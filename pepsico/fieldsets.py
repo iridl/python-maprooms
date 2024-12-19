@@ -21,17 +21,17 @@ def Text(id, default):
     dbc.Input : component
         dbc Input component with text inputs.
     """
-    return [ dbc.Input(
+    return dbc.Input(
         id=id,
         type="text",
         size="sm",
         class_name="m-0 p-0 d-inline-block w-auto",
         debounce=True,
         value=default,
-    ) ]
+    )
 
 
-def Number(id, default, min=None, max=None, width="auto"):
+def Number(id, default=None, min=None, max=None, width="auto"):
     """Provides input for a number in a range.
 
     Auto-generates a dash bootstrap components
@@ -55,7 +55,7 @@ def Number(id, default, min=None, max=None, width="auto"):
     dbc.Input : component
         dbc Input component with numerical inputs.
     """
-    return [ dbc.Input(
+    return dbc.Input(
         id=id,
         type="number",
         min=min,
@@ -64,7 +64,7 @@ def Number(id, default, min=None, max=None, width="auto"):
         debounce=True,
         value=str(default),
         style={"font-size": "10pt", "width": width},
-    ) ]
+    )
 
 
 def Month(id, default):

@@ -159,7 +159,7 @@ def navbar_layout():
                 Month(id="end_month", default="Mar"),
                 button_id="submit_season",
             ),
-            Block("Projected Years", Sentence(
+            Block("Projected Years",
                 Number(
                     id="start_year",
                     default=2015,
@@ -175,8 +175,9 @@ def navbar_layout():
                     max=2099,
                     width="5em",
                 ),
-            ), button_id="submit_projy",),
-            Block("Reference Years", Sentence(
+                button_id="submit_projy",
+            ),
+            Block("Reference Years",
                 Number(
                     id="start_year_ref",
                     default=1981,
@@ -192,27 +193,17 @@ def navbar_layout():
                     max=2014,
                     width="5em",
                 ),
-            ), button_id="submit_refy",),
+                button_id="submit_refy",
+            ),
             Block("Pick lat/lon",
-                dbc.Input(
-                    id="lat_input",
-                    type="number",
-                    style={"font-size": "10pt", "width": "8em"},
-                    class_name="ps-1 pe-0 py-0",
-                    #placeholder=lat_min,
-                ),
+                Number(id="lat_input", width="8em"), "˚N",
                 dbc.Tooltip(
                     id="lat_input_tooltip",
                     target="lat_input",
                     className="tooltiptext",
                 ),
-                dbc.Input(
-                    id="lng_input",
-                    type="number",
-                    style={"font-size": "10pt", "width": "8em"},
-                    class_name="ps-1 pe-0 py-0",
-                    #placeholder=lon_min,
-                ),
+                "-",
+                Number(id="lng_input", width="8em"), "˚E",
                 dbc.Tooltip(
                     id="lng_input_tooltip",
                     target="lng_input",

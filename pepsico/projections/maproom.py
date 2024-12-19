@@ -123,7 +123,8 @@ def register(FLASK, config):
         lon_label = lon_min + " to " + lon_max + " by " + str(lon_res) + "˚"
         zoom = {"SAMER": 3, "US-CA": 4, "SASIA": 4, "Thailand": 5}
         return (
-            lat_min, lat_max, lat_label, lon_min, lon_max, lon_label,
+            lat_min, lat_max, lat_label,
+            lon_min, lon_max, lon_label,
             center_of_the_map, zoom[region],
         )
 
