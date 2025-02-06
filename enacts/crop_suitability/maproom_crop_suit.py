@@ -29,26 +29,6 @@ import xarray as xr
 from globals_ import FLASK, GLOBAL_CONFIG
 
 
-
-        zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]
-        if zarr_path_tmin is None:
-            zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][0]
-        tmin_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmin}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][2]]
-        zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]
-        if zarr_path_tmax is None:
-            zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][0]
-        tmax_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmax}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][2]]
-        # Assumes that grid spacing is regular and cells are square. When we
-        # generalize this, don't make those assumptions.
-        RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
-        # The longest possible distance between a point and the center of the
-        # grid cell containing that point.
-
-
 CROP_SUIT_COLORMAP = pingrid.ColorScale(
     "crop_suit",
     [BROWN, BROWN, ORANGE, ORANGE, YELLOW, YELLOW,
@@ -134,6 +114,8 @@ def register(FLASK, config):
         Output("lng_input", "max"),
         Output("lng_input_tooltip", "children"),
         Output("map", "center"),
+        Output("target_year", "default"),
+        Output("target_year", "max"),
         Input("location", "pathname"),
     )
     def initialize(path):
@@ -156,10 +138,11 @@ def register(FLASK, config):
         lon_max = str((rr_mrg["X"][-1] + lon_res/2).values)
         lat_label = lat_min + " to " + lat_max + " by " + str(lat_res) + "˚"
         lon_label = lon_min + " to " + lon_max + " by " + str(lon_res) + "˚"
+        year_max = str(rr_mrg["T"][-1].dt.year.values)
         return (
             lat_min, lat_max, lat_label,
             lon_min, lon_max, lon_label,
-            center_of_the_map,
+            center_of_the_map, year_max, year_max,
         )
 
 
@@ -178,17 +161,17 @@ def register(FLASK, config):
         State("temp_range","value"),
     )
     def make_map(
-            n_clicks,
-            data_choice,
-            target_season,
-            target_year,
-            min_wet_days,
-            wet_day_def,
-            lower_wet_threshold,
-            upper_wet_threshold,
-            maximum_temp,
-            minimum_temp,
-            temp_range,
+        n_clicks,
+        data_choice,
+        target_season,
+        target_year,
+        min_wet_days,
+        wet_day_def,
+        lower_wet_threshold,
+        upper_wet_threshold,
+        maximum_temp,
+        minimum_temp,
+        temp_range,
     ):
         qstr = urllib.parse.urlencode({
             "data_choice": data_choice,
@@ -386,6 +369,25 @@ def register(FLASK, config):
         lat1 = loc_marker[0]
         lng1 = loc_marker[1]
         season_str = select_season(target_season)
+        # Reads daily data
+        zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
+        if zarr_path_rr is None:
+            zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
+        rr_mrg = calc.read_zarr_data(Path(
+            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
+        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
+        zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]
+        if zarr_path_tmin is None:
+            zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][0]
+        tmin_mrg = calc.read_zarr_data(Path(
+            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmin}'
+        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][2]]
+        zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]
+        if zarr_path_tmax is None:
+            zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][0]
+        tmax_mrg = calc.read_zarr_data(Path(
+            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmax}'
+        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][2]]
         try:
             if data_choice == "precip":
                 data_var = pingrid.sel_snap(rr_mrg, lat1, lng1)
@@ -525,7 +527,27 @@ def register(FLASK, config):
         upper_wet_threshold = parse_arg("upper_wet_threshold", int)
         maximum_temp = parse_arg("maximum_temp", float)
         minimum_temp = parse_arg("minimum_temp", float)
-        temp_range = parse_arg("temp_range", float) 
+        temp_range = parse_arg("temp_range", float)
+
+        # Reads daily data
+        zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
+        if zarr_path_rr is None:
+            zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
+        rr_mrg = calc.read_zarr_data(Path(
+            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
+        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
+        zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]
+        if zarr_path_tmin is None:
+            zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][0]
+        tmin_mrg = calc.read_zarr_data(Path(
+            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmin}'
+        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][2]]
+        zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]
+        if zarr_path_tmax is None:
+            zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][0]
+        tmax_mrg = calc.read_zarr_data(Path(
+            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmax}'
+        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][2]]
 
         x_min = pingrid.tile_left(tx, tz)
         x_max = pingrid.tile_left(tx + 1, tz)
@@ -548,6 +570,7 @@ def register(FLASK, config):
         rr_mrg_year = rr_mrg.sel(T=rr_mrg['T.year']==target_year)
         tmin_mrg_year = tmin_mrg.sel(T=tmin_mrg['T.year']==target_year)
         tmax_mrg_year = tmax_mrg.sel(T=tmax_mrg['T.year']==target_year)
+        RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 
         rr_mrg_year_tile = rr_mrg_year.sel(
             X=slice(
@@ -662,4 +685,3 @@ def register(FLASK, config):
             map_max,
             [i for i in range(map_min, map_max + 1) if i % tick_freq == 0],
         )
-

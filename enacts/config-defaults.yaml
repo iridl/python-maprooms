@@ -132,27 +132,26 @@ maprooms:
     #crop suitability
     crop_suitability:
  
-        # App   
-        core_path: crops_climate_suitability
-
-        app_title: Climate Suitability for Crops
-        crop_suit_title: Climate Suitability for Crops
-        title: Climate Suitability for Crops
-        map_text:
-            suitability:
-                menu_label: Crop climate suitability
-                description: The map shows the count of suitable climate conditions for a specific crop.
-                units: integer index
-            precip:
-                menu_label: Precipitation
-                description: Seasonal Precipitation Total.
-                units: mm
-            tmax:
-                menu_label: Maximum temperature
-                description: Seasonal Maximum Temperature.
-                units: C
-            tmin:
-                menu_label: Minimum temperature
-                description: Seasonal Minimum Temperature.
-                units: C
+        # App
+        - title: CSC
+          core_path: crops_climate_suitability
+          app_title: Climate Suitability for Crops
+          crop_suit_title: Climate Suitability for Crops
+          map_text:
+              suitability:
+                  menu_label: Crop climate suitability
+                  description: The map shows the count of suitable climate conditions for a specific crop.
+                  units: integer index
+              precip:
+                  menu_label: Precipitation
+                  description: Seasonal Precipitation Total.
+                  units: mm
+              tmax:
+                  menu_label: Maximum temperature
+                  description: Seasonal Maximum Temperature.
+                  units: C
+              tmin:
+                  menu_label: Minimum temperature
+                  description: Seasonal Minimum Temperature.
+                  units: C
 
