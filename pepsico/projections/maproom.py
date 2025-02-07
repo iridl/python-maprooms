@@ -580,10 +580,10 @@ def register(FLASK, config):
                 adm["sql"],
                 adm["color"],
                 i+1,
-                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
+                len(GLOBAL_CONFIG["datasets"][f"shapes_adm_{region}"])-i,
                 is_checked=adm["is_checked"]
             )
-            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
+            for i, adm in enumerate(GLOBAL_CONFIG["datasets"][f"shapes_adm_{region}"])
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(url=url_str, opacity=1),
