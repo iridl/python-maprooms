@@ -106,7 +106,7 @@ def register(FLASK, config):
     def initialize(region, path):
         scenario = "ssp126"
         model = "GFDL-ESM4"
-        variable = "tasmin"
+        variable = "pr"
         data = ac.read_data(scenario, model, variable, region)
         center_of_the_map = [
             ((data["Y"][int(data["Y"].size/2)].values)),
@@ -142,7 +142,7 @@ def register(FLASK, config):
         # Reading
         scenario = "ssp126"
         model = "GFDL-ESM4"
-        variable = "tasmin"
+        variable = "pr"
         data = ac.read_data(scenario, model, variable, region)
         if (dash.ctx.triggered_id == None or dash.ctx.triggered_id == "region"):
             lat = data["Y"][int(data["Y"].size/2)].values
@@ -525,7 +525,7 @@ def register(FLASK, config):
         Output("layers_control", "children"),
         Output("map_warning", "is_open"),
         Input("region", "value"),
-        Input("submit_controls","n_clicks"),
+        Input("submit_controls", "n_clicks"),
         State("scenario", "value"),
         State("model", "value"),
         State("variable", "value"),

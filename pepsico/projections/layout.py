@@ -110,6 +110,7 @@ def navbar_layout():
                 Block("Scenario", Select(
                     id="scenario",
                     options=["picontrol", "ssp126", "ssp370", "ssp585"],
+                    init=1,
                 )),
                 Block("Model", Select(id="model", options=[
                     "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR", "MRI-ESM2-0",
@@ -252,7 +253,7 @@ def map_layout():
                     "margin-top":"3px", "margin-bottom":"3px",
                 },
             ),  type="dot"),
-            dcc.Loading(dlf.Map(
+            dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
@@ -280,7 +281,7 @@ def map_layout():
                 center=None,
                 zoom=GLOBAL_CONFIG["zoom"],
                 style={"width": "100%", "height": "50vh"},
-            ),  type="dot"),
+            ),
         ],
         fluid=True,
     )
