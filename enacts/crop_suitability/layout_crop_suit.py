@@ -22,16 +22,16 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 
-def app_layout():
+def app_layout(config):
 
     return dbc.Container(
         [
             dcc.Location(id="location", refresh=True),
-            navbar_layout(),
+            navbar_layout(config),
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(),
+                        controls_layout(config),
                         sm=12,
                         md=4,
                         style={
@@ -87,7 +87,7 @@ def app_layout():
     )
 
 
-def navbar_layout():
+def navbar_layout(config):
     return dbc.Navbar(
         [
             html.A(
@@ -101,7 +101,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CONFIG["crop_suit_title"],
+                                "Climate and Agriculture / " + config["crop_suit_title"],
                                 className="ml-2",
                             )
                         ),
@@ -122,12 +122,12 @@ def navbar_layout():
     )
 
 
-def controls_layout():
+def controls_layout(config):
     return dbc.Container(
         [
             html.Div(
                 [
-                    html.H5(CONFIG["crop_suit_title"]),
+                    html.H5(config["crop_suit_title"]),
                     html.P(
                         [f"""
                         Maproom to explore crop climate suitability using a 
@@ -159,7 +159,7 @@ def controls_layout():
                     ),
                 ]+[
                     html.P([html.H6(val["menu_label"]), html.P(val["description"])])
-                    for key, val in CONFIG["map_text"].items()
+                    for key, val in config["map_text"].items()
                 ],
                 style={"position":"relative","height":"25%", "overflow":"scroll"},#box holding text
             ),
@@ -169,8 +169,8 @@ def controls_layout():
                     Block("Variable",
                         Select(
                             "data_choice",
-                            [key for key, val in CONFIG["map_text"].items()],
-                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
+                            [key for key, val in config["map_text"].items()],
+                            labels=[val["menu_label"] for key, val in config["map_text"].items()],
                         ),
                     ),
                     Block("Pick a point",
@@ -206,11 +206,11 @@ def controls_layout():
                         dbc.Row(
                             [
                                 dbc.Col(
-                                    Number(
-                                        "target_year",
+                                    dbc.Input(
                                         id="target_year",
+                                        type="number",
                                         min=1981,
-                                        width="6em",
+                                        style={"width": "6em"},
                                     ),
                                 ),
                                 dbc.Col(
@@ -230,9 +230,9 @@ def controls_layout():
                         "Optimum seasonal total rainfall",
                         Sentence(
                             "Total rainfall amount between",
-                            Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999, width="6em"),
+                            Number("lower_wet_threshold", config["param_defaults"]["lower_wet_thresh"], min=0, max=99999, width="6em"),
                             "and",
-                            Number("upper_wet_threshold", CONFIG["param_defaults"]["upper_wet_thresh"], min=0, max=99999, width="6em"),
+                            Number("upper_wet_threshold", config["param_defaults"]["upper_wet_thresh"], min=0, max=99999, width="6em"),
                             "mm",
                         ),
                     ),
@@ -240,9 +240,9 @@ def controls_layout():
                         "Temperature tolerance",
                         Sentence(
                             "Temperature range between",
-                            Number("minimum_temp", CONFIG["param_defaults"]["min_temp"], min=-99, max=999, width="6em"),
+                            Number("minimum_temp", config["param_defaults"]["min_temp"], min=-99, max=999, width="6em"),
                             "and",
-                            Number("maximum_temp", CONFIG["param_defaults"]["max_temp"], min=-99, max=99999, width="6em"),
+                            Number("maximum_temp", config["param_defaults"]["max_temp"], min=-99, max=99999, width="6em"),
                             "C",
                         ),
                     ),
@@ -250,7 +250,7 @@ def controls_layout():
                         "Optimal daily temperature amplitude",
                         Sentence(
                             "An average daily temperature amplitude of:",
-                            Number("temp_range", CONFIG["param_defaults"]["temp_range"], min=0, max=99999, width="4em"),
+                            Number("temp_range", config["param_defaults"]["temp_range"], min=0, max=99999, width="4em"),
                             "C",
                         ),
                     ),
@@ -266,12 +266,12 @@ def controls_layout():
                         "Wet days",
                         Sentence(
                             "The minimum number of wet days within a season:",
-                            Number("min_wet_days", CONFIG["param_defaults"]["min_wet_days"], min=0, max=99999, width="5em"),
+                            Number("min_wet_days", config["param_defaults"]["min_wet_days"], min=0, max=99999, width="5em"),
                             "days",
                         ),
                         Sentence(
                             "Where a wet day is defined as a day with rainfall more than:",
-                            Number("wet_day_def", CONFIG["param_defaults"]["wet_day_def"], min=0, max=9999, width="5em"),
+                            Number("wet_day_def", config["param_defaults"]["wet_day_def"], min=0, max=9999, width="5em"),
                             "mm",
                         ),
                     ),

@@ -56,7 +56,7 @@ def register(FLASK, config):
     )
     APP.title = config["app_title"]
 
-    APP.layout = layout_crop_suit.app_layout()
+    APP.layout = layout_crop_suit.app_layout(config)
 
 
     def adm_borders(shapes):
@@ -114,7 +114,7 @@ def register(FLASK, config):
         Output("lng_input", "max"),
         Output("lng_input_tooltip", "children"),
         Output("map", "center"),
-        Output("target_year", "default"),
+        Output("target_year", "value"),
         Output("target_year", "max"),
         Input("location", "pathname"),
     )
@@ -127,8 +127,8 @@ def register(FLASK, config):
             f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
         ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
         center_of_the_map = [
-            ((rr_mrg["Y"][int(data["Y"].size/2)].values)),
-            ((rr_mrg["X"][int(data["X"].size/2)].values)),
+            ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
+            ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
         ]
         lat_res = (rr_mrg["Y"][0 ]- rr_mrg["Y"][1]).values
         lat_min = str((rr_mrg["Y"][-1] - lat_res/2).values)
@@ -255,6 +255,14 @@ def register(FLASK, config):
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
+        # Reads daily data
+        zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
+        if zarr_path_rr is None:
+            zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
+        rr_mrg = calc.read_zarr_data(Path(
+            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
+        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
+
         if dash.ctx.triggered_id == None:
             lat = rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values
             lng = rr_mrg["X"][int(rr_mrg["X"].size/2)].values
@@ -443,7 +451,7 @@ def register(FLASK, config):
                 xaxis_title = "years",
                 yaxis_title = "Suitability index",
                 title = (
-                    f"{CONFIG['map_text'][data_choice]['menu_label']} "
+                    f"{config['map_text'][data_choice]['menu_label']} "
                     f"for {season_str} at [{lat1}N, {lng1}E]"
                 ),
             ) 
@@ -476,11 +484,11 @@ def register(FLASK, config):
             timeseries_plot.update_layout(
                 xaxis_title = "years",
                 yaxis_title = (
-                    f"{CONFIG['map_text'][data_choice]['id']} "
-                    f"({CONFIG['map_text'][data_choice]['units']})"
+                    f"{config['map_text'][data_choice]['id']} "
+                    f"({config['map_text'][data_choice]['units']})"
                 ),
                 title = (
-                    f"{CONFIG['map_text'][data_choice]['menu_label']} "
+                    f"{config['map_text'][data_choice]['menu_label']} "
                     f"for {season_str} at [{lat1}N, {lng1}E]"
                 ),
             )
@@ -508,7 +516,7 @@ def register(FLASK, config):
     def write_map_title(data_choice, target_year, target_season):
         season_str = select_season(target_season)
         map_title = (
-            f"{CONFIG['map_text'][data_choice]['menu_label']} "
+            f"{config['map_text'][data_choice]['menu_label']} "
             f"for {season_str} in {str(target_year)}"
         )
         return map_title
@@ -621,8 +629,8 @@ def register(FLASK, config):
             ) 
             data_tile = crop_suit_vals["crop_suit"]
         else:
-            map_min = CONFIG["map_text"][data_choice]["map_min"]
-            map_max = CONFIG["map_text"][data_choice]["map_max"]
+            map_min = config["map_text"][data_choice]["map_min"]
+            map_max = config["map_text"][data_choice]["map_max"]
             if data_choice == "precip":
                 data_tile = rr_mrg_season
             if data_choice == "tmin":
@@ -645,6 +653,10 @@ def register(FLASK, config):
         map = map.rename(X="lon", Y="lat")
         map.attrs["scale_min"] = map_min
         map.attrs["scale_max"] = map_max
+        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
+            s = sql.Composed([sql.SQL(GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'])])
+            df = pd.read_sql(s, conn)
+            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
         result = pingrid.tile(map.astype('float64'), tx, ty, tz, clip_shape)
 
         return result
@@ -667,8 +679,8 @@ def register(FLASK, config):
             map_max = 5
             tick_freq = 1
         else:
-            map_min = CONFIG["map_text"][data_choice]["map_min"]
-            map_max = CONFIG["map_text"][data_choice]["map_max"]
+            map_min = config["map_text"][data_choice]["map_min"]
+            map_max = config["map_text"][data_choice]["map_max"]
             if data_choice == "precip":
                 colormap = CMAPS["precip"]
                 tick_freq = 50
@@ -677,8 +689,8 @@ def register(FLASK, config):
                 tick_freq = 4 
         return (
             (
-                f"{CONFIG['map_text'][data_choice]['menu_label']} "
-                f"[{CONFIG['map_text'][data_choice]['units']}]"
+                f"{config['map_text'][data_choice]['menu_label']} "
+                f"[{config['map_text'][data_choice]['units']}]"
             ),
             colormap.to_dash_leaflet(),
             map_min,
