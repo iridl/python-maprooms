@@ -218,6 +218,7 @@ def controls_layout(config):
                                         "target_season",
                                         ["DJF", "MAM", "JJA", "SON"],
                                         labels=["Dec-Feb", "Mar-May", "Jun-Aug", "Sep-Nov"],
+                                        init=config["param_defaults"]["target_season"],
                                     ),
                                 ),
                             ],

@@ -319,7 +319,7 @@ def register(FLASK, config):
             (seasonal_precip.groupby("T.year").sum() <= upper_wet_threshold) &
             (seasonal_precip.groupby("T.year").sum() >= lower_wet_threshold)
         )
-
+        
         crop_suit = (
             seasonal_avg_tmax_suitability.astype(int) +
             seasonal_avg_tmin_suitability.astype(int) +
