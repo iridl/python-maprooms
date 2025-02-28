@@ -2059,7 +2059,7 @@ countries:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
                     description: CHIRPS total precipitation for Jun
-                    path: mali/chirps-precip-jun.zarr
+                    path: mali/chirps-precip-jun-jas.zarr
                     var_names:
                         value: precipitation
                         lat: Y
@@ -2092,7 +2092,7 @@ countries:
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
-                    path: mali/chirp-spi-jj.zarr
+                    path: mali/chirp-spi-jj-jas.zarr
                     var_names:
                         value: spi
                         lat: Y
@@ -2116,7 +2116,7 @@ countries:
                 chirp-rainfall-sep:
                     label: CHIRP Rain Sep
                     description: Total rainfall in September according to CHIRP
-                    path: mali/chirp-rainfall-sep.zarr
+                    path: mali/chirp-rainfall-sep-jas.zarr
                     var_names:
                         value: prcp
                         lat: Y
@@ -2128,7 +2128,7 @@ countries:
                 chirps-dryspell:
                     label: Dry Spell
                     description: Longest dry spell, calculated from CHIRPS
-                    path: mali/chirps-dryspell.zarr
+                    path: mali/chirps-dryspell-jas.zarr
                     var_names:
                         value: lls
                         lat: Y
