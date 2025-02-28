@@ -1,1 +1,1 @@
-from . import maproom_crop_suit
+from .maproom_crop_suit import register
