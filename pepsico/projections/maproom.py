@@ -72,7 +72,7 @@ def register(FLASK, config):
 
 
     def make_adm_overlay(
-        adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False,
+        adm_name, adm_id, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False,
     ):
         border_id = {"type": "borders_adm", "index": adm_lev}
         return dlf.Overlay(
@@ -87,6 +87,7 @@ def register(FLASK, config):
                 },
             ),
             name=adm_name,
+            id=adm_id,
             checked=is_checked,
         )
 
@@ -106,7 +107,7 @@ def register(FLASK, config):
     def initialize(region, path):
         scenario = "ssp126"
         model = "GFDL-ESM4"
-        variable = "tasmin"
+        variable = "pr"
         data = ac.read_data(scenario, model, variable, region)
         center_of_the_map = [
             ((data["Y"][int(data["Y"].size/2)].values)),
@@ -142,7 +143,7 @@ def register(FLASK, config):
         # Reading
         scenario = "ssp126"
         model = "GFDL-ESM4"
-        variable = "tasmin"
+        variable = "pr"
         data = ac.read_data(scenario, model, variable, region)
         if (dash.ctx.triggered_id == None or dash.ctx.triggered_id == "region"):
             lat = data["Y"][int(data["Y"].size/2)].values
@@ -525,7 +526,7 @@ def register(FLASK, config):
         Output("layers_control", "children"),
         Output("map_warning", "is_open"),
         Input("region", "value"),
-        Input("submit_controls","n_clicks"),
+        Input("submit_controls", "n_clicks"),
         State("scenario", "value"),
         State("model", "value"),
         State("variable", "value"),
@@ -577,16 +578,18 @@ def register(FLASK, config):
         ] + [
             make_adm_overlay(
                 adm["name"],
+                f'{adm["name"]}_{region}',
                 adm["sql"],
                 adm["color"],
                 i+1,
-                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
-                is_checked=adm["is_checked"]
+                len(GLOBAL_CONFIG["datasets"][f"shapes_adm_{region}"])-i,
+                is_checked=adm["is_checked"],
             )
-            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
+            for i, adm in enumerate(GLOBAL_CONFIG["datasets"][f"shapes_adm_{region}"])
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(url=url_str, opacity=1),
+                id=f"change_{region}",
                 name="Change",
                 checked=True,
             ),

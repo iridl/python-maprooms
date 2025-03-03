@@ -11,25 +11,79 @@ db:
 
 datasets:
     
-    shapes_adm:
+    shapes_adm_US-CA:
+        - name: CA-US-MX
+          color: black
+          sql: select adm0_code as key, adm0_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2012_0 where adm0_code in (46, 162, 259)
+          is_checked: True
+        - name: Countries
+          color: black
+          sql: select adm0_code as key, adm0_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2012_0 where adm0_code in (9, 11, 20, 28, 30, 32, 39, 46, 48, 63, 71, 72, 98, 100, 103, 108, 111, 123, 162, 168, 174, 176, 180, 200, 208, 210, 251, 258, 259)
+          is_checked: True
+        - name: States
+          color: grey
+          sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2014_1 where adm0_code in (46, 162, 259)
+          is_checked: True
+    
+    shapes_adm_SAMER:
         - name: National
           color: black
           sql: select adm0_code as key, adm0_name as label,
             ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
-            from g2015_2012_0
+            from g2015_2012_0 where adm0_code in (12, 14, 24, 32, 33, 37, 51, 57, 61, 71, 73, 81, 86, 99, 100, 107, 111, 158, 176, 180, 191, 194, 195, 209, 211, 228, 233, 246, 260, 263)
           is_checked: True
-        #- name: Adm2
-        #  color: black
-        #  sql: select (adm0_code, adm1_code) as key, adm1_name as label,
-        #    ST_AsBinary(ST_SimplifyPreserveTopology(the_geom, 0.0025)) as the_geom
-        #    from g2015_2014_1
-        #  is_checked: False
-        #- name: Adm3
-        #  color: grey
-        #  sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
-        #    ST_AsBinary(ST_SimplifyPreserveTopology(the_geom, 0.0025)) as the_geom
-        #    from g2015_2014_2
-        #  is_checked: False
+        - name: States
+          color: grey
+          sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2014_1 where adm0_code in (12, 14, 24, 32, 33, 37, 51, 57, 61, 71, 73, 81, 86, 99, 100, 107, 111, 158, 176, 180, 191, 194, 195, 209, 211, 228, 233, 246, 260, 263)
+          is_checked: True
+    
+    shapes_adm_SASIA:
+        - name: India-Pakistan
+          color: black
+          sql: select adm0_code as key, adm0_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2012_0 where adm0_code in (115, 188)
+          is_checked: True
+        - name: National
+          color: grey
+          sql: select adm0_code as key, adm0_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2012_0 where adm0_code in (1, 2, 15, 23, 31, 52, 117, 132, 138, 154, 171, 175, 187, 231, 239, 250)
+          is_checked: True
+        - name: States
+          color: grey
+          sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2014_1 where adm0_code in (115, 188)
+          is_checked: True
+    
+    shapes_adm_Thailand:
+        - name: Thailand-Vietnam
+          color: black
+          sql: select adm0_code as key, adm0_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2012_0 where adm0_code in (240, 264)
+          is_checked: True
+        - name: National
+          color: grey
+          sql: select adm0_code as key, adm0_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2012_0 where adm0_code in (15, 23, 31, 40, 44, 115, 116, 139, 149, 153, 171, 175, 183, 230)
+          is_checked: True
+        - name: States
+          color: grey
+          sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.0025)) as the_geom
+            from g2015_2014_1 where adm0_code in (240, 264)
+          is_checked: True
 
 maprooms:
 
