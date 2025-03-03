@@ -50,6 +50,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     datadir = Path(args.datadir)
-    infile = datadir / f'original_data/{args.dataset_name}.csv'
+    infile = datadir / f'original-data/{args.dataset_name}.csv'
     outdir = datadir / f'{args.dataset_name}.zarr'
     convert(infile, args.target_month, outdir)
