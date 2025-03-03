@@ -10,9 +10,8 @@ OUTPUT_PATH = TOP_PATH / COMMON_PATH / "monthly"
 for scenario_path in INPUT_PATH.iterdir():
     for model_path in scenario_path.iterdir():
         for var in [
-            #"hurs", "huss", "pr", "prsn", "ps", "rlds", "sfcwind", "tas", "tasmax",
-            #"tasmin",
-            "rsds",
+            "hurs", "huss", "pr", "prsn", "ps", "rlds", "sfcwind", "tas", "tasmax",
+            "tasmin", "rsds",
         ]:
             print(model_path / "zarr" / var)
             daily = xr.open_zarr(model_path / "zarr" / var)
