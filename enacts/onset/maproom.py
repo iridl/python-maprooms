@@ -36,13 +36,6 @@ def register(FLASK, config):
 
     PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
     TILE_PFX = f"{PFX}/tile"
-
-#Assumes that grid spacing is regular and cells are square. When we
-# generalize this, don't make those assumptions.
-RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
-# The longest possible distance between a point and the center of the
-# grid cell containing that point.
-
     APP = dash.Dash(
         __name__,
         server=FLASK,
@@ -908,6 +901,11 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             raise Exception(
                 "Input time dimension must be strictly increasing"
             )
+        #Assumes that grid spacing is regular and cells are square. When we
+        # generalize this, don't make those assumptions.
+        resolution = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
+        # The longest possible distance between a point and the center of the
+        # grid cell containing that point.
         precip = rr_mrg.precip
 
         if (
@@ -934,10 +932,10 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 
         precip_tile = precip_tile.sel(
             X=slice(
-                x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION
+                x_min - x_min % resolution, x_max + resolution - x_max % resolution
             ),
             Y=slice(
-                y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION
+                y_min - y_min % resolution, y_max + resolution - y_max % resolution
             ),
         ).compute()
 
