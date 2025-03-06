@@ -56,9 +56,7 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
     APP = dash.Dash(
         __name__,
         server=FLASK,
-        external_stylesheets=[
-            dbc.themes.BOOTSTRAP,
-        ],
+        external_stylesheets=[dbc.themes.BOOTSTRAP,],
         url_base_pathname=f"{PFX}/",
         meta_tags=[
             {"name": "description", "content": "Water Balance Maproom"},
@@ -96,7 +94,9 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         return {"features": shapes}
 
 
-    def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False):
+    def make_adm_overlay(
+        adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False
+    ):
         border_id = {"type": "borders_adm", "index": adm_lev}
         return dlf.Overlay(
             dlf.GeoJSON(
@@ -134,7 +134,10 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
                 time_range >= p_d, drop=True
             )
             time_options = [
-                {"label": tr.dt.strftime(HUMAN_TIME_FORMAT).values, "value": tr.dt.strftime(STD_TIME_FORMAT).values}
+                {
+                    "label": tr.dt.strftime(HUMAN_TIME_FORMAT).values,
+                    "value": tr.dt.strftime(STD_TIME_FORMAT).values,
+                }
                 for tr in time_range
             ]
             the_value = time_options[-1]["value"]
@@ -192,9 +195,9 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         })
         return [
             dlf.BaseLayer(
-                dlf.TileLayer(
-                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-                ),
+                dlf.TileLayer(url=(
+                    "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
+                ),),
                 name="Street",
                 checked=False,
             ),
@@ -323,7 +326,8 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         time_coord="T",
     ):
         kc_periods = pd.TimedeltaIndex(
-            [0, kc_init_length, kc_veg_length, kc_mid_length, kc_late_length], unit="D"
+            [0, kc_init_length, kc_veg_length, kc_mid_length, kc_late_length],
+            unit="D",
         )
         kc_params = xr.DataArray(data=[
             kc_init, kc_veg, kc_mid, kc_late, kc_end
@@ -337,14 +341,21 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         )).squeeze(drop=True).rename("p_d")
 
         if the_date is None:
-            the_date = (p_d + np.timedelta64(365, "D")).dt.strftime(HUMAN_TIME_FORMAT)
+            the_date = (
+                p_d + np.timedelta64(365, "D")
+            ).dt.strftime(HUMAN_TIME_FORMAT)
         precip = precip.sel(T=slice(
-            (p_d - np.timedelta64(API_WINDOW - 1, "D")).dt.strftime(HUMAN_TIME_FORMAT),
+            (
+                p_d - np.timedelta64(API_WINDOW - 1, "D")
+            ).dt.strftime(HUMAN_TIME_FORMAT),
             the_date,
         ))
-        precip_effective = precip.isel({"T": slice(API_WINDOW - 1, None)}) - ag.api_runoff(
-            precip.isel({"T": slice(API_WINDOW - 1, None)}),
-            api = ag.antecedent_precip_ind(precip, API_WINDOW),
+        precip_effective = (
+            precip.isel({"T": slice(API_WINDOW - 1, None)})
+            - ag.api_runoff(
+                precip.isel({"T": slice(API_WINDOW - 1, None)}),
+                api = ag.antecedent_precip_ind(precip, API_WINDOW),
+            )
         )
         return ag.soil_plant_water_balance(
             precip_effective,
@@ -488,13 +499,15 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         first_year = rr_mrg.precip["T"][0].dt.year.values
         last_year = rr_mrg.precip["T"][-1].dt.year.values
         if planting2_year is None:
-            return pingrid.error_fig(
-                error_msg=f"Planting date must be between {first_year} and {last_year}"
-            )
+            return pingrid.error_fig(error_msg=(
+                f"Planting date must be between {first_year} and {last_year}"
+            ))
         lat = marker_pos[0]
         lng = marker_pos[1]
         try:
-            taw = pingrid.sel_snap(xr.open_dataarray(Path(CONFIG["taw_file"])), lat, lng)
+            taw = pingrid.sel_snap(
+                xr.open_dataarray(Path(CONFIG["taw_file"])), lat, lng
+            )
         except KeyError:
             return pingrid.error_fig(error_msg="Grid box out of data domain")
         precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
@@ -519,9 +532,10 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             float(kc_end),
         )
         if (ts is None):
-            return pingrid.error_fig(
-                error_msg="Please ensure all input boxes are filled for the calculation to run."
-            )
+            return pingrid.error_fig(error_msg=(
+                f"Please ensure all input boxes are filled for the calculation "
+                f"to run."
+            ))
         ts2 = wat_bal_ts(
             precip,
             map_choice,
@@ -541,9 +555,10 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             planting_year=int(planting2_year)
         )
         if (ts2 is None):
-            return pingrid.error_fig(
-                error_msg="Please ensure all input boxes are filled for the calculation to run."
-            )
+            return pingrid.error_fig(error_msg=(
+                f"Please ensure all input boxes are filled for the calculation "
+                f"to run."
+            ))
         #Save actual start of ts2
         ts2_start = ts2["T"][0]
         #Find corresponding day closer to ts
@@ -557,7 +572,8 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         ts2 = ts2.assign_coords({"T": pd.date_range(datetime.datetime(
             p_d2.dt.year.values, p_d2.dt.month.values, p_d2.dt.day.values
         ), periods=ts2["T"].size)})
-        #Align ts and ts2 so that they have same size (otherwise Scatter goes bananas)
+        #Align ts and ts2 so that they have same size
+        #(otherwise Scatter goes bananas)
         ts, ts2 = xr.align(ts, ts2, join="outer")
         #Recreate real dates of ts2 after alignment in ts contemporary dates
         #to feed to customdata to hovertemplate
@@ -575,14 +591,20 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         ), periods=ts2["T"].size).strftime(STD_TIME_FORMAT)
         wat_bal_graph = pgo.Figure()
         wat_bal_graph.add_trace(plot_scatter(ts, "Current", "green"))
-        wat_bal_graph.add_trace(
-            plot_scatter(ts2, "Comparison", "blue", dash="dash", customdata=ts2_customdata)
-        )
+        wat_bal_graph.add_trace(plot_scatter(
+            ts2, "Comparison", "blue", dash="dash", customdata=ts2_customdata
+        ))
         wat_bal_graph.update_layout(
             xaxis_title="Time",
             xaxis_tickformat="%-d %b",
-            yaxis_title=f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
-            title=f"{CONFIG['map_text'][map_choice]['menu_label']} for {crop_name} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+            yaxis_title=(
+                f"{CONFIG['map_text'][map_choice]['menu_label']} "
+                f"[{CONFIG['map_text'][map_choice]['units']}]"
+            ),
+            title=(
+                f"{CONFIG['map_text'][map_choice]['menu_label']} for {crop_name} "
+                f"at ({round_latLng(lat)}N,{round_latLng(lng)}E)"
+            ),
         )
         return wat_bal_graph
 
@@ -627,12 +649,20 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             exclude="T",
         )
         taw_tile = taw.sel(
-            X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
-            Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+            X=slice(
+                x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION
+            ),
+            Y=slice(
+                y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION
+            ),
         ).compute()
         precip_tile = precip.sel(
-            X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
-            Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+            X=slice(
+                x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION
+            ),
+            Y=slice(
+                y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION
+            ),
         ).compute()
         sm, drainage, et_crop, et_crop_red, planting_date = wat_bal(
             precip_tile,
@@ -682,7 +712,9 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         map.attrs["scale_min"] = 0
         map.attrs["scale_max"] = map_max
         with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
+            s = sql.Composed([
+                sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])
+            ])
             df = pd.read_sql(s, conn)
             clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
         return pingrid.tile(map, tx, ty, tz, clip_shape)
@@ -706,7 +738,9 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             p_d = calc.sel_day_and_month(
                 time_range, int(planting_day), calc.strftimeb2int(planting_month)
             ).squeeze(drop=True).rename("p_d")
-            map_max = time_range.sel(T=slice(p_d.dt.strftime(HUMAN_TIME_FORMAT), the_date)).size
+            map_max = time_range.sel(
+                T=slice(p_d.dt.strftime(HUMAN_TIME_FORMAT), the_date)
+            ).size
         elif map_choice == "peff":
             map_max = CONFIG["peff_max"]
         else:
