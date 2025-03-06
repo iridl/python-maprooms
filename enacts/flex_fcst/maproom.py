@@ -99,6 +99,50 @@ def register(FLASK, config):
         else:
             hcst = None
         return fcst_mu, fcst_var, obs, hcst
+    def adm_borders(shapes):
+        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
+            s = sql.Composed(
+                [
+                    sql.SQL("with g as ("),
+                    sql.SQL(shapes),
+                    sql.SQL(
+                        """
+                        )
+                        select
+                            g.label, g.key, g.the_geom
+                        from g
+                        """
+                    ),
+                ]
+            )
+            df = pd.read_sql(s, conn)
+
+        df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+        df["the_geom"] = df["the_geom"].apply(
+            lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
+        )
+        shapes = df["the_geom"].apply(shapely.geometry.mapping)
+        for i in df.index: #this adds the district layer as a label in the dict
+            shapes[i]['label'] = df['label'][i]
+        return {"features": shapes}
+
+
+    def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False):
+        border_id = {"type": "borders_adm", "index": adm_lev}
+        return dlf.Overlay(
+            dlf.GeoJSON(
+                id=border_id,
+                data=adm_borders(adm_sql),
+                options={
+                    "fill": False,
+                    "color": adm_color,
+                    "weight": adm_weight,
+                },
+            ),
+            name=adm_name,
+            checked=is_checked,
+        )
+        
 
     @APP.callback(
             Output("phys-units" ,"children"),

@@ -59,6 +59,74 @@ def read_file(
     return read_ds
 
 
+def read_cptdataset(
+    data_path,
+    filename_pattern_mu,
+    filename_pattern_var,
+    filename_pattern_obs,
+    start_date,
+    lead_time=None,
+    target_time=None,
+    filename_pattern_hcst=None,
+):
+    if lead_time is not None and target_time is not None:
+        raise Exception("I am not sure which of leads or targets to use")
+    elif lead_time is not None:
+        use_leads = lead_time
+        use_targets = None
+    elif target_time is not None:
+        use_leads = None
+        use_targets = lead_time
+    else:
+        raise Exception("One of leads or targets must be not None")
+    fcst_mu = cpt.read_file(
+        data_path,
+        filename_pattern_mu,
+        start_date,
+        lead_time=use_leads,
+        target_time=use_targets,
+    )
+    if fcst_mu is not None:
+        fcst_mu_name = list(fcst_mu.data_vars)[0]
+        fcst_mu = fcst_mu[fcst_mu_name]
+    fcst_var = cpt.read_file(
+        data_path,
+        filename_pattern_var,
+        start_date,
+        lead_time=use_leads,
+        target_time=use_targets,
+    )
+    if fcst_var is not None:
+        fcst_var_name = list(fcst_var.data_vars)[0]
+        fcst_var = fcst_var[fcst_var_name]
+    obs = cpt.read_file(
+        data_path,
+        filename_pattern_obs,
+        start_date,
+        lead_time=use_leads,
+        target_time=use_targets,
+    )
+    if obs is not None:
+        obs = obs.squeeze()
+        obs_name = list(obs.data_vars)[0]
+        obs = obs[obs_name]
+    if filename_pattern_hcst it not None:
+        hcst = cpt.read_file(
+            data_path,
+            filename_pattern_hcst,
+            start_date,
+            lead_time=use_leads,
+            target_time=use_targets,
+        )
+        if hcst is not None:
+            hcst = hcst.squeeze()
+            hcst_name = list(hcst.data_vars)[0]
+            hcst = hcst[hcst_name]
+    else:
+        hcst = None
+    return fcst_mu, fcst_var, obs, hcst
+
+
 def starts_list(
     data_path,
     filename_pattern,
