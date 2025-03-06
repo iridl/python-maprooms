@@ -32,11 +32,6 @@ def register(FLASK, config):
     PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
     TILE_PFX = f"{PFX}/tile"
 
-with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
-    df = pd.read_sql(s, conn)
-    clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
-
 # Reads daily data
 
 DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
@@ -60,9 +55,7 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
     APP = dash.Dash(
         __name__,
         server=FLASK,
-        external_stylesheets=[
-            dbc.themes.BOOTSTRAP,
-        ],
+        external_stylesheets=[dbc.themes.BOOTSTRAP,],
         url_base_pathname=f"{PFX}/",
         meta_tags=[
             {"name": "description", "content": "Onset Maproom"},
@@ -1015,6 +1008,12 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         map_data = map_data.rename(X="lon", Y="lat")
         map_data.attrs["scale_min"] = map_min
         map_data.attrs["scale_max"] = map_max
+        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
+            s = sql.Composed(
+                [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]
+            )
+            df = pd.read_sql(s, conn)
+            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
         result = pingrid.tile(map_data, tx, ty, tz, clip_shape)
         return result
 
