@@ -20,31 +20,12 @@ CESS_KEYS = np.array(list(CONFIG["map_text"].keys()))[IS_CESS_KEY]
 if not CONFIG["ison_cess_date_hist"]:
     for key in CESS_KEYS:
         CONFIG["map_text"].pop(key, None)
-
-DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
-if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
-RR_MRG_ZARR = Path(DR_PATH)
-
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 
 def app_layout():
-
-    # Initialization
-    rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-    center_of_the_map = [((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)), ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values))]
-    lat_res = np.around((rr_mrg["Y"][1]-rr_mrg["Y"][0]).values, decimals=10)
-    lat_min = np.around((rr_mrg["Y"][0]-lat_res/2).values, decimals=10)
-    lat_max = np.around((rr_mrg["Y"][-1]+lat_res/2).values, decimals=10)
-    lon_res = np.around((rr_mrg["X"][1]-rr_mrg["X"][0]).values, decimals=10)
-    lon_min = np.around((rr_mrg["X"][0]-lon_res/2).values, decimals=10)
-    lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
-    lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
-    lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
 
     return dbc.Container(
         [
@@ -53,7 +34,7 @@ def app_layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label),
+                        controls_layout(),
                         sm=12,
                         md=4,
                         style={
@@ -69,7 +50,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max),
+                                        map_layout(),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -144,7 +125,7 @@ def navbar_layout():
     )
 
 
-def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
+def controls_layout():
     return dbc.Container(
         [
             html.Div(
@@ -242,10 +223,34 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block(
-                        "Pick Latitude/Longitude",
-                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
-                        width="w-auto",
+                    Block("Pick a point",
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="lat_input", type="number",
+                                    ),
+                                    dbc.Label("Latitude", style={"font-size": "80%"}),
+                                    dbc.Tooltip(
+                                        id="lat_input_tooltip",
+                                        target="lat_input",
+                                        className="tooltiptext",
+                                    )]),
+                                ),
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="lng_input", type="number",
+                                    ),
+                                    dbc.Label("Longitude", style={"font-size": "80%"}),
+                                    dbc.Tooltip(
+                                        id="lng_input_tooltip",
+                                        target="lng_input",
+                                        className="tooltiptext",
+                                    )]),
+                                ),
+                                dbc.Button(id="submit_lat_lng", children='Submit'),
+                            ],
+                        ),
                     ),
                     Block("Ask the map:",
                         Select(
@@ -333,14 +338,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
     )    #style for container that is returned #95vh
 
-def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
+def map_layout():
     return dbc.Container(
         [
             dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
-                        [dlf.Marker(id="loc_marker", position=center_of_the_map)],
+                        [dlf.Marker(id="loc_marker", position=(0, 0))],
                         id="layers_group"
                     ),
                     dlf.ScaleControl(imperial=False, position="bottomleft"),
@@ -362,9 +367,8 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                     )
                 ],
                 id="map",
-                center=center_of_the_map,
+                center=None,
                 zoom=GLOBAL_CONFIG["zoom"],
-                maxBounds = [[lat_min, lon_min],[lat_max, lon_max]],
                 minZoom = GLOBAL_CONFIG["zoom"] - 1,
                 maxZoom = GLOBAL_CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={

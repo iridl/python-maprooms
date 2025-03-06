@@ -99,6 +99,43 @@ def register(FLASK, config):
 
 
     @APP.callback(
+        Output("lat_input", "min"),
+        Output("lat_input", "max"),
+        Output("lat_input_tooltip", "children"),
+        Output("lng_input", "min"),
+        Output("lng_input", "max"),
+        Output("lng_input_tooltip", "children"),
+        Output("map", "center"),
+        Output("map", "max_bounds"),
+        Input("location", "pathname"),
+    )
+    def initialize(path):
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+            raise Exception(
+                "Input time dimension must be strictly increasing"
+            )
+        center_of_the_map = [
+            ((rr_mrg["Y"][int(data["Y"].size/2)].values)),
+            ((rr_mrg["X"][int(data["X"].size/2)].values)),
+        ]
+        lat_res = (rr_mrg["Y"][0 ]- rr_mrg["Y"][1]).values
+        lat_min = str((rr_mrg["Y"][-1] - lat_res/2).values)
+        lat_max = str((rr_mrg["Y"][0] + lat_res/2).values)
+        lon_res = (rr_mrg["X"][1] - rr_mrg["X"][0]).values
+        lon_min = str((rr_mrg["X"][0] - lon_res/2).values)
+        lon_max = str((rr_mrg["X"][-1] + lon_res/2).values)
+        lat_label = lat_min + " to " + lat_max + " by " + str(lat_res) + "˚"
+        lon_label = lon_min + " to " + lon_max + " by " + str(lon_res) + "˚"
+        return (
+            lat_min, lat_max, lat_label,
+            lon_min, lon_max, lon_label,
+            center_of_the_map,
+            [[lat_min, lon_min],[lat_max, lon_max]],
+        )
+
+
+    @APP.callback(
         Output("layers_control", "children"),
         Input("map_choice", "value"),
         Input("search_start_day", "value"),
