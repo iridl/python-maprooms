@@ -1,1 +1,1 @@
-from . import maproom_monit
+from .maproom_monit import register
