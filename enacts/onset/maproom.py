@@ -26,27 +26,18 @@ import datetime
 from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
+DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
+if DATA_PATH is None:
+    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
+RR_MRG_ZARR = Path(DR_PATH)
 
 def register(FLASK, config):
 
     PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
     TILE_PFX = f"{PFX}/tile"
 
-# Reads daily data
-
-DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
-if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
-RR_MRG_ZARR = Path(DR_PATH)
-rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-
-if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-    raise Exception(
-        "Input time dimension must be strictly increasing"
-    )
-
-# Assumes that grid spacing is regular and cells are square. When we
+#Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
@@ -288,6 +279,11 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         pet_length,
         pet_tot,
     ):
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+            raise Exception(
+                "Input time dimension must be strictly increasing"
+            )
 
         if map_choice == "monit":
             search_start_month1 = calc.strftimeb2int(search_start_month)
@@ -364,6 +360,11 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+            raise Exception(
+                "Input time dimension must be strictly increasing"
+            )
         if dash.ctx.triggered_id == None:
             lat = rr_mrg.precip["Y"][int(rr_mrg.precip["Y"].size/2)].values
             lng = rr_mrg.precip["X"][int(rr_mrg.precip["X"].size/2)].values
@@ -413,6 +414,11 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+            raise Exception(
+                "Input time dimension must be strictly increasing"
+            )
         try:
             precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
             isnan = np.isnan(precip).any()
@@ -570,6 +576,11 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             tab_style = {"display": "none"}
             return {}, {}, tab_style
         else:
+            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+            if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+                raise Exception(
+                    "Input time dimension must be strictly increasing"
+                )
             tab_style = {}
             lat = marker_pos[0]
             lng = marker_pos[1]
@@ -716,7 +727,12 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         if not CONFIG["ison_cess_date_hist"]:
             tab_style = {"display": "none"}
             return {}, {}, tab_style
-        else:
+        els
+            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+            if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+                raise Exception(
+                    "Input time dimension must be strictly increasing"
+                )
             tab_style = {}
             lat = marker_pos[0]
             lng = marker_pos[1]
@@ -887,6 +903,11 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         y_max = pingrid.tile_top_mercator(ty, tz)
         y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+            raise Exception(
+                "Input time dimension must be strictly increasing"
+            )
         precip = rr_mrg.precip
 
         if (
@@ -1052,6 +1073,11 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             map_max = CONFIG["map_text"][map_choice]["map_max"]
             unit = "days"
         if map_choice == "monit":
+            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+            if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+                raise Exception(
+                    "Input time dimension must be strictly increasing"
+                )
             precip = rr_mrg.precip.isel({"T": slice(-366, None)})
             search_start_dm = calc.sel_day_and_month(
                 precip["T"],
