@@ -27,28 +27,16 @@ from shapely.geometry.multipolygon import MultiPolygon
 
 from globals_ import GLOBAL_CONFIG, FLASK
 CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
-
-
-def register(FLASK, config):
-
-    PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
-    TILE_PFX = f"{PFX}/tile"
-
-# Reads daily data
-
 DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
 if DATA_PATH is None:
     DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
 DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
-rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 
-# Assumes that grid spacing is regular and cells are square. When we
-# generalize this, don't make those assumptions.
-RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
-# The longest possible distance between a point and the center of the
-# grid cell containing that point.
+def register(FLASK, config):
 
+    PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
+    TILE_PFX = f"{PFX}/tile"
     API_WINDOW = 7
     STD_TIME_FORMAT = "%Y-%m-%d"
     HUMAN_TIME_FORMAT = "%-d %b %Y"
@@ -126,6 +114,7 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             time_options = current_options
             the_value = graph_click["points"][0]["x"]
         else:
+            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
             time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
             p_d = calc.sel_day_and_month(
                 time_range, int(planting_day), calc.strftimeb2int(planting_month)
@@ -286,6 +275,7 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
         if dash.ctx.triggered_id == None:
             lat = rr_mrg.precip["Y"][int(rr_mrg.precip["Y"].size/2)].values
             lng = rr_mrg.precip["X"][int(rr_mrg.precip["X"].size/2)].values
@@ -496,6 +486,7 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         kc2_late_length,
         kc2_end,
     ):
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
         first_year = rr_mrg.precip["T"][0].dt.year.values
         last_year = rr_mrg.precip["T"][-1].dt.year.values
         if planting2_year is None:
@@ -626,6 +617,7 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         kc_late_length = parse_arg("kc_late_length", int)
         kc_end = parse_arg("kc_end", float)
 
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
         precip = rr_mrg.precip
         x_min = pingrid.tile_left(tx, tz)
         x_max = pingrid.tile_left(tx + 1, tz)
@@ -648,20 +640,25 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
             join="override",
             exclude="T",
         )
+        # Assumes that grid spacing is regular and cells are square. When we
+        # generalize this, don't make those assumptions.
+        resolution = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
+        # The longest possible distance between a point and the center of the
+        # grid cell containing that point.
         taw_tile = taw.sel(
             X=slice(
-                x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION
+                x_min - x_min % resolution, x_max + resolution - x_max % resolution
             ),
             Y=slice(
-                y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION
+                y_min - y_min % resolution, y_max + resolution - y_max % resolution
             ),
         ).compute()
         precip_tile = precip.sel(
             X=slice(
-                x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION
+                x_min - x_min % resolution, x_max + resolution - x_max % resolution
             ),
             Y=slice(
-                y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION
+                y_min - y_min % resolution, y_max + resolution - y_max % resolution
             ),
         ).compute()
         sm, drainage, et_crop, et_crop_red, planting_date = wat_bal(
@@ -734,6 +731,7 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         if map_choice == "paw":
             map_max = 100
         elif map_choice == "water_excess":
+            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
             time_range = rr_mrg.precip["T"][-366:]
             p_d = calc.sel_day_and_month(
                 time_range, int(planting_day), calc.strftimeb2int(planting_month)
