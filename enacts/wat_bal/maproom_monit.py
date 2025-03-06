@@ -35,7 +35,7 @@ RR_MRG_ZARR = Path(DR_PATH)
 
 def register(FLASK, config):
 
-    PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
+    PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}'
     TILE_PFX = f"{PFX}/tile"
     API_WINDOW = 7
     STD_TIME_FORMAT = "%Y-%m-%d"
@@ -51,7 +51,7 @@ def register(FLASK, config):
             {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
         ],
     )
-    APP.title = CONFIG["title"]
+    APP.title = config["title"]
     APP.layout = layout_monit.app_layout()
 
 
@@ -294,7 +294,7 @@ def register(FLASK, config):
         Input("crop_name", "value"),
     )
     def write_map_title(map_choice, crop_name):
-        return f"{CONFIG['map_text'][map_choice]['menu_label']} for {crop_name}"
+        return f"{config['map_text'][map_choice]['menu_label']} for {crop_name}"
 
 
     @APP.callback(
@@ -302,7 +302,7 @@ def register(FLASK, config):
         Input("map_choice", "value"),
     )
     def write_map_description(map_choice):
-        return CONFIG["map_text"][map_choice]["description"]    
+        return config["map_text"][map_choice]["description"]    
 
 
     @APP.callback(
@@ -537,7 +537,7 @@ def register(FLASK, config):
         lng = marker_pos[1]
         try:
             taw = pingrid.sel_snap(
-                xr.open_dataarray(Path(CONFIG["taw_file"])), lat, lng
+                xr.open_dataarray(Path(config["taw_file"])), lat, lng
             )
         except KeyError:
             return pingrid.error_fig(error_msg="Grid box out of data domain")
@@ -629,11 +629,11 @@ def register(FLASK, config):
             xaxis_title="Time",
             xaxis_tickformat="%-d %b",
             yaxis_title=(
-                f"{CONFIG['map_text'][map_choice]['menu_label']} "
-                f"[{CONFIG['map_text'][map_choice]['units']}]"
+                f"{config['map_text'][map_choice]['menu_label']} "
+                f"[{config['map_text'][map_choice]['units']}]"
             ),
             title=(
-                f"{CONFIG['map_text'][map_choice]['menu_label']} for {crop_name} "
+                f"{config['map_text'][map_choice]['menu_label']} for {crop_name} "
                 f"at ({round_latLng(lat)}N,{round_latLng(lng)}E)"
             ),
         )
@@ -676,7 +676,7 @@ def register(FLASK, config):
             return pingrid.image_resp(pingrid.empty_tile())
         _, taw = xr.align(
             precip,
-            xr.open_dataarray(Path(CONFIG["taw_file"])),
+            xr.open_dataarray(Path(config["taw_file"])),
             join="override",
             exclude="T",
         )
@@ -718,7 +718,7 @@ def register(FLASK, config):
             kc_end,
             the_date=the_date,
         )
-        map_max = CONFIG["taw_max"]
+        map_max = config["taw_max"]
         if map_choice == "sm":
             map = sm
         elif map_choice == "drainage":
@@ -740,7 +740,7 @@ def register(FLASK, config):
             map_max = sm["T"].size
         elif map_choice == "peff":
             map = precip_effective
-            map_max = CONFIG["peff_max"]
+            map_max = config["peff_max"]
         else:
             raise Exception("can not enter here")
         map = map.isel(T=-1, missing_dims='ignore')
@@ -780,12 +780,12 @@ def register(FLASK, config):
                 T=slice(p_d.dt.strftime(HUMAN_TIME_FORMAT), the_date)
             ).size
         elif map_choice == "peff":
-            map_max = CONFIG["peff_max"]
+            map_max = config["peff_max"]
         else:
-            map_max = CONFIG["taw_max"]
+            map_max = config["taw_max"]
         return (
             CMAPS["precip"].to_dash_leaflet(),
             map_max,
             [i for i in range(0, map_max + 1) if i % int(map_max/8) == 0],
-            CONFIG['map_text'][map_choice]['units'],
+            config['map_text'][map_choice]['units'],
         )
