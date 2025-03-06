@@ -34,7 +34,7 @@ RR_MRG_ZARR = Path(DR_PATH)
 
 def register(FLASK, config):
 
-    PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
+    PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}'
     TILE_PFX = f"{PFX}/tile"
     APP = dash.Dash(
         __name__,
@@ -46,7 +46,7 @@ def register(FLASK, config):
             {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
         ],
     )
-    APP.title = CONFIG["title"]
+    APP.title = config["title"]
 
     APP.layout = layout.app_layout()
 
@@ -377,7 +377,7 @@ def register(FLASK, config):
         Input("map_choice", "value"),
     )
     def write_map_description(map_choice):
-        return CONFIG["map_text"][map_choice]["description"]    
+        return config["map_text"][map_choice]["description"]    
 
 
     @APP.callback(
@@ -602,7 +602,7 @@ def register(FLASK, config):
         cess_soil_moisture,
         cess_dry_spell,
     ):
-        if not CONFIG["ison_cess_date_hist"]:
+        if not config["ison_cess_date_hist"]:
             tab_style = {"display": "none"}
             return {}, {}, tab_style
         else:
@@ -754,7 +754,7 @@ def register(FLASK, config):
         cess_soil_moisture,
         cess_dry_spell,
     ):
-        if not CONFIG["ison_cess_date_hist"]:
+        if not config["ison_cess_date_hist"]:
             tab_style = {"display": "none"}
             return {}, {}, tab_style
         els
@@ -1049,11 +1049,11 @@ def register(FLASK, config):
             if map_choice == "length_mean":
                 map_data = seasonal_length.mean("T")
                 map_max = np.timedelta64(
-                    int(CONFIG["map_text"][map_choice]["map_max"]), 'D',
+                    int(config["map_text"][map_choice]["map_max"]), 'D',
                 )
             if map_choice == "length_stddev":
                 map_data = seasonal_length.dt.days.std(dim="T", skipna=True)
-                map_max = CONFIG["map_text"][map_choice]["map_max"]
+                map_max = config["map_text"][map_choice]["map_max"]
             if map_choice == "length_pe":
                 map_data = (
                     seasonal_length < np.timedelta64(prob_exc_thresh_length, 'D')
@@ -1101,11 +1101,11 @@ def register(FLASK, config):
             unit = "days"
         if map_choice == "length_mean":
             tick_freq = 20
-            map_max = CONFIG["map_text"][map_choice]["map_max"]
+            map_max = config["map_text"][map_choice]["map_max"]
             unit = "days"
         if map_choice == "length_stddev":
             tick_freq = 5
-            map_max = CONFIG["map_text"][map_choice]["map_max"]
+            map_max = config["map_text"][map_choice]["map_max"]
             unit = "days"
         if map_choice == "monit":
             rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
