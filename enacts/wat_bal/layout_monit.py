@@ -12,13 +12,6 @@ import pingrid
 from globals_ import GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
-
-DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
-if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
-RR_MRG_ZARR = Path(DR_PATH)
-
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
@@ -36,25 +29,6 @@ def help_layout(buttonname, id_name, message):
 
 
 def app_layout():
-    
-    # Initialization
-    rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-    center_of_the_map = [
-        ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
-        ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
-    ]
-    lat_res = np.around((rr_mrg["Y"][1]-rr_mrg["Y"][0]).values, decimals=10)
-    lat_min = np.around((rr_mrg["Y"][0]-lat_res/2).values, decimals=10)
-    lat_max = np.around((rr_mrg["Y"][-1]+lat_res/2).values, decimals=10)
-    lon_res = np.around((rr_mrg["X"][1]-rr_mrg["X"][0]).values, decimals=10)
-    lon_min = np.around((rr_mrg["X"][0]-lon_res/2).values, decimals=10)
-    lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
-    lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
-    lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
-    first_year =  rr_mrg["T"][0].dt.year.values
-    one_to_last_year = rr_mrg["T"][-367].dt.year.values
-    last_year =  rr_mrg["T"][-1].dt.year.values
-    year_label = str(first_year)+" to "+str(last_year)
 
     return dbc.Container(
         [
@@ -63,18 +37,7 @@ def app_layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(
-                            lat_min,
-                            lat_max,
-                            lon_min,
-                            lon_max,
-                            lat_label,
-                            lon_label,
-                            first_year,
-                            one_to_last_year,
-                            last_year,
-                            year_label,
-                        ),
+                        controls_layout(),
                         sm=12,
                         md=4,
                         style={
@@ -90,7 +53,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max),
+                                        map_layout(),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -184,18 +147,7 @@ def navbar_layout():
     )
 
 
-def controls_layout(
-    lat_min,
-    lat_max,
-    lon_min,
-    lon_max,
-    lat_label,
-    lon_label,
-    other_year_min,
-    other_year_default,
-    other_year_max,
-    year_label
-):
+def controls_layout():
     return dbc.Container(
         [
             html.Div(
@@ -270,10 +222,34 @@ def controls_layout(
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block(
-                        "Pick a point",
-                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
-                        width="w-auto",
+                    Block("Pick a point",
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="lat_input", type="number",
+                                    ),
+                                    dbc.Label("Latitude", style={"font-size": "80%"}),
+                                    dbc.Tooltip(
+                                        id="lat_input_tooltip",
+                                        target="lat_input",
+                                        className="tooltiptext",
+                                    )]),
+                                ),
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="lng_input", type="number",
+                                    ),
+                                    dbc.Label("Longitude", style={"font-size": "80%"}),
+                                    dbc.Tooltip(
+                                        id="lng_input_tooltip",
+                                        target="lng_input",
+                                        className="tooltiptext",
+                                    )]),
+                                ),
+                                dbc.Button(id="submit_lat_lng", children='Submit'),
+                            ],
+                        ),
                     ),
                     Block("Water Balance Outputs to display",
                         Select(
@@ -332,12 +308,10 @@ def controls_layout(
                             "Planting Date",
                             DateNoYear("planting2_", 1, CONFIG["planting_month"]),
                             "",
-                            Number(
-                                "planting2_year",
-                                other_year_default,
-                                min=other_year_min,
-                                max=other_year_max,
-                                width="120px"
+                            dbc.Input(
+                                id="planting2_year",
+                                type=number,
+                                style={"width": "120px"},
                             ),
                         ),
                         Sentence(
@@ -397,7 +371,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
-                        [dlf.Marker(id="loc_marker", position=center_of_the_map)],
+                        [dlf.Marker(id="loc_marker", position=(0, 0))],
                         id="layers_group"
                     ),
                     dlf.ScaleControl(imperial=False, position="topright"),
@@ -413,9 +387,8 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                     )
                 ],
                 id="map",
-                center=center_of_the_map,
+                center=None,
                 zoom=GLOBAL_CONFIG["zoom"],
-                maxBounds = [[lat_min, lon_min],[lat_max, lon_max]],
                 minZoom = GLOBAL_CONFIG["zoom"] - 1,
                 maxZoom = GLOBAL_CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={

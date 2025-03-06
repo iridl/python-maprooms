@@ -102,6 +102,46 @@ def register(FLASK, config):
 
 
     @APP.callback(
+        Output("lat_input", "min"),
+        Output("lat_input", "max"),
+        Output("lat_input_tooltip", "children"),
+        Output("lng_input", "min"),
+        Output("lng_input", "max"),
+        Output("lng_input_tooltip", "children"),
+        Output("map", "center"),
+        Output("map", "max_bounds"),
+        Output("planting2_year", "min"),
+        Output("planting2_year", "value"),
+        Output("planting2_year", "max"),
+        Input("location", "pathname"),
+    )
+    def initialize(path):
+        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        center_of_the_map = [
+            ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
+            ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
+        ]
+        lat_res = np.around((rr_mrg["Y"][1]-rr_mrg["Y"][0]).values, decimals=10)
+        lat_min = np.around((rr_mrg["Y"][0]-lat_res/2).values, decimals=10)
+        lat_max = np.around((rr_mrg["Y"][-1]+lat_res/2).values, decimals=10)
+        lon_res = np.around((rr_mrg["X"][1]-rr_mrg["X"][0]).values, decimals=10)
+        lon_min = np.around((rr_mrg["X"][0]-lon_res/2).values, decimals=10)
+        lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
+        lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
+        lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
+        first_year =  rr_mrg["T"][0].dt.year.values
+        one_to_last_year = rr_mrg["T"][-367].dt.year.values
+        last_year =  rr_mrg["T"][-1].dt.year.values
+        return (
+            lat_min, lat_max, lat_label,
+            lon_min, lon_max, lon_label,
+            center_of_the_map,
+            [[lat_min, lon_min],[lat_max, lon_max]],
+            first_year, one_to_last_year, last_year,
+        )
+
+
+    @APP.callback(
         Output("time_selection", "options"),
         Output("time_selection", "value"),
         Input("planting_day","value"),
