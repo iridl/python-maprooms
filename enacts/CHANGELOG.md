@@ -14,6 +14,10 @@
 
 * `target_year` is dropped
 
+* `crop_suitability` config value is now a list of dictionaries rather than a single dictionary.
+
+* `param_defaults["target_season"]` is now a number between 0 and 3 corresponding to "DJF", "MAM", "JJA", "SON"
+
 ### `flex_fcst`
 
 * `flex_fcst` config value is now a list of dictionaries rather than a single dictionary.
