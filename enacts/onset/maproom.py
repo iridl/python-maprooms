@@ -111,10 +111,6 @@ def register(FLASK, config):
     )
     def initialize(path):
         rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-            raise Exception(
-                "Input time dimension must be strictly increasing"
-            )
         center_of_the_map = [
             ((rr_mrg["Y"][int(data["Y"].size/2)].values)),
             ((rr_mrg["X"][int(data["X"].size/2)].values)),
@@ -309,13 +305,8 @@ def register(FLASK, config):
         pet_length,
         pet_tot,
     ):
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-            raise Exception(
-                "Input time dimension must be strictly increasing"
-            )
-
         if map_choice == "monit":
+            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
             search_start_month1 = calc.strftimeb2int(search_start_month)
             first_day = calc.sel_day_and_month(
                 rr_mrg.precip["T"][-366:-1],
@@ -391,10 +382,6 @@ def register(FLASK, config):
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-            raise Exception(
-                "Input time dimension must be strictly increasing"
-            )
         if dash.ctx.triggered_id == None:
             lat = rr_mrg.precip["Y"][int(rr_mrg.precip["Y"].size/2)].values
             lng = rr_mrg.precip["X"][int(rr_mrg.precip["X"].size/2)].values
@@ -445,10 +432,6 @@ def register(FLASK, config):
         lat = marker_pos[0]
         lng = marker_pos[1]
         rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-            raise Exception(
-                "Input time dimension must be strictly increasing"
-            )
         try:
             precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
             isnan = np.isnan(precip).any()
@@ -607,10 +590,6 @@ def register(FLASK, config):
             return {}, {}, tab_style
         else:
             rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-            if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-                raise Exception(
-                    "Input time dimension must be strictly increasing"
-                )
             tab_style = {}
             lat = marker_pos[0]
             lng = marker_pos[1]
@@ -759,10 +738,6 @@ def register(FLASK, config):
             return {}, {}, tab_style
         els
             rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-            if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-                raise Exception(
-                    "Input time dimension must be strictly increasing"
-                )
             tab_style = {}
             lat = marker_pos[0]
             lng = marker_pos[1]
@@ -934,10 +909,6 @@ def register(FLASK, config):
         y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
         rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-        if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-            raise Exception(
-                "Input time dimension must be strictly increasing"
-            )
         #Assumes that grid spacing is regular and cells are square. When we
         # generalize this, don't make those assumptions.
         resolution = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -1109,10 +1080,6 @@ def register(FLASK, config):
             unit = "days"
         if map_choice == "monit":
             rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-            if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
-                raise Exception(
-                    "Input time dimension must be strictly increasing"
-                )
             precip = rr_mrg.precip.isel({"T": slice(-366, None)})
             search_start_dm = calc.sel_day_and_month(
                 precip["T"],
