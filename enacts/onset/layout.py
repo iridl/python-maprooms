@@ -14,37 +14,12 @@ import pandas as pd
 from globals_ import GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
-
-IS_CESS_KEY = np.array(list("length_" in cess_key for cess_key in list(CONFIG["map_text"].keys())))
-CESS_KEYS = np.array(list(CONFIG["map_text"].keys()))[IS_CESS_KEY]
-if not CONFIG["ison_cess_date_hist"]:
-    for key in CESS_KEYS:
-        CONFIG["map_text"].pop(key, None)
-
-DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
-if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
-RR_MRG_ZARR = Path(DR_PATH)
-
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 
 def app_layout():
-
-    # Initialization
-    rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-    center_of_the_map = [((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)), ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values))]
-    lat_res = np.around((rr_mrg["Y"][1]-rr_mrg["Y"][0]).values, decimals=10)
-    lat_min = np.around((rr_mrg["Y"][0]-lat_res/2).values, decimals=10)
-    lat_max = np.around((rr_mrg["Y"][-1]+lat_res/2).values, decimals=10)
-    lon_res = np.around((rr_mrg["X"][1]-rr_mrg["X"][0]).values, decimals=10)
-    lon_min = np.around((rr_mrg["X"][0]-lon_res/2).values, decimals=10)
-    lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
-    lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
-    lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
 
     return dbc.Container(
         [
@@ -53,7 +28,7 @@ def app_layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label),
+                        controls_layout(),
                         sm=12,
                         md=4,
                         style={
@@ -69,7 +44,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max),
+                                        map_layout(),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -123,7 +98,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CONFIG["onset_and_cessation_title"],
+                                id="navbarbrand",
                                 className="ml-2",
                             )
                         ),
@@ -144,56 +119,72 @@ def navbar_layout():
     )
 
 
-def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
+def controls_layout():
     return dbc.Container(
         [
             html.Div(
                 [
-                    html.H5(
-                        [
-                            CONFIG["onset_and_cessation_title"],
-                        ]
-                    ),
-                    html.P(
-                        f"""
-                        The Maproom explores current and historical rainy season onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                         dates based on user-defined definitions.
-                        The date when the rainy season starts with germinating rains
-                        is critical to agriculture planification, in particular for planting.
-                        """
-                    ),
+                    html.H5(id="app_title"),
+                    html.P([
+                        (
+                            f"""
+                            The Maproom explores current and historical rainy season onset
+                            """
+                        ),
+                        html.Span(id="andcess"),
+                        (
+                            f"""
+                            dates based on user-defined definitions.
+                            The date when the rainy season starts with germinating rains
+                            is critical to agriculture planification, in particular for planting.
+                            """
+                        ),
+                    ]),
                     dcc.Loading(html.P(id="map_description"), type="dot"),
-                    html.P(
-                        f"""
-                        The Control Panel below allows to make other maps
-                        and change the definition of the onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                        dates.
-                        """
-                    ),
-                    html.P(
-                        f"""
-                        The local information shows first whether
-                        the germinating rains have occured or not and when.
-                        Graphics of historical onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                        dates are presented in the form of time series
-                        and probability of exceeding.
-                        Pick another point with the controls below
-                        or by clicking on the map.
-                        """
-                    ),
-                    html.P(
-                        f"""
-                        By enabling the exploration of the current and historical onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                         dates, the Maproom allows to monitor
-                        and understand the spatial and temporal variability of how seasons unfold and
-                        therefore characterize the risk for a successful
-                        agricultural campaign.
-                        """
-                    ),
+                    html.P([
+                        (
+                            f"""
+                            The Control Panel below allows to make other maps
+                            and change the definition of the onset
+                            """
+                        ),
+                        html.Span(id="andcess2"),
+                        f"""dates.""",
+                    ]),
+                    html.P([
+                        (
+                            f"""
+                            The local information shows first whether
+                            the germinating rains have occured or not and when.
+                            Graphics of historical onset
+                            """
+                        ),
+                        html.Span(id="andcess3"),
+                        (
+                            f"""
+                            dates are presented in the form of time series
+                            and probability of exceeding.
+                            Pick another point with the controls below
+                            or by clicking on the map.
+                            """
+                        ),
+                    ]),
+                    html.P([
+                        (
+                            f"""
+                            By enabling the exploration of the current and historical onset
+                            """
+                        ),
+                        html.Span(id="andcess4"),
+                        (
+                            f"""
+                            dates, the Maproom allows to monitor
+                            and understand the spatial and temporal variability of how seasons unfold and
+                            therefore characterize the risk for a successful
+                            agricultural campaign.
+                            """
+                        ),
+                    ]),
                     html.P(
                         """
                         The definition of the onset can be set up in the Controls above
@@ -210,23 +201,25 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         is ahead of the expected onset date.
                         """
                     ),
-                ]+[
-                    html.P([html.H6(val["menu_label"]), html.P(val["description"])])
-                    for key, val in CONFIG["map_text"].items()
-                ]+[
-                    html.P(
-                        f"""
-                        Note that if the criteria to define the
-                        onset{"/cessation " if CONFIG["ison_cess_date_hist"] else " "}
-                        date are not met within the search period, the analysis will
-                        return a missing value. And if the analysis returns 0,
-                        it is likely that the
-                        onset{"/cessation " if CONFIG["ison_cess_date_hist"] else " "}
-                        has already occured and thus that the date from when to search is
-                        within{"/passed " if CONFIG["ison_cess_date_hist"] else " "}
-                        the rainy season.
-                        """
-                    ),
+                    html.Div(id="maplabdesc"),
+                    html.P([
+                        f"""Note that if the criteria to define the onset""",
+                        html.Span(id="andcess5"),
+                        (
+                            f"""
+                            date are not met within the search period, the analysis will
+                            return a missing value. And if the analysis returns 0,
+                            it is likely that the onset"""
+                        ),
+                        html.Span(id="andcess6"),
+                        (
+                            f"""
+                            has already occured and thus that the date from when to
+                            search is within"""
+                        ),
+                        html.Span(id="andcess7"),
+                        f"""the rainy season.""",
+                    ]),
                     html.H5("Dataset Documentation"),
                     html.P(
                         f"""
@@ -242,17 +235,37 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block(
-                        "Pick Latitude/Longitude",
-                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
-                        width="w-auto",
+                    Block("Pick a point",
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="lat_input", type="number",
+                                    ),
+                                    dbc.Label("Latitude", style={"font-size": "80%"}),
+                                    dbc.Tooltip(
+                                        id="lat_input_tooltip",
+                                        target="lat_input",
+                                        className="tooltiptext",
+                                    )]),
+                                ),
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="lng_input", type="number",
+                                    ),
+                                    dbc.Label("Longitude", style={"font-size": "80%"}),
+                                    dbc.Tooltip(
+                                        id="lng_input_tooltip",
+                                        target="lng_input",
+                                        className="tooltiptext",
+                                    )]),
+                                ),
+                                dbc.Button(id="submit_lat_lng", children='Submit'),
+                            ],
+                        ),
                     ),
                     Block("Ask the map:",
-                        Select(
-                            "map_choice",
-                            [key for key, val in CONFIG["map_text"].items()],
-                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
-                        ),
+                        html.Div(id="mapchoice"),
                         html.P(
                             Sentence(
                                 Number("prob_exc_thresh_onset", 30, min=0, width="5em"),
@@ -278,12 +291,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     ),
                     Block(
                         "Onset Date Search Period",
-                        Sentence(
-                            "From Early Start date of",
-                            DateNoYear("search_start_", 1, CONFIG["default_search_month"]),
-                            "and within the next",
-                            Number("search_days", 90, min=0, max=9999, width="5em"), "days",
-                        ),
+                        html.Div(id="onsetsearchperiod"),
                     ),
                     Block(
                         "Wet Day Definition",
@@ -295,35 +303,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     ),
                     Block(
                         "Onset Date Definition",
-                        Sentence(
-                            "First spell of",
-                            Number("running_days", CONFIG["default_running_days"], min=0, max=999, width="4em"),
-                            "days that totals",
-                            Number("running_total", 20, min=0, max=99999, width="5em"),
-                            "mm or more and with at least",
-                            Number("min_rainy_days", CONFIG["default_min_rainy_days"], min=0, max=999, width="4em"),
-                            "wet day(s) that is not followed by a",
-                            Number("dry_days", 7, min=0, max=999, width="4em"),
-                            "-day dry spell within the next",
-                            Number("dry_spell", 21, min=0, max=9999, width="4em"),
-                            "days",
-                        ),
+                        html.Div(id="onsetdef"),
                     ),
-                    Block(
-                        "Cessation Date Definition",
-                        Sentence(
-                            "First date after",
-                            DateNoYear("cess_start_", 1, CONFIG["default_search_month_cess"]),
-                            "in",
-                            Number("cess_search_days", 90, min=0, max=99999, width="5em"),
-                            "days when the soil moisture falls below",
-                            Number("cess_soil_moisture", 5, min=0, max=999, width="5em"),
-                            "mm for a period of",
-                            Number("cess_dry_spell", 3, min=0, max=999, width="5em"),
-                            "days",
-                        ),
-                        is_on=CONFIG["ison_cess_date_hist"]
-                    ),
+                    html.Div(id="cessdef"),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
             ),
@@ -333,14 +315,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
     )    #style for container that is returned #95vh
 
-def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
+def map_layout():
     return dbc.Container(
         [
             dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
-                        [dlf.Marker(id="loc_marker", position=center_of_the_map)],
+                        [dlf.Marker(id="loc_marker", position=(0, 0))],
                         id="layers_group"
                     ),
                     dlf.ScaleControl(imperial=False, position="bottomleft"),
@@ -362,9 +344,8 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                     )
                 ],
                 id="map",
-                center=center_of_the_map,
+                center=None,
                 zoom=GLOBAL_CONFIG["zoom"],
-                maxBounds = [[lat_min, lon_min],[lat_max, lon_max]],
                 minZoom = GLOBAL_CONFIG["zoom"] - 1,
                 maxZoom = GLOBAL_CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={

@@ -1,1 +1,1 @@
-from . import maproom
+from .maproom import register
