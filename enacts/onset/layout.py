@@ -14,12 +14,6 @@ import pandas as pd
 from globals_ import GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
-
-IS_CESS_KEY = np.array(list("length_" in cess_key for cess_key in list(CONFIG["map_text"].keys())))
-CESS_KEYS = np.array(list(CONFIG["map_text"].keys()))[IS_CESS_KEY]
-if not CONFIG["ison_cess_date_hist"]:
-    for key in CESS_KEYS:
-        CONFIG["map_text"].pop(key, None)
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
@@ -104,7 +98,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CONFIG["onset_and_cessation_title"],
+                                id="navbarbrand",
                                 className="ml-2",
                             )
                         ),
@@ -130,51 +124,67 @@ def controls_layout():
         [
             html.Div(
                 [
-                    html.H5(
-                        [
-                            CONFIG["onset_and_cessation_title"],
-                        ]
-                    ),
-                    html.P(
-                        f"""
-                        The Maproom explores current and historical rainy season onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                         dates based on user-defined definitions.
-                        The date when the rainy season starts with germinating rains
-                        is critical to agriculture planification, in particular for planting.
-                        """
-                    ),
+                    html.H5(id="app_title"),
+                    html.P([
+                        (
+                            f"""
+                            The Maproom explores current and historical rainy season onset
+                            """
+                        ),
+                        html.Span(id="andcess"),
+                        (
+                            f"""
+                            dates based on user-defined definitions.
+                            The date when the rainy season starts with germinating rains
+                            is critical to agriculture planification, in particular for planting.
+                            """
+                        ),
+                    ]),
                     dcc.Loading(html.P(id="map_description"), type="dot"),
-                    html.P(
-                        f"""
-                        The Control Panel below allows to make other maps
-                        and change the definition of the onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                        dates.
-                        """
-                    ),
-                    html.P(
-                        f"""
-                        The local information shows first whether
-                        the germinating rains have occured or not and when.
-                        Graphics of historical onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                        dates are presented in the form of time series
-                        and probability of exceeding.
-                        Pick another point with the controls below
-                        or by clicking on the map.
-                        """
-                    ),
-                    html.P(
-                        f"""
-                        By enabling the exploration of the current and historical onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                         dates, the Maproom allows to monitor
-                        and understand the spatial and temporal variability of how seasons unfold and
-                        therefore characterize the risk for a successful
-                        agricultural campaign.
-                        """
-                    ),
+                    html.P([
+                        (
+                            f"""
+                            The Control Panel below allows to make other maps
+                            and change the definition of the onset
+                            """
+                        ),
+                        html.Span(id="andcess2"),
+                        f"""dates.""",
+                    ]),
+                    html.P([
+                        (
+                            f"""
+                            The local information shows first whether
+                            the germinating rains have occured or not and when.
+                            Graphics of historical onset
+                            """
+                        ),
+                        html.Span(id="andcess3"),
+                        (
+                            f"""
+                            dates are presented in the form of time series
+                            and probability of exceeding.
+                            Pick another point with the controls below
+                            or by clicking on the map.
+                            """
+                        ),
+                    ]),
+                    html.P([
+                        (
+                            f"""
+                            By enabling the exploration of the current and historical onset
+                            """
+                        ),
+                        html.Span(id="andcess4"),
+                        (
+                            f"""
+                            dates, the Maproom allows to monitor
+                            and understand the spatial and temporal variability of how seasons unfold and
+                            therefore characterize the risk for a successful
+                            agricultural campaign.
+                            """
+                        ),
+                    ]),
                     html.P(
                         """
                         The definition of the onset can be set up in the Controls above
@@ -191,23 +201,25 @@ def controls_layout():
                         is ahead of the expected onset date.
                         """
                     ),
-                ]+[
-                    html.P([html.H6(val["menu_label"]), html.P(val["description"])])
-                    for key, val in CONFIG["map_text"].items()
-                ]+[
-                    html.P(
-                        f"""
-                        Note that if the criteria to define the
-                        onset{"/cessation " if CONFIG["ison_cess_date_hist"] else " "}
-                        date are not met within the search period, the analysis will
-                        return a missing value. And if the analysis returns 0,
-                        it is likely that the
-                        onset{"/cessation " if CONFIG["ison_cess_date_hist"] else " "}
-                        has already occured and thus that the date from when to search is
-                        within{"/passed " if CONFIG["ison_cess_date_hist"] else " "}
-                        the rainy season.
-                        """
-                    ),
+                    html.Div(id="maplabdesc"),
+                    html.P([
+                        f"""Note that if the criteria to define the onset""",
+                        html.Span(id="andcess5"),
+                        (
+                            f"""
+                            date are not met within the search period, the analysis will
+                            return a missing value. And if the analysis returns 0,
+                            it is likely that the onset"""
+                        ),
+                        html.Span(id="andcess6"),
+                        (
+                            f"""
+                            has already occured and thus that the date from when to
+                            search is within"""
+                        ),
+                        html.Span(id="andcess7"),
+                        f"""the rainy season.""",
+                    ]),
                     html.H5("Dataset Documentation"),
                     html.P(
                         f"""
@@ -253,11 +265,7 @@ def controls_layout():
                         ),
                     ),
                     Block("Ask the map:",
-                        Select(
-                            "map_choice",
-                            [key for key, val in CONFIG["map_text"].items()],
-                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
-                        ),
+                        html.Div(id="mapchoice"),
                         html.P(
                             Sentence(
                                 Number("prob_exc_thresh_onset", 30, min=0, width="5em"),
@@ -283,12 +291,7 @@ def controls_layout():
                     ),
                     Block(
                         "Onset Date Search Period",
-                        Sentence(
-                            "From Early Start date of",
-                            DateNoYear("search_start_", 1, CONFIG["default_search_month"]),
-                            "and within the next",
-                            Number("search_days", 90, min=0, max=9999, width="5em"), "days",
-                        ),
+                        html.Div(id="onsetsearchperiod"),
                     ),
                     Block(
                         "Wet Day Definition",
@@ -300,35 +303,9 @@ def controls_layout():
                     ),
                     Block(
                         "Onset Date Definition",
-                        Sentence(
-                            "First spell of",
-                            Number("running_days", CONFIG["default_running_days"], min=0, max=999, width="4em"),
-                            "days that totals",
-                            Number("running_total", 20, min=0, max=99999, width="5em"),
-                            "mm or more and with at least",
-                            Number("min_rainy_days", CONFIG["default_min_rainy_days"], min=0, max=999, width="4em"),
-                            "wet day(s) that is not followed by a",
-                            Number("dry_days", 7, min=0, max=999, width="4em"),
-                            "-day dry spell within the next",
-                            Number("dry_spell", 21, min=0, max=9999, width="4em"),
-                            "days",
-                        ),
+                        html.Div(id="onsetdef"),
                     ),
-                    Block(
-                        "Cessation Date Definition",
-                        Sentence(
-                            "First date after",
-                            DateNoYear("cess_start_", 1, CONFIG["default_search_month_cess"]),
-                            "in",
-                            Number("cess_search_days", 90, min=0, max=99999, width="5em"),
-                            "days when the soil moisture falls below",
-                            Number("cess_soil_moisture", 5, min=0, max=999, width="5em"),
-                            "mm for a period of",
-                            Number("cess_dry_spell", 3, min=0, max=999, width="5em"),
-                            "days",
-                        ),
-                        is_on=CONFIG["ison_cess_date_hist"]
-                    ),
+                    html.Div(id="cessdef"),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
             ),
