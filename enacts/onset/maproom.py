@@ -22,6 +22,8 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 import datetime
+from controls import Block, Sentence, DateNoYear, Number, Select
+
 
 from globals_ import FLASK, GLOBAL_CONFIG
 
@@ -36,6 +38,11 @@ def register(FLASK, config):
 
     PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}'
     TILE_PFX = f"{PFX}/tile"
+    IS_CESS_KEY = np.array(list("length_" in cess_key for cess_key in list(config["map_text"].keys())))
+    CESS_KEYS = np.array(list(config["map_text"].keys()))[IS_CESS_KEY]
+    if not config["ison_cess_date_hist"]:
+        for key in CESS_KEYS:
+            config["map_text"].pop(key, None)
     APP = dash.Dash(
         __name__,
         server=FLASK,
@@ -107,13 +114,27 @@ def register(FLASK, config):
         Output("lng_input_tooltip", "children"),
         Output("map", "center"),
         Output("map", "max_bounds"),
+        Output("navbarbrand", "children"),
+        Output("app_title", "children"),
+        Output("andcess", "children"),
+        Output("andcess2", "children"),
+        Output("andcess3", "children"),
+        Output("andcess4", "children"),
+        Output("andcess5", "children"),
+        Output("andcess6", "children"),
+        Output("andcess7", "children"),        
+        Output("maplabdesc", "children"),
+        Output("mapchoice", "children"),
+        Output("onsetsearchperiod", "children"),
+        Output("onsetdef", "children"),
+        Output("cessdef", "children"),
         Input("location", "pathname"),
     )
     def initialize(path):
         rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
         center_of_the_map = [
-            ((rr_mrg["Y"][int(data["Y"].size/2)].values)),
-            ((rr_mrg["X"][int(data["X"].size/2)].values)),
+            ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
+            ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
         ]
         lat_res = (rr_mrg["Y"][0 ]- rr_mrg["Y"][1]).values
         lat_min = str((rr_mrg["Y"][-1] - lat_res/2).values)
@@ -123,11 +144,64 @@ def register(FLASK, config):
         lon_max = str((rr_mrg["X"][-1] + lon_res/2).values)
         lat_label = lat_min + " to " + lat_max + " by " + str(lat_res) + "˚"
         lon_label = lon_min + " to " + lon_max + " by " + str(lon_res) + "˚"
+        cess_text = " and cessation" if config["ison_cess_date_hist"] else " "
+        cess_text2 = "/cessation " if config["ison_cess_date_hist"] else " "
+        cess_text3 = "/passed " if config["ison_cess_date_hist"] else " "
+        map_label_description = [
+            html.P([html.H6(val["menu_label"]), html.P(val["description"])])
+                for key, val in config["map_text"].items()
+        ]
+        map_choice = Select(
+            "map_choice",
+            [key for key, val in config["map_text"].items()],
+            labels=[val["menu_label"] for key, val in config["map_text"].items()],
+        )
+        onset_search_period = Sentence(
+            "From Early Start date of",
+            DateNoYear("search_start_", 1, config["default_search_month"]),
+            "and within the next",
+            Number("search_days", 90, min=0, max=9999, width="5em"), "days",
+        )
+        onset_def = Sentence(
+            "First spell of",
+            Number("running_days", config["default_running_days"], min=0, max=999, width="4em"),
+            "days that totals",
+            Number("running_total", 20, min=0, max=99999, width="5em"),
+            "mm or more and with at least",
+            Number("min_rainy_days", config["default_min_rainy_days"], min=0, max=999, width="4em"),
+            "wet day(s) that is not followed by a",
+            Number("dry_days", 7, min=0, max=999, width="4em"),
+            "-day dry spell within the next",
+            Number("dry_spell", 21, min=0, max=9999, width="4em"),
+            "days",
+        )
+        cess_def = Block(
+                "Cessation Date Definition",
+                Sentence(
+                    "First date after",
+                    DateNoYear("cess_start_", 1, config["default_search_month_cess"]),
+                    "in",
+                    Number("cess_search_days", 90, min=0, max=99999, width="5em"),
+                    "days when the soil moisture falls below",
+                    Number("cess_soil_moisture", 5, min=0, max=999, width="5em"),
+                    "mm for a period of",
+                    Number("cess_dry_spell", 3, min=0, max=999, width="5em"),
+                    "days",
+                ),
+                is_on=config["ison_cess_date_hist"]
+        )
         return (
             lat_min, lat_max, lat_label,
             lon_min, lon_max, lon_label,
             center_of_the_map,
             [[lat_min, lon_min],[lat_max, lon_max]],
+            ("Climate and Agriculture / " + config["onset_and_cessation_title"]),
+            config["onset_and_cessation_title"],
+            cess_text, cess_text, cess_text, cess_text,
+            cess_text2, cess_text2,
+            cess_text3,
+            map_label_description, map_choice, onset_search_period,
+            onset_def, cess_def,
         )
 
 
@@ -736,7 +810,7 @@ def register(FLASK, config):
         if not config["ison_cess_date_hist"]:
             tab_style = {"display": "none"}
             return {}, {}, tab_style
-        els
+        else:
             rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
             tab_style = {}
             lat = marker_pos[0]
