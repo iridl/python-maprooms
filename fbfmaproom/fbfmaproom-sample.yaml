@@ -420,7 +420,7 @@ countries:
                 predictors:
                     - prcp-v1
                     - enacts-precip-mon
-                predictand: bad-years-v3
+                predictand: bad-years-ndj
             observations:
                 enacts-precip-mon:
                     label: ENACTS MON precip
@@ -502,20 +502,10 @@ countries:
                     lower_is_worse: yes
                     format: number3
                 enso_state: *enso_3mo
-                bad-years-v2:
-                    label: Drought humanitarian ranking v2
-                    description: Drought ranking of expert committee humanitarian data review (v2)
-                    path: madagascar/bad-years-djf.zarr
-                    var_names:
-                        value: rank
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number0
-                bad-years-v3:
-                    label: Drought humanitarian ranking v3
-                    description: Drought ranking of expert committee humanitarian data review (v3)
-                    path: madagascar/bad-years-v3-djf.zarr
+                bad-years-ndj:
+                    label: Drought humanitarian ranking
+                    description: Drought ranking of expert committee humanitarian data review Dec 2022 Workshop
+                    path: madagascar/bad-years-ndj.zarr
                     var_names:
                         value: rank
                         time: T
