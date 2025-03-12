@@ -76,10 +76,7 @@ datasets:
 maprooms:
     # Onset
     onset:
-    - core_path: onset
-      title: Growing Season Maproom
-      onset_and_cessation_title: Planting and Harvest Decision Support Maproom
-      default_search_month: May
+    - default_search_month: May
       default_search_month_cess: Sep
       default_running_days: 3
       default_min_rainy_days: 1
@@ -97,9 +94,7 @@ maprooms:
       kc_l: [3, 27, 45, 60]
       taw_file: /data/remic/mydatafiles/soilgrids/Senegal/GYGA_ERZD_wat_cap_abs_anacim_enacts3.nc
       taw_max: 136
-    
-    crop_suitability: null
-    
+        
     monthly:
     - vars:
         Rainfall:
@@ -111,4 +106,26 @@ maprooms:
           min: -5
           max: 40
     
+    crop_suitability:
+    - map_text:
+        precip:
+          map_max: 400
+          map_min: 0
+        tmax:
+          map_max: 42
+          map_min: 10
+        tmin:
+          map_max: 32
+          map_min: 0
+      param_defaults:
+        target_season: 1 #from DJF, MAM, JJA or SON
+        lower_wet_thresh: 500 #mm; cumulative for the season
+        upper_wet_thresh: 700 #mm; cumulative for the season
+        min_temp: 10 #C
+        max_temp: 25 #C
+        temp_range: 15 #C; amplitude: `max_temp - min_temp`
+        season_length: 75 #days 
+        min_wet_days: 60 #days
+        wet_day_def: 1 #mm
+
     flex_fcst: null
