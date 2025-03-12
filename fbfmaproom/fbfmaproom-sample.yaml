@@ -576,7 +576,7 @@ countries:
                 predictors:
                     - pnep-v3
                     - enacts-precip-mon
-                predictand: bad-years
+                predictand: bad-years-v2
             observations:
                 enacts-precip-mon:
                     label: ENACTS MON precip
