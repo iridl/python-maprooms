@@ -2,6 +2,7 @@ import os
 import flask
 import dash
 from dash import ALL
+from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
@@ -15,6 +16,7 @@ import pandas as pd
 import numpy as np
 import urllib
 import datetime
+from controls import Sentence, DateNoYear, Number, Select, Text
 
 import xarray as xr
 import agronomy as ag
@@ -110,9 +112,12 @@ def register(FLASK, config):
         Output("lng_input_tooltip", "children"),
         Output("map", "center"),
         Output("map", "max_bounds"),
-        Output("planting2_year", "min"),
-        Output("planting2_year", "value"),
-        Output("planting2_year", "max"),
+        Output("navbarbrand", "children"),
+        Output("app_title", "children"),
+        Output("maplabdesc", "children"),
+        Output("mapchoice", "children"),
+        Output("curseas", "children"),
+        Output("otherseas", "children"),
         Input("location", "pathname"),
     )
     def initialize(path):
@@ -121,23 +126,116 @@ def register(FLASK, config):
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
         ]
-        lat_res = np.around((rr_mrg["Y"][1]-rr_mrg["Y"][0]).values, decimals=10)
-        lat_min = np.around((rr_mrg["Y"][0]-lat_res/2).values, decimals=10)
-        lat_max = np.around((rr_mrg["Y"][-1]+lat_res/2).values, decimals=10)
-        lon_res = np.around((rr_mrg["X"][1]-rr_mrg["X"][0]).values, decimals=10)
-        lon_min = np.around((rr_mrg["X"][0]-lon_res/2).values, decimals=10)
-        lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
-        lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
-        lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
+        lat_res = (rr_mrg["Y"][0 ]- rr_mrg["Y"][1]).values
+        lat_min = str((rr_mrg["Y"][-1] - lat_res/2).values)
+        lat_max = str((rr_mrg["Y"][0] + lat_res/2).values)
+        lon_res = (rr_mrg["X"][1] - rr_mrg["X"][0]).values
+        lon_min = str((rr_mrg["X"][0] - lon_res/2).values)
+        lon_max = str((rr_mrg["X"][-1] + lon_res/2).values)
+        lat_label = lat_min + " to " + lat_max + " by " + str(lat_res) + "˚"
+        lon_label = lon_min + " to " + lon_max + " by " + str(lon_res) + "˚"
         first_year =  rr_mrg["T"][0].dt.year.values
         one_to_last_year = rr_mrg["T"][-367].dt.year.values
         last_year =  rr_mrg["T"][-1].dt.year.values
+        map_label_description = [
+            html.P([html.H6(val["menu_label"]), html.P(val["description"])])
+                for key, val in config["map_text"].items()
+        ]
+        map_choice = Select(
+            "map_choice",
+            [key for key, val in config["map_text"].items()],
+            labels=[val["menu_label"] for key, val in config["map_text"].items()],
+        )
+        current_season = (
+            Sentence(
+                "Planting Date",
+                DateNoYear("planting_", 1, config["planting_month"]),
+                "for",
+                Text("crop_name", config["crop_name"]),
+                "crop cultivars: initiated at",
+            ),
+            Sentence(
+                Number("kc_init", config["kc_v"][0], min=0, max=2, width="5em"),
+                "through",
+                Number("kc_init_length", config["kc_l"][0], min=0, max=99, width="4em"),
+                "days of initialization to",
+            ),
+            Sentence(
+                Number("kc_veg", config["kc_v"][1], min=0, max=2, width="5em"),
+                "through",
+                Number("kc_veg_length", config["kc_l"][1], min=0, max=99, width="4em"),
+                "days of growth to",
+            ),
+            Sentence(
+                Number("kc_mid", config["kc_v"][2], min=0, max=2, width="5em"),
+                "through",
+                Number("kc_mid_length", config["kc_l"][2], min=0, max=99, width="4em"),
+                "days of mid-season to",
+            ),
+            Sentence(
+                Number("kc_late", config["kc_v"][3], min=0, max=2, width="5em"),
+                "through",
+                Number("kc_late_length", config["kc_l"][3], min=0, max=99, width="4em"),
+                "days of late-season to",
+            ),
+            Sentence(
+                Number("kc_end", config["kc_v"][4], min=0, max=2, width="5em"),
+            ),
+        )
+        other_season = (
+            Sentence(
+                "Planting Date",
+                DateNoYear("planting2_", 1, config["planting_month"]),
+                "",
+                Number(
+                    "planting2_year",
+                    one_to_last_year,
+                    min=f'{first_year}',
+                    max=f'{last_year}',
+                    width="120px",
+                ),
+            ),
+            Sentence(
+                "for",
+                Text("crop2_name", config["crop_name"]),
+                "crop cultivars: initiated at",
+            ),
+            Sentence(
+                Number("kc2_init", config["kc_v"][0], min=0, max=2, width="5em"),
+                "through",
+                Number("kc2_init_length", config["kc_l"][0], min=0, max=99, width="4em"),
+                "days of initialization to",
+            ),
+            Sentence(
+                Number("kc2_veg", config["kc_v"][1], min=0, max=2, width="5em"),
+                "through",
+                Number("kc2_veg_length", config["kc_l"][1], min=0, max=99, width="4em"),
+                "days of growth to",
+            ),
+            Sentence(
+                Number("kc2_mid", config["kc_v"][2], min=0, max=2, width="5em"),
+                "through",
+                Number("kc2_mid_length", config["kc_l"][2], min=0, max=99, width="4em"),
+                "days of mid-season to",
+            ),
+            Sentence(
+                Number("kc2_late", config["kc_v"][3], min=0, max=2, width="5em"),
+                "through",
+                Number("kc2_late_length", config["kc_l"][3], min=0, max=99, width="4em"),
+                "days of late-season to",
+            ),
+            Sentence(
+                Number("kc2_end", config["kc_v"][4], min=0, max=2, width="5em"),
+            ),
+        )
         return (
             lat_min, lat_max, lat_label,
             lon_min, lon_max, lon_label,
             center_of_the_map,
             [[lat_min, lon_min],[lat_max, lon_max]],
-            first_year, one_to_last_year, last_year,
+            ("Climate and Agriculture / " + config["title"]),
+            config["title"], map_label_description, map_choice,
+            current_season, other_season,
         )
 
 

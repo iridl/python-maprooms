@@ -107,7 +107,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CONFIG["title"],
+                                id="navbarbrand",
                                 className="ml-2",
                             )
                         ),
@@ -152,11 +152,7 @@ def controls_layout():
         [
             html.Div(
                 [
-                    html.H5(
-                        [
-                            CONFIG["title"],
-                        ]
-                    ),
+                    html.H5(id="app_title"),
                     html.P(
                         f"""
 			The Maproom monitors recent daily water balance.
@@ -195,10 +191,7 @@ def controls_layout():
                         """)
                     ),
                     html.H5("Water Balance Outputs"),
-                ]+[
-                    html.P([html.H6(val["menu_label"]), html.P(val["description"])])
-                    for key, val in CONFIG["map_text"].items()
-                ]+[
+                    html.Div(id="maplabdesc"),
                     html.H5("Dataset Documentation"),
                     html.P(
                         f"""
@@ -251,49 +244,13 @@ def controls_layout():
                             ],
                         ),
                     ),
-                    Block("Water Balance Outputs to display",
-                        Select(
-                            "map_choice",
-                            [key for key, val in CONFIG["map_text"].items()],
-                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
-                        ),
+                    Block(
+                        "Water Balance Outputs to display",
+                        html.Div(id="mapchoice"),
                     ),
                     Block(
                         "Current Season",
-                        Sentence(
-                            "Planting Date",
-                            DateNoYear("planting_", 1, CONFIG["planting_month"]),
-                            "for",
-                            Text("crop_name", CONFIG["crop_name"]),
-                            "crop cultivars: initiated at",
-                        ),
-                        Sentence(
-                            Number("kc_init", CONFIG["kc_v"][0], min=0, max=2, width="5em"),
-                            "through",
-                            Number("kc_init_length", CONFIG["kc_l"][0], min=0, max=99, width="4em"),
-                            "days of initialization to",
-                        ),
-                        Sentence(
-                            Number("kc_veg", CONFIG["kc_v"][1], min=0, max=2, width="5em"),
-                            "through",
-                            Number("kc_veg_length", CONFIG["kc_l"][1], min=0, max=99, width="4em"),
-                            "days of growth to",
-                        ),
-                        Sentence(
-                            Number("kc_mid", CONFIG["kc_v"][2], min=0, max=2, width="5em"),
-                            "through",
-                            Number("kc_mid_length", CONFIG["kc_l"][2], min=0, max=99, width="4em"),
-                            "days of mid-season to",
-                        ),
-                        Sentence(
-                            Number("kc_late", CONFIG["kc_v"][3], min=0, max=2, width="5em"),
-                            "through",
-                            Number("kc_late_length", CONFIG["kc_l"][3], min=0, max=99, width="4em"),
-                            "days of late-season to",
-                        ),
-                        Sentence(
-                            Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, width="5em"),
-                        ),
+                        html.Div(id="curseas"),
                         dbc.Button(
                             id="submit_kc",
                             children='Submit',
@@ -304,48 +261,7 @@ def controls_layout():
                     ),
                     Block(
                         "Compare to...",
-                        Sentence(
-                            "Planting Date",
-                            DateNoYear("planting2_", 1, CONFIG["planting_month"]),
-                            "",
-                            dbc.Input(
-                                id="planting2_year",
-                                type=number,
-                                style={"width": "120px"},
-                            ),
-                        ),
-                        Sentence(
-                            "for",
-                            Text("crop2_name", CONFIG["crop_name"]),
-                            "crop cultivars: initiated at",
-                        ),
-                        Sentence(
-                            Number("kc2_init", CONFIG["kc_v"][0], min=0, max=2, width="5em"),
-                            "through",
-                            Number("kc2_init_length", CONFIG["kc_l"][0], min=0, max=99, width="4em"),
-                            "days of initialization to",
-                        ),
-                        Sentence(
-                            Number("kc2_veg", CONFIG["kc_v"][1], min=0, max=2, width="5em"),
-                            "through",
-                            Number("kc2_veg_length", CONFIG["kc_l"][1], min=0, max=99, width="4em"),
-                            "days of growth to",
-                        ),
-                        Sentence(
-                            Number("kc2_mid", CONFIG["kc_v"][2], min=0, max=2, width="5em"),
-                            "through",
-                            Number("kc2_mid_length", CONFIG["kc_l"][2], min=0, max=99, width="4em"),
-                            "days of mid-season to",
-                        ),
-                        Sentence(
-                            Number("kc2_late", CONFIG["kc_v"][3], min=0, max=2, width="5em"),
-                            "through",
-                            Number("kc2_late_length", CONFIG["kc_l"][3], min=0, max=99, width="4em"),
-                            "days of late-season to",
-                        ),
-                        Sentence(
-                            Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, width="5em"),
-                        ),
+                        html.Div(id="otherseas"),
                         dbc.Button(
                             id="submit_kc2",
                             children='Submit',
@@ -364,7 +280,7 @@ def controls_layout():
     )
 
 
-def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
+def map_layout():
     return dbc.Container(
         [
             dlf.Map(
