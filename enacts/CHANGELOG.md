@@ -10,9 +10,17 @@
 
 * each `map_text` entry has the suffix `_layer` dropped
 
+* `map_text` entries need not `id`
+
+* `target_year` is dropped
+
 ### `flex_fcst`
 
 * `flex_fcst` config value is now a list of dictionaries rather than a single dictionary.
+
+### `onset`
+
+* `onset` config value is now a list of dictionaries rather than a single dictionary.
 
 ## Nota Bene
 
@@ -24,9 +32,4 @@
     ```
     $ ADD metmalawi.png /app/static/
     ```
-
-### `crop_suitability`
-
-* `map_text` entries need not `id`
-
-* `target_year` is dropped
+    
