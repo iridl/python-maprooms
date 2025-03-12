@@ -29,33 +29,10 @@ from globals_ import GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
-def get_shapes(query):
-    with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-        s = sql.SQL(query)
-        df = pd.read_sql(s, conn)
-
-    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-    df["the_geom"] = df["the_geom"].apply(
-        # lambda x: ((x if isinstance(x, MultiPolygon) else MultiPolygon([x]))
-        lambda x: (x
-                   .simplify(0.01, preserve_topology=False))
-    )
-    shapes = df["the_geom"].apply(shapely.geometry.mapping)
-    for i in df.index: #this adds the district layer as a label in the dict
-        shapes[i]['label'] = df['label'][i]
-    return {"features": shapes}
-
-
-# Loading the geometries for the admin layers in the map
-SHAP = {
-    level['name']: get_shapes(level['sql'])
-    for level in GLOBAL_CONFIG['datasets']['shapes_adm']
-}
-
-
 def layout(): # Defining the function that will be called in the layout section of  `maproom.py`.
     return dbc.Container([ # The function will return the dash bootstrap container, and all of its contents.
-       dbc.Row(html.H1(CONFIG["title"])), # First of two rows (horizontal) which is the title bar of the maproom.
+       dcc.Location(id="location", refresh=True),
+       dbc.Row(html.H1(id="app_title")), # First of two rows (horizontal) which is the title bar of the maproom.
 
        dbc.Row([ # second of two rows (horizontal), which contains the rest of the maproom (the map and controls column).
 
@@ -75,50 +52,10 @@ def layout(): # Defining the function that will be called in the layout section 
                         dlf.Map( # Dash leaflet map.
                              [
                                 dlf.LayersControl(
-                                    [
-                                        dlf.BaseLayer(
-                                            dlf.TileLayer(
-                                                opacity=0.6,
-                                                url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", # Cartodb street map.
-                                            ),
-                                            name="Street",
-                                            checked=True,
-                                        ),
-                                        dlf.BaseLayer(
-                                            dlf.TileLayer(
-                                                opacity=0.6,
-                                                url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" # opentopomap topography map.
-                                            ),
-                                            name="Topo",
-                                            checked=False,
-                                        ),
-                                        dlf.Overlay(
-                                            dlf.TileLayer(
-                                                id="map_raster",
-                                            ),
-                                            name="Raster",
-                                            checked=True,
-                                        ),
-                                    ] + [
-                                        dlf.Overlay(
-                                           dlf.GeoJSON(
-                                               data=v,
-                                               options={
-                                                  "fill": False,
-                                                  "color": "black",
-                                                  "weight": .5,
-                                                  "fillOpacity": 0,
-                                               },
-                                           ),
-                                           name=k,
-                                           checked=True,
-                                        )
-                                        for k, v in SHAP.items()
-                                    ],
                                     position="topleft", # Where the layers control button is placed.
                                     id="map_layers_control",
                                 ),
-                                dlf.LayerGroup(dlf.Marker(id="loc_marker",position=GLOBAL_CONFIG['map_center']),id="marker_layer"),
+                                dlf.LayerGroup(dlf.Marker(id="loc_marker",position=(0, 0)),id="marker_layer"),
                                 dlf.ScaleControl(imperial=False, position="topright"), # Define scale bar
                                 html.Div(id="map_colorbar"),
                              ],
@@ -127,7 +64,7 @@ def layout(): # Defining the function that will be called in the layout section 
                                  "width": "100%",
                                  "height": "50vh",
                              },
-                             center=GLOBAL_CONFIG['map_center'], # Where the center of the map will be upon loading the maproom.
+                             center=None,
                              zoom=GLOBAL_CONFIG['zoom'],
                         ),
                         dbc.Spinner(dcc.Graph(id="plot"))

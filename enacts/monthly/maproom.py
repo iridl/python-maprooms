@@ -44,7 +44,7 @@ DATA_DIR = f"{GLOBAL_CONFIG['datasets']['dekadal']['zarr_path']}"
 
 def register(FLASK, config):
 
-    PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}' # Prefix used at the end of the maproom url
+    PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}' # Prefix used at the end of the maproom url
     TILE_PFX = f"{PREFIX}/tile"
 
     APP = dash.Dash(
@@ -68,13 +68,48 @@ def register(FLASK, config):
         return data
 
 
+    def get_shapes(query):
+        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
+            s = sql.SQL(query)
+            df = pd.read_sql(s, conn)
+
+        df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+        df["the_geom"] = df["the_geom"].apply(
+            # lambda x: ((x if isinstance(x, MultiPolygon) else MultiPolygon([x]))
+            lambda x: (x
+                   .simplify(0.01, preserve_topology=False))
+        )
+        shapes = df["the_geom"].apply(shapely.geometry.mapping)
+        for i in df.index: #this adds the district layer as a label in the dict
+            shapes[i]['label'] = df['label'][i]
+        return {"features": shapes}
+
+
+    @APP.callback(
+        Output("app_title", "children"),
+        Output("map", "center"),
+        Input("location", "pathname"),
+    )
+    def initialize(path):
+        rr_mrg = read_data("precip")
+        center_of_the_map = [
+            ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
+            ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
+        ]
+        return config["title"], center_of_the_map
+
+
     @APP.callback( # Callback to return the raster layer of the map
-        Output("map_raster", "url"),
+        Output("map_layers_control", "children"),
         Input("variable", "value"),
         Input("mon0", "value"),
     )
     def update_map(variable, month):
-        var = CONFIG["vars"][variable]
+        SHAP = {
+            level['name']: get_shapes(level['sql'])
+            for level in GLOBAL_CONFIG['datasets']['shapes_adm']
+        }
+        var = config["vars"][variable]
 
         mon = { "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4,
                 "May": 5, "Jun": 6, "Jul": 7, "Aug": 8,
@@ -84,8 +119,49 @@ def register(FLASK, config):
             "variable": variable,
             "month": mon,
         })
-        #return ""
-        return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}"
+        return [
+            dlf.BaseLayer(
+                dlf.TileLayer(
+                    opacity=0.6,
+                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", # Cartodb street map.
+                ),
+                name="Street",
+                checked=True,
+            ),
+            dlf.BaseLayer(
+                dlf.TileLayer(
+                    opacity=0.6,
+                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" # opentopomap topography map.
+                ),
+                name="Topo",
+                checked=False,
+            ),
+        ] + [
+            dlf.Overlay(
+                dlf.GeoJSON(
+                    data=v,
+                    options={
+                        "fill": False,
+                        "color": "black",
+                        "weight": .5,
+                        "fillOpacity": 0,
+                    },
+                ),
+                name=k,
+                checked=True,
+            )
+            for k, v in SHAP.items()
+        ] + [
+            dlf.Overlay(
+                dlf.TileLayer(
+                    url=f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
+                    opacity=1,
+                    id="map_raster",
+                ),
+                name="Raster",
+                checked=True,
+            ),
+        ]
 
 
     @APP.callback( # Callback for updating the location of the market on the map.
@@ -94,7 +170,11 @@ def register(FLASK, config):
     )
     def pick_location(click_lat_lng):
         if click_lat_lng == None:
-            return GLOBAL_CONFIG['map_center']
+            rr_mrg = read_data("precip")
+            return [
+                ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
+                ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
+            ]
         return click_lat_lng                           #  in the data to where the user clicked on the map.
 
     @APP.callback(
@@ -103,7 +183,7 @@ def register(FLASK, config):
         Input("variable","value")
     )
     def create_plot(marker_loc, variable): # Callback that creates bar plot to display data at a given point.
-        var = CONFIG["vars"][variable]
+        var = config["vars"][variable]
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         try:
@@ -154,7 +234,7 @@ def register(FLASK, config):
         Input("variable", "value"),
     )
     def set_colorbar(variable): #setting the color bar colors and values
-        var = CONFIG["vars"][variable]
+        var = config["vars"][variable]
         colormap = select_colormap(var['id'])
         return dlf.Colorbar(
             id="colorbar",
@@ -200,7 +280,7 @@ def register(FLASK, config):
         y_max = pingrid.tile_top_mercator(ty, tz)
         y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
-        varobj = CONFIG['vars'][var]
+        varobj = config['vars'][var]
         data = read_data(varobj['id'])
     
         if (
@@ -241,7 +321,7 @@ def register(FLASK, config):
             s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
             df = pd.read_sql(s, conn)
             clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
-
+        
         result = pingrid.tile(tile, tx, ty, tz, clip_shape)
 
         return result
