@@ -132,12 +132,11 @@ maprooms:
     #crop suitability
     crop_suitability:
  
-        # App   
+        # App
+        title: Climate Suitability for Crops
         core_path: crops_climate_suitability
-
         app_title: Climate Suitability for Crops
         crop_suit_title: Climate Suitability for Crops
-        title: Climate Suitability for Crops
         map_text:
             suitability:
                 menu_label: Crop climate suitability

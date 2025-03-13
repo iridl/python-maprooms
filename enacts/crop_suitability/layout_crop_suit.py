@@ -17,45 +17,21 @@ from globals_ import GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["crop_suitability"]
 
-ZARR_PATH = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
-if ZARR_PATH is None:
-    ZARR_PATH = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
-DR_PATH = f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{ZARR_PATH}'
-RR_MRG_ZARR = Path(DR_PATH)
-
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 
-def app_layout():
-
-    # Initialization
-    rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-    center_of_the_map = [((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)), ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values))]
-    lat_res = np.around((rr_mrg["Y"][1]-rr_mrg["Y"][0]).values, decimals=10)
-    lat_min = np.around((rr_mrg["Y"][0]-lat_res/2).values, decimals=10)
-    lat_max = np.around((rr_mrg["Y"][-1]+lat_res/2).values, decimals=10)
-    lon_res = np.around((rr_mrg["X"][1]-rr_mrg["X"][0]).values, decimals=10)
-    lon_min = np.around((rr_mrg["X"][0]-lon_res/2).values, decimals=10)
-    lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
-    lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
-    lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
-    year_max = str(rr_mrg["T"][-1].dt.year.values)
+def app_layout(config):
 
     return dbc.Container(
         [
             dcc.Location(id="location", refresh=True),
-            navbar_layout(),
+            navbar_layout(config),
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(
-                            lat_min, lat_max,
-                            lon_min, lon_max,
-                            lat_label, lon_label,
-                            year_max,
-                        ),
+                        controls_layout(config),
                         sm=12,
                         md=4,
                         style={
@@ -71,7 +47,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max),
+                                        map_layout(),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -111,7 +87,7 @@ def app_layout():
     )
 
 
-def navbar_layout():
+def navbar_layout(config):
     return dbc.Navbar(
         [
             html.A(
@@ -125,7 +101,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CONFIG["crop_suit_title"],
+                                "Climate and Agriculture / " + config["crop_suit_title"],
                                 className="ml-2",
                             )
                         ),
@@ -146,12 +122,12 @@ def navbar_layout():
     )
 
 
-def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, year_max):
+def controls_layout(config):
     return dbc.Container(
         [
             html.Div(
                 [
-                    html.H5(CONFIG["crop_suit_title"]),
+                    html.H5(config["crop_suit_title"]),
                     html.P(
                         [f"""
                         Maproom to explore crop climate suitability using a 
@@ -183,7 +159,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                     ),
                 ]+[
                     html.P([html.H6(val["menu_label"]), html.P(val["description"])])
-                    for key, val in CONFIG["map_text"].items()
+                    for key, val in config["map_text"].items()
                 ],
                 style={"position":"relative","height":"25%", "overflow":"scroll"},#box holding text
             ),
@@ -193,25 +169,48 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                     Block("Variable",
                         Select(
                             "data_choice",
-                            [key for key, val in CONFIG["map_text"].items()],
-                            labels=[val["menu_label"] for key, val in CONFIG["map_text"].items()],
+                            [key for key, val in config["map_text"].items()],
+                            labels=[val["menu_label"] for key, val in config["map_text"].items()],
                         ),
                     ),
-                    Block(
-                        "Pick a point",
-                        PickPoint(lat_min, lat_max, lat_label, lon_min, lon_max, lon_label),
-                        width="w-auto",
+                    Block("Pick a point",
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="lat_input", type="number",
+                                    ),
+                                    dbc.Label("Latitude", style={"font-size": "80%"}),
+                                    dbc.Tooltip(
+                                        id="lat_input_tooltip",
+                                        target="lat_input",
+                                        className="tooltiptext",
+                                    )]),
+                                ),
+                                dbc.Col(
+                                    dbc.FormFloating([dbc.Input(
+                                        id="lng_input", type="number",
+                                    ),
+                                    dbc.Label("Longitude", style={"font-size": "80%"}),
+                                    dbc.Tooltip(
+                                        id="lng_input_tooltip",
+                                        target="lng_input",
+                                        className="tooltiptext",
+                                    )]),
+                                ),
+                                dbc.Button(id="submit_lat_lng", children='Submit'),
+                            ],
+                        ),
                     ),
                     Block("Map for a Year and a Season:",
                         dbc.Row(
                             [
                                 dbc.Col(
-                                    Number(
-                                        "target_year",
-                                        year_max,
+                                    dbc.Input(
+                                        id="target_year",
+                                        type="number",
                                         min=1981,
-                                        max=year_max,
-                                        width="6em",
+                                        style={"width": "6em"},
                                     ),
                                 ),
                                 dbc.Col(
@@ -219,6 +218,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                                         "target_season",
                                         ["DJF", "MAM", "JJA", "SON"],
                                         labels=["Dec-Feb", "Mar-May", "Jun-Aug", "Sep-Nov"],
+                                        init=config["param_defaults"]["target_season"],
                                     ),
                                 ),
                             ],
@@ -231,9 +231,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Optimum seasonal total rainfall",
                         Sentence(
                             "Total rainfall amount between",
-                            Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999, width="6em"),
+                            Number("lower_wet_threshold", config["param_defaults"]["lower_wet_thresh"], min=0, max=99999, width="6em"),
                             "and",
-                            Number("upper_wet_threshold", CONFIG["param_defaults"]["upper_wet_thresh"], min=0, max=99999, width="6em"),
+                            Number("upper_wet_threshold", config["param_defaults"]["upper_wet_thresh"], min=0, max=99999, width="6em"),
                             "mm",
                         ),
                     ),
@@ -241,9 +241,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Temperature tolerance",
                         Sentence(
                             "Temperature range between",
-                            Number("minimum_temp", CONFIG["param_defaults"]["min_temp"], min=-99, max=999, width="6em"),
+                            Number("minimum_temp", config["param_defaults"]["min_temp"], min=-99, max=999, width="6em"),
                             "and",
-                            Number("maximum_temp", CONFIG["param_defaults"]["max_temp"], min=-99, max=99999, width="6em"),
+                            Number("maximum_temp", config["param_defaults"]["max_temp"], min=-99, max=99999, width="6em"),
                             "C",
                         ),
                     ),
@@ -251,7 +251,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Optimal daily temperature amplitude",
                         Sentence(
                             "An average daily temperature amplitude of:",
-                            Number("temp_range", CONFIG["param_defaults"]["temp_range"], min=0, max=99999, width="4em"),
+                            Number("temp_range", config["param_defaults"]["temp_range"], min=0, max=99999, width="4em"),
                             "C",
                         ),
                     ),
@@ -267,12 +267,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
                         "Wet days",
                         Sentence(
                             "The minimum number of wet days within a season:",
-                            Number("min_wet_days", CONFIG["param_defaults"]["min_wet_days"], min=0, max=99999, width="5em"),
+                            Number("min_wet_days", config["param_defaults"]["min_wet_days"], min=0, max=99999, width="5em"),
                             "days",
                         ),
                         Sentence(
                             "Where a wet day is defined as a day with rainfall more than:",
-                            Number("wet_day_def", CONFIG["param_defaults"]["wet_day_def"], min=0, max=9999, width="5em"),
+                            Number("wet_day_def", config["param_defaults"]["wet_day_def"], min=0, max=9999, width="5em"),
                             "mm",
                         ),
                     ),
@@ -288,7 +288,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ye
         style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
     )    #style for container that is returned #95vh
 
-def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
+def map_layout():
     return dbc.Container(
         [
             dlf.Map(
@@ -318,9 +318,8 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                     )
                 ],
                 id="map",
-                center=center_of_the_map,
+                center=None,
                 zoom=GLOBAL_CONFIG["zoom"],
-                maxBounds = [[lat_min, lon_min],[lat_max, lon_max]],
                 minZoom = GLOBAL_CONFIG["zoom"] - 1,
                 maxZoom = GLOBAL_CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
