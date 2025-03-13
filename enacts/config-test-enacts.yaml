@@ -91,9 +91,7 @@ maprooms:
               map_max: 40
 
     wat_bal:
-    - core_path: wat_bal
-      title: Soil Plant Water Balance Monitoring
-      planting_month: Jun
+    - planting_month: Jun
       crop_name: Rice
       kc_v: [0, 0, 1.1, 1.1, 0]
       kc_l: [3, 27, 45, 60]
