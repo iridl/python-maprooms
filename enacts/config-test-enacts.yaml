@@ -90,7 +90,14 @@ maprooms:
           length_stddev:
               map_max: 40
 
-    wat_bal: null
+    wat_bal:
+    - planting_month: Jun
+      crop_name: Rice
+      kc_v: [0, 0, 1.1, 1.1, 0]
+      kc_l: [3, 27, 45, 60]
+      taw_file: /data/remic/mydatafiles/soilgrids/Senegal/GYGA_ERZD_wat_cap_abs_anacim_enacts3.nc
+      taw_max: 136
+    
     crop_suitability: null
     
     monthly:
