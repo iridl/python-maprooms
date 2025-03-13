@@ -133,7 +133,7 @@ maprooms:
     crop_suitability:
  
         # App
-        title: CSC
+        title: Climate Suitability for Crops
         core_path: crops_climate_suitability
         app_title: Climate Suitability for Crops
         crop_suit_title: Climate Suitability for Crops
