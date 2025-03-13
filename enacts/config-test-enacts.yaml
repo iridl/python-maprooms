@@ -94,9 +94,7 @@ maprooms:
     crop_suitability: null
     
     monthly:
-    - core_path: monthly-climatology
-      title: Monthly Climatology Maproom
-      vars:
+    - vars:
         Rainfall:
           max: 350
         Minimum Temperature:
