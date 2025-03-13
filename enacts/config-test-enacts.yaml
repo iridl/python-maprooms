@@ -47,7 +47,31 @@ datasets:
                 - et0
 
     # Dekadal ENACTS Zarr conversion
-    #dekadal: # Same-same as daily
+    dekadal:
+        nc_path: /Data/data23/
+        zarr_resolution: null #set to null for no regridding
+        chunks: #consider changing chunk sizes if regridding
+            T: 360
+            Y: 31
+            X: 29
+        zarr_path: /data/remic/mydatafiles/
+        vars:
+           #var name in file name:
+           #    - input file path relative to nc_path
+           #    - output file path relative to zarr_path (set to null if same as input file path)
+           #    - var name def in file
+            precip: 
+                - ANACIM/anacim_v3/ALL_block2/rr_mrg_dekad/
+                - null
+                - precip
+            tmax: 
+                - ANACIM/anacim_v3/ALL_block2/tx_mrg_dekad/
+                - null
+                - temp
+            tmin: 
+                - ANACIM/anacim_v3/ALL_block2/tn_mrg_dekad/
+                - null
+                - temp
 
 maprooms:
     # Onset
@@ -68,5 +92,16 @@ maprooms:
 
     wat_bal: null
     crop_suitability: null
-    monthly: null
+    
+    monthly:
+    - vars:
+        Rainfall:
+          max: 350
+        Minimum Temperature:
+          min: -5
+          max: 40
+        Maximum Temperature:
+          min: -5
+          max: 40
+    
     flex_fcst: null
