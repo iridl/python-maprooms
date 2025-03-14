@@ -35,7 +35,9 @@ def register(FLASK, config):
 
     PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}'
     TILE_PFX = f"{PFX}/tile"
-    IS_CESS_KEY = np.array(list("length_" in cess_key for cess_key in list(config["map_text"].keys())))
+    IS_CESS_KEY = np.array(
+        list("length_" in cess_key for cess_key in list(config["map_text"].keys()))
+    )
     CESS_KEYS = np.array(list(config["map_text"].keys()))[IS_CESS_KEY]
     if not config["ison_cess_date_hist"]:
         for key in CESS_KEYS:
@@ -162,11 +164,23 @@ def register(FLASK, config):
         )
         onset_def = Sentence(
             "First spell of",
-            Number("running_days", config["default_running_days"], min=0, max=999, width="4em"),
+            Number(
+                "running_days",
+                config["default_running_days"],
+                min=0,
+                max=999,
+                width="4em",
+            ),
             "days that totals",
             Number("running_total", 20, min=0, max=99999, width="5em"),
             "mm or more and with at least",
-            Number("min_rainy_days", config["default_min_rainy_days"], min=0, max=999, width="4em"),
+            Number(
+                "min_rainy_days",
+                config["default_min_rainy_days"],
+                min=0,
+                max=999,
+                width="4em",
+            ),
             "wet day(s) that is not followed by a",
             Number("dry_days", 7, min=0, max=999, width="4em"),
             "-day dry spell within the next",
@@ -177,7 +191,9 @@ def register(FLASK, config):
                 "Cessation Date Definition",
                 Sentence(
                     "First date after",
-                    DateNoYear("cess_start_", 1, config["default_search_month_cess"]),
+                    DateNoYear(
+                        "cess_start_", 1, config["default_search_month_cess"]
+                    ),
                     "in",
                     Number("cess_search_days", 90, min=0, max=99999, width="5em"),
                     "days when the soil moisture falls below",

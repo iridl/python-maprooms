@@ -32,8 +32,12 @@ from globals_ import FLASK, GLOBAL_CONFIG
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
 
 RR_MRG_READ_PARAMS = {"time_res": "daily", "ds_conf": GLOBAL_CONFIG['datasets']}
-TMIN_MRG_READ_PARAMS = {"variable": "tmin", "time_res": "daily", "ds_conf": GLOBAL_CONFIG['datasets']}
-TMAX_MRG_READ_PARAMS = {"variable": "tmax", "time_res": "daily", "ds_conf": GLOBAL_CONFIG['datasets']}
+TMIN_MRG_READ_PARAMS = {
+    "variable": "tmin", "time_res": "daily", "ds_conf": GLOBAL_CONFIG['datasets']
+}
+TMAX_MRG_READ_PARAMS = {
+    "variable": "tmax", "time_res": "daily", "ds_conf": GLOBAL_CONFIG['datasets']
+}
 
 CROP_SUIT_COLORMAP = pingrid.ColorScale(
     "crop_suit",
@@ -620,7 +624,9 @@ def register(FLASK, config):
         map.attrs["scale_min"] = map_min
         map.attrs["scale_max"] = map_max
         with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed([sql.SQL(GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'])])
+            s = sql.Composed(
+                [sql.SQL(GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'])]
+            )
             df = pd.read_sql(s, conn)
             clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
         result = pingrid.tile(map.astype('float64'), tx, ty, tz, clip_shape)

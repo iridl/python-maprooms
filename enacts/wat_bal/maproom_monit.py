@@ -156,25 +156,33 @@ def register(FLASK, config):
             Sentence(
                 Number("kc_init", config["kc_v"][0], min=0, max=2, width="5em"),
                 "through",
-                Number("kc_init_length", config["kc_l"][0], min=0, max=99, width="4em"),
+                Number(
+                    "kc_init_length", config["kc_l"][0], min=0, max=99, width="4em"
+                ),
                 "days of initialization to",
             ),
             Sentence(
                 Number("kc_veg", config["kc_v"][1], min=0, max=2, width="5em"),
                 "through",
-                Number("kc_veg_length", config["kc_l"][1], min=0, max=99, width="4em"),
+                Number(
+                    "kc_veg_length", config["kc_l"][1], min=0, max=99, width="4em"
+                ),
                 "days of growth to",
             ),
             Sentence(
                 Number("kc_mid", config["kc_v"][2], min=0, max=2, width="5em"),
                 "through",
-                Number("kc_mid_length", config["kc_l"][2], min=0, max=99, width="4em"),
+                Number(
+                    "kc_mid_length", config["kc_l"][2], min=0, max=99, width="4em"
+                ),
                 "days of mid-season to",
             ),
             Sentence(
                 Number("kc_late", config["kc_v"][3], min=0, max=2, width="5em"),
                 "through",
-                Number("kc_late_length", config["kc_l"][3], min=0, max=99, width="4em"),
+                Number(
+                    "kc_late_length", config["kc_l"][3], min=0, max=99, width="4em"
+                ),
                 "days of late-season to",
             ),
             Sentence(
@@ -202,25 +210,33 @@ def register(FLASK, config):
             Sentence(
                 Number("kc2_init", config["kc_v"][0], min=0, max=2, width="5em"),
                 "through",
-                Number("kc2_init_length", config["kc_l"][0], min=0, max=99, width="4em"),
+                Number(
+                    "kc2_init_length", config["kc_l"][0], min=0, max=99, width="4em"
+                ),
                 "days of initialization to",
             ),
             Sentence(
                 Number("kc2_veg", config["kc_v"][1], min=0, max=2, width="5em"),
                 "through",
-                Number("kc2_veg_length", config["kc_l"][1], min=0, max=99, width="4em"),
+                Number(
+                    "kc2_veg_length", config["kc_l"][1], min=0, max=99, width="4em"
+                ),
                 "days of growth to",
             ),
             Sentence(
                 Number("kc2_mid", config["kc_v"][2], min=0, max=2, width="5em"),
                 "through",
-                Number("kc2_mid_length", config["kc_l"][2], min=0, max=99, width="4em"),
+                Number(
+                    "kc2_mid_length", config["kc_l"][2], min=0, max=99, width="4em"
+                ),
                 "days of mid-season to",
             ),
             Sentence(
                 Number("kc2_late", config["kc_v"][3], min=0, max=2, width="5em"),
                 "through",
-                Number("kc2_late_length", config["kc_l"][3], min=0, max=99, width="4em"),
+                Number(
+                    "kc2_late_length", config["kc_l"][3], min=0, max=99, width="4em"
+                ),
                 "days of late-season to",
             ),
             Sentence(
