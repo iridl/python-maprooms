@@ -43,8 +43,8 @@ CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 READ_PARAMS = {"ds_conf": GLOBAL_CONFIG['datasets']}
 
 def register(FLASK, config):
-
-    PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}' # Prefix used at the end of the maproom url
+    # Prefix used at the end of the maproom url
+    PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}'
     TILE_PFX = f"{PREFIX}/tile"
 
     APP = dash.Dash(
@@ -55,18 +55,9 @@ def register(FLASK, config):
     )
 
     APP.title = config["title"]
-    APP.layout = layout.layout() # Calling the layout function in `layout.py` which includes the layout definitions.
-
-    def read_data(name):
-
-        dr_path = GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][1]
-        if dr_path is None:
-            dr_path = GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][0]
-        dr_path = f"{DATA_DIR}{dr_path}"
-        dr_path = Path(dr_path)
-        data = calc.read_zarr_data(dr_path)[GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][2]]
-        return data
-
+    # Calling the layout function in `layout.py`
+    # which includes the layout definitions.
+    APP.layout = layout.layout()
 
     def get_shapes(query):
         with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
@@ -123,7 +114,8 @@ def register(FLASK, config):
             dlf.BaseLayer(
                 dlf.TileLayer(
                     opacity=0.6,
-                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", # Cartodb street map.
+                    # Cartodb street map.
+                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
                 ),
                 name="Street",
                 checked=True,
@@ -131,7 +123,8 @@ def register(FLASK, config):
             dlf.BaseLayer(
                 dlf.TileLayer(
                     opacity=0.6,
-                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" # opentopomap topography map.
+                    # opentopomap topography map.
+                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
                 ),
                 name="Topo",
                 checked=False,
@@ -175,14 +168,15 @@ def register(FLASK, config):
                 ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
                 ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
             ]
-        return click_lat_lng                           #  in the data to where the user clicked on the map.
+        return click_lat_lng # in the data to where the user clicked on the map.
 
     @APP.callback(
         Output("plot","figure"),
         Input("loc_marker","position"),
         Input("variable","value")
     )
-    def create_plot(marker_loc, variable): # Callback that creates bar plot to display data at a given point.
+    def create_plot(marker_loc, variable):
+        # Callback that creates bar plot to display data at a given point.
         var = config["vars"][variable]
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -202,7 +196,8 @@ def register(FLASK, config):
             # q50 = quantile(0.50)
             # q95 = quantile(0.05)
         except KeyError:
-            return pingrid.error_fig(error_msg="Data missing at this location.") # Error fig if marker is out of bounds of data.
+            # Error fig if marker is out of bounds of data.
+            return pingrid.error_fig(error_msg="Data missing at this location.")
  
         # bar_plot = px.bar( # Create the bar plot using plotly express
         #     clim, x=months, y=clim,
@@ -211,13 +206,30 @@ def register(FLASK, config):
         # )
         return {
             'data': [
-                {'x': months, 'y': base.mean().values, 'type': 'bar', 'name': 'average'},
-
-                {'x': months, 'y': base.quantile(0.95).values, 'type': 'scatter', 'name': '95%-ile'},
-
-                {'x': months, 'y': base.quantile(0.50).values, 'type': 'scatter', 'name': '50%-ile'},
-
-                {'x': months, 'y': base.quantile(0.05).values, 'type': 'scatter', 'name': '5%-ile'},
+                {
+                    'x': months,
+                    'y': base.mean().values,
+                    'type': 'bar',
+                    'name': 'average',
+                },
+                {
+                    'x': months,
+                    'y': base.quantile(0.95).values,
+                    'type': 'scatter',
+                    'name': '95%-ile',
+                },
+                {
+                    'x': months,
+                    'y': base.quantile(0.50).values,
+                    'type': 'scatter',
+                    'name': '50%-ile',
+                },
+                {
+                    'x': months,
+                    'y': base.quantile(0.05).values,
+                    'type': 'scatter',
+                    'name': '5%-ile',
+                },
             ],
             'layout': {
                 'title': f"{variable} monthly climatology",
@@ -318,7 +330,9 @@ def register(FLASK, config):
         tile.attrs["scale_max"] = varobj['max']
     
         with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
+            s = sql.Composed(
+                [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]
+            )
             df = pd.read_sql(s, conn)
             clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
         
