@@ -469,7 +469,7 @@ def register(FLASK, config):
             timeseries_plot.update_layout(
                 xaxis_title = "years",
                 yaxis_title = (
-                    f"{config['map_text'][data_choice]['id']} "
+                    f"{data_choice} "
                     f"({config['map_text'][data_choice]['units']})"
                 ),
                 title = (
