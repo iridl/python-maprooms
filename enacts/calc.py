@@ -3,11 +3,46 @@ import pandas as pd
 import xarray as xr
 
 # Date Reading functions
+
+
+def read_enacts_zarr_data(
+    variable="precip", time_res="dekadal", ds_conf=None, as_array=True
+):
+    """ Read ENACTS zarr data and return `xr.Dataset` or `xr.DataArray`
+
+    Parameters
+    ----------
+    variable : str, optional
+        string reprensenting ENACTS variable (precip (default), tmin or tmax)
+    time_res : str, optional
+        string represneting ENACTS time resolution (daily or dekadal (default))
+    ds_conf: dict, optional
+        dictionary indicating ENACTS zarr path (see config)
+        default is None in which case synthetic data will be created (in dev)
+    as_array: boolean, optional
+        returns a `xr.DataArray` if true (default), a `xr.Dataset` if not
+    
+    Returns
+    -------
+        `xr.Dataset` or `xr.DataArray` of ENACTS `variable` at `time_res` time steps
+    
+    See Also
+    --------
+    read_zarr_data
+    """
+    data_path = ds_conf[time_res]['vars'][variable][1]
+    if data_path is None:
+        data_path = ds_conf[time_res]['vars'][variable][0]
+    xrds = read_zarr_data(f"{ds_conf[time_res]['zarr_path']}{data_path}")
+    array = ds_conf[time_res]['vars'][variable][2]
+    return xrds[array] if as_array else xrds
+
+
 def read_zarr_data(zarr_path):
     """Read and return data in zarr format.
 
     Parameters
-    ------
+    ----------
     zarr_path : str
         String of path to zarr folder.
     Returns
