@@ -1,0 +1,59 @@
+logo: anacimLogo.jpg
+institution: IRI
+zoom: 7
+
+datasets:
+    shapes_adm:
+        - name: Country
+          color: black
+          sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from g2015_2012_0 where adm0_code=86
+          is_checked: False
+        - name: Canton
+          color: black
+          sql: select adm1_code as key, adm0_name as label, adm0_code, ST_AsBinary(the_geom) as the_geom
+              from g2015_2014_1 where adm0_code=86
+          is_checked: True
+    daily: null
+
+maprooms:
+    # Onset
+    onset:
+    - default_search_month: Jan
+      default_search_month_cess: May
+      default_running_days: 3
+      default_min_rainy_days: 1
+      ison_cess_date_hist: True
+      map_text:
+          length_mean:
+              map_max: 180
+          length_stddev:
+              map_max: 40
+
+    wat_bal: null
+        
+    monthly: null
+    
+    crop_suitability:
+    - map_text:
+        precip:
+          map_max: 400
+          map_min: 0
+        tmax:
+          map_max: 42
+          map_min: 10
+        tmin:
+          map_max: 32
+          map_min: 0
+      param_defaults:
+        target_season: 0 #from DJF, MAM, JJA or SON
+        lower_wet_thresh: 500 #mm; cumulative for the season
+        upper_wet_thresh: 700 #mm; cumulative for the season
+        min_temp: 10 #C
+        max_temp: 25 #C
+        temp_range: 15 #C; amplitude: `max_temp - min_temp`
+        season_length: 75 #days 
+        min_wet_days: 60 #days
+        wet_day_def: 1 #mm
+
+    flex_fcst: null
