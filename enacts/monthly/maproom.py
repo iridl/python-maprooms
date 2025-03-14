@@ -40,7 +40,7 @@ from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
-DATA_DIR = f"{GLOBAL_CONFIG['datasets']['dekadal']['zarr_path']}"
+READ_PARAMS = {"ds_conf": GLOBAL_CONFIG['datasets']}
 
 def register(FLASK, config):
 
@@ -91,7 +91,7 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def initialize(path):
-        rr_mrg = read_data("precip")
+        rr_mrg = calc.read_enacts_zarr_data(**READ_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -170,7 +170,7 @@ def register(FLASK, config):
     )
     def pick_location(click_lat_lng):
         if click_lat_lng == None:
-            rr_mrg = read_data("precip")
+            rr_mrg = calc.read_enacts_zarr_data(**READ_PARAMS)
             return [
                 ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
                 ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -187,8 +187,8 @@ def register(FLASK, config):
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         try:
-            DATA = read_data(var['id'])
-            data = pingrid.sel_snap(DATA,marker_loc[0], marker_loc[1])
+            DATA = calc.read_enacts_zarr_data(variable=var['id'], **READ_PARAMS)
+            data = pingrid.sel_snap(DATA, marker_loc[0], marker_loc[1])
             base = data.resample(T="1M")
             if var['id'] == "precip":
                 base = base.sum()
@@ -281,7 +281,7 @@ def register(FLASK, config):
         y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
         varobj = config['vars'][var]
-        data = read_data(varobj['id'])
+        data = calc.read_enacts_zarr_data(variable=varobj['id'], **READ_PARAMS)
     
         if (
             x_min > data['X'].max() or
