@@ -7,7 +7,7 @@ import datetime
 
 np.random.seed(123)
 
-def read_enacts_zarr_data(
+def read_enacts_data(
     variable="precip", time_res="dekadal", ds_conf=None, as_array=True
 ):
     """ Read ENACTS zarr data and return `xr.Dataset` or `xr.DataArray`
