@@ -32,7 +32,7 @@ def read_enacts_data(
     --------
     xr.open_zarr
     """
-    if ds_conf[time_res] is None:
+    if ds_conf is None:
         # Center mu, amplitude amp of the base sinusoid
         # and amplitude of noisy anomalies to apply to it
         characteristics = {
