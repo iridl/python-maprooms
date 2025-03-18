@@ -15,9 +15,9 @@ def read_enacts_data(
     Parameters
     ----------
     variable : str, optional
-        string reprensenting ENACTS variable (precip (default), tmin or tmax)
+        string representing ENACTS variable (precip (default), tmin or tmax)
     time_res : str, optional
-        string represneting ENACTS time resolution (daily or dekadal (default))
+        string representing ENACTS time resolution (daily or dekadal (default))
     ds_conf: dict, optional
         dictionary indicating ENACTS zarr path (see config)
         default is None in which case synthetic data will be created

@@ -157,7 +157,7 @@ def register(FLASK, config):
         ]
 
 
-    @APP.callback( # Callback for updating the location of the market on the map.
+    @APP.callback( # Callback for updating the location of the marker on the map.
         Output("loc_marker","position"),
         Input("map","click_lat_lng"),
     )
@@ -168,7 +168,7 @@ def register(FLASK, config):
                 ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
                 ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
             ]
-        return click_lat_lng # in the data to where the user clicked on the map.
+        return click_lat_lng
 
     @APP.callback(
         Output("plot","figure"),
