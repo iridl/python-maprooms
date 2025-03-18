@@ -30,7 +30,7 @@ def read_enacts_data(
     
     See Also
     --------
-    read_zarr_data
+    xr.open_zarr
     """
     if ds_conf[time_res] is None:
         # Center mu, amplitude amp of the base sinusoid
@@ -83,30 +83,9 @@ def read_enacts_data(
         data_path = ds_conf[time_res]['vars'][variable][1]
         if data_path is None:
             data_path = ds_conf[time_res]['vars'][variable][0]
-        xrds = read_zarr_data(f"{ds_conf[time_res]['zarr_path']}{data_path}")
+        xrds = xr.open_zarr(f"{ds_conf[time_res]['zarr_path']}{data_path}")
         array = ds_conf[time_res]['vars'][variable][2]
     return xrds[array] if as_array else xrds
-
-
-def read_zarr_data(zarr_path):
-    """Read and return data in zarr format.
-
-    Parameters
-    ----------
-    zarr_path : str
-        String of path to zarr folder.
-    Returns
-    -------
-    zarr_data : Dataset
-        Data from zarr folder as multidimensional xarray dataset.
-    See Also
-    --------
-    Notes
-     -----
-    """
-    zarr_data = xr.open_zarr(zarr_path)
-    return zarr_data
-
 
 # Growing season functions
 

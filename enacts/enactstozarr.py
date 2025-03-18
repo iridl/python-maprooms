@@ -207,12 +207,12 @@ def convert(
 
     See Also
     --------
-    calc.read_zarr_data, filename2datetime64, nc2xr, xarray.Dataset.to_zarr
+    xr.open_zarr, filename2datetime64, nc2xr, xarray.Dataset.to_zarr
     """
     print(f"converting files for: {time_res} {var_name}")
     netcdf = list(sorted(Path(input_path).glob("*.nc")))
     if Path(output_path).is_dir() :
-        current_zarr = calc.read_zarr_data(output_path)
+        current_zarr = xr.open_zarr(output_path)
         last_T_zarr = current_zarr["T"][-1]
         T_nc = [
             filename2datetime64(netcdf[i], time_res=time_res)
