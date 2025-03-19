@@ -96,9 +96,10 @@ def register(FLASK, config):
                 id=border_id,
                 data=adm_borders(adm_sql),
                 options={
-                    "fill": False,
+                    "fill": True,
                     "color": adm_color,
                     "weight": adm_weight,
+                    "fillOpacity": 0,
                 },
             ),
             name=adm_name,
