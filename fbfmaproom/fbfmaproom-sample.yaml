@@ -2463,7 +2463,7 @@ countries:
                     path: chad/bad-years-emdat.zarr
                     description: Drought Years collected from EM-DAT
                     var_names:
-                        value: bad
+                        value: rank
                         time: T
                     colormap: precip
                     lower_is_worse: no
@@ -2492,8 +2492,6 @@ countries:
                 length: 3.0
                 issue_months: [0, 1, 2, 3, 4, 5]
                 start_year: 1991
-
-
 
     burkinafaso:
         logo: BurkinaFaso_IRI_120x48.png
@@ -2618,7 +2616,7 @@ countries:
                     path: burkinafaso/bad-years-emdat.zarr
                     description: Drought Years collected from EM-DAT
                     var_names:
-                        value: bad
+                        value: rank
                         time: T
                     colormap: precip
                     lower_is_worse: no
@@ -2772,7 +2770,7 @@ countries:
                     path: mauritania/bad-years-emdat.zarr
                     description: Drought Years collected from EM-DAT
                     var_names:
-                        value: bad
+                        value: rank
                         time: T
                     colormap: precip
                     lower_is_worse: no
