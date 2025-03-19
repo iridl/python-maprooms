@@ -141,7 +141,7 @@ def register(FLASK, config):
                 dlf.GeoJSON(
                     data=v,
                     options={
-                        "fill": False,
+                        "fill": True,
                         "color": "black",
                         "weight": .5,
                         "fillOpacity": 0,
