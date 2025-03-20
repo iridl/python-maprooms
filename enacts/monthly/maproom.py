@@ -40,7 +40,7 @@ from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
-READ_PARAMS = {"ds_conf": GLOBAL_CONFIG['datasets']}
+READ_PARAMS = {"ds_conf": GLOBAL_CONFIG['datasets']['dekadal']}
 
 def register(FLASK, config):
     # Prefix used at the end of the maproom url
