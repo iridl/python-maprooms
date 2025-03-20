@@ -7,7 +7,7 @@ import datetime
 
 np.random.seed(123)
 
-def read_enacts(variable, ds_conf="dekadal", as_array=True):
+def read_enacts(variable, ds_conf="dekadal"):
     """ Read ENACTS zarr data and return `xr.Dataset` or `xr.DataArray`
 
     Parameters
@@ -18,8 +18,6 @@ def read_enacts(variable, ds_conf="dekadal", as_array=True):
         string "daily" or "dekadal" indicating time resolution of synthetic data
         or dictionary indicating ENACTS zarr path (see config)
         default is synthetic dekadal data
-    as_array: boolean, optional
-        returns a `xr.DataArray` if true (default), a `xr.Dataset` if not
     
     Returns
     -------
@@ -82,7 +80,7 @@ def read_enacts(variable, ds_conf="dekadal", as_array=True):
             data_path = ds_conf['vars'][variable][0]
         xrds = xr.open_zarr(f"{ds_conf['zarr_path']}{data_path}")
         array = ds_conf['vars'][variable][2]
-    return xrds[array] if as_array else xrds
+    return xrds[array]
 
 # Growing season functions
 
