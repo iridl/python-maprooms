@@ -82,7 +82,7 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def initialize(path):
-        rr_mrg = calc.read_enacts_data(**READ_PARAMS)
+        rr_mrg = calc.read_enacts(**READ_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -163,7 +163,7 @@ def register(FLASK, config):
     )
     def pick_location(click_lat_lng):
         if click_lat_lng == None:
-            rr_mrg = calc.read_enacts_data(**READ_PARAMS)
+            rr_mrg = calc.read_enacts(**READ_PARAMS)
             return [
                 ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
                 ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -181,7 +181,7 @@ def register(FLASK, config):
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         try:
-            DATA = calc.read_enacts_data(variable=var['id'], **READ_PARAMS)
+            DATA = calc.read_enacts(variable=var['id'], **READ_PARAMS)
             data = pingrid.sel_snap(DATA, marker_loc[0], marker_loc[1])
             base = data.resample(T="1M")
             if var['id'] == "precip":
@@ -293,7 +293,7 @@ def register(FLASK, config):
         y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
         varobj = config['vars'][var]
-        data = calc.read_enacts_data(variable=varobj['id'], **READ_PARAMS)
+        data = calc.read_enacts(variable=varobj['id'], **READ_PARAMS)
     
         if (
             x_min > data['X'].max() or

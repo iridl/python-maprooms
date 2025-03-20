@@ -120,7 +120,7 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def initialize(path):
-        rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -267,7 +267,7 @@ def register(FLASK, config):
             time_options = current_options
             the_value = graph_click["points"][0]["x"]
         else:
-            rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
+            rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
             time_range = rr_mrg["T"].isel({"T": slice(-366, None)})
             p_d = calc.sel_day_and_month(
                 time_range, int(planting_day), calc.strftimeb2int(planting_month)
@@ -428,7 +428,7 @@ def register(FLASK, config):
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
-        rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
         if dash.ctx.triggered_id == None:
             lat = rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values
             lng = rr_mrg["X"][int(rr_mrg["X"].size/2)].values
@@ -639,7 +639,7 @@ def register(FLASK, config):
         kc2_late_length,
         kc2_end,
     ):
-        rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
         first_year = rr_mrg["T"][0].dt.year.values
         last_year = rr_mrg["T"][-1].dt.year.values
         if planting2_year is None:
@@ -770,7 +770,7 @@ def register(FLASK, config):
         kc_late_length = parse_arg("kc_late_length", int)
         kc_end = parse_arg("kc_end", float)
 
-        rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
         precip = rr_mrg
         x_min = pingrid.tile_left(tx, tz)
         x_max = pingrid.tile_left(tx + 1, tz)
@@ -884,7 +884,7 @@ def register(FLASK, config):
         if map_choice == "paw":
             map_max = 100
         elif map_choice == "water_excess":
-            rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
+            rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
             time_range = rr_mrg["T"][-366:]
             p_d = calc.sel_day_and_month(
                 time_range, int(planting_day), calc.strftimeb2int(planting_month)

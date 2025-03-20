@@ -131,7 +131,7 @@ def register(FLASK, config):
     )
     def initialize(path):
         # Reads daily data
-        rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -262,7 +262,7 @@ def register(FLASK, config):
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Reads daily data
-        rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
         if dash.ctx.triggered_id == None:
             lat = rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values
             lng = rr_mrg["X"][int(rr_mrg["X"].size/2)].values
@@ -378,9 +378,9 @@ def register(FLASK, config):
         lng1 = loc_marker[1]
         season_str = select_season(target_season)
         # Reads daily data
-        rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
-        tmin_mrg = calc.read_enacts_data(**TMIN_MRG_READ_PARAMS)
-        tmax_mrg = calc.read_enacts_data(**TMAX_MRG_READ_PARAMS)
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+        tmin_mrg = calc.read_enacts(**TMIN_MRG_READ_PARAMS)
+        tmax_mrg = calc.read_enacts(**TMAX_MRG_READ_PARAMS)
         try:
             if data_choice == "precip":
                 data_var = pingrid.sel_snap(rr_mrg, lat1, lng1)
@@ -523,9 +523,9 @@ def register(FLASK, config):
         temp_range = parse_arg("temp_range", float)
 
         # Reads daily data
-        rr_mrg = calc.read_enacts_data(**RR_MRG_READ_PARAMS)
-        tmin_mrg = calc.read_enacts_data(**TMIN_MRG_READ_PARAMS)
-        tmax_mrg = calc.read_enacts_data(**TMAX_MRG_READ_PARAMS)
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+        tmin_mrg = calc.read_enacts(**TMIN_MRG_READ_PARAMS)
+        tmax_mrg = calc.read_enacts(**TMAX_MRG_READ_PARAMS)
 
         x_min = pingrid.tile_left(tx, tz)
         x_max = pingrid.tile_left(tx + 1, tz)
