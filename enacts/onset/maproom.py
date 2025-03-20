@@ -29,7 +29,9 @@ from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
 
-RR_MRG_READ_PARAMS = {"time_res": "daily", "ds_conf": GLOBAL_CONFIG['datasets']}
+RR_MRG_READ_PARAMS = {
+    "variable": "precip", "time_res": "daily", "ds_conf": GLOBAL_CONFIG['datasets']
+}
 
 def register(FLASK, config):
 
