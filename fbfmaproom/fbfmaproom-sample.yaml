@@ -2343,10 +2343,10 @@ countries:
     chad:
         logo: Chad_IRI_120x48.png
         resolution: [0.05, 0.05]
-        center: [18.73, 15.45]
+        center: [17.12, 19.16]
         zoom: 6
         rotation: 0
-        marker: [18.73, 15.45]
+        marker: [17.12, 19.16]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
@@ -2505,10 +2505,10 @@ countries:
     burkinafaso:
         logo: BurkinaFaso_IRI_120x48.png
         resolution: [0.05, 0.05]
-        center: [12.36566, 1.53388]
+        center: [12.90, -1.60]
         zoom: 6
         rotation: 0
-        marker: [12.370, 1.530]
+        marker: [12.90, -1.60]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
@@ -2667,10 +2667,10 @@ countries:
     mauritania:
         logo: Mauritania_IRI_120x48.png
         resolution: [0.05, 0.05]
-        center: [15.965662, 18.079021]
+        center: [19.25, -11.10]
         zoom: 6
         rotation: 0
-        marker: [15.960, 18.080]
+        marker: [19.25, -11.10]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
