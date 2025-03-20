@@ -8,14 +8,14 @@ import datetime
 np.random.seed(123)
 
 def read_enacts(
-    variable="precip", time_res="dekadal", ds_conf=None, as_array=True
+    variable, time_res="dekadal", ds_conf=None, as_array=True
 ):
     """ Read ENACTS zarr data and return `xr.Dataset` or `xr.DataArray`
 
     Parameters
     ----------
-    variable : str, optional
-        string representing ENACTS variable (precip (default), tmin or tmax)
+    variable : str
+        string representing ENACTS variable (precip, tmin or tmax)
     time_res : str, optional
         string representing ENACTS time resolution (daily or dekadal (default))
     ds_conf: dict, optional

@@ -82,7 +82,7 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def initialize(path):
-        rr_mrg = calc.read_enacts(**READ_PARAMS)
+        rr_mrg = calc.read_enacts(variable="precip", **READ_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -163,7 +163,7 @@ def register(FLASK, config):
     )
     def pick_location(click_lat_lng):
         if click_lat_lng == None:
-            rr_mrg = calc.read_enacts(**READ_PARAMS)
+            rr_mrg = calc.read_enacts(variable="precip", **READ_PARAMS)
             return [
                 ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
                 ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
