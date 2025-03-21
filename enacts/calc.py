@@ -8,7 +8,7 @@ import datetime
 np.random.seed(123)
 
 def read_enacts(variable, ds_conf="dekadal"):
-    """ Read ENACTS zarr data and return `xr.Dataset` or `xr.DataArray`
+    """ Read ENACTS zarr data and return `xr.DataArray`
 
     Parameters
     ----------
@@ -21,7 +21,7 @@ def read_enacts(variable, ds_conf="dekadal"):
     
     Returns
     -------
-        `xr.Dataset` or `xr.DataArray` of ENACTS `variable` at `time_res` time steps
+        `xr.DataArray` of ENACTS `variable` at `time_res` time steps
     
     See Also
     --------
@@ -73,13 +73,13 @@ def read_enacts(variable, ds_conf="dekadal"):
             {"X": X, "Y": Y, "T": T},
         # Interpolate back on a typical ENACTS spatial resolution
         ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
-        array = variable
+        var_name = variable
     else:
         data_path = ds_conf['vars'][variable][1]
         if data_path is None:
             data_path = ds_conf['vars'][variable][0]
         xrds = xr.open_zarr(f"{ds_conf['zarr_path']}{data_path}")
-        array = ds_conf['vars'][variable][2]
+        var_name = ds_conf['vars'][variable][2]
     return xrds[array]
 
 # Growing season functions
