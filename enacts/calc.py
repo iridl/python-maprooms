@@ -7,17 +7,53 @@ import datetime
 
 np.random.seed(123)
 
-def read_enacts(variable, ds_conf="dekadal"):
+
+def find_enacts_zarr_path(variable, ds_conf, time_res="daily"):
+    """ Find path and name of ENACTS zarr variable if any
+
+    Parameters
+    ----------
+    variable : str
+        string representing ENACTS variable (precip, tmin or tmax)
+    ds_conf : dict
+        dictionary indicating ENACTS zarr path (see config)
+    time_res : str, optional
+        "daily" or "dekadal" resolution of the desired variable
+        defautl is "daily"
+    
+    Returns
+    -------
+        path to feed `xr.open_zarr` or None
+    
+    See Also
+    --------
+    xr.open_zarr
+    """
+    try:
+        data_path = ds_conf[time_res]['vars'][variable][1]
+        if data_path is None:
+            data_path = ds_conf[time_res]['vars'][variable][0]
+        zarr_path = f"{ds_conf[time_res]['zarr_path']}{data_path}"
+        var_name = ds_conf[time_res]['vars'][variable][2]
+    except KeyError:
+        zarr_path = None
+        var_name = None
+    return zarr_path, var_name
+
+
+def read_enacts(variable, ds_conf=None, time_res="daily"):
     """ Read ENACTS zarr data and return `xr.DataArray`
 
     Parameters
     ----------
     variable : str
         string representing ENACTS variable (precip, tmin or tmax)
-    ds_conf: str or dict, optional
-        string "daily" or "dekadal" indicating time resolution of synthetic data
-        or dictionary indicating ENACTS zarr path (see config)
-        default is synthetic dekadal data
+    ds_conf : dict, optional
+        dictionary indicating ENACTS zarr path (see config)
+        default is None to produce synthetic data
+    time_res : str, optional
+        "daily" or "dekadal" resolution of the desired variable
+        defautl is "daily"
     
     Returns
     -------
@@ -27,7 +63,8 @@ def read_enacts(variable, ds_conf="dekadal"):
     --------
     xr.open_zarr
     """
-    if not isinstance(ds_conf, dict):
+    data_path, var_name = find_enacts_zarr_path(variable, ds_conf, time_res=time_res)
+    if data_path is None:
         # Center mu, amplitude amp of the base sinusoid
         # and amplitude of noisy anomalies to apply to it
         characteristics = {
@@ -75,12 +112,8 @@ def read_enacts(variable, ds_conf="dekadal"):
         ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
         var_name = variable
     else:
-        data_path = ds_conf['vars'][variable][1]
-        if data_path is None:
-            data_path = ds_conf['vars'][variable][0]
-        xrds = xr.open_zarr(f"{ds_conf['zarr_path']}{data_path}")
-        var_name = ds_conf['vars'][variable][2]
-    return xrds[array]
+        xrds = xr.open_zarr(data_path)
+    return xrds[var_name]
 
 # Growing season functions
 
