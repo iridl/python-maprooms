@@ -31,15 +31,9 @@ from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
 
-RR_MRG_READ_PARAMS = {
-    "variable": "precip", "ds_conf": GLOBAL_CONFIG['datasets']['daily']
-}
-TMIN_MRG_READ_PARAMS = {
-    "variable": "tmin", "ds_conf": GLOBAL_CONFIG['datasets']['daily']
-}
-TMAX_MRG_READ_PARAMS = {
-    "variable": "tmax", "ds_conf": GLOBAL_CONFIG['datasets']['daily']
-}
+RR_MRG_READ_PARAMS = {"variable": "precip", "ds_conf": GLOBAL_CONFIG['datasets']}
+TMIN_MRG_READ_PARAMS = {"variable": "tmin", "ds_conf": GLOBAL_CONFIG['datasets']}
+TMAX_MRG_READ_PARAMS = {"variable": "tmax", "ds_conf": GLOBAL_CONFIG['datasets']}
 
 CROP_SUIT_COLORMAP = pingrid.ColorScale(
     "crop_suit",
