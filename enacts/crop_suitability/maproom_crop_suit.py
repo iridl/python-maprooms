@@ -29,6 +29,12 @@ import xarray as xr
 from globals_ import FLASK, GLOBAL_CONFIG
 
 
+CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
+
+RR_MRG_READ_PARAMS = {"variable": "precip", "ds_conf": GLOBAL_CONFIG['datasets']}
+TMIN_MRG_READ_PARAMS = {"variable": "tmin", "ds_conf": GLOBAL_CONFIG['datasets']}
+TMAX_MRG_READ_PARAMS = {"variable": "tmax", "ds_conf": GLOBAL_CONFIG['datasets']}
+
 CROP_SUIT_COLORMAP = pingrid.ColorScale(
     "crop_suit",
     [BROWN, BROWN, ORANGE, ORANGE, YELLOW, YELLOW,
@@ -121,12 +127,7 @@ def register(FLASK, config):
     )
     def initialize(path):
         # Reads daily data
-        zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
-        if zarr_path_rr is None:
-            zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
-        rr_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -257,13 +258,7 @@ def register(FLASK, config):
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Reads daily data
-        zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
-        if zarr_path_rr is None:
-            zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
-        rr_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
-
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
         if dash.ctx.triggered_id == None:
             lat = rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values
             lng = rr_mrg["X"][int(rr_mrg["X"].size/2)].values
@@ -379,24 +374,9 @@ def register(FLASK, config):
         lng1 = loc_marker[1]
         season_str = select_season(target_season)
         # Reads daily data
-        zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
-        if zarr_path_rr is None:
-            zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
-        rr_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
-        zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]
-        if zarr_path_tmin is None:
-            zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][0]
-        tmin_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmin}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][2]]
-        zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]
-        if zarr_path_tmax is None:
-            zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][0]
-        tmax_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmax}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][2]]
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+        tmin_mrg = calc.read_enacts(**TMIN_MRG_READ_PARAMS)
+        tmax_mrg = calc.read_enacts(**TMAX_MRG_READ_PARAMS)
         try:
             if data_choice == "precip":
                 data_var = pingrid.sel_snap(rr_mrg, lat1, lng1)
@@ -485,7 +465,7 @@ def register(FLASK, config):
             timeseries_plot.update_layout(
                 xaxis_title = "years",
                 yaxis_title = (
-                    f"{config['map_text'][data_choice]['id']} "
+                    f"{data_choice} "
                     f"({config['map_text'][data_choice]['units']})"
                 ),
                 title = (
@@ -539,24 +519,9 @@ def register(FLASK, config):
         temp_range = parse_arg("temp_range", float)
 
         # Reads daily data
-        zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
-        if zarr_path_rr is None:
-            zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
-        rr_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
-        zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]
-        if zarr_path_tmin is None:
-            zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][0]
-        tmin_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmin}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][2]]
-        zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]
-        if zarr_path_tmax is None:
-            zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][0]
-        tmax_mrg = calc.read_zarr_data(Path(
-            f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmax}'
-        ))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][2]]
+        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+        tmin_mrg = calc.read_enacts(**TMIN_MRG_READ_PARAMS)
+        tmax_mrg = calc.read_enacts(**TMAX_MRG_READ_PARAMS)
 
         x_min = pingrid.tile_left(tx, tz)
         x_max = pingrid.tile_left(tx + 1, tz)
@@ -655,7 +620,9 @@ def register(FLASK, config):
         map.attrs["scale_min"] = map_min
         map.attrs["scale_max"] = map_max
         with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed([sql.SQL(GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'])])
+            s = sql.Composed(
+                [sql.SQL(GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'])]
+            )
             df = pd.read_sql(s, conn)
             clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
         result = pingrid.tile(map.astype('float64'), tx, ty, tz, clip_shape)
