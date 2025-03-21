@@ -2220,7 +2220,7 @@ countries:
               predictors:
                 - prcp-v1
                 - chirps-precip-jas
-              predictand: bad-years-emdat
+              predictand: bad-years-humanitarian
             observations:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
@@ -2315,6 +2315,17 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: mali/bad-years-humanitarian.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number0
+                    units: rank
             forecasts:
                 prcp-v1:
                     label: JAS fcst v1
@@ -2346,7 +2357,7 @@ countries:
         center: [17.12, 19.16]
         zoom: 6
         rotation: 0
-        marker: [17.12, 19.16]
+        marker: [17.125, 19.165]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
@@ -2382,7 +2393,7 @@ countries:
               predictors:
                 - prcp-v1
                 - chirps-precip-jas
-              predictand: bad-years-emdat
+              predictand: bad-years-humanitarian
             observations:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
@@ -2477,6 +2488,17 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: chad/bad-years-humanitarian.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number0
+                    units: rank
             forecasts:
                 prcp-v1:
                     label: JAS fcst v1
@@ -2505,10 +2527,10 @@ countries:
     burkinafaso:
         logo: BurkinaFaso_IRI_120x48.png
         resolution: [0.05, 0.05]
-        center: [12.90, -1.60]
+        center: [-1.60, 12.90]
         zoom: 6
         rotation: 0
-        marker: [12.90, -1.60]
+        marker: [-1.60, 12.90]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
@@ -2544,7 +2566,7 @@ countries:
                 predictors:
                     - prcp-v1
                     - chirps-precip-jas
-                predictand: bad-years-emdat
+                predictand: bad-years-humanitarian
             observations:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
@@ -2639,6 +2661,17 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: burkinafaso/bad-years-humanitarian.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number0
+                    units: rank
             forecasts:
                 prcp-v1:
                     label: JAS fcst v1
@@ -2667,10 +2700,10 @@ countries:
     mauritania:
         logo: Mauritania_IRI_120x48.png
         resolution: [0.05, 0.05]
-        center: [19.25, -11.10]
+        center: [-11.10, 19.25]
         zoom: 6
         rotation: 0
-        marker: [19.25, -11.10]
+        marker: [-11.10, 19.25]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
@@ -2706,7 +2739,7 @@ countries:
                 predictors:
                     - prcp-v1
                     - chirps-precip-jas
-                predictand: bad-years-emdat
+                predictand: bad-years-humanitarian
             observations:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
@@ -2801,6 +2834,17 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: mauritania/bad-years-humanitarian.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number0
+                    units: rank
             forecasts:
                 prcp-v1:
                     label: JAS fcst v1
