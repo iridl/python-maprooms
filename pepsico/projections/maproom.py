@@ -7,6 +7,7 @@ from . import layout
 import plotly.graph_objects as pgo
 import xarray as xr
 import pandas as pd
+from dateutil.relativedelta import *
 import dash_leaflet as dlf
 import psycopg2
 from psycopg2 import sql
@@ -210,6 +211,27 @@ def register(FLASK, config):
             line=pgo.scatter.Line(color=color),
             connectgaps=False,
         )
+    
+
+    def add_period_shape(
+        graph, data, start_year, end_year, fill_color, line_color, annotation
+    ):
+        return graph.add_vrect(
+            x0=data["seasons_starts"].where(
+                lambda x : (x.dt.year == int(start_year)), drop=True
+            ).dt.strftime(STD_TIME_FORMAT).values[0],
+            #it's hard to believe this is how it is done
+            x1=(
+                pd.to_datetime(data["seasons_ends"].where(
+                    lambda x : (x.dt.year == int(end_year)), drop=True
+                ).dt.strftime(STD_TIME_FORMAT).values[0]
+            ) + relativedelta(months=+1)).strftime(STD_TIME_FORMAT),
+            fillcolor=fill_color,  opacity=0.2,
+            line_color=line_color, line_width=3,
+            layer="below",
+            annotation_text=annotation, annotation_position="top left",
+            #editable=True, #a reminder it might be the way to interact
+        )
 
 
     @APP.callback(
@@ -273,8 +295,24 @@ def register(FLASK, config):
         State("variable", "value"),
         State("start_month", "value"),
         State("end_month", "value"),
+        State("start_year", "value"),
+        State("end_year", "value"),
+        State("start_year_ref", "value"),
+        State("end_year_ref", "value"),
     )
-    def local_plots(marker_pos, region, n_clicks, model, variable, start_month, end_month):
+    def local_plots(
+        marker_pos,
+        region,
+        n_clicks,
+        model,
+        variable,
+        start_month,
+        end_month,
+        start_year,
+        end_year,
+        start_year_ref,
+        end_year_ref,
+    ):
         lat = marker_pos[0]
         lng = marker_pos[1]
         start_month = ac.strftimeb2int(start_month)
@@ -301,6 +339,24 @@ def register(FLASK, config):
                     data_ds[var], var, data_color[var], start_format,
                     data_ds[var].attrs["units"]
                 ))
+            add_period_shape(
+                local_graph,
+                data_ds,
+                start_year_ref,
+                end_year_ref,
+                "blue",
+                "RoyalBlue",
+                "reference period",
+            )
+            add_period_shape(
+                local_graph,
+                data_ds,
+                start_year,
+                end_year,
+                "LightPink",
+                "Crimson",
+                "projected period",
+            )
             local_graph.update_layout(
                 xaxis_title="Time",
                 yaxis_title=(
