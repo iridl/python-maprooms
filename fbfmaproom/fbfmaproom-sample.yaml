@@ -2323,7 +2323,7 @@ countries:
                         value: rank
                         time: T
                     colormap: precip
-                    lower_is_worse: no
+                    lower_is_worse: yes
                     format: number0
                     units: rank
             forecasts:
@@ -2496,7 +2496,7 @@ countries:
                         value: rank
                         time: T
                     colormap: precip
-                    lower_is_worse: no
+                    lower_is_worse: yes
                     format: number0
                     units: rank
             forecasts:
@@ -2669,7 +2669,7 @@ countries:
                         value: rank
                         time: T
                     colormap: precip
-                    lower_is_worse: no
+                    lower_is_worse: yes
                     format: number0
                     units: rank
             forecasts:
@@ -2810,19 +2810,19 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number3
-#                chirps-dryspell:
-#                    label: Dry Spell
-#                    description: Longest dry spell, calculated from CHIRPS
-#                    path: mauritania/chirps-dryspell-jas.zarr
-#                    var_names:
-#                        value: lls
-#                        lat: Y
-#                        lon: X
-#                        time: T
-#                    units: days
-#                    colormap: precip
-#                    lower_is_worse: no
-#                    format: number2
+                chirps-dryspell:
+                    label: Dry Spell
+                    description: Longest dry spell, calculated from CHIRPS
+                    path: mauritania/chirps-dryspell-jas.zarr
+                    var_names:
+                        value: lls
+                        lat: Y
+                        lon: X
+                        time: T
+                    units: days
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number2
                 enso_state: *enso_3mo
                 bad-years-emdat:
                     label: EM-DAT Bad Years
@@ -2842,7 +2842,7 @@ countries:
                         value: rank
                         time: T
                     colormap: precip
-                    lower_is_worse: no
+                    lower_is_worse: yes
                     format: number0
                     units: rank
             forecasts:
