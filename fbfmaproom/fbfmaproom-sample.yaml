@@ -2220,7 +2220,7 @@ countries:
               predictors:
                 - prcp-v1
                 - chirps-precip-jas
-              predictand: bad-years-emdat
+              predictand: bad-years-humanitarian
             observations:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
@@ -2315,11 +2315,541 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: mali/bad-years-humanitarian.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
             forecasts:
                 prcp-v1:
                     label: JAS fcst v1
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
                     path: mali/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+            vuln:
+                colormap: vulnerability
+                range: [0.0, 5.0]
+        seasons:
+            season1:
+                label: JAS
+                target_month: 7.5
+                length: 3.0
+                issue_months: [0, 1, 2, 3, 4, 5]
+                start_year: 1991
+
+    chad:
+        logo: Chad_IRI_120x48.png
+        resolution: [0.05, 0.05]
+        center: [17.12, 19.16]
+        zoom: 6
+        rotation: 0
+        marker: [17.125, 19.165]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Chad'
+              vuln_sql:
+                  select (null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+            - name: Regional
+              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
+                  where adm0_name = 'Chad'
+              vuln_sql:
+                  select (null::int, null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+            - name: Department
+              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
+                  where adm0_name = 'Chad'
+              vuln_sql:
+                  select (null::int, null::int, null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+        datasets:
+            defaults:
+              predictors:
+                - prcp-v1
+                - chirps-precip-jas
+              predictand: bad-years-humanitarian
+            observations:
+                chirps-precip-jun:
+                    label: CHIRPS Precip Jun
+                    description: CHIRPS total precipitation for Jun
+                    path: chad/chirps-precip-jun-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jjaso:
+                    label: CHIRPS Precip Jun-Oct
+                    description: CHIRPS total precipitation for Jun-Oct
+                    path: chad/chirps-precip-jjaso.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jas:
+                    label: CHIRPS Precip JAS
+                    description: CHIRPS total precipitation for Jul-Sep
+                    path: chad/chirps-precip-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirp-spi-jj:
+                    label: CHIRP SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from CHIRP
+                    path: chad/chirp-spi-jj-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-spi-jas:
+                    label: CHIRP SPI JAS
+                    description: Average SPI in July-September, calculated from CHIRP
+                    path: chad/chirp-spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-rainfall-sep:
+                    label: CHIRP Rain Sep
+                    description: Total rainfall in September according to CHIRP
+                    path: chad/chirp-rainfall-sep-jas.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirps-dryspell:
+                    label: Dry Spell
+                    description: Longest dry spell, calculated from CHIRPS
+                    path: chad/chirps-dryspell-jas.zarr
+                    var_names:
+                        value: lls
+                        lat: Y
+                        lon: X
+                        time: T
+                    units: days
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number2
+                enso_state: *enso_3mo
+                bad-years-emdat:
+                    label: EM-DAT Bad Years
+                    path: chad/bad-years-emdat.zarr
+                    description: Drought Years collected from EM-DAT
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: chad/bad-years-humanitarian.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+            forecasts:
+                prcp-v1:
+                    label: JAS fcst v1
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
+                    path: chad/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+            vuln:
+                colormap: vulnerability
+                range: [0.0, 5.0]
+        seasons:
+            season1:
+                label: JAS
+                target_month: 7.5
+                length: 3.0
+                issue_months: [0, 1, 2, 3, 4, 5]
+                start_year: 1991
+
+    burkinafaso:
+        logo: BurkinaFaso_IRI_120x48.png
+        resolution: [0.05, 0.05]
+        center: [-1.60, 12.90]
+        zoom: 6
+        rotation: 0
+        marker: [-1.60, 12.90]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Burkina Faso'
+              vuln_sql:
+                  select (null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+            - name: Regional
+              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
+                  where adm0_name = 'Burkina Faso'
+              vuln_sql:
+                  select (null::int, null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+            - name: Department
+              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
+                  where adm0_name = 'Burkina Faso'
+              vuln_sql:
+                  select (null::int, null::int, null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+        datasets:
+            defaults:
+                predictors:
+                    - prcp-v1
+                    - chirps-precip-jas
+                predictand: bad-years-humanitarian
+            observations:
+                chirps-precip-jun:
+                    label: CHIRPS Precip Jun
+                    description: CHIRPS total precipitation for Jun
+                    path: burkinafaso/chirps-precip-jun-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jjaso:
+                    label: CHIRPS Precip Jun-Oct
+                    description: CHIRPS total precipitation for Jun-Oct
+                    path: burkinafaso/chirps-precip-jjaso.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jas:
+                    label: CHIRPS Precip JAS
+                    description: CHIRPS total precipitation for Jul-Sep
+                    path: burkinafaso/chirps-precip-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirp-spi-jj:
+                    label: CHIRP SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from CHIRP
+                    path: burkinafaso/chirp-spi-jj-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-spi-jas:
+                    label: CHIRP SPI JAS
+                    description: Average SPI in July-September, calculated from CHIRP
+                    path: burkinafaso/chirp-spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-rainfall-sep:
+                    label: CHIRP Rain Sep
+                    description: Total rainfall in September according to CHIRP
+                    path: burkinafaso/chirp-rainfall-sep-jas.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirps-dryspell:
+                    label: Dry Spell
+                    description: Longest dry spell, calculated from CHIRPS
+                    path: burkinafaso/chirps-dryspell-jas.zarr
+                    var_names:
+                        value: lls
+                        lat: Y
+                        lon: X
+                        time: T
+                    units: days
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number2
+                enso_state: *enso_3mo
+                bad-years-emdat:
+                    label: EM-DAT Bad Years
+                    path: burkinafaso/bad-years-emdat.zarr
+                    description: Drought Years collected from EM-DAT
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: burkinafaso/bad-years-humanitarian.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+            forecasts:
+                prcp-v1:
+                    label: JAS fcst v1
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
+                    path: burkinafaso/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+            vuln:
+                colormap: vulnerability
+                range: [0.0, 5.0]
+        seasons:
+            season1:
+                label: JAS
+                target_month: 7.5
+                length: 3.0
+                issue_months: [0, 1, 2, 3, 4, 5]
+                start_year: 1991
+
+    mauritania:
+        logo: Mauritania_IRI_120x48.png
+        resolution: [0.05, 0.05]
+        center: [-11.10, 19.25]
+        zoom: 6
+        rotation: 0
+        marker: [-11.10, 19.25]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Mauritania'
+              vuln_sql:
+                  select (null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+            - name: Regional
+              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
+                  where adm0_name = 'Mauritania'
+              vuln_sql:
+                  select (null::int, null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+            - name: Department
+              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
+                  where adm0_name = 'Mauritania'
+              vuln_sql:
+                  select (null::int, null::int, null::int) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
+
+        datasets:
+            defaults:
+                predictors:
+                    - prcp-v1
+                    - chirps-precip-jas
+                predictand: bad-years-humanitarian
+            observations:
+                chirps-precip-jun:
+                    label: CHIRPS Precip Jun
+                    description: CHIRPS total precipitation for Jun
+                    path: mauritania/chirps-precip-jun-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jjaso:
+                    label: CHIRPS Precip Jun-Oct
+                    description: CHIRPS total precipitation for Jun-Oct
+                    path: mauritania/chirps-precip-jjaso.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jas:
+                    label: CHIRPS Precip JAS
+                    description: CHIRPS total precipitation for Jul-Sep
+                    path: mauritania/chirps-precip-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirp-spi-jj:
+                    label: CHIRP SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from CHIRP
+                    path: mauritania/chirp-spi-jj-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-spi-jas:
+                    label: CHIRP SPI JAS
+                    description: Average SPI in July-September, calculated from CHIRP
+                    path: mauritania/chirp-spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-rainfall-sep:
+                    label: CHIRP Rain Sep
+                    description: Total rainfall in September according to CHIRP
+                    path: mauritania/chirp-rainfall-sep-jas.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirps-dryspell:
+                    label: Dry Spell
+                    description: Longest dry spell, calculated from CHIRPS
+                    path: mauritania/chirps-dryspell-jas.zarr
+                    var_names:
+                        value: lls
+                        lat: Y
+                        lon: X
+                        time: T
+                    units: days
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number2
+                enso_state: *enso_3mo
+                bad-years-emdat:
+                    label: EM-DAT Bad Years
+                    path: mauritania/bad-years-emdat.zarr
+                    description: Drought Years collected from EM-DAT
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: mauritania/bad-years-humanitarian.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+            forecasts:
+                prcp-v1:
+                    label: JAS fcst v1
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
+                    path: mauritania/prcp-jas-v1.zarr
                     var_names:
                         value: pne
                         lat: Y
@@ -2537,7 +3067,7 @@ countries:
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: quantile
                     colormap: pne_25
-                    is_poe: no               
+                    is_poe: no
                 pnep-v3:
                     label: Forecast prob non-exc v3
                     description: NextGen forecast probability of non-exceedance of selected percentile v3
@@ -2775,7 +3305,7 @@ countries:
                 start_year: 1996
 
 
- 
+
     djibouti:
         logo: Djibouti_IRI.svg
         resolution: [.25, .25]
