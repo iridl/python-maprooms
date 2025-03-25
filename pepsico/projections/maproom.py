@@ -167,23 +167,26 @@ def register(FLASK, config):
 
 
     def local_data(lat, lng, region, model, variable, start_month, end_month):
-        data_ds = xr.Dataset({
+        model = [model] if model != "Multi-Model-Average" else [
+            "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
+        ]
+        data_ds = xr.concat([xr.Dataset({
             "histo" : ac.read_data(
-                "historical", model, variable, region, unit_convert=True,
+                "historical", m, variable, region, unit_convert=True,
             ),
             "picontrol" : ac.read_data(
-                "picontrol", model, variable, region, unit_convert=True,
+                "picontrol", m, variable, region, unit_convert=True,
             ),
             "ssp126" : ac.read_data(
-                "ssp126", model, variable, region, unit_convert=True,
+                "ssp126", m, variable, region, unit_convert=True,
             ),
             "ssp370" : ac.read_data(
-                "ssp370", model, variable, region, unit_convert=True,
+                "ssp370", m, variable, region, unit_convert=True,
             ),
             "ssp585" : ac.read_data(
-                "ssp585", model, variable, region, unit_convert=True,
+                "ssp585", m, variable, region, unit_convert=True,
             ),
-        })
+        }) for m in model], "M").assign_coords({"M": [m for m in model]})
         error_msg = None
         missing_ds = xr.Dataset()
         if any([var is None for var in data_ds.data_vars.values()]):
@@ -255,19 +258,19 @@ def register(FLASK, config):
         Input("btn_csv", "n_clicks"),
         State("loc_marker", "position"),
         State("region", "value"),
-        State("model", "value"),
         State("variable", "value"),
         State("start_month", "value"),
         State("end_month", "value"),
         prevent_initial_call=True,
     )
     def send_data_as_csv(
-        n_clicks, marker_pos, region, model, variable, start_month, end_month,
+        n_clicks, marker_pos, region, variable, start_month, end_month,
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
+        model = "Multi-Model-Average"
         data_ds, error_msg = local_data(
             lat, lng, region, model, variable, start_month, end_month
         )
@@ -277,7 +280,7 @@ def register(FLASK, config):
             file_name = (
                 f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
                 f'{data_ds["histo"]["seasons_ends"].dt.strftime("%b")[0].values}'
-                f'_{variable}_{model}_{abs(lat)}{lat_units}_{abs(lng)}{lng_units}'
+                f'_{variable}_{abs(lat)}{lat_units}_{abs(lng)}{lng_units}'
                 f'.csv'
             )
             df = data_ds.to_dataframe()
@@ -336,8 +339,8 @@ def register(FLASK, config):
             lat_units = "˚N" if (lat >= 0) else "˚S"
             for var in data_ds.data_vars:
                 local_graph.add_trace(plot_ts(
-                    data_ds[var], var, data_color[var], start_format,
-                    data_ds[var].attrs["units"]
+                    data_ds[var].mean("M", keep_attrs=True), var, data_color[var],
+                    start_format, data_ds[var].attrs["units"]
                 ))
             add_period_shape(
                 local_graph,
@@ -492,16 +495,23 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        ref = ac.seasonal_data(
-            ac.read_data("historical", model, variable, region, unit_convert=True),
-            start_month, end_month,
-            start_year=start_year_ref, end_year=end_year_ref,
-        ).mean(dim="T", keep_attrs=True)
-        data = ac.seasonal_data(
-            ac.read_data(scenario, model, variable, region, unit_convert=True),
-            start_month, end_month,
-            start_year=start_year, end_year=end_year,
-        ).mean(dim="T", keep_attrs=True)
+        model = [model] if model != "Multi-Model-Average" else [
+            "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
+        ]
+        ref = xr.concat([
+            ac.seasonal_data(
+                ac.read_data("historical", m, variable, region, unit_convert=True),
+                start_month, end_month,
+                start_year=start_year_ref, end_year=end_year_ref,
+            ).mean(dim="T", keep_attrs=True) for m in model
+        ], "M").mean("M", keep_attrs=True)
+        data = xr.concat([
+            ac.seasonal_data(
+                ac.read_data(scenario, m, variable, region, unit_convert=True),
+                start_month, end_month,
+                start_year=start_year, end_year=end_year,
+            ).mean(dim="T", keep_attrs=True) for m in model
+        ], "M").mean("M", keep_attrs=True)
         #Tedious way to make a subtraction only to keep attributes
         data = xr.apply_ufunc(
             np.subtract, data, ref, dask="allowed", keep_attrs="drop_conflicts",
@@ -562,9 +572,12 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        data = seasonal_change(
+        model = [model] if model != "Multi-Model-Average" else [
+            "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
+        ]
+        data = xr.concat([seasonal_change(
             scenario,
-            model,
+            m,
             variable,
             region,
             ac.strftimeb2int(start_month),
@@ -573,7 +586,7 @@ def register(FLASK, config):
             int(end_year),
             int(start_year_ref),
             int(end_year_ref),
-        )
+        ) for m in model], "M").mean("M", keep_attrs=True)
         colorbar, min, max = map_attributes(data)
         return colorbar.to_dash_leaflet(), min, max, data.attrs["units"]
 
@@ -673,9 +686,12 @@ def register(FLASK, config):
         end_year_ref,
     ):
         # Reading\
-        data = seasonal_change(
+        model = [model] if model != "Multi-Model-Average" else [
+            "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
+        ]
+        data = xr.concat([seasonal_change(
             scenario,
-            model,
+            m,
             variable,
             region,
             ac.strftimeb2int(start_month),
@@ -684,7 +700,7 @@ def register(FLASK, config):
             int(end_year),
             int(start_year_ref),
             int(end_year_ref),
-        )
+        ) for m in model], "M").mean("M", keep_attrs=True)
         (
             data.attrs["colormap"],
             data.attrs["scale_min"],
