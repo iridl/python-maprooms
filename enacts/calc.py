@@ -19,7 +19,7 @@ def find_enacts_zarr_path(variable, ds_conf, time_res="daily"):
         dictionary indicating ENACTS zarr path (see config)
     time_res : str, optional
         "daily" or "dekadal" resolution of the desired variable
-        defautl is "daily"
+        default is "daily"
     
     Returns
     -------
@@ -53,7 +53,7 @@ def read_enacts(variable, ds_conf=None, time_res="daily"):
         default is None to produce synthetic data
     time_res : str, optional
         "daily" or "dekadal" resolution of the desired variable
-        defautl is "daily"
+        default is "daily"
     
     Returns
     -------
