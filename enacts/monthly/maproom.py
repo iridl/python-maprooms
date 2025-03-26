@@ -40,7 +40,17 @@ from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
-READ_PARAMS = {"time_res": "dekadal", "ds_conf": GLOBAL_CONFIG['datasets']}
+try:
+    DS_CONF = GLOBAL_CONFIG['datasets']['dekadal']
+    HAS_REAL_DATA = True
+except:
+    HAS_REAL_DATA = False
+
+def get_data(variable, real_data=True):
+    if real_data:
+        return calc.read_enacts(variable, DS_CONF)
+    else:
+        return calc.synthetize_enacts(variable, "dekadal")
 
 def register(FLASK, config):
     # Prefix used at the end of the maproom url
@@ -82,7 +92,7 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def initialize(path):
-        rr_mrg = calc.read_enacts(variable="precip", **READ_PARAMS)
+        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -163,7 +173,7 @@ def register(FLASK, config):
     )
     def pick_location(click_lat_lng):
         if click_lat_lng == None:
-            rr_mrg = calc.read_enacts(variable="precip", **READ_PARAMS)
+            rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
             return [
                 ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
                 ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -181,7 +191,7 @@ def register(FLASK, config):
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         try:
-            DATA = calc.read_enacts(variable=var['id'], **READ_PARAMS)
+            DATA = get_data(var['id'], real_data=HAS_REAL_DATA)
             data = pingrid.sel_snap(DATA, marker_loc[0], marker_loc[1])
             base = data.resample(T="1M")
             if var['id'] == "precip":
@@ -293,7 +303,7 @@ def register(FLASK, config):
         y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
         varobj = config['vars'][var]
-        data = calc.read_enacts(variable=varobj['id'], **READ_PARAMS)
+        data = get_data(varobj['id'], real_data=HAS_REAL_DATA)
     
         if (
             x_min > data['X'].max() or

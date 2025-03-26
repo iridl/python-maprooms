@@ -29,7 +29,18 @@ from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
 
-RR_MRG_READ_PARAMS = {"variable": "precip", "ds_conf": GLOBAL_CONFIG['datasets']}
+try:
+    DS_CONF = GLOBAL_CONFIG['datasets']['daily']
+    HAS_REAL_DATA = True
+except KeyError:
+    HAS_REAL_DATA = False
+
+def get_data(variable, real_data=True):
+    if real_data:
+        print(DS_CONF)
+        return calc.read_enacts(variable, DS_CONF)
+    else:
+        return calc.synthetize_enacts(variable, "daily")
 
 def register(FLASK, config):
 
@@ -131,7 +142,7 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def initialize(path):
-        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -394,7 +405,7 @@ def register(FLASK, config):
         pet_tot,
     ):
         if map_choice == "monit":
-            rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+            rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
             search_start_month1 = calc.strftimeb2int(search_start_month)
             first_day = calc.sel_day_and_month(
                 rr_mrg["T"][-366:-1],
@@ -469,7 +480,7 @@ def register(FLASK, config):
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
-        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
         if dash.ctx.triggered_id == None:
             lat = rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values
             lng = rr_mrg["X"][int(rr_mrg["X"].size/2)].values
@@ -519,7 +530,7 @@ def register(FLASK, config):
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
-        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
         try:
             precip = pingrid.sel_snap(rr_mrg, lat, lng)
             isnan = np.isnan(precip).any()
@@ -677,7 +688,7 @@ def register(FLASK, config):
             tab_style = {"display": "none"}
             return {}, {}, tab_style
         else:
-            rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+            rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
             tab_style = {}
             lat = marker_pos[0]
             lng = marker_pos[1]
@@ -825,7 +836,7 @@ def register(FLASK, config):
             tab_style = {"display": "none"}
             return {}, {}, tab_style
         else:
-            rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+            rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
             tab_style = {}
             lat = marker_pos[0]
             lng = marker_pos[1]
@@ -996,7 +1007,7 @@ def register(FLASK, config):
         y_max = pingrid.tile_top_mercator(ty, tz)
         y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
-        rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
         #Assumes that grid spacing is regular and cells are square. When we
         # generalize this, don't make those assumptions.
         resolution = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -1167,7 +1178,7 @@ def register(FLASK, config):
             map_max = config["map_text"][map_choice]["map_max"]
             unit = "days"
         if map_choice == "monit":
-            rr_mrg = calc.read_enacts(**RR_MRG_READ_PARAMS)
+            rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
             precip = rr_mrg.isel({"T": slice(-366, None)})
             search_start_dm = calc.sel_day_and_month(
                 precip["T"],
