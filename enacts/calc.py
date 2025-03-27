@@ -26,10 +26,10 @@ def get_data(variable, time_res, ds_conf):
     
     See Also
     --------
-    read_enacts, synthetize_enacts
+    read_enacts, synthesize_enacts
     """
     if ds_conf[time_res] == "FAKE" :
-        return synthetize_enacts(variable, time_res)
+        return synthesize_enacts(variable, time_res)
     else:
         return read_enacts(variable, ds_conf[time_res])
 
@@ -62,7 +62,7 @@ def read_enacts(variable, dst_conf):
     return xrds[var_name]    
 
 
-def synthetize_enacts(variable, time_res):
+def synthesize_enacts(variable, time_res):
     """ Synthetize ENACTS data as `xr.DataArray`
 
     Parameters
