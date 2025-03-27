@@ -32,7 +32,12 @@ maprooms:
             length_stddev:
                 map_max: 40
 
-    wat_bal: null
+    wat_bal:
+      - planting_month: Jan
+        crop_name: Rice
+        kc_v: [0, 0, 1.1, 1.1, 0]
+        kc_l: [3, 27, 45, 60]
+        taw_max: 120
         
     monthly: null
     
