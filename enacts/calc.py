@@ -1,27 +1,125 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+import datetime
 
 # Date Reading functions
-def read_zarr_data(zarr_path):
-    """Read and return data in zarr format.
 
-    Parameters
-    ------
-    zarr_path : str
-        String of path to zarr folder.
+np.random.seed(123)
+
+def get_data(variable, time_res, ds_conf):
+    """ Gets ENACTS data for ENACTS Maprooms, read from files or synthetic
+
+     Parameters
+    ----------
+    variable : str
+        string representing ENACTS variable ("precip", "tmin" or "tmax")
+    time_res : str
+        "daily" or "dekadal" resolution of the desired variable
+    ds_conf : dict
+        dictionary indicating ENACTS datasets configuration
+        (see config)
+    
     Returns
     -------
-    zarr_data : Dataset
-        Data from zarr folder as multidimensional xarray dataset.
+        `xr.DataArray` of ENACTS `variable` for `time_res` time step
+    
     See Also
     --------
-    Notes
-     -----
+    read_enacts, synthesize_enacts
     """
-    zarr_data = xr.open_zarr(zarr_path)
-    return zarr_data
+    if ds_conf[time_res] == "FAKE" :
+        return synthesize_enacts(variable, time_res)
+    else:
+        return read_enacts(variable, ds_conf[time_res])
 
+
+def read_enacts(variable, dst_conf):
+    """ Read ENACTS data
+
+    Parameters
+    ----------
+    variable : str
+        string representing ENACTS variable ("precip", "tmin" or "tmax")
+    dst_conf : dict
+        dictionary indicating ENACTS zarr paths for a given time resolution
+        (see config)
+    
+    Returns
+    -------
+        `xr.DataArray` of ENACTS `variable` for `dst_conf` time step
+    
+    See Also
+    --------
+    xr.open_zarr
+    """
+    data_path = dst_conf['vars'][variable][1]
+    if data_path is None:
+        data_path = dst_conf['vars'][variable][0]
+    zarr_path = f"{dst_conf['zarr_path']}{data_path}"
+    var_name = dst_conf['vars'][variable][2]
+    xrds = xr.open_zarr(zarr_path)
+    return xrds[var_name]    
+
+
+def synthesize_enacts(variable, time_res):
+    """ Synthetize ENACTS data as `xr.DataArray`
+
+    Parameters
+    ----------
+    variable : str
+        string representing ENACTS variable ("precip", "tmin" or "tmax")
+    time_res : str
+        "daily" or "dekadal" resolution of the desired variable
+    
+    Returns
+    -------
+        `xr.DataArray` of ENACTS-like `variable` at `time_res` time steps
+    """
+    # Center mu, amplitude amp of the base sinusoid
+    # and amplitude of noisy anomalies to apply to it
+    characteristics = {
+        "precip": {"mu": -2, "amp": 10, "ano_amp": 5},
+        "tmin": {"mu": 27, "amp": 3, "ano_amp": 0.6},
+        "tmax": {"mu": 32, "amp": 2, "ano_amp": 0.4},
+    }
+    T = pd.date_range("1991-01-01", datetime.date.today(), name="T")
+    if variable == "precip":
+        # precip peaks in Apr
+        annual_cycle = np.cos(2 * np.pi * (T.dayofyear.values / 365.25 - 0.28))
+    else:
+        # temp peaks in Oct
+        annual_cycle = np.sin(2 * np.pi * (T.dayofyear.values / 365.25 - 0.28))
+    base_T = (
+        characteristics[variable]["mu"]
+        + characteristics[variable]["amp"]
+        * annual_cycle
+    ) + (
+        characteristics[variable]["ano_amp"]
+        * np.random.randn(annual_cycle.size, 1).reshape(1, 1, -1)
+    )
+    if variable == "precip":
+        # precip is >0
+        # and because of mu and amp,
+        # he rainy season is a bit shorter than 1/2 the year
+        base_T = np.clip(base_T, a_min=0, a_max=None)
+    # Coarse lat, lon dims to preserve some spatial homogeneity
+    Y = np.arange(2, 6.5, 0.5)
+    X = np.arange(-55, -51, 0.5)
+    # lat/lon log style trend around 1
+    # plus noise even closer to 1
+    lat_rand = np.log(Y*0.2/4.5 + 2.42) * (1 + 0.1 * np.random.randn(Y.size))
+    lon_rand = np.log(-X*0.2/4 - 0.05) * (1 + 0.1 * np.random.randn(X.size))
+    xrds = xr.Dataset(
+        {variable: (
+            ("X", "Y", "T"),
+            base_T * (lon_rand.reshape(-1, 1, 1) * lat_rand.reshape(1, -1, 1)),
+        )},
+        {"X": X, "Y": Y, "T": T},
+    # Interpolate back on a typical ENACTS spatial resolution
+    ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
+    var_name = variable
+    return xrds[var_name]
 
 # Growing season functions
 

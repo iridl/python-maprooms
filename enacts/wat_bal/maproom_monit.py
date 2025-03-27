@@ -28,12 +28,12 @@ from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
 from globals_ import GLOBAL_CONFIG, FLASK
+
 CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
-DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
-if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
-RR_MRG_ZARR = Path(DR_PATH)
+
+PRECIP_PARAMS = {
+    "variable": "precip", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
+}
 
 def register(FLASK, config):
 
@@ -122,7 +122,7 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def initialize(path):
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -158,25 +158,33 @@ def register(FLASK, config):
             Sentence(
                 Number("kc_init", config["kc_v"][0], min=0, max=2, width="5em"),
                 "through",
-                Number("kc_init_length", config["kc_l"][0], min=0, max=99, width="4em"),
+                Number(
+                    "kc_init_length", config["kc_l"][0], min=0, max=99, width="4em"
+                ),
                 "days of initialization to",
             ),
             Sentence(
                 Number("kc_veg", config["kc_v"][1], min=0, max=2, width="5em"),
                 "through",
-                Number("kc_veg_length", config["kc_l"][1], min=0, max=99, width="4em"),
+                Number(
+                    "kc_veg_length", config["kc_l"][1], min=0, max=99, width="4em"
+                ),
                 "days of growth to",
             ),
             Sentence(
                 Number("kc_mid", config["kc_v"][2], min=0, max=2, width="5em"),
                 "through",
-                Number("kc_mid_length", config["kc_l"][2], min=0, max=99, width="4em"),
+                Number(
+                    "kc_mid_length", config["kc_l"][2], min=0, max=99, width="4em"
+                ),
                 "days of mid-season to",
             ),
             Sentence(
                 Number("kc_late", config["kc_v"][3], min=0, max=2, width="5em"),
                 "through",
-                Number("kc_late_length", config["kc_l"][3], min=0, max=99, width="4em"),
+                Number(
+                    "kc_late_length", config["kc_l"][3], min=0, max=99, width="4em"
+                ),
                 "days of late-season to",
             ),
             Sentence(
@@ -204,25 +212,33 @@ def register(FLASK, config):
             Sentence(
                 Number("kc2_init", config["kc_v"][0], min=0, max=2, width="5em"),
                 "through",
-                Number("kc2_init_length", config["kc_l"][0], min=0, max=99, width="4em"),
+                Number(
+                    "kc2_init_length", config["kc_l"][0], min=0, max=99, width="4em"
+                ),
                 "days of initialization to",
             ),
             Sentence(
                 Number("kc2_veg", config["kc_v"][1], min=0, max=2, width="5em"),
                 "through",
-                Number("kc2_veg_length", config["kc_l"][1], min=0, max=99, width="4em"),
+                Number(
+                    "kc2_veg_length", config["kc_l"][1], min=0, max=99, width="4em"
+                ),
                 "days of growth to",
             ),
             Sentence(
                 Number("kc2_mid", config["kc_v"][2], min=0, max=2, width="5em"),
                 "through",
-                Number("kc2_mid_length", config["kc_l"][2], min=0, max=99, width="4em"),
+                Number(
+                    "kc2_mid_length", config["kc_l"][2], min=0, max=99, width="4em"
+                ),
                 "days of mid-season to",
             ),
             Sentence(
                 Number("kc2_late", config["kc_v"][3], min=0, max=2, width="5em"),
                 "through",
-                Number("kc2_late_length", config["kc_l"][3], min=0, max=99, width="4em"),
+                Number(
+                    "kc2_late_length", config["kc_l"][3], min=0, max=99, width="4em"
+                ),
                 "days of late-season to",
             ),
             Sentence(
@@ -253,8 +269,8 @@ def register(FLASK, config):
             time_options = current_options
             the_value = graph_click["points"][0]["x"]
         else:
-            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-            time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
+            rr_mrg = calc.get_data(**PRECIP_PARAMS)
+            time_range = rr_mrg["T"].isel({"T": slice(-366, None)})
             p_d = calc.sel_day_and_month(
                 time_range, int(planting_day), calc.strftimeb2int(planting_month)
             ).squeeze()
@@ -414,10 +430,10 @@ def register(FLASK, config):
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
         if dash.ctx.triggered_id == None:
-            lat = rr_mrg.precip["Y"][int(rr_mrg.precip["Y"].size/2)].values
-            lng = rr_mrg.precip["X"][int(rr_mrg.precip["X"].size/2)].values
+            lat = rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values
+            lng = rr_mrg["X"][int(rr_mrg["X"].size/2)].values
         else:
             if dash.ctx.triggered_id == "map":
                 lat = click_lat_lng[0]
@@ -426,7 +442,7 @@ def register(FLASK, config):
                 lat = latitude
                 lng = longitude
             try:
-                nearest_grid = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+                nearest_grid = pingrid.sel_snap(rr_mrg, lat, lng)
                 lat = nearest_grid["Y"].values
                 lng = nearest_grid["X"].values
             except KeyError:
@@ -625,9 +641,9 @@ def register(FLASK, config):
         kc2_late_length,
         kc2_end,
     ):
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-        first_year = rr_mrg.precip["T"][0].dt.year.values
-        last_year = rr_mrg.precip["T"][-1].dt.year.values
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
+        first_year = rr_mrg["T"][0].dt.year.values
+        last_year = rr_mrg["T"][-1].dt.year.values
         if planting2_year is None:
             return pingrid.error_fig(error_msg=(
                 f"Planting date must be between {first_year} and {last_year}"
@@ -640,7 +656,7 @@ def register(FLASK, config):
             )
         except KeyError:
             return pingrid.error_fig(error_msg="Grid box out of data domain")
-        precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+        precip = pingrid.sel_snap(rr_mrg, lat, lng)
         if np.isnan(precip).all():
             return pingrid.error_fig(error_msg="Data missing at this location")
 
@@ -756,8 +772,8 @@ def register(FLASK, config):
         kc_late_length = parse_arg("kc_late_length", int)
         kc_end = parse_arg("kc_end", float)
 
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-        precip = rr_mrg.precip
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
+        precip = rr_mrg
         x_min = pingrid.tile_left(tx, tz)
         x_max = pingrid.tile_left(tx + 1, tz)
         # row numbers increase as latitude decreases
@@ -870,8 +886,8 @@ def register(FLASK, config):
         if map_choice == "paw":
             map_max = 100
         elif map_choice == "water_excess":
-            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-            time_range = rr_mrg.precip["T"][-366:]
+            rr_mrg = calc.get_data(**PRECIP_PARAMS)
+            time_range = rr_mrg["T"][-366:]
             p_d = calc.sel_day_and_month(
                 time_range, int(planting_day), calc.strftimeb2int(planting_month)
             ).squeeze(drop=True).rename("p_d")

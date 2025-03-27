@@ -28,17 +28,18 @@ from controls import Block, Sentence, DateNoYear, Number, Select
 from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
-DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
-if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
-RR_MRG_ZARR = Path(DR_PATH)
+
+PRECIP_PARAMS = {
+    "variable": "precip", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
+}
 
 def register(FLASK, config):
 
     PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}'
     TILE_PFX = f"{PFX}/tile"
-    IS_CESS_KEY = np.array(list("length_" in cess_key for cess_key in list(config["map_text"].keys())))
+    IS_CESS_KEY = np.array(
+        list("length_" in cess_key for cess_key in list(config["map_text"].keys()))
+    )
     CESS_KEYS = np.array(list(config["map_text"].keys()))[IS_CESS_KEY]
     if not config["ison_cess_date_hist"]:
         for key in CESS_KEYS:
@@ -132,7 +133,7 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def initialize(path):
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -165,11 +166,23 @@ def register(FLASK, config):
         )
         onset_def = Sentence(
             "First spell of",
-            Number("running_days", config["default_running_days"], min=0, max=999, width="4em"),
+            Number(
+                "running_days",
+                config["default_running_days"],
+                min=0,
+                max=999,
+                width="4em",
+            ),
             "days that totals",
             Number("running_total", 20, min=0, max=99999, width="5em"),
             "mm or more and with at least",
-            Number("min_rainy_days", config["default_min_rainy_days"], min=0, max=999, width="4em"),
+            Number(
+                "min_rainy_days",
+                config["default_min_rainy_days"],
+                min=0,
+                max=999,
+                width="4em",
+            ),
             "wet day(s) that is not followed by a",
             Number("dry_days", 7, min=0, max=999, width="4em"),
             "-day dry spell within the next",
@@ -180,7 +193,9 @@ def register(FLASK, config):
                 "Cessation Date Definition",
                 Sentence(
                     "First date after",
-                    DateNoYear("cess_start_", 1, config["default_search_month_cess"]),
+                    DateNoYear(
+                        "cess_start_", 1, config["default_search_month_cess"]
+                    ),
                     "in",
                     Number("cess_search_days", 90, min=0, max=99999, width="5em"),
                     "days when the soil moisture falls below",
@@ -381,14 +396,14 @@ def register(FLASK, config):
         pet_tot,
     ):
         if map_choice == "monit":
-            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+            rr_mrg = calc.get_data(**PRECIP_PARAMS)
             search_start_month1 = calc.strftimeb2int(search_start_month)
             first_day = calc.sel_day_and_month(
-                rr_mrg.precip["T"][-366:-1],
+                rr_mrg["T"][-366:-1],
                 int(search_start_day),
                 search_start_month1,
             )[0].dt.strftime("%Y-%m-%d").values
-            last_day = rr_mrg.precip["T"][-1].dt.strftime("%Y-%m-%d").values
+            last_day = rr_mrg["T"][-1].dt.strftime("%Y-%m-%d").values
             map_title = (
                 "Onset date found between " + first_day + " and " + last_day
                 + " in days since " + first_day
@@ -456,10 +471,10 @@ def register(FLASK, config):
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
         if dash.ctx.triggered_id == None:
-            lat = rr_mrg.precip["Y"][int(rr_mrg.precip["Y"].size/2)].values
-            lng = rr_mrg.precip["X"][int(rr_mrg.precip["X"].size/2)].values
+            lat = rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values
+            lng = rr_mrg["X"][int(rr_mrg["X"].size/2)].values
         else:
             if dash.ctx.triggered_id == "map":
                 lat = click_lat_lng[0]
@@ -468,7 +483,7 @@ def register(FLASK, config):
                 lat = latitude
                 lng = longitude
             try:
-                nearest_grid = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+                nearest_grid = pingrid.sel_snap(rr_mrg, lat, lng)
                 lat = nearest_grid["Y"].values
                 lng = nearest_grid["X"].values
             except KeyError:
@@ -506,9 +521,9 @@ def register(FLASK, config):
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
         try:
-            precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+            precip = pingrid.sel_snap(rr_mrg, lat, lng)
             isnan = np.isnan(precip).any()
             if isnan:
                 error_fig = pingrid.error_fig(
@@ -664,12 +679,12 @@ def register(FLASK, config):
             tab_style = {"display": "none"}
             return {}, {}, tab_style
         else:
-            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+            rr_mrg = calc.get_data(**PRECIP_PARAMS)
             tab_style = {}
             lat = marker_pos[0]
             lng = marker_pos[1]
             try:
-                precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+                precip = pingrid.sel_snap(rr_mrg, lat, lng)
                 isnan = np.isnan(precip).any()
                 if isnan:
                     error_fig = pingrid.error_fig(
@@ -812,12 +827,12 @@ def register(FLASK, config):
             tab_style = {"display": "none"}
             return {}, {}, tab_style
         else:
-            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+            rr_mrg = calc.get_data(**PRECIP_PARAMS)
             tab_style = {}
             lat = marker_pos[0]
             lng = marker_pos[1]
             try:
-                precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+                precip = pingrid.sel_snap(rr_mrg, lat, lng)
                 isnan = np.isnan(precip).any()
                 if isnan:
                     error_fig = pingrid.error_fig(
@@ -983,13 +998,13 @@ def register(FLASK, config):
         y_max = pingrid.tile_top_mercator(ty, tz)
         y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
-        rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
         #Assumes that grid spacing is regular and cells are square. When we
         # generalize this, don't make those assumptions.
         resolution = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
         # The longest possible distance between a point and the center of the
         # grid cell containing that point.
-        precip = rr_mrg.precip
+        precip = rr_mrg
 
         if (
             # When we generalize this to other datasets, remember to
@@ -1003,7 +1018,7 @@ def register(FLASK, config):
             return pingrid.image_resp(pingrid.empty_tile())
 
         if map_choice == "monit":
-            precip_tile = rr_mrg.precip.isel({"T": slice(-366, None)})
+            precip_tile = rr_mrg.isel({"T": slice(-366, None)})
             search_start_dm = calc.sel_day_and_month(
                 precip_tile["T"], search_start_day, search_start_month1,
             )
@@ -1011,7 +1026,7 @@ def register(FLASK, config):
                 {"T": slice(search_start_dm.values[0], None)}
             )
         else:
-            precip_tile = rr_mrg.precip
+            precip_tile = rr_mrg
 
         precip_tile = precip_tile.sel(
             X=slice(
@@ -1154,8 +1169,8 @@ def register(FLASK, config):
             map_max = config["map_text"][map_choice]["map_max"]
             unit = "days"
         if map_choice == "monit":
-            rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-            precip = rr_mrg.precip.isel({"T": slice(-366, None)})
+            rr_mrg = calc.get_data(**PRECIP_PARAMS)
+            precip = rr_mrg.isel({"T": slice(-366, None)})
             search_start_dm = calc.sel_day_and_month(
                 precip["T"],
                 int(search_start_day),
