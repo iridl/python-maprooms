@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import datetime
+from pathlib import Path
 
 # Date Reading functions
 
@@ -120,6 +121,54 @@ def synthesize_enacts(variable, time_res):
     ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
     var_name = variable
     return xrds[var_name]
+
+
+def get_taw(dstaw_conf):
+    """ Get TAW data for ENACTS Maprooms, read from file or synthetic
+
+     Parameters
+    ----------
+    dstaw_conf : dict
+        dictionary indicating TAW file path configuration
+        (see config)
+    
+    Returns
+    -------
+        `xr.DataArray` of TAW
+    
+    See Also
+    --------
+    read_taw, synthesize_taw
+    """
+    if dstaw_conf == "FAKE" :
+        return synthesize_taw()
+    else:
+        return read_taw(Path(dstaw_conf))
+
+
+def read_taw(path):
+    """ Read TAW data for ENACTS Maprooms
+
+     Parameters
+    ----------
+    path : pathlib's Path
+        TAW path from configuration
+        (see config)
+    
+    Returns
+    -------
+        `xr.DataArray` of TAW
+    
+    See Also
+    --------
+    xr.open_dataarray
+    """
+    return xr.open_dataarray(path)
+
+
+def synthesize_taw():
+    return 10
+
 
 # Growing season functions
 
