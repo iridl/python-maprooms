@@ -14,6 +14,8 @@ datasets:
           sql: select adm1_code as key, adm0_name as label, adm0_code, ST_AsBinary(the_geom) as the_geom
               from g2015_2014_1 where adm0_code=86
           is_checked: True
+    daily: FAKE
+    dekadal: FAKE
 
 maprooms:
     # Onset

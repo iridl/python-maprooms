@@ -7,33 +7,57 @@ import datetime
 
 np.random.seed(123)
 
+def get_data(variable, time_res, ds_conf):
+    """ Gets ENACTS data for ENACTS Maprooms, read from files or synthetic
 
-def read_enacts(variable, ds_conf):
+     Parameters
+    ----------
+    variable : str
+        string representing ENACTS variable ("precip", "tmin" or "tmax")
+    time_res : str
+        "daily" or "dekadal" resolution of the desired variable
+    ds_conf : dict
+        dictionary indicating ENACTS datasets configuration
+        (see config)
+    
+    Returns
+    -------
+        `xr.DataArray` of ENACTS `variable` for `time_res` time step
+    
+    See Also
+    --------
+    read_enacts, synthetize_enacts
+    """
+    if ds_conf[time_res] == "FAKE" :
+        return synthetize_enacts(variable, time_res)
+    else:
+        return read_enacts(variable, ds_conf[time_res])
+
+
+def read_enacts(variable, dst_conf):
     """ Read ENACTS data
 
     Parameters
     ----------
     variable : str
         string representing ENACTS variable ("precip", "tmin" or "tmax")
-    ds_conf : dict
-        dictionary indicating ENACTS zarr path (see config)
+    dst_conf : dict
+        dictionary indicating ENACTS zarr paths for a given time resolution
+        (see config)
     
     Returns
     -------
-        `xr.DataArray` of ENACTS `variable` at `time_res` time steps
+        `xr.DataArray` of ENACTS `variable` for `dst_conf` time step
     
     See Also
     --------
     xr.open_zarr
     """
-    try:
-        data_path = ds_conf['vars'][variable][1]
-        if data_path is None:
-            data_path = ds_conf['vars'][variable][0]
-        zarr_path = f"{ds_conf['zarr_path']}{data_path}"
-        var_name = ds_conf['vars'][variable][2]
-    except KeyError as e:
-        raise Exception(f'configuration of data reading raised error {e}')
+    data_path = dst_conf['vars'][variable][1]
+    if data_path is None:
+        data_path = dst_conf['vars'][variable][0]
+    zarr_path = f"{dst_conf['zarr_path']}{data_path}"
+    var_name = dst_conf['vars'][variable][2]
     xrds = xr.open_zarr(zarr_path)
     return xrds[var_name]    
 

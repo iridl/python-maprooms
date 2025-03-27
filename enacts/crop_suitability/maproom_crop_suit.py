@@ -31,18 +31,15 @@ from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
 
-try:
-    DS_CONF = GLOBAL_CONFIG['datasets']['daily']
-    HAS_REAL_DATA = True
-except:
-    HAS_REAL_DATA = False
-
-def get_data(variable, real_data=True):
-    if real_data:
-        return calc.read_enacts(variable, DS_CONF)
-    else:
-        return calc.synthetize_enacts(variable, "daily")
-
+PRECIP_PARAMS = {
+    "variable": "precip", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
+}
+TMIN_PARAMS = {
+    "variable": "tmin", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
+}
+TMAX_PARAMS = {
+    "variable": "tmax", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
+}
 
 CROP_SUIT_COLORMAP = pingrid.ColorScale(
     "crop_suit",
@@ -136,7 +133,7 @@ def register(FLASK, config):
     )
     def initialize(path):
         # Gets daily data
-        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
         center_of_the_map = [
             ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
             ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
@@ -267,7 +264,7 @@ def register(FLASK, config):
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Get daily data
-        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
         if dash.ctx.triggered_id == None:
             lat = rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values
             lng = rr_mrg["X"][int(rr_mrg["X"].size/2)].values
@@ -383,9 +380,9 @@ def register(FLASK, config):
         lng1 = loc_marker[1]
         season_str = select_season(target_season)
         # Get daily data
-        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
-        tmin_mrg = get_data("tmin", real_data=HAS_REAL_DATA)
-        tmax_mrg = get_data("tmax", real_data=HAS_REAL_DATA) 
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
+        tmin_mrg = calc.get_data(**TMIN_PARAMS)
+        tmax_mrg = calc.get_data(**TMAX_PARAMS) 
         try:
             if data_choice == "precip":
                 data_var = pingrid.sel_snap(rr_mrg, lat1, lng1)
@@ -528,9 +525,9 @@ def register(FLASK, config):
         temp_range = parse_arg("temp_range", float)
 
         # Reads daily data
-        rr_mrg = get_data("precip", real_data=HAS_REAL_DATA)
-        tmin_mrg = get_data("tmin", real_data=HAS_REAL_DATA)
-        tmax_mrg = get_data("tmax", real_data=HAS_REAL_DATA) 
+        rr_mrg = calc.get_data(**PRECIP_PARAMS)
+        tmin_mrg = calc.get_data(**TMIN_PARAMS)
+        tmax_mrg = calc.get_data(**TMAX_PARAMS) 
 
         x_min = pingrid.tile_left(tx, tz)
         x_max = pingrid.tile_left(tx + 1, tz)
