@@ -7,6 +7,7 @@ from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
+from pathlib import Path
 
 # Date Reading functions
 
@@ -234,6 +235,52 @@ def sql2geom(shapes_sql, db_config):
         df = pd.read_sql(s, conn)
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
+def get_taw(dstaw_conf):
+    """ Get TAW data for ENACTS Maprooms, read from file or synthetic
+
+     Parameters
+    ----------
+    dstaw_conf : dict
+        dictionary indicating TAW file path configuration
+        (see config)
+    
+    Returns
+    -------
+        `xr.DataArray` of TAW
+    
+    See Also
+    --------
+    read_taw, synthesize_taw
+    """
+    if dstaw_conf == "FAKE" :
+        return synthesize_taw()
+    else:
+        return read_taw(Path(dstaw_conf))
+
+
+def read_taw(path):
+    """ Read TAW data for ENACTS Maprooms
+
+     Parameters
+    ----------
+    path : pathlib's Path
+        TAW path from configuration
+        (see config)
+    
+    Returns
+    -------
+        `xr.DataArray` of TAW
+    
+    See Also
+    --------
+    xr.open_dataarray
+    """
+    return xr.open_dataarray(path)
+
+
+def synthesize_taw():
+    return 10
+
 
 # Growing season functions
 
