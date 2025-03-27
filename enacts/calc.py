@@ -279,7 +279,14 @@ def read_taw(path):
 
 
 def synthesize_taw():
-    return 10
+    Y = np.arange(2, 6.5, 0.5)
+    X = np.arange(-55, -51, 0.5)
+    taw = 90 + 30 * np.random.randn(X.size*Y.size).reshape(X.size, Y.size)
+    xrds = xr.Dataset(
+        {"taw": (("X", "Y"), taw,)}, {"X": X, "Y": Y}
+    # Interpolate back on a typical ENACTS spatial resolution
+    ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
+    return xrds["taw"]
 
 
 # Growing season functions
