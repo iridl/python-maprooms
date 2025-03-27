@@ -35,7 +35,7 @@ def get_data(variable, time_res, ds_conf):
     read_enacts, synthesize_enacts
     """
     if ds_conf[time_res] == "FAKE" :
-        return synthesize_enacts(variable, time_res)
+        return synthesize_enacts(variable, time_res, ds_conf["bbox"])
     else:
         return read_enacts(variable, ds_conf[time_res])
 
@@ -68,7 +68,7 @@ def read_enacts(variable, dst_conf):
     return xrds[var_name]    
 
 
-def synthesize_enacts(variable, time_res):
+def synthesize_enacts(variable, time_res, bbox):
     """ Synthetize ENACTS data as `xr.DataArray`
 
     Parameters
@@ -77,6 +77,8 @@ def synthesize_enacts(variable, time_res):
         string representing ENACTS variable ("precip", "tmin" or "tmax")
     time_res : str
         "daily" or "dekadal" resolution of the desired variable
+    bbox : array
+        coordinates of bounding box of spatial domain as [W, S, E, N]
     
     Returns
     -------
@@ -110,20 +112,16 @@ def synthesize_enacts(variable, time_res):
         # he rainy season is a bit shorter than 1/2 the year
         base_T = np.clip(base_T, a_min=0, a_max=None)
     # Coarse lat, lon dims to preserve some spatial homogeneity
-    Y = np.arange(2, 6.5, 0.5)
-    X = np.arange(-55, -51, 0.5)
-    # lat/lon log style trend around 1
-    # plus noise even closer to 1
-    lat_rand = np.log(Y*0.2/4.5 + 2.42) * (1 + 0.1 * np.random.randn(Y.size))
-    lon_rand = np.log(-X*0.2/4 - 0.05) * (1 + 0.1 * np.random.randn(X.size))
+    Y = np.arange(bbox[1], bbox[3], 0.5)
+    X = np.arange(bbox[0], bbox[2], 0.5)
+    XY_rand = 0.1 * np.random.randn(X.size*Y.size).reshape(X.size, Y.size, 1)
     xrds = xr.Dataset(
-        {variable: (
-            ("X", "Y", "T"),
-            base_T * (lon_rand.reshape(-1, 1, 1) * lat_rand.reshape(1, -1, 1)),
-        )},
+        {variable: (("X", "Y", "T"), base_T + base_T * XY_rand)},
         {"X": X, "Y": Y, "T": T},
     # Interpolate back on a typical ENACTS spatial resolution
-    ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
+    ).interp(
+        X=np.arange(bbox[0], bbox[2], 0.0375), Y=np.arange(bbox[1], bbox[3], 0.0375)
+    )
     var_name = variable
     return xrds[var_name]
 
@@ -235,12 +233,14 @@ def sql2geom(shapes_sql, db_config):
         df = pd.read_sql(s, conn)
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
-def get_taw(dstaw_conf):
+
+
+def get_taw(ds_conf):
     """ Get TAW data for ENACTS Maprooms, read from file or synthetic
 
      Parameters
     ----------
-    dstaw_conf : dict
+    ds_conf : dict
         dictionary indicating TAW file path configuration
         (see config)
     
@@ -252,16 +252,16 @@ def get_taw(dstaw_conf):
     --------
     read_taw, synthesize_taw
     """
-    if dstaw_conf == "FAKE" :
-        return synthesize_taw()
+    if ds_conf["taw_file"] == "FAKE" :
+        return synthesize_taw(ds_conf["bbox"])
     else:
-        return read_taw(Path(dstaw_conf))
+        return read_taw(Path(ds_conf["taw_file"]))
 
 
 def read_taw(path):
     """ Read TAW data for ENACTS Maprooms
 
-     Parameters
+    Parameters
     ----------
     path : pathlib's Path
         TAW path from configuration
@@ -278,14 +278,31 @@ def read_taw(path):
     return xr.open_dataarray(path)
 
 
-def synthesize_taw():
-    Y = np.arange(2, 6.5, 0.5)
-    X = np.arange(-55, -51, 0.5)
+def synthesize_taw(bbox):
+    """ Synthesize TAW-like data for ENACTS Maprooms
+
+    Parameters
+    ----------
+    bbox : array
+        coordinates of bounding box of spatial domain as [W, S, E, N]
+    
+    Returns
+    -------
+        `xr.DataArray` of TAW
+    
+    See Also
+    --------
+    xr.open_dataarray
+    """
+    Y = np.arange(bbox[1], bbox[3], 0.5)
+    X = np.arange(bbox[0], bbox[2], 0.5)
     taw = 90 + 30 * np.random.randn(X.size*Y.size).reshape(X.size, Y.size)
     xrds = xr.Dataset(
         {"taw": (("X", "Y"), taw,)}, {"X": X, "Y": Y}
     # Interpolate back on a typical ENACTS spatial resolution
-    ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
+    ).interp(
+        X=np.arange(bbox[0], bbox[2], 0.0375), Y=np.arange(bbox[1], bbox[3], 0.0375)
+    )
     return xrds["taw"]
 
 
