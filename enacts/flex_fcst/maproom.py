@@ -16,6 +16,8 @@ import urllib
 import dash_leaflet as dlf
 from globals_ import FLASK, GLOBAL_CONFIG
 
+ADMS_PARAMS = GLOBAL_CONFIG["datasets"]["shapes_adm"]
+
 def register(FLASK, config):
     PFX = f"{GLOBAL_CONFIG['url_path_prefix']}/{config['core_path']}"
     TILE_PFX = f"{PFX}/tile"
@@ -657,10 +659,10 @@ def register(FLASK, config):
                 calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
                 adm["color"],
                 i+1,
-                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
+                len(ADMS_PARAMS)-i,
                 is_checked=adm["is_checked"]
             )
-            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
+            for i, adm in enumerate(ADMS_PARAMS)
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(
@@ -741,7 +743,7 @@ def register(FLASK, config):
         # choice of colorscale (dry to wet, wet to dry, or correlation)
         fcst_cdf = to_flexible(fcst_cdf, proba, variable, percentile,)
         clip_shape = calc.sql2geom(
-            GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'], GLOBAL_CONFIG["db"]
+            ADMS_PARAMS[0]['sql'], GLOBAL_CONFIG["db"]
         )["the_geom"][0]
 
         resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)

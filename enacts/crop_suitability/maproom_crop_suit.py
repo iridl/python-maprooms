@@ -37,6 +37,8 @@ TMAX_PARAMS = {
     "variable": "tmax", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
 }
 
+ADMS_PARAMS = GLOBAL_CONFIG["datasets"]["shapes_adm"]
+
 CROP_SUIT_COLORMAP = pingrid.ColorScale(
     "crop_suit",
     [BROWN, BROWN, ORANGE, ORANGE, YELLOW, YELLOW,
@@ -161,10 +163,10 @@ def register(FLASK, config):
                 calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
                 adm["color"],
                 i+1,
-                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
+                len(ADMS_PARAMS)-i,
                 is_checked=adm["is_checked"]
             )
-            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
+            for i, adm in enumerate(ADMS_PARAMS)
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(
@@ -573,7 +575,7 @@ def register(FLASK, config):
         map.attrs["scale_min"] = map_min
         map.attrs["scale_max"] = map_max
         clip_shape = calc.sql2geom(
-            GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'], GLOBAL_CONFIG["db"]
+            ADMS_PARAMS[0]['sql'], GLOBAL_CONFIG["db"]
         )["the_geom"][0]
         result = pingrid.tile(map.astype('float64'), tx, ty, tz, clip_shape)
 

@@ -35,6 +35,8 @@ CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
 PARAMS = {"time_res": "dekadal", "ds_conf": GLOBAL_CONFIG["datasets"]}
 
+ADMS_PARAMS = GLOBAL_CONFIG["datasets"]["shapes_adm"]
+
 def register(FLASK, config):
     # Prefix used at the end of the maproom url
     PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}'
@@ -107,10 +109,10 @@ def register(FLASK, config):
                 calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
                 adm["color"],
                 i+1,
-                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
+                len(ADMS_PARAMS)-i,
                 is_checked=adm["is_checked"]
             )
-            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
+            for i, adm in enumerate(ADMS_PARAMS)
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(
@@ -297,7 +299,7 @@ def register(FLASK, config):
         tile.attrs["scale_max"] = varobj['max']
     
         clip_shape = calc.sql2geom(
-            GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'], GLOBAL_CONFIG["db"]
+            ADMS_PARAMS[0]['sql'], GLOBAL_CONFIG["db"]
         )["the_geom"][0]
 
         result = pingrid.tile(tile, tx, ty, tz, clip_shape)
