@@ -11,6 +11,7 @@ from scipy.stats import t, norm
 import pandas as pd
 from . import predictions
 from . import cpt
+import maproom_utilities as mapr_u
 import urllib
 import dash_leaflet as dlf
 import psycopg2
@@ -40,24 +41,6 @@ def register(FLASK, config):
     APP.title = "Forecast"
 
     APP.layout = layout.app_layout()
-
-    def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False):
-        border_id = {"type": "borders_adm", "index": adm_lev}
-        return dlf.Overlay(
-            dlf.GeoJSON(
-                id=border_id,
-                data=calc.sql2GeoJSON(adm_sql, GLOBAL_CONFIG["db"]),
-                options={
-                    "fill": True,
-                    "color": adm_color,
-                    "weight": adm_weight,
-                    "fillOpacity": 0,
-                },
-            ),
-            name=adm_name,
-            checked=is_checked,
-        )
-
 
     #Should I move this function into the predictions.py file where I put the other funcs?
     #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
@@ -673,9 +656,9 @@ def register(FLASK, config):
                 checked=True,
             ),
         ] + [
-            make_adm_overlay(
+            mapr_u.make_adm_overlay(
                 adm["name"],
-                adm["sql"],
+                calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
                 adm["color"],
                 i+1,
                 len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
