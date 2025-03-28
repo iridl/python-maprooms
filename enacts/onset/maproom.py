@@ -17,10 +17,6 @@ import pandas as pd
 import numpy as np
 import urllib
 import math
-import psycopg2
-from psycopg2 import sql
-import shapely
-from shapely import wkb
 import datetime
 from controls import Block, Sentence, DateNoYear, Number, Select
 
@@ -1076,12 +1072,9 @@ def register(FLASK, config):
         map_data = map_data.rename(X="lon", Y="lat")
         map_data.attrs["scale_min"] = map_min
         map_data.attrs["scale_max"] = map_max
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed(
-                [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]
-            )
-            df = pd.read_sql(s, conn)
-            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
+        clip_shape = calc.sql2geom(
+            GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'], GLOBAL_CONFIG["db"]
+        )["the_geom"][0]
         result = pingrid.tile(map_data, tx, ty, tz, clip_shape)
         return result
 

@@ -22,11 +22,6 @@ from controls import Sentence, DateNoYear, Number, Select, Text
 import xarray as xr
 import agronomy as ag
 
-import psycopg2
-from psycopg2 import sql
-import shapely
-from shapely import wkb
-
 from globals_ import GLOBAL_CONFIG, FLASK
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
@@ -815,12 +810,9 @@ def register(FLASK, config):
         map = map.rename(X="lon", Y="lat")
         map.attrs["scale_min"] = 0
         map.attrs["scale_max"] = map_max
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed([
-                sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])
-            ])
-            df = pd.read_sql(s, conn)
-            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
+        clip_shape = calc.sql2geom(
+            GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'], GLOBAL_CONFIG["db"]
+        )["the_geom"][0]
         return pingrid.tile(map, tx, ty, tz, clip_shape)
 
 
