@@ -33,6 +33,7 @@ import urllib
 import xarray as xr
 
 import calc
+import maproom_utilities as mapr_u
 
 from . import layout
 from globals_ import FLASK, GLOBAL_CONFIG
@@ -78,10 +79,6 @@ def register(FLASK, config):
         Input("mon0", "value"),
     )
     def update_map(variable, month):
-        SHAP = {
-            level['name']: calc.sql2GeoJSON(level['sql'], GLOBAL_CONFIG["db"])
-            for level in GLOBAL_CONFIG['datasets']['shapes_adm']
-        }
         var = config["vars"][variable]
 
         mon = { "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4,
@@ -112,20 +109,15 @@ def register(FLASK, config):
                 checked=False,
             ),
         ] + [
-            dlf.Overlay(
-                dlf.GeoJSON(
-                    data=v,
-                    options={
-                        "fill": True,
-                        "color": "black",
-                        "weight": .5,
-                        "fillOpacity": 0,
-                    },
-                ),
-                name=k,
-                checked=True,
+            mapr_u.make_adm_overlay(
+                adm["name"],
+                calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
+                adm["color"],
+                i+1,
+                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
+                is_checked=adm["is_checked"]
             )
-            for k, v in SHAP.items()
+            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(

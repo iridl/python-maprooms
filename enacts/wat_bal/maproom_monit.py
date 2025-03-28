@@ -11,6 +11,7 @@ import pingrid
 from pingrid import CMAPS
 from . import layout_monit
 import calc
+import maproom_utilities as mapr_u
 import plotly.graph_objects as pgo
 import pandas as pd
 import numpy as np
@@ -54,26 +55,6 @@ def register(FLASK, config):
     )
     APP.title = config["title"]
     APP.layout = layout_monit.app_layout()
-
-    def make_adm_overlay(
-        adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False
-    ):
-        border_id = {"type": "borders_adm", "index": adm_lev}
-        return dlf.Overlay(
-            dlf.GeoJSON(
-                id=border_id,
-                data=calc.sql2GeoJSON(adm_sql, GLOBAL_CONFIG["db"]),
-                options={
-                    "fill": True,
-                    "color": adm_color,
-                    "weight": adm_weight,
-                    "fillOpacity": 0,
-                },
-            ),
-            name=adm_name,
-            checked=is_checked,
-        )
-
 
     @APP.callback(
         Output("lat_input", "min"),
@@ -324,9 +305,9 @@ def register(FLASK, config):
                 checked=True,
             ),
         ] + [
-            make_adm_overlay(
+            mapr_u.make_adm_overlay(
                 adm["name"],
-                adm["sql"],
+                calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
                 adm["color"],
                 i+1,
                 len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
