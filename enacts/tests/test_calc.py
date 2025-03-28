@@ -5,6 +5,65 @@ import calc
 import data_test_calc
 
 
+def test_swap_interval_left():
+    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    dekad_precip = calc.groupby_dekads(precip).sum()
+    dekad_precip_topoint = calc.swap_interval(
+        dekad_precip, "T_bins", to_point="left"
+    )
+
+    assert (dekad_precip_topoint["T"] == pd.to_datetime([
+        "2000-05-01", "2000-05-11", "2000-05-21",
+        "2000-06-01", "2000-06-11", "2000-06-21"
+    ])).all()
+
+
+def test_swap_interval_mid():
+    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    dekad_precip = calc.groupby_dekads(precip).sum()
+    dekad_precip_topoint = calc.swap_interval(dekad_precip, "T_bins")
+
+    assert (dekad_precip_topoint["T"] == pd.to_datetime([
+        "2000-05-06", "2000-05-16", "2000-05-26T12:00:00",
+        "2000-06-06", "2000-06-16", "2000-06-26"
+    ])).all()
+
+
+def test_groupby_dekads_perfect_partition():
+    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    grouped = calc.groupby_dekads(precip)
+
+    assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
+
+
+def test_groupby_dekads_overlaps():
+    t = pd.date_range(start="2000-04-30", end="2000-06-29", freq="1D")
+    values = np.arange(t.size)
+    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    grouped = calc.groupby_dekads(precip)
+
+    assert (grouped.sum() == [ 55, 155, 286, 365, 465 ]).all()
+
+
+def test_daily2dekad_sum():
+    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    dekad_precip = calc.daily2dekad_sum(precip)
+
+    assert (dekad_precip == [ 55, 155, 286, 365, 465, 565 ]).all()
+    assert (dekad_precip["T"] == pd.to_datetime([
+        "2000-05-01", "2000-05-11", "2000-05-21",
+        "2000-06-01", "2000-06-11", "2000-06-21"
+    ])).all()
+
+
 def test_longest_run_length():
 
     precip = precip_sample()

@@ -841,6 +841,141 @@ def _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, time_coord):
 
 
 # Time functions
+
+
+def swap_interval(data, interval_dim, to_point="mid", assigned_coord=None):
+    """ Assign coordinate of left, mid or right point of interval dimension
+    and swap to it
+
+    Parameters
+    ----------
+    data : xr.DataArray or xr.Dataset
+        data with an Interval dimension `interval_dim`
+    interval_dim : str
+        name of `data` dimension that is an Interval
+    to_point : str, optional
+        "left", "mid" or "right" point of the Intervals to swap to
+        default is "mid"
+    assigned_coord : str, optional
+        name of new dimension.
+        If not given, removes string after last "_" of `interval_dim`
+        (e.g. T_bins -> T)
+        If no "_" in `interval_dim, appends "_"`to_point` to `interval_dim`
+        (e.g. T -> T_mid)
+        If given, can not be same as `interval_dim`
+
+    Returns
+    -------
+    swapped : xr.DataArray or xr.Dataset
+        where `data` assigned, and swaped to,
+        a point-wise dimension from an Interval one
+
+    See Also
+    --------
+    pandas.Interval, xarray.assign_coords, xarray.swap_dims
+
+    Notes
+    -----
+    Should work for any type of dim, not just time.
+    xr.groupby_bins against dim renames the Interval dim_bins,
+    not sure if xr.groupby does the same,
+    and what other Xarray functions return Intervals but, depending,
+    could generalized the interval_dim and assigned_coord parameters
+    """
+    if assigned_coord is None :
+        if interval_dim.find("_") == -1 :
+            assigned_coord = "_".join([interval_dim, to_point])
+        else :
+            assigned_coord = '_'.join(interval_dim.split("_")[:-1])
+    else :
+        assert (
+            interval_dim != assigned_coord,
+            "assigned_coord can't be named after interval_dim",
+        )
+    interval_values = data[interval_dim].values
+    interval_dim_range = range(data[interval_dim].size)
+    # Is there a way for an Attribute (left, mid, right) to be a variable
+    # so that all this becomes one line using to_point?
+    if to_point == "mid" :
+        assigned_dim = [interval_values[t].mid for t in interval_dim_range]
+    elif to_point == "left" :
+        assigned_dim = [interval_values[t].left for t in interval_dim_range]
+    elif to_point == "right" :
+        assigned_dim = [interval_values[t].right for t in interval_dim_range]
+    else:
+        raise Exception("to_point must be left, right or mid")
+    return (
+        data
+        .assign_coords({assigned_coord : (interval_dim, assigned_dim)})
+        .swap_dims({interval_dim: assigned_coord})
+    )
+
+
+def groupby_dekads(daily_data, time_dim="T"):
+    """ Groups `daily_data` by dekads for grouping operations
+
+    Parameters
+    ----------
+    daily_data : xr.DataArray or xr.Dataset
+        daily data
+    time_dim : str, optional
+        name of daily time dimenstion, default is "T"
+
+    Returns
+    -------
+    grouped : xr.DataArrayGroupBy or xr.DatasetGroupBy
+        `daily_data` grouped by dekads
+
+    See Also
+    --------
+    xarray.groupby_bins
+    """
+    dekad_bins = daily_data[time_dim].where(
+        lambda x : ((x.dt.day == 1) | (x.dt.day == 11) | (x.dt.day == 21)),
+        drop=True,
+    )
+    if (daily_data[time_dim][-1] + np.timedelta64(1, "D")).dt.day == 1 :
+        dekad_bins = xr.concat(
+            [dekad_bins, daily_data[time_dim][-1] + np.timedelta64(1, "D")],
+            dim=time_dim,
+        )
+    assert dekad_bins.size > 1, "daily_data must span at least one full dekad"
+    return daily_data.groupby_bins(daily_data[time_dim], dekad_bins, right=False)
+
+
+def daily2dekad_sum(daily_data, time_dim="T"):
+    """ Compute dekad-totals from daily data
+
+    Parameters
+    ----------
+    daily_data : xr.DataArray or xr.Dataset
+        daily data
+    time_dim : str, optional
+        name of daily time dimenstion, default is "T"
+
+    Returns
+    -------
+    swapped : xr.DataArray or xr.Dataset
+        where `daily_data` was summed over dekads
+        and assigned and swapped to a `time_dim`
+        pointing to the beginninf of each dekad
+
+    See Also
+    --------
+    swap_interval, groupby_dekads
+
+    Notes
+    -----
+    At present assuming that beginning of dekad is the conventional way to represent
+    a dekad. It is the way in ENACTS zarrficiation scripts. This may change.
+    Could of course derive to all other Methods of grouped objects.
+    """
+    return swap_interval(
+        groupby_dekads(daily_data, time_dim=time_dim).sum(),
+        "_".join([time_dim, "bins"],
+    ), to_point="left")
+
+
 def strftimeb2int(strftimeb):
     """Convert month values to integers (1-12) from strings.
  
