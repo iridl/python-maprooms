@@ -2,6 +2,11 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import datetime
+import psycopg2
+from psycopg2 import sql
+import shapely
+from shapely import wkb
+from shapely.geometry.multipolygon import MultiPolygon
 
 # Date Reading functions
 
@@ -120,6 +125,67 @@ def synthesize_enacts(variable, time_res):
     ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
     var_name = variable
     return xrds[var_name]
+
+
+def sql2GeoJSON(shapes_sql, db_sql):
+    """ Form a GeoJSON dict from sql request to a database
+
+    Parameters
+    ----------
+    shapes_sql: str
+        sql request
+    db_sql: dict
+        dictionary with host, port, user and dbname information
+    
+    Returns
+    -------
+    features: dict
+        dictionary with features as key and GeoJSON of shapes_sql as value
+
+    See Also
+    --------
+    psycopg2.connect, psycopg2.sql, pandas.read_sql, shapely.wkb,
+    shapely.MultiPolygon, shapely.geometry.mapping
+
+    Examples
+    --------
+    shapes_sql: select id_1 as key, name_1 as label,
+        ST_AsBinary(the_geom) as the_geom from sen_adm1
+    db_sql:
+        host: postgres
+        port: 5432
+        user: ingrid
+        dbname: iridb
+
+    Notes
+    -----
+    Description of Return is approximative as I don't know exactly what the output is
+    """
+    with psycopg2.connect(**db_sql) as conn:
+        s = sql.Composed(
+            [
+                sql.SQL("with g as ("),
+                sql.SQL(shapes_sql),
+                sql.SQL(
+                    """
+                    )
+                    select
+                        g.label, g.key, g.the_geom
+                    from g
+                    """
+                ),
+            ]
+        )
+        df = pd.read_sql(s, conn)
+
+    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    df["the_geom"] = df["the_geom"].apply(
+        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
+    )
+    shapes = df["the_geom"].apply(shapely.geometry.mapping)
+    for i in df.index: #this adds the district layer as a label in the dict
+        shapes[i]['label'] = df['label'][i]
+    return {"features": shapes}
 
 # Growing season functions
 
