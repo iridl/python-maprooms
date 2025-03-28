@@ -2455,7 +2455,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v3
+                    - pnep-v4
                     - rain
                 predictand: bad-years
             observations:
@@ -2542,6 +2542,19 @@ countries:
                     label: Forecast prob non-exc v3
                     description: NextGen forecast probability of non-exceedance of selected percentile v3
                     path: guatemala/prcp-jja-v3.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v4:
+                    label: Forecast prob non-exc v4
+                    description: NextGen forecast probability of non-exceedance of selected percentile v4
+                    path: guatemala/prcp-jja-v4.zarr
                     var_names:
                         value: pne
                         lat: Y
