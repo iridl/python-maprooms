@@ -144,8 +144,7 @@ def sql2GeoJSON(shapes_sql, db_sql):
 
     See Also
     --------
-    psycopg2.connect, psycopg2.sql, pandas.read_sql, shapely.wkb,
-    shapely.MultiPolygon, shapely.geometry.mapping
+    sql2geom, geom2GeoJSON
 
     Examples
     --------
@@ -160,6 +159,73 @@ def sql2GeoJSON(shapes_sql, db_sql):
     Notes
     -----
     Description of Return is approximative as I don't know exactly what the output is
+    """
+    return geom2GeoJSON(sql2geom(shapes_sql, db_sql))
+
+
+def geom2GeoJSON(df):
+    """ Form a GeoJSON dict from a geometric object
+
+    Parameters
+    ----------
+    df: geometric object
+        shapely geometric object
+    
+    Returns
+    -------
+    features: dict
+        dictionary with features as key and GeoJSON of `geom` as value
+
+    See Also
+    --------
+    sql2geom, shapely.MultiPolygon, shapely.geometry.mapping
+
+    Notes
+    -----
+    Description of Return is approximative as I don't know exactly what the output is
+    """
+    df["the_geom"] = df["the_geom"].apply(
+        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
+    )
+    shapes = df["the_geom"].apply(shapely.geometry.mapping)
+    for i in df.index: #this adds the district layer as a label in the dict
+        shapes[i]['label'] = df['label'][i]
+    return {"features": shapes}
+
+
+def sql2geom(shapes_sql, db_sql):
+    """ Form a geometric object from sql query to a database
+
+    Parameters
+    ----------
+    shapes_sql: str
+        sql query
+    db_sql: dict
+        dictionary with host, port, user and dbname information
+    
+    Returns
+    -------
+    geometric object
+        shapely geometric object
+
+    See Also
+    --------
+    psycopg2.connect, psycopg2.sql, pandas.read_sql, shapely.wkb,
+
+    Examples
+    --------
+    shapes_sql: select id_1 as key, name_1 as label,
+        ST_AsBinary(the_geom) as the_geom from sen_adm1
+    db_sql:
+        host: postgres
+        port: 5432
+        user: ingrid
+        dbname: iridb
+
+    Notes
+    -----
+    Description of Returns is approximative
+    as I don't know exactly what the output is
     """
     with psycopg2.connect(**db_sql) as conn:
         s = sql.Composed(
@@ -177,15 +243,8 @@ def sql2GeoJSON(shapes_sql, db_sql):
             ]
         )
         df = pd.read_sql(s, conn)
-
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-    df["the_geom"] = df["the_geom"].apply(
-        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
-    )
-    shapes = df["the_geom"].apply(shapely.geometry.mapping)
-    for i in df.index: #this adds the district layer as a label in the dict
-        shapes[i]['label'] = df['label'][i]
-    return {"features": shapes}
+    return df
 
 # Growing season functions
 

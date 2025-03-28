@@ -14,10 +14,6 @@ from . import cpt
 import maproom_utilities as mapr_u
 import urllib
 import dash_leaflet as dlf
-import psycopg2
-from psycopg2 import sql
-import shapely
-from shapely import wkb
 from globals_ import FLASK, GLOBAL_CONFIG
 
 def register(FLASK, config):
@@ -744,10 +740,9 @@ def register(FLASK, config):
         # probabilities symmetry around percentile threshold
         # choice of colorscale (dry to wet, wet to dry, or correlation)
         fcst_cdf = to_flexible(fcst_cdf, proba, variable, percentile,)
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
-            df = pd.read_sql(s, conn)
-            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
+        clip_shape = calc.sql2geom(
+            GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'], GLOBAL_CONFIG["db"]
+        )["the_geom"][0]
 
         resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
         return resp

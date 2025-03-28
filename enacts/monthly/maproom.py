@@ -11,13 +11,6 @@ import dash_leaflet as dlf
 import dash_leaflet.express as dlx
 import json
 
-import psycopg2
-from psycopg2 import sql
-import shapely
-from shapely import wkb
-from shapely.geometry.polygon import Polygon
-from shapely import geometry
-
 import plotly.express as px
 
 import pingrid
@@ -303,13 +296,10 @@ def register(FLASK, config):
         tile.attrs["scale_min"] = varobj['min']
         tile.attrs["scale_max"] = varobj['max']
     
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed(
-                [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]
-            )
-            df = pd.read_sql(s, conn)
-            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
-        
+        clip_shape = calc.sql2geom(
+            GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'], GLOBAL_CONFIG["db"]
+        )["the_geom"][0]
+
         result = pingrid.tile(tile, tx, ty, tz, clip_shape)
 
         return result
