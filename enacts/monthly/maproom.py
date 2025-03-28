@@ -16,7 +16,6 @@ from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.polygon import Polygon
-from shapely.geometry.multipolygon import MultiPolygon
 from shapely import geometry
 
 import plotly.express as px
@@ -59,23 +58,6 @@ def register(FLASK, config):
     # which includes the layout definitions.
     APP.layout = layout.layout()
 
-    def get_shapes(query):
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.SQL(query)
-            df = pd.read_sql(s, conn)
-
-        df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-        df["the_geom"] = df["the_geom"].apply(
-            # lambda x: ((x if isinstance(x, MultiPolygon) else MultiPolygon([x]))
-            lambda x: (x
-                   .simplify(0.01, preserve_topology=False))
-        )
-        shapes = df["the_geom"].apply(shapely.geometry.mapping)
-        for i in df.index: #this adds the district layer as a label in the dict
-            shapes[i]['label'] = df['label'][i]
-        return {"features": shapes}
-
-
     @APP.callback(
         Output("app_title", "children"),
         Output("map", "center"),
@@ -97,7 +79,7 @@ def register(FLASK, config):
     )
     def update_map(variable, month):
         SHAP = {
-            level['name']: get_shapes(level['sql'])
+            level['name']: calc.sql2GeoJSON(level['sql'], GLOBAL_CONFIG["db"])
             for level in GLOBAL_CONFIG['datasets']['shapes_adm']
         }
         var = config["vars"][variable]
