@@ -10,17 +10,13 @@ import pingrid
 from pingrid import CMAPS
 from . import layout
 import calc
+import maproom_utilities as mapr_u
 import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
 import numpy as np
 import urllib
 import math
-import psycopg2
-from psycopg2 import sql
-import shapely
-from shapely import wkb
-from shapely.geometry.multipolygon import MultiPolygon
 import datetime
 from controls import Block, Sentence, DateNoYear, Number, Select
 
@@ -32,6 +28,8 @@ CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
 PRECIP_PARAMS = {
     "variable": "precip", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
 }
+
+ADMIN_CONFIG = GLOBAL_CONFIG["datasets"]["shapes_adm"]
 
 def register(FLASK, config):
 
@@ -57,55 +55,6 @@ def register(FLASK, config):
     APP.title = config["title"]
 
     APP.layout = layout.app_layout()
-
-
-    def adm_borders(shapes):
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed(
-                [
-                    sql.SQL("with g as ("),
-                    sql.SQL(shapes),
-                    sql.SQL(
-                        """
-                        )
-                        select
-                            g.label, g.key, g.the_geom
-                        from g
-                        """
-                    ),
-                ]
-            )
-            df = pd.read_sql(s, conn)
-
-        df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-        df["the_geom"] = df["the_geom"].apply(
-            lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
-        )
-        shapes = df["the_geom"].apply(shapely.geometry.mapping)
-        for i in df.index: #this adds the district layer as a label in the dict
-            shapes[i]['label'] = df['label'][i]
-        return {"features": shapes}
-
-
-    def make_adm_overlay(
-        adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False
-    ):
-        border_id = {"type": "borders_adm", "index": adm_lev}
-        return dlf.Overlay(
-            dlf.GeoJSON(
-                id=border_id,
-                data=adm_borders(adm_sql),
-                options={
-                    "fill": True,
-                    "color": adm_color,
-                    "weight": adm_weight,
-                    "fillOpacity": 0,
-                },
-            ),
-            name=adm_name,
-            checked=is_checked,
-        )
-
 
     @APP.callback(
         Output("lat_input", "min"),
@@ -298,15 +247,15 @@ def register(FLASK, config):
                 checked=True,
             ),
         ] + [
-            make_adm_overlay(
-                adm["name"],
-                adm["sql"],
-                adm["color"],
-                i+1,
-                len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
-                is_checked=adm["is_checked"]
+            mapr_u.make_adm_overlay(
+                adm_name=adm["name"],
+                adm_geojson=calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
+                adm_clor=adm["color"],
+                adm_lev=i+1,
+                adm_weight=len(ADMIN_CONFIG)-i,
+                is_checked=adm["is_checked"],
             )
-            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
+            for i, adm in enumerate(ADMIN_CONFIG)
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(
@@ -1125,12 +1074,9 @@ def register(FLASK, config):
         map_data = map_data.rename(X="lon", Y="lat")
         map_data.attrs["scale_min"] = map_min
         map_data.attrs["scale_max"] = map_max
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed(
-                [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]
-            )
-            df = pd.read_sql(s, conn)
-            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
+        clip_shape = calc.sql2geom(
+            ADMIN_CONFIG[0]['sql'], GLOBAL_CONFIG["db"]
+        )["the_geom"][0]
         result = pingrid.tile(map_data, tx, ty, tz, clip_shape)
         return result
 
