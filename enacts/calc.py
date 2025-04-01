@@ -114,9 +114,9 @@ def synthesize_enacts(variable, time_res, bbox):
     # Coarse lat, lon dims to preserve some spatial homogeneity
     Y = np.arange(bbox[1], bbox[3], 0.5)
     X = np.arange(bbox[0], bbox[2], 0.5)
-    XY_rand = 0.1 * np.random.randn(X.size*Y.size).reshape(X.size, Y.size, 1)
+    XY_rand = 0.1 * np.random.randn(X.size*Y.size).reshape(Y.size, X.size, 1)
     xrds = xr.Dataset(
-        {variable: (("X", "Y", "T"), base_T + base_T * XY_rand)},
+        {variable: (("Y", "X", "T"), base_T + base_T * XY_rand)},
         {"X": X, "Y": Y, "T": T},
     # Interpolate back on a typical ENACTS spatial resolution
     ).interp(
