@@ -115,15 +115,13 @@ def synthesize_enacts(variable, time_res, bbox):
     Y = np.arange(bbox[1], bbox[3], 0.5)
     X = np.arange(bbox[0], bbox[2], 0.5)
     XY_rand = 0.1 * np.random.randn(X.size*Y.size).reshape(Y.size, X.size, 1)
-    xrds = xr.Dataset(
-        {variable: (("Y", "X", "T"), base_T + base_T * XY_rand)},
-        {"X": X, "Y": Y, "T": T},
-    # Interpolate back on a typical ENACTS spatial resolution
+    return xr.DataArray(
+        data=(base_T + base_T * XY_rand),
+        coords={"Y": Y, "X": X, "T": T},
+        name=variable,
     ).interp(
         X=np.arange(bbox[0], bbox[2], 0.0375), Y=np.arange(bbox[1], bbox[3], 0.0375)
     )
-    var_name = variable
-    return xrds[var_name]
 
 
 def sql2GeoJSON(shapes_sql, db_config):
@@ -280,13 +278,9 @@ def synthesize_taw(bbox):
     Y = np.arange(bbox[1], bbox[3], 0.5)
     X = np.arange(bbox[0], bbox[2], 0.5)
     taw = 90 + 30 * np.random.randn(X.size*Y.size).reshape(Y.size, X.size)
-    xrds = xr.Dataset(
-        {"taw": (("Y", "X"), taw,)}, {"X": X, "Y": Y}
-    # Interpolate back on a typical ENACTS spatial resolution
-    ).interp(
+    return xr.DataArray(data=taw, coords={"Y": Y, "X": X}, name="taw").interp(
         X=np.arange(bbox[0], bbox[2], 0.0375), Y=np.arange(bbox[1], bbox[3], 0.0375)
     )
-    return xrds["taw"]
 
 
 # Growing season functions
