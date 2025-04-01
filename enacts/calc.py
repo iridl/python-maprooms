@@ -279,9 +279,9 @@ def synthesize_taw(bbox):
     """
     Y = np.arange(bbox[1], bbox[3], 0.5)
     X = np.arange(bbox[0], bbox[2], 0.5)
-    taw = 90 + 30 * np.random.randn(X.size*Y.size).reshape(X.size, Y.size)
+    taw = 90 + 30 * np.random.randn(X.size*Y.size).reshape(Y.size, X.size)
     xrds = xr.Dataset(
-        {"taw": (("X", "Y"), taw,)}, {"X": X, "Y": Y}
+        {"taw": (("Y", "X"), taw,)}, {"X": X, "Y": Y}
     # Interpolate back on a typical ENACTS spatial resolution
     ).interp(
         X=np.arange(bbox[0], bbox[2], 0.0375), Y=np.arange(bbox[1], bbox[3], 0.0375)
