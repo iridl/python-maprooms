@@ -127,14 +127,14 @@ def synthesize_enacts(variable, time_res):
     return xrds[var_name]
 
 
-def sql2GeoJSON(shapes_sql, db_sql):
+def sql2GeoJSON(shapes_sql, db_config):
     """ Form a GeoJSON dict from sql request to a database
 
     Parameters
     ----------
     shapes_sql: str
         sql request
-    db_sql: dict
+    db_config: dict
         dictionary with host, port, user and dbname information
     
     Returns
@@ -150,17 +150,13 @@ def sql2GeoJSON(shapes_sql, db_sql):
     --------
     shapes_sql: select id_1 as key, name_1 as label,
         ST_AsBinary(the_geom) as the_geom from sen_adm1
-    db_sql:
+    db_config:
         host: postgres
         port: 5432
         user: ingrid
         dbname: iridb
-
-    Notes
-    -----
-    Description of Return is approximative as I don't know exactly what the output is
     """
-    return geom2GeoJSON(sql2geom(shapes_sql, db_sql))
+    return geom2GeoJSON(sql2geom(shapes_sql, db_config))
 
 
 def geom2GeoJSON(df):
@@ -179,10 +175,6 @@ def geom2GeoJSON(df):
     See Also
     --------
     sql2geom, shapely.MultiPolygon, shapely.geometry.mapping
-
-    Notes
-    -----
-    Description of Return is approximative as I don't know exactly what the output is
     """
     df["the_geom"] = df["the_geom"].apply(
         lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
@@ -193,20 +185,20 @@ def geom2GeoJSON(df):
     return {"features": shapes}
 
 
-def sql2geom(shapes_sql, db_sql):
+def sql2geom(shapes_sql, db_config):
     """ Form a geometric object from sql query to a database
 
     Parameters
     ----------
     shapes_sql: str
         sql query
-    db_sql: dict
+    db_config: dict
         dictionary with host, port, user and dbname information
     
     Returns
     -------
-    geometric object
-        shapely geometric object
+    df : pandas.DataFrame
+        a pd.DF including "the_geom" : a shapely geometric object
 
     See Also
     --------
@@ -216,18 +208,13 @@ def sql2geom(shapes_sql, db_sql):
     --------
     shapes_sql: select id_1 as key, name_1 as label,
         ST_AsBinary(the_geom) as the_geom from sen_adm1
-    db_sql:
+    db_config:
         host: postgres
         port: 5432
         user: ingrid
         dbname: iridb
-
-    Notes
-    -----
-    Description of Returns is approximative
-    as I don't know exactly what the output is
     """
-    with psycopg2.connect(**db_sql) as conn:
+    with psycopg2.connect(**db_config) as conn:
         s = sql.Composed(
             [
                 sql.SQL("with g as ("),

@@ -30,7 +30,7 @@ PRECIP_PARAMS = {
     "variable": "precip", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
 }
 
-ADMS_PARAMS = GLOBAL_CONFIG["datasets"]["shapes_adm"]
+ADMIN_CONFIG = GLOBAL_CONFIG["datasets"]["shapes_adm"]
 
 def register(FLASK, config):
 
@@ -303,14 +303,14 @@ def register(FLASK, config):
             ),
         ] + [
             mapr_u.make_adm_overlay(
-                adm["name"],
-                calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
-                adm["color"],
-                i+1,
-                len(ADMS_PARAMS)-i,
-                is_checked=adm["is_checked"]
+                adm_name=adm["name"],
+                adm_geojson=calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
+                adm_clor=adm["color"],
+                adm_lev=i+1,
+                adm_weight=len(ADMIN_CONFIG)-i,
+                is_checked=adm["is_checked"],
             )
-            for i, adm in enumerate(ADMS_PARAMS)
+            for i, adm in enumerate(ADMIN_CONFIG)
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(
@@ -813,7 +813,7 @@ def register(FLASK, config):
         map.attrs["scale_min"] = 0
         map.attrs["scale_max"] = map_max
         clip_shape = calc.sql2geom(
-            ADMS_PARAMS[0]['sql'], GLOBAL_CONFIG["db"]
+            ADMIN_CONFIG[0]['sql'], GLOBAL_CONFIG["db"]
         )["the_geom"][0]
         return pingrid.tile(map, tx, ty, tz, clip_shape)
 
