@@ -255,27 +255,10 @@ def get_taw(ds_conf):
     if ds_conf["taw_file"] == "FAKE" :
         return synthesize_taw(ds_conf["bbox"])
     else:
-        return read_taw(Path(ds_conf["taw_file"]))
-
-
-def read_taw(path):
-    """ Read TAW data for ENACTS Maprooms
-
-    Parameters
-    ----------
-    path : pathlib's Path
-        TAW path from configuration
-        (see config)
-    
-    Returns
-    -------
-        `xr.DataArray` of TAW
-    
-    See Also
-    --------
-    xr.open_dataarray
-    """
-    return xr.open_dataarray(path)
+        # At the moment, it's the only case we have
+        # if/when other ways to read taw come up,
+        # can reintroduce a more sophisticated read_taw function
+        return xr.open_dataarray(ds_conf["taw_file"])
 
 
 def synthesize_taw(bbox):
