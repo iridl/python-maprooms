@@ -113,8 +113,8 @@ def navbar_layout():
                     init=1,
                 )),
                 Block("Model", Select(id="model", options=[
-                    "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR", "MRI-ESM2-0",
-                    "UKESM1-0-LL",
+                    "Multi-Model-Average", "GFDL-ESM4", "IPSL-CM6A-LR",
+                    "MPI-ESM1-2-HR", "MRI-ESM2-0", "UKESM1-0-LL",
                 ])),
                 Block("Variable", Select(
                     id="variable",
