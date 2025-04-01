@@ -8,7 +8,7 @@ import data_test_calc
 def test_swap_interval_left():
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     values = 1 + np.arange(t.size)
-    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    precip = xr.DataArray(values, coords={"T": t})
     dekad_precip = calc.groupby_dekads(precip).sum()
     dekad_precip_topoint = calc.swap_interval(
         dekad_precip, "T_bins", to_point="left"
@@ -23,7 +23,7 @@ def test_swap_interval_left():
 def test_swap_interval_mid():
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     values = 1 + np.arange(t.size)
-    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    precip = xr.DataArray(values, coords={"T": t})
     dekad_precip = calc.groupby_dekads(precip).sum()
     dekad_precip_topoint = calc.swap_interval(dekad_precip, "T_bins")
 
@@ -36,7 +36,7 @@ def test_swap_interval_mid():
 def test_groupby_dekads_perfect_partition():
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     values = 1 + np.arange(t.size)
-    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    precip = xr.DataArray(values, coords={"T": t})
     grouped = calc.groupby_dekads(precip)
 
     assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
@@ -45,7 +45,7 @@ def test_groupby_dekads_perfect_partition():
 def test_groupby_dekads_overlaps():
     t = pd.date_range(start="2000-04-30", end="2000-06-29", freq="1D")
     values = np.arange(t.size)
-    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    precip = xr.DataArray(values, coords={"T": t})
     grouped = calc.groupby_dekads(precip)
 
     assert (grouped.sum() == [ 55, 155, 286, 365, 465 ]).all()
@@ -54,7 +54,7 @@ def test_groupby_dekads_overlaps():
 def test_daily2dekad_sum():
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     values = 1 + np.arange(t.size)
-    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    precip = xr.DataArray(values, coords={"T": t})
     dekad_precip = calc.daily2dekad_sum(precip)
 
     assert (dekad_precip == [ 55, 155, 286, 365, 465, 565 ]).all()
