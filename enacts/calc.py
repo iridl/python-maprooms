@@ -843,6 +843,51 @@ def _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, time_coord):
 # Time functions
 
 
+def interval_to_point(interval, to_point="mid", keep_attrs=True):
+    """ Create an xr.DataArray of the left, mid or right points of an Interval
+    dimension
+
+    Parameters
+    ----------
+    interval : xr.DataArray(pd.Interval)
+        array of intervals
+    to_point : str, optional
+        "left", "mid" or "right" point of `interval`
+        default is "mid"
+    keep_attrs : boolean, optional
+        Keep attributed from `interval` to point array
+        default is True
+
+    Returns
+    -------
+    point_array : xr.DataArray
+        array of the left, mid or right points of `interval`
+
+    See Also
+    --------
+    pandas.Interval
+
+    Notes
+    -----
+    Should work for any type of array, not just time.
+    xr.groupby_bins against dim renames the Interval dim_bins,
+    not sure if xr.groupby does the same,
+    and what other Xarray functions return Intervals but, depending,
+    could generalize the returned array name
+    """
+    return xr.DataArray(
+        data = [getattr(interval.values[t], to_point) for t in range(interval.size)],
+        coords = {interval.name : interval},
+        name = ( # There might be other automatic cases to cover
+            interval.name.replace("_bins", f'_{to_point}')
+            if interval.name.endswith("_bins")
+            else "_".join(interval.name, f'_{to_point}')
+        ),
+        attrs = interval.attrs if keep_attrs else {},
+    )
+    return data
+
+
 def swap_interval(data, interval_dim, to_point="mid", assigned_coord=None):
     """ Assign coordinate of left, mid or right point of interval dimension
     and swap to it
