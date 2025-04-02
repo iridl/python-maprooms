@@ -41,6 +41,22 @@ def test_groupby_dekads_noon_days_overlaps():
     assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
 
 
+def test_interval_to_point_dim():
+    t = pd.date_range(start="2000-05-01T120000", end="2000-07-01T120000", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, coords={"T": t})
+    grouped = calc.groupby_dekads(precip).sum()
+    mid_dim = calc.interval_to_point_dim(grouped["T_bins"])
+    left_dim = calc.interval_to_point_dim(grouped["T_bins"], to_point="left")
+    right_dim = calc.interval_to_point_dim(grouped["T_bins"], to_point="right")
+
+    assert mid_dim.name.endswith("_mid")
+    assert left_dim.name.endswith("_left")
+    assert right_dim.name.endswith("_right")
+    for t in range(mid_dim.size) :
+        assert mid_dim.values[t] == mid_dim["T_bins"].values[t].mid
+
+
 def test_swap_interval_left():
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     values = 1 + np.arange(t.size)
