@@ -888,9 +888,8 @@ def swap_interval(data, interval_dim, to_point="mid", assigned_coord=None):
         else :
             assigned_coord = '_'.join(interval_dim.split("_")[:-1])
     else :
-        assert (
-            interval_dim != assigned_coord,
-            "assigned_coord can't be named after interval_dim",
+        assert interval_dim != assigned_coord, (
+            "assigned_coord can't be named after interval_dim"
         )
     interval_values = data[interval_dim].values
     interval_dim_range = range(data[interval_dim].size)
@@ -940,7 +939,7 @@ def groupby_dekads(daily_data, time_dim="T"):
         (dekad_edges.day == 1) | (dekad_edges.day == 11) | (dekad_edges.day == 21)
     ).dropna()
     assert dekad_edges.size > 1, (
-        f"daily_data must span at least one full dekad (need 2 edges to form 1 bin)"
+        "daily_data must span at least one full dekad (need 2 edges to form 1 bin)"
     )
     return daily_data.groupby_bins(daily_data[time_dim], dekad_edges, right=False)
 
