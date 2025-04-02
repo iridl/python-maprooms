@@ -931,16 +931,18 @@ def groupby_dekads(daily_data, time_dim="T"):
     xarray.groupby_bins
     """
     # dekad bins are located at midnight
-    dekad_bins = pd.date_range(
+    dekad_edges = pd.date_range(
         start=daily_data[time_dim][0].dt.floor("D").values,
         end=(daily_data[time_dim][-1] + np.timedelta64(1, "D")).dt.floor("D").values,
         freq="1D",
     )
-    dekad_bins = dekad_bins.where(
-        (dekad_bins.day == 1) | (dekad_bins.day == 11) | (dekad_bins.day == 21)
+    dekad_edges = dekad_edges.where(
+        (dekad_edges.day == 1) | (dekad_edges.day == 11) | (dekad_edges.day == 21)
     ).dropna()
-    assert dekad_bins.size > 1, "daily_data must span at least one full dekad"
-    return daily_data.groupby_bins(daily_data[time_dim], dekad_bins, right=False)
+    assert dekad_edges.size > 1, (
+        f"daily_data must span at least one full dekad (need 2 edges to form 1 bin)"
+    )
+    return daily_data.groupby_bins(daily_data[time_dim], dekad_edges, right=False)
 
 
 def daily2dekad_sum(daily_data, time_dim="T"):
