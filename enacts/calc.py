@@ -893,16 +893,9 @@ def swap_interval(data, interval_dim, to_point="mid", assigned_coord=None):
         )
     interval_values = data[interval_dim].values
     interval_dim_range = range(data[interval_dim].size)
-    # Is there a way for an Attribute (left, mid, right) to be a variable
-    # so that all this becomes one line using to_point?
-    if to_point == "mid" :
-        assigned_dim = [interval_values[t].mid for t in interval_dim_range]
-    elif to_point == "left" :
-        assigned_dim = [interval_values[t].left for t in interval_dim_range]
-    elif to_point == "right" :
-        assigned_dim = [interval_values[t].right for t in interval_dim_range]
-    else:
-        raise Exception("to_point must be left, right or mid")
+    assigned_dim = [
+        getattr(interval_values[t], to_point) for t in interval_dim_range
+    ]
     return (
         data
         .assign_coords({assigned_coord : (interval_dim, assigned_dim)})
