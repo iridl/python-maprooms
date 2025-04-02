@@ -930,15 +930,15 @@ def groupby_dekads(daily_data, time_dim="T"):
     --------
     xarray.groupby_bins
     """
-    dekad_bins = daily_data[time_dim].where(
-        lambda x : ((x.dt.day == 1) | (x.dt.day == 11) | (x.dt.day == 21)),
-        drop=True,
+    # dekad bins are located at midnight
+    dekad_bins = pd.date_range(
+        start=daily_data[time_dim][0].dt.floor("D").values,
+        end=(daily_data[time_dim][-1] + np.timedelta64(1, "D")).dt.floor("D").values,
+        freq="1D",
     )
-    if (daily_data[time_dim][-1] + np.timedelta64(1, "D")).dt.day == 1 :
-        dekad_bins = xr.concat(
-            [dekad_bins, daily_data[time_dim][-1] + np.timedelta64(1, "D")],
-            dim=time_dim,
-        )
+    dekad_bins = dekad_bins.where(
+        (dekad_bins.day == 1) | (dekad_bins.day == 11) | (dekad_bins.day == 21)
+    ).dropna()
     assert dekad_bins.size > 1, "daily_data must span at least one full dekad"
     return daily_data.groupby_bins(daily_data[time_dim], dekad_bins, right=False)
 
