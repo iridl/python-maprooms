@@ -5,6 +5,33 @@ import calc
 import data_test_calc
 
 
+def test_groupby_dekads_perfect_partition():
+    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, coords={"T": t})
+    grouped = calc.groupby_dekads(precip)
+
+    assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
+
+
+def test_groupby_dekads_noon_days():
+    t = pd.date_range(start="2000-05-01T120000", end="2000-06-30T120000", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, coords={"T": t})
+    grouped = calc.groupby_dekads(precip)
+
+    assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
+
+
+def test_groupby_dekads_overlaps():
+    t = pd.date_range(start="2000-04-30", end="2000-06-29", freq="1D")
+    values = np.arange(t.size)
+    precip = xr.DataArray(values, coords={"T": t})
+    grouped = calc.groupby_dekads(precip)
+
+    assert (grouped.sum() == [ 55, 155, 286, 365, 465 ]).all()
+
+
 def test_swap_interval_left():
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     values = 1 + np.arange(t.size)
@@ -31,24 +58,6 @@ def test_swap_interval_mid():
         "2000-05-06", "2000-05-16", "2000-05-26T12:00:00",
         "2000-06-06", "2000-06-16", "2000-06-26"
     ])).all()
-
-
-def test_groupby_dekads_perfect_partition():
-    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
-    values = 1 + np.arange(t.size)
-    precip = xr.DataArray(values, coords={"T": t})
-    grouped = calc.groupby_dekads(precip)
-
-    assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
-
-
-def test_groupby_dekads_overlaps():
-    t = pd.date_range(start="2000-04-30", end="2000-06-29", freq="1D")
-    values = np.arange(t.size)
-    precip = xr.DataArray(values, coords={"T": t})
-    grouped = calc.groupby_dekads(precip)
-
-    assert (grouped.sum() == [ 55, 155, 286, 365, 465 ]).all()
 
 
 def test_daily2dekad_sum():
