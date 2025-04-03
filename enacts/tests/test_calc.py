@@ -46,9 +46,9 @@ def test_interval_to_point_dim():
     values = 1 + np.arange(t.size)
     precip = xr.DataArray(values, coords={"T": t})
     grouped = calc.groupby_dekads(precip).sum()
-    mid_dim = calc.interval_to_point_dim(grouped["T_bins"])
-    left_dim = calc.interval_to_point_dim(grouped["T_bins"], to_point="left")
-    right_dim = calc.interval_to_point_dim(grouped["T_bins"], to_point="right")
+    mid_dim = calc.interval_to_point(grouped["T_bins"])
+    left_dim = calc.interval_to_point(grouped["T_bins"], to_point="left")
+    right_dim = calc.interval_to_point(grouped["T_bins"], to_point="right")
 
     assert mid_dim.name.endswith("_mid")
     assert left_dim.name.endswith("_left")
@@ -57,45 +57,41 @@ def test_interval_to_point_dim():
         assert mid_dim.values[t] == mid_dim["T_bins"].values[t].mid
 
 
-def test_swap_interval_left():
-    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
+def test_daily_to_dekad_default():
+    t = pd.date_range(start="2000-05-01T120000", end="2000-07-01T120000", freq="1D")
     values = 1 + np.arange(t.size)
     precip = xr.DataArray(values, coords={"T": t})
-    dekad_precip = calc.groupby_dekads(precip).sum()
-    dekad_precip_topoint = calc.swap_interval(
-        dekad_precip, "T_bins", to_point="left"
+    dekad_pr = calc.daily_to_dekad(precip)
+
+    # This may need to import something
+    # assertIsInstance(dekad_pr, xr.core.groupby.DataArrayGroupBy)
+    assert isinstance(dekad_pr, xr.core.groupby.DataArrayGroupBy)
+    assert isinstance(list(dekad_pr.groups.keys())[0], pd._libs.interval.Interval)
+
+
+def test_daily_to_dekad_sum_default():
+    t = pd.date_range(start="2000-05-01T120000", end="2000-07-01T120000", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, coords={"T": t})
+    dekad_pr = calc.daily_to_dekad(precip, method="sum")
+
+    assert (dekad_pr.values == [ 55., 155., 286., 365., 465., 565.]).all()
+    assert isinstance(dekad_pr["T_bins"].values[0], pd._libs.interval.Interval)
+
+
+def test_daily_to_dekad_sum_kwargs():
+    t = pd.date_range(start="2000-05-01T120000", end="2000-07-01T120000", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, coords={"T": t}).assign_attrs(
+        units="mm", long_name="Precipitation"
     )
-
-    assert (dekad_precip_topoint["T"] == pd.to_datetime([
-        "2000-05-01", "2000-05-11", "2000-05-21",
-        "2000-06-01", "2000-06-11", "2000-06-21"
-    ])).all()
-
-
-def test_swap_interval_mid():
-    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
-    values = 1 + np.arange(t.size)
-    precip = xr.DataArray(values, coords={"T": t})
-    dekad_precip = calc.groupby_dekads(precip).sum()
-    dekad_precip_topoint = calc.swap_interval(dekad_precip, "T_bins")
-
-    assert (dekad_precip_topoint["T"] == pd.to_datetime([
-        "2000-05-06", "2000-05-16", "2000-05-26T12:00:00",
-        "2000-06-06", "2000-06-16", "2000-06-26"
-    ])).all()
-
-
-def test_daily2dekad_sum():
-    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
-    values = 1 + np.arange(t.size)
-    precip = xr.DataArray(values, coords={"T": t})
-    dekad_precip = calc.daily2dekad_sum(precip)
-
-    assert (dekad_precip == [ 55, 155, 286, 365, 465, 565 ]).all()
-    assert (dekad_precip["T"] == pd.to_datetime([
-        "2000-05-01", "2000-05-11", "2000-05-21",
-        "2000-06-01", "2000-06-11", "2000-06-21"
-    ])).all()
+    dekad_pr = calc.daily_to_dekad(precip, method="sum", method_kwargs={
+        "skipna": True, "min_count": 11, "keep_attrs": True
+    })
+    
+    assert (np.isnan(dekad_pr.values) == [True, True, False, True, True, True]).all()
+    assert dekad_pr.attrs["units"] == "mm"
+    assert dekad_pr.attrs["long_name"] == "Precipitation"
 
 
 def test_longest_run_length():
