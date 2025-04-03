@@ -94,6 +94,19 @@ def test_daily_to_dekad_sum_kwargs():
     assert dekad_pr.attrs["long_name"] == "Precipitation"
 
 
+def test_swap_interval_to_assigned_point():
+    t = pd.date_range(start="2000-05-01T120000", end="2000-07-01T120000", freq="1D")
+    values = 1 + np.arange(t.size)
+    precip = xr.DataArray(values, coords={"T": t})
+    dekad_pr = calc.daily_to_dekad(precip, method="sum")
+    dekad_left_pr = calc.swap_interval_to_assigned_point(
+        dekad_pr, "T_bins", to_point="left"
+    )
+
+    assert "T_left" in dekad_left_pr.dims
+    assert (dekad_left_pr["T_left"].dt.day.values == [1, 11, 21, 1, 11, 21]).all()
+
+
 def test_longest_run_length():
 
     precip = precip_sample()
