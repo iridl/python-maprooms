@@ -888,6 +888,44 @@ def interval_to_point(interval, to_point="mid", keep_attrs=True):
     return data
 
 
+def swap_interval_to_assigned_point(
+    interval_data, interval_dim, to_point="mid", keep_attrs=True
+):
+    """ Replace a coordinate whose values are pd.Interval with one whose values are
+    the left edge, center (mid), or right edge of those intervals.
+
+    Parameters
+    ----------
+    interval_data : xr.DataArray or xr.Dataset
+        data depending on a pd.Interval dimension
+    interval_dim : str
+        name of pd.Interval dimension to be replaced
+    to_point : str, optional
+        "left", "mid" or "right" point of `interval_dim` intervals
+        default is "mid"
+    keep_attrs : boolean, optional
+        keep attributes from `interval_dim` to replacing point-wise dimension
+        default is True
+
+    Returns
+    -------
+    point_data : xr.DataArray or xr.Dataset
+        of whicn interval dimension has been replaced by point dimension
+
+    See Also
+    --------
+    pandas.Interval, interval_to_point, xarray.assign_coords, xarray.swap_dims
+    """
+    point_dim = interval_to_point(
+        interval_data[interval_dim], to_point=to_point, keep_attrs=keep_attrs
+    )
+    return (
+        interval_data
+        .assign_coords({point_dim.name : (interval_dim, point_dim.data)})
+        .swap_dims({interval_dim: point_dim.name})
+    )
+
+
 def groupby_dekads(daily_data, time_dim="T"):
     """ Groups `daily_data` by dekads for grouping operations
 
