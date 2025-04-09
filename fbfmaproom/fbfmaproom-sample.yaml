@@ -3771,3 +3771,62 @@ countries:
                 length: 3.0
                 issue_months: [5, 6, 7, 8]
                 start_year: 1983
+
+
+    zambia:
+        logo: Zambia_IRI_94x48.png
+        resolution: [.0375, .0375]
+        center: [28.25625, -29.606]
+        zoom: 8
+        rotation: 0
+        marker:  [28.25625, -29.606]
+        origin: [0, 0]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Zambia'
+              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
+                  from public.fbf_vulnerability where adm0_name = 'Zambia' group by 1, 2
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep
+                predictand: bad-years
+            observations:
+                bad-years:
+                    label: "bad year new method national level"
+                    description: Bad years at national level
+                    path: zambia/bad-years.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+            forecasts:
+                pnep:
+                    label: Forecast prob non-exc v1
+                    description: NextGen forecast probability of non-exceedance of selected percentile
+                    path: zambia/prcp-ndj-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        # lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+
+            vuln:
+                colormap: vulnerability
+                range: [0.0, 5.0]
+        seasons:
+            season1:
+                label: NDJ
+                target_month: 0.5
+                length: 3.0
+                issue_months: [9, 10]
+                start_year: 1983
