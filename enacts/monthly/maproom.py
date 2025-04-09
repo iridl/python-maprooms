@@ -11,14 +11,6 @@ import dash_leaflet as dlf
 import dash_leaflet.express as dlx
 import json
 
-import psycopg2
-from psycopg2 import sql
-import shapely
-from shapely import wkb
-from shapely.geometry.polygon import Polygon
-from shapely.geometry.multipolygon import MultiPolygon
-from shapely import geometry
-
 import plotly.express as px
 
 import pingrid
@@ -34,6 +26,7 @@ import urllib
 import xarray as xr
 
 import calc
+import maproom_utilities as mapr_u
 
 from . import layout
 from globals_ import FLASK, GLOBAL_CONFIG
@@ -41,6 +34,8 @@ from globals_ import FLASK, GLOBAL_CONFIG
 CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
 PARAMS = {"time_res": "dekadal", "ds_conf": GLOBAL_CONFIG["datasets"]}
+
+ADMIN_CONFIG = GLOBAL_CONFIG["datasets"]["shapes_adm"]
 
 def register(FLASK, config):
     # Prefix used at the end of the maproom url
@@ -58,23 +53,6 @@ def register(FLASK, config):
     # Calling the layout function in `layout.py`
     # which includes the layout definitions.
     APP.layout = layout.layout()
-
-    def get_shapes(query):
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.SQL(query)
-            df = pd.read_sql(s, conn)
-
-        df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-        df["the_geom"] = df["the_geom"].apply(
-            # lambda x: ((x if isinstance(x, MultiPolygon) else MultiPolygon([x]))
-            lambda x: (x
-                   .simplify(0.01, preserve_topology=False))
-        )
-        shapes = df["the_geom"].apply(shapely.geometry.mapping)
-        for i in df.index: #this adds the district layer as a label in the dict
-            shapes[i]['label'] = df['label'][i]
-        return {"features": shapes}
-
 
     @APP.callback(
         Output("app_title", "children"),
@@ -96,10 +74,6 @@ def register(FLASK, config):
         Input("mon0", "value"),
     )
     def update_map(variable, month):
-        SHAP = {
-            level['name']: get_shapes(level['sql'])
-            for level in GLOBAL_CONFIG['datasets']['shapes_adm']
-        }
         var = config["vars"][variable]
 
         mon = { "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4,
@@ -130,20 +104,15 @@ def register(FLASK, config):
                 checked=False,
             ),
         ] + [
-            dlf.Overlay(
-                dlf.GeoJSON(
-                    data=v,
-                    options={
-                        "fill": True,
-                        "color": "black",
-                        "weight": .5,
-                        "fillOpacity": 0,
-                    },
-                ),
-                name=k,
-                checked=True,
+            mapr_u.make_adm_overlay(
+                adm_name=adm["name"],
+                adm_geojson=calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
+                adm_clor=adm["color"],
+                adm_lev=i+1,
+                adm_weight=len(ADMIN_CONFIG)-i,
+                is_checked=adm["is_checked"],
             )
-            for k, v in SHAP.items()
+            for i, adm in enumerate(ADMIN_CONFIG)
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(
@@ -329,13 +298,10 @@ def register(FLASK, config):
         tile.attrs["scale_min"] = varobj['min']
         tile.attrs["scale_max"] = varobj['max']
     
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed(
-                [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]
-            )
-            df = pd.read_sql(s, conn)
-            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
-        
+        clip_shape = calc.sql2geom(
+            ADMIN_CONFIG[0]['sql'], GLOBAL_CONFIG["db"]
+        )["the_geom"][0]
+
         result = pingrid.tile(tile, tx, ty, tz, clip_shape)
 
         return result
