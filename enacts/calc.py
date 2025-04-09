@@ -198,7 +198,9 @@ def sql2geom(shapes_sql, db_config):
     Returns
     -------
     df : pandas.DataFrame
-        a pd.DF including "the_geom" : a shapely geometric object
+        a pd.DF with columns "label" (dtype=string),
+        "key" (string or int depending on the table),
+        and "the_geom" (shapely.Geometry)
 
     See Also
     --------
