@@ -92,19 +92,18 @@ def synthesize_enacts(variable, time_res, bbox):
         "tmax": {"mu": 32, "amp": 2, "ano_amp": 0.4},
     }
     T = pd.date_range("1991-01-01", datetime.date.today(), name="T")
-    if variable == "precip":
-        # precip peaks in Apr
-        annual_cycle = np.cos(2 * np.pi * (T.dayofyear.values / 365.25 - 0.28))
-    else:
-        # temp peaks in Oct
-        annual_cycle = np.sin(2 * np.pi * (T.dayofyear.values / 365.25 - 0.28))
+     # precip peaks in Apr while temp peaks in Oct
+    sinusoid = "cos" if variable == "precip" else "sin"
+    annual_cycle = getattr(np, sinusoid)(
+        2 * np.pi * (T.dayofyear.values / 365.25 - 0.28)
+    ).reshape(T.size, 1, 1)
     base_T = (
         characteristics[variable]["mu"]
         + characteristics[variable]["amp"]
         * annual_cycle
     ) + (
         characteristics[variable]["ano_amp"]
-        * np.random.randn(annual_cycle.size, 1).reshape(1, 1, -1)
+        * np.random.randn(annual_cycle.size, 1, 1)
     )
     if variable == "precip":
         # precip is >0
@@ -114,10 +113,10 @@ def synthesize_enacts(variable, time_res, bbox):
     # Coarse lat, lon dims to preserve some spatial homogeneity
     Y = np.arange(bbox[1], bbox[3], 0.5)
     X = np.arange(bbox[0], bbox[2], 0.5)
-    XY_rand = 0.1 * np.random.randn(X.size*Y.size).reshape(Y.size, X.size, 1)
+    XY_rand = 0.1 * np.random.randn(X.size*Y.size).reshape(1, Y.size, X.size)
     return xr.DataArray(
         data=(base_T + base_T * XY_rand),
-        coords={"Y": Y, "X": X, "T": T},
+        coords={"T": T, "Y": Y, "X": X},
         name=variable,
     ).interp(
         X=np.arange(bbox[0], bbox[2], 0.0375), Y=np.arange(bbox[1], bbox[3], 0.0375)
