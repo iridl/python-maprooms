@@ -993,6 +993,271 @@ def daily_to_dekad(daily_data, method=None, method_kwargs={}, time_dim="T"):
     return dekad_data
 
 
+def resample_interval_to_daily(time_series, extent=None, time_dim="T_bins"):
+    """ Resample any (interval-based) time series to daily
+
+    Parameters
+    ----------
+    time_series : xr.DataArray or xr.Dataset
+        data depending on time intervals greater or equal then a day
+    extent : str, optional
+        indicate the "extensive" or "intensive" property of `time_series` .
+        Upsampling to daily requires intensive data.
+        If extensive, make intensive by dividing by length of intervals in days
+        Default is None in which case: if units end with "/day", considers intensive,
+        else, considers extensive
+    time_dim : str, optional
+        name of interval time dimenstion, default is "T_bins"
+
+    Returns
+    -------
+    time_series : xr.DataArray or xr.Dataset
+        `time_series` resampled to daily
+
+    See Also
+    --------
+    pandas.Interval, interval_to_point, swap_interval_to_assigned_point,
+    xarray.resample
+
+    Notes
+    -----
+    The day is considered the smallest unit or interval of time in the sense that a
+    time dimensions expressed as time points is considered equivalent to intervals of
+    length 1 day. There may be generalization to make to adapt to the actual smallest
+    time unit of this ecosystem which is the ns.
+    Extent proterty could be inferred in more cases, e.g. Kelvin is intensive.
+    Waiting for pint to figure that all out.
+    """
+    if isinstance(time_series[time_dim].values[0], pd._libs.interval.Interval):
+        # else time_dim is not intervals thus points thus considered daily already
+        # make daily for computations
+        if extent is None :
+            # There are a lot more cases to cover
+            if "units" in time_series.attrs :
+                extent = (
+                    "intensive" if "/day" in time_series.attrs["units"]
+                    else "extensive"
+                )
+            else :
+                extent = "extensive"
+        if extent == "extensive" : # Can only ffill intensive data
+            time_series = time_series / [
+                time_series[time_dim].values[t].length.days
+                for t in range(time_series[time_dim].size)
+            ]
+            if "units" in time_series.attrs :
+                time_series.attrs["units"] = f'{time_series.attrs["units"]}/day'
+        time_dim_left = ( # There might be other automatic cases to cover
+            # Same logic as in interval_to_point
+            time_dim.replace("_bins", "_left") if time_dim.endswith("_bins")
+            else "_".join(time_dim, "_left")
+        )
+        time_dim_right = (
+            time_dim.replace("_bins", "_right") if time_dim.endswith("_bins")
+            else "_".join(time_dim, "right")
+        )
+        time_series = xr.concat([
+            swap_interval_to_assigned_point(time_series, time_dim, to_point="left"),
+            # Need to cover entirely the last interval
+            swap_interval_to_assigned_point(
+                time_series.isel({time_dim : [-1]}), time_dim, to_point="right"
+            ).rename({time_dim_right : time_dim_left}),
+        ], dim=time_dim_left)
+        time_series = (
+            time_series.resample({time_dim_left: "1D"}).ffill()
+            # once filled, can drop the open right point of last interval
+            .isel({time_dim_left : slice(0, -1)})
+        )
+    return time_series
+
+
+def regroup(time_series, group="1D", method=None, method_kwargs={}, time_dim="T"):
+    """ Regroup any type of interval-based time series to another,
+    according to `method`
+
+    Parameters
+    ----------
+    time_series : xr.DataArray or xr.Dataset
+        data depending on time intervals greater or equal then a day
+    group: str, int, or array-like[pandas.DatetimeIndex]
+        indicates the new type of intervals to regroup to.
+        As string, must be: nD, pentad, 8day, dekad, 16day, nM, d-d Mmm
+        or d Mmm - d Mmm. See Notes for details.
+        As integer or array-like[pandas.DatetimeIndex],
+        see xr.DataArray.groupby_bins' `bins` Parameter
+    method: str, optional
+        name of xr.core.groupby.DataArrayGroupBy's Method to apply to form the new
+        intervals. Default is None in which case no final reduction is applied
+        and returned `time_series` is a xr.core.groupby.DataArrayGroupBy object of
+        days grouped according to `group` .
+    method_kwargs: dict, optional
+        keyword arguments of `method` . Default is an empty dict in which case
+        default keywords of `method` will be applied.
+    time_dim : str, optional
+        name of interval time dimenstion, default is "T"
+
+    Returns
+    -------
+    regrouped : xr.DataArray or xr.Dataset
+        `time_series` regrouped to specified time intervals according to `method`
+
+    See Also
+    --------
+    resample_interval_to_daily, pandas.DatetimeIndex, xarray.DataArray.groupby_bins
+
+    Notes
+    -----
+    The day is considered the smallest unit or interval of time (see Note of
+    resample_interval_to_daily). In this implementation, all `time_series` inputs are
+    resampled to daily no matter the `group` of interest. It may not be necessary
+    and more efficient if `group` is coarser than a day (so nearly all cases). The
+    intersection of `time_series` intervals and `group` intervals would form the
+    coarsest partition of `time_dim` and weights could be applied depending on
+    `method` .
+    The seasonal grouping is of different nature than all other groupings. While all
+    others make a partition of time, the purpose of the seasonal grouping is to make
+    a yearly time series of a tailored sesason (e.g. 19 Jan - 29 Mar). However, the
+    case fits. As of now, the selection of the season of interest is to be done after
+    applyting `regroup` . It could be incorporated into `regroup` and constitute the
+    specificity of this case. Or the case could be removed altogether and put in
+    another function.
+    Outputs of `regroup` that have a yearly periodicity (ie all except nD, some nM,
+    int and some array-like[pandas.DatetimeIndex]), could be used to split the time
+    dimension in 2: years and intervals of the year; which in turn could be reduced
+    to make climatologies or yearly time series of a given interval.
+    Known groups:
+    * nD (e.g. 7D): intervals of n (e.g. 7) days from first day of `time_dim`
+    * pentad: partition of the year in 5-day intervals. In leap years, Feb 29 is
+    included in the 25 Feb - 1 Mar interval, making it 6-day long. E.g. at
+    https://iridl.ldeo.columbia.edu/expert/SOURCES/.NOAA/.NCEP/.CPC/.FEWS/.DAILY/.est_prcp/pentadAverage
+    * 8day: partition of the year in 8-day intervals. The last interval is used to
+    adjust the partitioning and is 26/27-31 Dec depending on leap years. E.g. at
+    https://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.1km/.8day/.version_006/.Terra/.NY/.Day/.LST
+    * dekad: partition of the months in 3 10-day intervals, except for the last dekad
+    of the month that runs until the end of the month (from the 21st -- thus can be
+    8, 9, 10 or 11 -day long)
+    * 16day: partition of the year in 16-day intervals. The last interval is used to
+    adjust the partitioning and is 18/19-31 Dec depending on leap years. E.g. at
+    https://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI
+    * nM (e.g. 5D): intervals of n (e.g. 5) months from first full month of `time_dim`
+    * d-d Mmm or d Mmm - d Mmm (e.g. 21-29 Mar or 19 Jan - 29 Mar): 2 seasons to
+    partition time against. The 2nd season is the complentary to the one given to
+    `group` (e.g. 30 Mar - 18 Jan).
+    * int (e.g. 7): number of equally sized intervals in `time_dim` (see
+    xr.DataArray.groupby_bins' `bins` for details).
+    * array-like[pandas.DatetimeIndex]: edges of time intervals  (see
+    xr.DataArray.groupby_bins' `bins` for details).
+    """
+    time_series = resample_interval_to_daily(time_series, time_dim=time_dim)
+    edges_base = pd.date_range(
+        # Flooring needed only if time_series already daily
+        start=time_series[time_dim][0].dt.floor("D").values,
+        # need one more day since right is excluded
+        end=(time_series[time_dim][-1] + np.timedelta64(1, "D")).dt.floor("D").values,
+        freq="1D",
+    )
+    if isinstance(group, str) :
+        # Form bins according to group
+        if group.endswith("D") :
+            bins = np.array(
+                [edges_base[t] for t in range(0, edges_base.size, int(group[:-1]))]
+            )
+        elif group == "pentad" :
+            # 29 Feb always in last pentad of Feb
+            bins = edges_base.where(
+                (edges_base.dayofyear % 5) == (
+                    1 - np.array([
+                        pd.Timedelta(
+                            ((eb.dayofyear > 59) * (not eb.is_leap_year)), "D"
+                        ).days for eb in edges_base
+                    ])
+                )
+            ).dropna()
+        elif group == "8day" :
+            # last period of year used to adjusting
+            bins = edges_base.where((edges_base.dayofyear % 8) == 1).dropna()
+        elif group == "dekad" :
+            bins = edges_base.where(
+                (edges_base.day == 1)
+                | (edges_base.day == 11)
+                | (edges_base.day == 21)
+            ).dropna()
+        elif group == "16day" :
+            # last period of year used to adjusting
+            bins = edges_base.where((edges_base.dayofyear % 16) == 1).dropna()
+        elif group.endswith("M") :
+            bins = edges_base.where(edges_base.day == 1).dropna()
+            bins = np.array([bins[t] for t in range(0, bins.size, int(group[:-1]))])
+        elif "-" in group :
+            # e.g. "29 Feb - 30 Mar" or "2-29 Mar"
+            # This case usage is to keep only the season of interest given as input.
+            # Thus not to form a partition of time as in other cases and could be
+            # moved to another function. Or if kept could include the selection of
+            # said season of interest. (Or just leave as is).
+            if " - " in group :
+                start_day = group.split()[0]
+                start_month = group.split()[1]
+                end_day = group.split()[3]
+                end_month = group.split()[4]
+            else:
+                start_day = group.split()[0].split("-")[0]
+                end_day = group.split()[0].split("-")[1]
+                start_month = group.split()[1]
+                end_month = start_month
+            start_day = int(start_day)
+            end_day = int(end_day)
+            if start_day == 29 and start_month == "Feb" :
+                # don't allow start on 29 Feb: this is pushy
+                start_day = 1
+                start_month = "Mar"
+            offset = 1
+            if end_day == 29 and end_month == "Feb" :
+                end_day = 1
+                end_month = "Mar"
+                offset = 0
+            bins = edges_base.where(
+                (
+                    (edges_base.day == start_day)
+                    & [
+                        (edges_base.month_name()[t][:3] == start_month)
+                        for t in range(edges_base.size)
+                    ]
+                )
+                | ( # group end is inclusive
+                    ((edges_base - pd.Timedelta(offset, "D")).day == end_day)
+                    & [
+                        ((
+                            edges_base - pd.Timedelta(offset, "D")
+                        ).month_name()[t][:3] == end_month)
+                        for t in range(edges_base.size)
+                    ]
+                )
+            ).dropna()
+        else:
+            raise Exception(
+                f"group as str must be nD, pentad, 8day, dekad, 16day, nM, d-d Mmm"
+                f" or d Mmm - d Mmm"
+            )
+    elif isinstance(group, int) :
+        bins = group
+    elif insintance(group, pandas.core.indexes.datetimes.DatetimeIndex):
+        # custom bins edges from input
+        bins = group
+    else :
+        raise Exception(
+            f"group must be int, array, or str of form nD, pentad, 8day, dekad,"
+            f" 16day, nM,d-d Mmm or d Mmm - d Mmm"
+        )
+    if (not isinstance(group, int)):
+        assert (bins.size > 1), (
+            "data must span at least one full group (need 2 edges to form 1 bin)"
+        )
+    regrouped = time_series.groupby_bins(time_series[time_dim], bins, right=False)
+    if method is not None :
+        regrouped = getattr(regrouped, method)(**method_kwargs)
+    return regrouped
+
+
 def strftimeb2int(strftimeb):
     """Convert month values to integers (1-12) from strings.
  
