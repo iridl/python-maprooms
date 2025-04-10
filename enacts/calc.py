@@ -7,7 +7,6 @@ from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
-from pathlib import Path
 
 # Date Reading functions
 
