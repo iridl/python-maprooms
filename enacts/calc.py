@@ -34,7 +34,7 @@ def get_data(variable, time_res, ds_conf):
     read_enacts, synthesize_enacts
     """
     if ds_conf[time_res] == "FAKE" :
-        return synthesize_enacts(variable, time_res)
+        return synthesize_enacts(variable, time_res, ds_conf["bbox"])
     else:
         return read_enacts(variable, ds_conf[time_res])
 
@@ -67,7 +67,7 @@ def read_enacts(variable, dst_conf):
     return xrds[var_name]    
 
 
-def synthesize_enacts(variable, time_res):
+def synthesize_enacts(variable, time_res, bbox):
     """ Synthetize ENACTS data as `xr.DataArray`
 
     Parameters
@@ -76,6 +76,8 @@ def synthesize_enacts(variable, time_res):
         string representing ENACTS variable ("precip", "tmin" or "tmax")
     time_res : str
         "daily" or "dekadal" resolution of the desired variable
+    bbox : array
+        coordinates of bounding box of spatial domain as [W, S, E, N]
     
     Returns
     -------
@@ -89,19 +91,18 @@ def synthesize_enacts(variable, time_res):
         "tmax": {"mu": 32, "amp": 2, "ano_amp": 0.4},
     }
     T = pd.date_range("1991-01-01", datetime.date.today(), name="T")
-    if variable == "precip":
-        # precip peaks in Apr
-        annual_cycle = np.cos(2 * np.pi * (T.dayofyear.values / 365.25 - 0.28))
-    else:
-        # temp peaks in Oct
-        annual_cycle = np.sin(2 * np.pi * (T.dayofyear.values / 365.25 - 0.28))
+     # precip peaks in Apr while temp peaks in Oct
+    sinusoid = "cos" if variable == "precip" else "sin"
+    annual_cycle = getattr(np, sinusoid)(
+        2 * np.pi * (T.dayofyear.values / 365.25 - 0.28)
+    ).reshape(T.size, 1, 1)
     base_T = (
         characteristics[variable]["mu"]
         + characteristics[variable]["amp"]
         * annual_cycle
     ) + (
         characteristics[variable]["ano_amp"]
-        * np.random.randn(annual_cycle.size, 1).reshape(1, 1, -1)
+        * np.random.randn(annual_cycle.size, 1, 1)
     )
     if variable == "precip":
         # precip is >0
@@ -109,22 +110,16 @@ def synthesize_enacts(variable, time_res):
         # he rainy season is a bit shorter than 1/2 the year
         base_T = np.clip(base_T, a_min=0, a_max=None)
     # Coarse lat, lon dims to preserve some spatial homogeneity
-    Y = np.arange(2, 6.5, 0.5)
-    X = np.arange(-55, -51, 0.5)
-    # lat/lon log style trend around 1
-    # plus noise even closer to 1
-    lat_rand = np.log(Y*0.2/4.5 + 2.42) * (1 + 0.1 * np.random.randn(Y.size))
-    lon_rand = np.log(-X*0.2/4 - 0.05) * (1 + 0.1 * np.random.randn(X.size))
-    xrds = xr.Dataset(
-        {variable: (
-            ("X", "Y", "T"),
-            base_T * (lon_rand.reshape(-1, 1, 1) * lat_rand.reshape(1, -1, 1)),
-        )},
-        {"X": X, "Y": Y, "T": T},
-    # Interpolate back on a typical ENACTS spatial resolution
-    ).interp(X=np.arange(-55, -51, 0.0375), Y=np.arange(2, 6.5, 0.0375))
-    var_name = variable
-    return xrds[var_name]
+    Y = np.arange(bbox[1], bbox[3], 0.5)
+    X = np.arange(bbox[0], bbox[2], 0.5)
+    XY_rand = 0.1 * np.random.randn(X.size*Y.size).reshape(1, Y.size, X.size)
+    return xr.DataArray(
+        data=(base_T + base_T * XY_rand),
+        coords={"T": T, "Y": Y, "X": X},
+        name=variable,
+    ).interp(
+        X=np.arange(bbox[0], bbox[2], 0.0375), Y=np.arange(bbox[1], bbox[3], 0.0375)
+    )
 
 
 def sql2GeoJSON(shapes_sql, db_config):
@@ -234,6 +229,57 @@ def sql2geom(shapes_sql, db_config):
         df = pd.read_sql(s, conn)
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
+
+
+def get_taw(ds_conf):
+    """ Get TAW data for ENACTS Maprooms, read from file or synthetic
+
+     Parameters
+    ----------
+    ds_conf : dict
+        dictionary indicating TAW file path configuration
+        (see config)
+    
+    Returns
+    -------
+        `xr.DataArray` of TAW
+    
+    See Also
+    --------
+    read_taw, synthesize_taw
+    """
+    if ds_conf["taw_file"] == "FAKE" :
+        return synthesize_taw(ds_conf["bbox"])
+    else:
+        # At the moment, it's the only case we have
+        # if/when other ways to read taw come up,
+        # can reintroduce a more sophisticated read_taw function
+        return xr.open_dataarray(ds_conf["taw_file"])
+
+
+def synthesize_taw(bbox):
+    """ Synthesize TAW-like data for ENACTS Maprooms
+
+    Parameters
+    ----------
+    bbox : array
+        coordinates of bounding box of spatial domain as [W, S, E, N]
+    
+    Returns
+    -------
+        `xr.DataArray` of TAW
+    
+    See Also
+    --------
+    xr.open_dataarray
+    """
+    Y = np.arange(bbox[1], bbox[3], 0.5)
+    X = np.arange(bbox[0], bbox[2], 0.5)
+    taw = 90 + 30 * np.random.randn(X.size*Y.size).reshape(Y.size, X.size)
+    return xr.DataArray(data=taw, coords={"Y": Y, "X": X}, name="taw").interp(
+        X=np.arange(bbox[0], bbox[2], 0.0375), Y=np.arange(bbox[1], bbox[3], 0.0375)
+    )
+
 
 # Growing season functions
 

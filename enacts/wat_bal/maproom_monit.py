@@ -601,7 +601,7 @@ def register(FLASK, config):
         lng = marker_pos[1]
         try:
             taw = pingrid.sel_snap(
-                xr.open_dataarray(Path(config["taw_file"])), lat, lng
+                calc.get_taw(GLOBAL_CONFIG["datasets"]), lat, lng
             )
         except KeyError:
             return pingrid.error_fig(error_msg="Grid box out of data domain")
@@ -740,7 +740,7 @@ def register(FLASK, config):
             return pingrid.image_resp(pingrid.empty_tile())
         _, taw = xr.align(
             precip,
-            xr.open_dataarray(Path(config["taw_file"])),
+            calc.get_taw(GLOBAL_CONFIG["datasets"]),
             join="override",
             exclude="T",
         )

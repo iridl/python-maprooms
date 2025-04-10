@@ -14,8 +14,10 @@ datasets:
           sql: select adm1_code as key, adm0_name as label, adm0_code, ST_AsBinary(the_geom) as the_geom
               from g2015_2014_1 where adm0_code=86
           is_checked: True
+    bbox: [-55, 2, -51, 6.5]  # [W, S, E, N]
     daily: FAKE
     dekadal: FAKE
+    taw_file: FAKE
 
 maprooms:
     # Onset
@@ -31,7 +33,12 @@ maprooms:
             length_stddev:
                 map_max: 40
 
-    wat_bal: null
+    wat_bal:
+      - planting_month: Jan
+        crop_name: Rice
+        kc_v: [0, 0, 1.1, 1.1, 0]
+        kc_l: [3, 27, 45, 60]
+        taw_max: 120
         
     monthly: null
     
