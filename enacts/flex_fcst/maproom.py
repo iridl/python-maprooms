@@ -16,8 +16,6 @@ import urllib
 import dash_leaflet as dlf
 from globals_ import FLASK, GLOBAL_CONFIG
 
-ADMIN_CONFIG = GLOBAL_CONFIG["datasets"]["shapes_adm"]
-
 def register(FLASK, config):
     PFX = f"{GLOBAL_CONFIG['url_path_prefix']}/{config['core_path']}"
     TILE_PFX = f"{PFX}/tile"
@@ -656,13 +654,15 @@ def register(FLASK, config):
         ] + [
             mapr_u.make_adm_overlay(
                 adm_name=adm["name"],
-                adm_geojson=calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
-                adm_clor=adm["color"],
+                adm_geojson=calc.geom2GeoJSON(
+                    calc.get_geom(level=i, conf=GLOBAL_CONFIG)
+                ),
+                adm_color=adm["color"],
                 adm_lev=i+1,
-                adm_weight=len(ADMIN_CONFIG)-i,
+                adm_weight=len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
                 is_checked=adm["is_checked"],
             )
-            for i, adm in enumerate(ADMIN_CONFIG)
+            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(
@@ -742,9 +742,7 @@ def register(FLASK, config):
         # probabilities symmetry around percentile threshold
         # choice of colorscale (dry to wet, wet to dry, or correlation)
         fcst_cdf = to_flexible(fcst_cdf, proba, variable, percentile,)
-        clip_shape = calc.sql2geom(
-            ADMIN_CONFIG[0]['sql'], GLOBAL_CONFIG["db"]
-        )["the_geom"][0]
+        clip_shape = calc.get_geom(level=0, conf=GLOBAL_CONFIG)["the_geom"][0]
 
         resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
         return resp

@@ -7,6 +7,7 @@ from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
+from shapely.geometry import Polygon
 
 # Date Reading functions
 
@@ -122,6 +123,34 @@ def synthesize_enacts(variable, time_res, bbox):
     )
 
 
+def get_geom(level, conf):
+    """ Form a geometric object from sql query or synthwetic
+
+    Parameters
+    ----------
+    level: int
+        level from the enumaration of a suite of administrative boundaries listed in
+        `conf` . Synthetic case limited to 0 and 1. 
+    conf: dict
+        dictionary listing desired administartive shapes and their attributes.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        a pd.DF with columns "label" (dtype=string),
+        "key" (string or int depending on the table),
+        and "the_geom" (shapely.Geometry)
+
+    See Also
+    --------
+        synthesize_geom, sql2geom
+    """
+    if "bbox" in conf["datasets"] :
+        return synthesize_geom(conf["datasets"]["bbox"], level=level)
+    else:
+        return sql2geom(conf["datasets"]["shapes_adm"][level]["sql"], conf["db"])
+
+
 def sql2GeoJSON(shapes_sql, db_config):
     """ Form a GeoJSON dict from sql request to a database
 
@@ -228,6 +257,71 @@ def sql2geom(shapes_sql, db_config):
         )
         df = pd.read_sql(s, conn)
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    return df
+
+
+def synthesize_geom(bbox, level=0):
+    """ Synthesize a geometric object from a bounding box
+
+    Parameters
+    ----------
+    bbox : array
+        coordinates of bounding box of spatial domain as [W, S, E, N]
+    level : int, optional
+        0 or 1 to mimick a containing admin level (0) with 1 geometry roughly smaller
+        than `bbox` or a contained admin level (1) with 2 geometries partitioning
+        level 0. Default is 0.
+    
+    Returns
+    -------
+    df : pandas.DataFrame
+        a pd.DF with columns "label" (dtype=string),
+        "key" (string or int depending on the table),
+        and "the_geom" (shapely.Geometry)
+
+    See Also
+    --------
+    shapely.geometry.Polygon
+
+    Notes
+    -----
+    A level 0 contained into bbox is necessary to test the clipping feature since
+    `bbox` is also used to generate the fake data.
+    """
+    assert (
+        (bbox[1] + 0.25 <= bbox[3] - 0.5),
+        "Please extend latitudinal domain of bbox"
+    )
+    if bbox[2] < bbox[0] :
+        assert (
+            (bbox[0] + 0.25 <= bbox[2] - 0.5),
+            "Please extend longitudinal domain of bbox"
+        )
+    else :
+        assert (
+            (bbox[0] + 0.25 >= bbox[2] - 0.5),
+            "Please extend longitudinal domain of bbox"
+        )
+    bbox = [bbox[0] + 0.25, bbox[1] + 0.25, bbox[2] - 0.5, bbox[3] - 0.5]
+    if level == 0 :
+        df = pd.DataFrame({"label" : ["Guyane"], "key": [0], "the_geom": [Polygon([
+            [bbox[0], bbox[1]], [bbox[0], bbox[3]],
+            [bbox[2], bbox[3]], [bbox[2], bbox[1]],
+        ])]})
+    elif level == 1 :
+        df = pd.DataFrame({"label" : ["NW", "SE"], "key": [1, 2],"the_geom": [
+            Polygon([
+                [bbox[0], bbox[1]], [bbox[0], bbox[3]],
+                [bbox[2], bbox[3]],
+            ]),
+            Polygon([
+                [bbox[0], bbox[1]],
+                [bbox[2], bbox[3]], [bbox[2], bbox[1]],
+            ]),
+        ]})
+    else:
+        raise Exception("level must be 0 or 1")
+    #df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
 
 

@@ -6,13 +6,9 @@ datasets:
     shapes_adm:
         - name: Country
           color: black
-          sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from g2015_2012_0 where adm0_code=86
-          is_checked: False
+          is_checked: True
         - name: Canton
-          color: black
-          sql: select adm1_code as key, adm0_name as label, adm0_code, ST_AsBinary(the_geom) as the_geom
-              from g2015_2014_1 where adm0_code=86
+          color: grey
           is_checked: True
     bbox: [-55, 2, -51, 6.5]  # [W, S, E, N]
     daily: FAKE
