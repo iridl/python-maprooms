@@ -229,7 +229,7 @@ APP = FbfDash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-APP.title = "FBF--Maproom"
+APP.title = "AA Design"
 
 APP.layout = fbflayout.app_layout()
 
