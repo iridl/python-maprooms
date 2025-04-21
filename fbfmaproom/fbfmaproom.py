@@ -812,7 +812,6 @@ def initial_setup(pathname: str, qstring: str):
         dbc.DropdownMenuItem(subpage, href=f"/fbfmaproom/{subpage_link}")
         for subpage, subpage_link in subpages.items()
     ]
-    # season_link_values = "default"
     cx, cy = c["center"]
     
     mode_options = [
