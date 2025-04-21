@@ -47,7 +47,7 @@ SERVER = flask.Flask(__name__)
 SERVER.register_error_handler(ClientSideError, pingrid.client_side_error)
 
 month_abbrev = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-abbrev_to_month0: Dict[str, int]  = dict((abbrev, month0) for month0, abbrev in enumerate(month_abbrev))
+abbrev_to_month0 = dict((abbrev, month0) for month0, abbrev in enumerate(month_abbrev))
 
 
 class FbfDash(dash.Dash):
@@ -1208,7 +1208,7 @@ def update_severity_color(value):
     Input("map_column", "value"),
     State("season", "value"),
 )
-def tile_url_callback(target_year, issue_month_abbrev: str, freq, pathname, map_col_key, season_id: str):
+def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_key, season_id):
     colorscale = None  # default value in case an exception is raised
     try:
         country_key = country(pathname)
