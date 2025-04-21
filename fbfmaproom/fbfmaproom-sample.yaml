@@ -358,7 +358,10 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-
+        subpages:
+            default: "madagascar"
+            ndj: "madagascar-ndj"
+            ond: "madagascar-ond"
         seasons:
             season1:
                 label: DJF
@@ -519,6 +522,10 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
+        subpages:
+            default: "madagascar"
+            ndj: "madagascar-ndj"
+            ond: "madagascar-ond"
         seasons:
             season1:
                 label: NDJ
@@ -689,7 +696,10 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-
+        subpages:
+            default: "madagascar"
+            ndj: "madagascar-ndj"
+            ond: "madagascar-ond"
         seasons:
             season1:
                 label: OND

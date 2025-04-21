@@ -778,6 +778,7 @@ APP.clientside_callback(
     Output("map", "zoom"),
     Output("season", "options"),
     Output("season", "value"),
+    Output("season_links", "children"),
     Output("mode", "options"),
     Output("mode", "value"),
     Output("predictand", "options"),
@@ -794,7 +795,7 @@ APP.clientside_callback(
     Input("location", "pathname"),
     State("location", "search"),
 )
-def initial_setup(pathname, qstring):
+def initial_setup(pathname: str, qstring: str):
     country_key = country(pathname)
     c = CONFIG["countries"][country_key]
 
@@ -805,6 +806,13 @@ def initial_setup(pathname, qstring):
         )
         for k in sorted(c["seasons"].keys())
     ]
+
+    subpages = c.get("subpages", {})
+    season_link_options = [
+        dbc.DropdownMenuItem(subpage, href=f"/fbfmaproom/{subpage_link}")
+        for subpage, subpage_link in subpages.items()
+    ]
+    # season_link_values = "default"
     cx, cy = c["center"]
     
     mode_options = [
@@ -894,6 +902,7 @@ def initial_setup(pathname, qstring):
         c["zoom"],
         season_options,
         season_value,
+        season_link_options,
         mode_options,
         mode_value,
         predictand_options,
