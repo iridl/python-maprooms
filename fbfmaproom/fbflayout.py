@@ -197,7 +197,7 @@ def control_layout():
                 children=[
                     dcc.Store(id="geom_key"),
                     html.Div(
-                        [html.H4("FBF—Maproom")],
+                        [html.H4("AA Design")],
                         style={
                             "top": "10px",
                             "width": "120px",
