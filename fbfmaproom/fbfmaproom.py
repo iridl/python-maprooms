@@ -852,7 +852,6 @@ def initial_setup(pathname: str, qstring: str):
         dbc.DropdownMenuItem(subpage, href=f"/fbfmaproom/{subpage_link}")
         for subpage, subpage_link in subpages.items()
     ]
-    # season_link_values = "default"
     cx, cy = c["center"]
     vuln_cs = CMAPS[c["datasets"]["vuln"]["colormap"]].to_dash_leaflet()
     mode_options = [
