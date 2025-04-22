@@ -15,6 +15,7 @@ import maproom_utilities as mapr_u
 import urllib
 import dash_leaflet as dlf
 from globals_ import FLASK, GLOBAL_CONFIG
+import calc
 
 def register(FLASK, config):
     PFX = f"{GLOBAL_CONFIG['url_path_prefix']}/{config['core_path']}"
@@ -38,66 +39,6 @@ def register(FLASK, config):
 
     APP.layout = layout.app_layout()
 
-    #Should I move this function into the predictions.py file where I put the other funcs?
-    #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
-    def read_cptdataset(lead_time, start_date, y_transform=config["y_transform"]):
-        if config["leads"] is not None and config["targets"] is not None:
-            raise Exception("I am not sure which of leads or targets to use")
-        elif config["leads"] is not None:
-            use_leads = lead_time
-            use_targets = None
-        elif config["targets"] is not None:
-            use_leads = None
-            use_targets = lead_time
-        else:
-            raise Exception("One of leads or targets must be not None")
-        fcst_mu = cpt.read_file(
-            config["forecast_path"],
-            config["forecast_mu_file_pattern"],
-            start_date,
-            lead_time=use_leads,
-            target_time=use_targets,
-        )
-        if fcst_mu is not None:
-            fcst_mu_name = list(fcst_mu.data_vars)[0]
-            fcst_mu = fcst_mu[fcst_mu_name]
-        fcst_var = cpt.read_file(
-            config["forecast_path"],
-            config["forecast_var_file_pattern"],
-            start_date,
-            lead_time=use_leads,
-            target_time=use_targets,
-        )
-        if fcst_var is not None:
-            fcst_var_name = list(fcst_var.data_vars)[0]
-            fcst_var = fcst_var[fcst_var_name]
-        obs = cpt.read_file(
-            config["forecast_path"],
-            config["obs_file_pattern"],
-            start_date,
-            lead_time=use_leads,
-            target_time=use_targets,
-        )
-        if obs is not None:
-            obs = obs.squeeze()
-            obs_name = list(obs.data_vars)[0]
-            obs = obs[obs_name]
-        if y_transform:
-            hcst = cpt.read_file(
-                config["forecast_path"],
-                config["hcst_file_pattern"],
-                start_date,
-                lead_time=use_leads,
-                target_time=use_targets,
-            )
-            if hcst is not None:
-                hcst = hcst.squeeze()
-                hcst_name = list(hcst.data_vars)[0]
-                hcst = hcst[hcst_name]
-        else:
-            hcst = None
-        return fcst_mu, fcst_var, obs, hcst
-
     @APP.callback(
             Output("phys-units" ,"children"),
             Output("start_date", "options"),
@@ -116,58 +57,33 @@ def register(FLASK, config):
             Input("location", "pathname"),
     )
     def initialize(lead_time_label_style, lead_time_control_style, path):
-        #Initialization for start date dropdown to get a list of start dates according to files available
-        if config["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
-            start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
-        else:
-            start_dates = cpt.starts_list(
-                config["forecast_path"],
-                config["forecast_mu_file_pattern"],
-                config["start_regex"],
-                format_in=config["start_format_in"],
-                format_out=config["start_format_out"],
-            )
-
-        if config["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
-        else:
-            if config["leads"] is not None and config["targets"] is not None:
-                raise Exception("I am not sure which of leads or targets to use")
-            elif config["leads"] is not None:
-                use_leads = list(config["leads"])[0]
-                use_targets = None
-            elif config["targets"] is not None:
-                use_leads = None
-                use_targets = config["targets"][-1]
-            else:
-                raise Exception("One of leads or targets must be not None")
-            fcst_mu = cpt.read_file(
-                config["forecast_path"],
-                config["forecast_mu_file_pattern"],
-                start_dates[-1],
-                lead_time=use_leads,
-                target_time=use_targets,
-            )
-        center_of_the_map = [((fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values)), ((fcst_mu["X"][int(fcst_mu["X"].size/2)].values))]
-        lat_res = (fcst_mu["Y"][0]-fcst_mu["Y"][1]).values
-        lat_min = str((fcst_mu["Y"][-1]-lat_res/2).values)
-        lat_max = str((fcst_mu["Y"][0]+lat_res/2).values)
-        lon_res = (fcst_mu["X"][1]-fcst_mu["X"][0]).values
-        lon_min = str((fcst_mu["X"][0]-lon_res/2).values)
-        lon_max = str((fcst_mu["X"][-1]+lon_res/2).values)
+        #Initialization for start date dropdown to get a list of start dates
+        # according to files available
+        start_dates, lead_times = cpt.get_fcst_SandL(
+            GLOBAL_CONFIG["datasets"]["fcst_data"]
+        )
+        fcst_ds, obs = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        center_of_the_map = [
+            ((fcst_ds["Y"][int(fcst_ds["Y"].size/2)].values)),
+            ((fcst_ds["X"][int(fcst_ds["X"].size/2)].values)),
+            ]
+        lat_res = (fcst_ds["Y"][0]-fcst_ds["Y"][1]).values
+        lat_min = str((fcst_ds["Y"][-1]-lat_res/2).values)
+        lat_max = str((fcst_ds["Y"][0]+lat_res/2).values)
+        lon_res = (fcst_ds["X"][1]-fcst_ds["X"][0]).values
+        lon_min = str((fcst_ds["X"][0]-lon_res/2).values)
+        lon_max = str((fcst_ds["X"][-1]+lon_res/2).values)
         lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
         lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-        if config["forecast_mu_file_pattern"] is None:
-            phys_units = [" "+obs.attrs["units"]]
-            target_display = "inline-block" if "L" in fcst_mu.dims else "none"
-        else:
-            fcst_mu_name = list(fcst_mu.data_vars)[0]
-            phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]
-            target_display = "inline-block"
+        phys_units = [" "+obs.attrs["units"]] if "units" in obs.attrs else ""
+        target_display = "none"
+        if lead_times is not None :
+            if lead_times.size > 1 :
+                target_display = "inline-block"
         lead_time_label_style = dict(lead_time_label_style, display=target_display)
-        lead_time_control_style = dict(lead_time_control_style, display=target_display)
-
+        lead_time_control_style = dict(
+            lead_time_control_style, display=target_display
+        )
         return (
             phys_units,
             start_dates, start_dates[-1],
@@ -206,81 +122,24 @@ def register(FLASK, config):
         Input("start_date","value"),
     )
     def target_range_options(start_date):
-        if config["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
-            if "L" in fcst_mu.dims:
-                fcst_mu = fcst_mu.sel(S=start_date)
-                options = [
-                    {
-                        "label": predictions.target_range_formatting(
-                            fcst_mu['Ti'].isel(S=0, L=ln, missing_dims="ignore").values,
-                            fcst_mu['Tf'].isel(S=0, L=ln,  missing_dims="ignore").values,
-                            "months",
-                        ),
-                        "value": lead,
-                    } for ln, lead in enumerate(fcst_mu["L"].values)
-                ]
-                return options, options[0]["value"]
-            else:
-                return None, None
-        else:
-            if config["leads"] is not None and config["targets"] is not None:
-                raise Exception("I am not sure which of leads or targets to use")
-            elif config["leads"] is not None:
-                leads_values = list(config["leads"].values())
-                leads_keys = list(config["leads"])
-                default_choice = list(config["leads"])[0]
-            elif config["targets"] is not None:
-                leads_values = config["targets"]
-                leads_keys = leads_values
-                default_choice = config["targets"][-1]
-            else:
-                raise Exception("One of leads or targets must be not None")
-            start_date = pd.to_datetime(start_date)
-            leads_dict = {}
-            for idx, lead in enumerate(leads_keys):
-                if config["leads"] is not None and config["targets"] is not None:
-                    raise Exception("I am not sure which of leads or targets to use")
-                elif config["leads"] is not None:
-                    target_range = predictions.target_range_format(
-                        leads_values[idx],
-                        start_date,
-                        config["target_period_length"],
-                        config["time_units"],
-                    )
-                elif config["targets"] is not None:
-                    target_range = leads_values[idx]
-                else:
-                    raise Exception("One of leads or targets must be not None")
-                leads_dict.update({lead:target_range})
-            return leads_dict, default_choice
+        targets, default_choice, _ = cpt.get_targets_dict(
+            GLOBAL_CONFIG["datasets"]["fcst_data"], start_date=start_date
+        )
+        return targets, default_choice
 
 
     @APP.callback(
-    Output("map_title","children"),
-    Input("start_date","value"),
-    Input("lead_time","value"),
-    Input("lead_time","options"),
+    Output("map_title", "children"),
+    Input("start_date", "value"),
+    Input("lead_time", "value"),
+    Input("lead_time", "options"),
+    Input("lead_time_control", "style"),
     )
-    def write_map_title(start_date, lead_time, lead_time_options):
-        if config["forecast_mu_file_pattern"] is None :
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
-            if "L" not in fcst_mu.dims:
-                fcst_mu = fcst_mu.sel(S=start_date)
-                target_period = predictions.target_range_formatting(
-                    fcst_mu['Ti'].isel(S=0, missing_dims="ignore").values,
-                    fcst_mu['Tf'].isel(S=0, missing_dims="ignore").values,
-                    "months"
-                )
-            else:
-                for label, value in lead_time_options.items() :
-                    if value == lead_time :
-                        target_period = label
-        else:
-            for label, value in lead_time_options.items() :
-                if value == lead_time :
-                    target_period = label
-        return f'{target_period} {config["variable"]} Forecast issued {start_date}'
+    def write_map_title(start_date, lead_time, targets, lead_time_control):
+        for option in targets :
+            if option["value"] == lead_time :
+                target = option["label"]
+        return f'{target} {config["variable"]} Forecast issued {start_date}'
 
 
     @APP.callback(
@@ -294,37 +153,10 @@ def register(FLASK, config):
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Reading
-        if config["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
-            start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
-        else:
-            start_dates = cpt.starts_list(
-                config["forecast_path"],
-                config["forecast_mu_file_pattern"],
-                config["start_regex"],
-                format_in=config["start_format_in"],
-                format_out=config["start_format_out"],
-            )
-            if config["leads"] is not None and config["targets"] is not None:
-                raise Exception("I am not sure which of leads or targets to use")
-            elif config["leads"] is not None:
-                use_leads = list(config["leads"])[0]
-                use_targets = None
-            elif config["targets"] is not None:
-                use_leads = None
-                use_targets = config["targets"][-1]
-            else:
-                raise Exception("One of leads or targets must be not None")
-            fcst_mu = cpt.read_file(
-                config["forecast_path"],
-                config["forecast_mu_file_pattern"],
-                start_dates[-1],
-                lead_time=use_leads,
-                target_time=use_targets,
-            )
+        fcst_ds, _ = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
         if dash.ctx.triggered_id == None:
-            lat = fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values
-            lng = fcst_mu["X"][int(fcst_mu["X"].size/2)].values
+            lat = fcst_ds["Y"][int(fcst_ds["Y"].size/2)].values
+            lng = fcst_ds["X"][int(fcst_ds["X"].size/2)].values
         else:
             if dash.ctx.triggered_id == "map":
                 lat = click_lat_lng[0]
@@ -333,7 +165,7 @@ def register(FLASK, config):
                 lat = latitude
                 lng = longitude
             try:
-                nearest_grid = pingrid.sel_snap(fcst_mu, lat, lng)
+                nearest_grid = pingrid.sel_snap(fcst_ds, lat, lng)
                 lat = nearest_grid["Y"].values
                 lng = nearest_grid["X"].values
             except KeyError:
@@ -346,87 +178,61 @@ def register(FLASK, config):
         Output("cdf_graph", "figure"),
         Output("pdf_graph", "figure"),
         Input("loc_marker", "position"),
-        Input("start_date","value"),
-        Input("lead_time","value"),
+        Input("start_date", "value"),
+        Input("lead_time", "value"),
+        Input("lead_time", "options")
     )
-    def local_plots(marker_pos, start_date, lead_time):
+    def local_plots(marker_pos, start_date, lead_time, targets):
         # Time Units Errors handling
-        if config["forecast_mu_file_pattern"] is None:
-            start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
-        else:
-            if config["time_units"] == "days":
-                start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
-            elif config["time_units"] == "months":
-                start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
-            else:
-                raise Exception("Forecast target time units should be days or months")
         # Reading
         lat = marker_pos[0]
         lng = marker_pos[1]
-        if config["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
-            fcst_mu = fcst_mu.sel(S=start_date)
-            fcst_var = fcst_var.sel(S=start_date)
-            if "L" in fcst_mu.dims:
-                fcst_mu = fcst_mu.sel(L=lead_time)
-                fcst_var = fcst_var.sel(L=lead_time)
-            obs = obs.where(obs["T"].dt.month == fcst_mu["T"].dt.month, drop=True)
-            is_y_transform = False
-        else:
-            fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=config["y_transform"])
-            is_y_transform = config["y_transform"]
-
+        fcst_ds, obs = cpt.get_fcst(
+            GLOBAL_CONFIG["datasets"]["fcst_data"],
+            lead_time=lead_time,
+            start_date=start_date,
+            y_transform=config["y_transform"],
+        )
         # Errors handling
         try:
-            if fcst_mu is None or fcst_var is None or obs is None:
-                error_fig = pingrid.error_fig(error_msg="Data missing for this issue and target")
+            if (
+                fcst_ds["deterministic"] is None
+                or fcst_ds["prediction_error_variance"] is None
+                or obs is None
+            ):
+                error_fig = pingrid.error_fig(
+                    error_msg="Data missing for this issue and target"
+                )
                 return error_fig, error_fig
             else:
-                fcst_mu = pingrid.sel_snap(fcst_mu, lat, lng)
-                fcst_var = pingrid.sel_snap(fcst_var, lat, lng)
+                fcst_ds = pingrid.sel_snap(fcst_ds, lat, lng)
                 obs = pingrid.sel_snap(obs, lat, lng)
-                isnan = np.isnan(fcst_mu) or np.isnan(obs).any()
-                if is_y_transform:
-                    if hcst is None:
-                        error_fig = pingrid.error_fig(error_msg="Data missing for this issue and target")
+                isnan = (
+                    np.isnan(fcst_ds["deterministic"]).any()
+                    or np.isnan(obs).any()
+                )
+                if config["y_transform"]:
+                    if fcst_ds["hcst"] is None:
+                        error_fig = pingrid.error_fig(
+                            error_msg="Data missing for this issue and target"
+                        )
                         return error_fig, error_fig
                     else:
-                        hcst = pingrid.sel_snap(hcst, lat, lng)
-                        isnan_yt = np.isnan(hcst).any()
+                        isnan_yt = np.isnan(fcst_ds["hcst"]).any()
                         isnan = isnan or isnan_yt
                 if isnan:
-                    error_fig = pingrid.error_fig(error_msg="Data missing at this location")
+                    error_fig = pingrid.error_fig(
+                        error_msg="Data missing at this location"
+                    )
                     return error_fig, error_fig
         except KeyError:
             error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
-            return error_fig, error_fig
-
-        if config["forecast_mu_file_pattern"] is None:
-            target_range = predictions.target_range_formatting(
-                fcst_mu['Ti'].isel(S=0, L=0, missing_dims="ignore").values,
-                fcst_mu['Tf'].isel(S=0, L=0, missing_dims="ignore").values,
-                "months"
-            )
-        else:
-            if config["leads"] is not None and config["targets"] is not None:
-                raise Exception("I am not sure which of leads or targets to use")
-            elif config["leads"] is not None:
-                target_range = predictions.target_range_format(
-                    config["leads"][lead_time],
-                    pd.to_datetime(start_date),
-                    config["target_period_length"],
-                    config["time_units"],
-                )
-            elif config["targets"] is not None:
-                target_range = lead_time
-            else:
-                raise Exception("One of leads or targets must be not None")
+            return error_fig, error_f
         # CDF from 499 quantiles
         quantiles = np.arange(1, 500) / 500
         quantiles = xr.DataArray(
             quantiles, dims="percentile", coords={"percentile": quantiles}
         )
-
         # Obs CDF
         obs_q, obs_mu = xr.broadcast(quantiles, obs.mean(dim="T"))
         obs_stddev = obs.std(dim="T")
@@ -437,21 +243,22 @@ def register(FLASK, config):
         ).rename("obs_ppf")
         # Obs quantiles
         obs_quant = obs.quantile(quantiles, dim="T")
-
         # Forecast CDF
-        fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_mu)
+        fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_ds["deterministic"])
         try:
-            fcst_dof = int(fcst_var.attrs["dof"])
+            fcst_dof = int(fcst_ds["fcst_var"].attrs["dof"])
         except:
             fcst_dof = obs["T"].size - 1
         if config["y_transform"]:
-            hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
+            hcst_err_var = (np.square(obs - fcst_ds["hcst"]).sum(dim="T")) / fcst_dof
             # fcst variance is hindcast variance weighted by (1+xvp)
             # but data files don't have xvp neither can we recompute it from them
             # thus xvp=0 is an approximation, acceptable dixit Simon Mason
             # The line below is thus just a reminder of the above
             xvp = 0
             fcst_var = hcst_err_var * (1 + xvp)
+        else:
+            fcst_var = fcst_ds["prediction_error_variance"]
         fcst_ppf = xr.apply_ufunc(
             t.ppf,
             fcst_q,
@@ -501,27 +308,30 @@ def register(FLASK, config):
             )
         )
         cdf_graph.update_traces(mode="lines", connectgaps=False)
+        for option in targets :
+            if option["value"] == lead_time :
+                target = option["label"]
         cdf_graph.update_layout(
             xaxis_title=f'{config["variable"]} ({obs.attrs["units"]})',
             yaxis_title="Probability of exceeding",
             title={
-                "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
+                "text": (
+                    f'{target} forecast issued {start_date} '
+                    f'<br> at ({fcst_ds["Y"].values}N,{fcst_ds["X"].values}E)'
+                ),
                 "font": dict(size=14),
             },
         )
-
         # PDF from 499 ppf values
-
         fcst_pdf = xr.apply_ufunc(
             t.pdf,
             fcst_ppf,
             fcst_dof,
             kwargs={
-                "loc": fcst_mu,
+                "loc": fcst_ds["deterministic"],
                 "scale": np.sqrt(fcst_var),
             },
         ).rename("fcst_pdf")
-
         obs_pdf = xr.apply_ufunc(
             norm.pdf,
             obs_ppf,
@@ -558,7 +368,10 @@ def register(FLASK, config):
             xaxis_title=f'{config["variable"]} ({obs.attrs["units"]})',
             yaxis_title="Probability density",
             title={
-                "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
+                "text": (
+                    f'{target} forecast issued {start_date} '
+                    f'<br> at ({fcst_ds["Y"].values}N,{fcst_ds["X"].values}E)'
+                ),
                 "font": dict(size=14),
             },
         )
@@ -654,9 +467,13 @@ def register(FLASK, config):
         ] + [
             mapr_u.make_adm_overlay(
                 adm_name=adm["name"],
+<<<<<<< HEAD
                 adm_geojson=calc.geom2GeoJSON(
                     calc.get_geom(level=i, conf=GLOBAL_CONFIG)
                 ),
+=======
+                adm_geojson=calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
+>>>>>>> ad29b88 (left to test single target cast and document functions)
                 adm_color=adm["color"],
                 adm_lev=i+1,
                 adm_weight=len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
@@ -683,19 +500,12 @@ def register(FLASK, config):
     )
     def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
         # Reading
-        
-        if config["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
-            fcst_mu = fcst_mu.sel(S=start_date)
-            fcst_var = fcst_var.sel(S=start_date)
-            if "L" in fcst_mu.dims:
-                fcst_mu = fcst_mu.sel(L=int(lead_time))
-                fcst_var = fcst_var.sel(L=int(lead_time))
-            obs = obs.where(obs["T"].dt.month == fcst_mu["T"].dt.month, drop=True)
-            is_y_transform = False
-        else:
-            fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=config["y_transform"])
-            is_y_transform = config["y_transform"]
+        fcst_ds, obs = cpt.get_fcst(
+            GLOBAL_CONFIG["datasets"]["fcst_data"],
+            lead_time=lead_time,
+            start_date=start_date,
+            y_transform=config["y_transform"],
+        )
         # Obs CDF
         if variable == "Percentile":
             obs_mu = obs.mean(dim="T")
@@ -711,17 +521,19 @@ def register(FLASK, config):
             obs_ppf = threshold
         # Forecast CDF
         try:
-            fcst_dof = int(fcst_var.attrs["dof"])
+            fcst_dof = int(fcst_ds["fcst_var"].attrs["dof"])
         except:
             fcst_dof = obs["T"].size - 1
-        if is_y_transform:
-            hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
+        if config["y_transform"]:
+            hcst_err_var = (np.square(obs - fcst_ds["hcst"]).sum(dim="T")) / fcst_dof
             # fcst variance is hindcast variance weighted by (1+xvp)
             # but data files don't have xvp neither can we recompute it from them
             # thus xvp=0 is an approximation, acceptable dixit Simon Mason
             # The line below is thus just a reminder of the above
             xvp = 0
             fcst_var = hcst_err_var * (1 + xvp)
+        else:
+            fcst_var = fcst_ds["prediction_error_variance"]
 
         fcst_cdf = xr.DataArray( # pingrid.tile expects a xr.DA but obs_ppf is never that
             data = xr.apply_ufunc(
@@ -729,13 +541,13 @@ def register(FLASK, config):
                 obs_ppf,
                 fcst_dof,
                 kwargs={
-                    "loc": fcst_mu,
+                    "loc": fcst_ds["deterministic"],
                     "scale": np.sqrt(fcst_var),
                 },
             ),
             # Naming conventions for pingrid.tile
-            coords = fcst_mu.rename({"X": "lon", "Y": "lat"}).coords,
-            dims = fcst_mu.rename({"X": "lon", "Y": "lat"}).dims
+            coords = fcst_ds.rename({"X": "lon", "Y": "lat"}).coords,
+            dims = fcst_ds.rename({"X": "lon", "Y": "lat"}).dims
         # pingrid.tile wants 2D data
         ).squeeze()
         # Depending on choices:
