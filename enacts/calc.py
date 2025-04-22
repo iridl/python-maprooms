@@ -124,15 +124,15 @@ def synthesize_enacts(variable, time_res, bbox):
 
 
 def get_geom(level, conf):
-    """ Form a geometric object from sql query or synthwetic
+    """ Form a geometric object from sql query or synthetic
 
     Parameters
     ----------
     level: int
-        level from the enumaration of a suite of administrative boundaries listed in
+        level from the enumeration of a suite of administrative boundaries listed in
         `conf` . Synthetic case limited to 0 and 1. 
     conf: dict
-        dictionary listing desired administartive shapes and their attributes.
+        dictionary listing desired administrative shapes and their attributes.
 
     Returns
     -------
@@ -321,7 +321,6 @@ def synthesize_geom(bbox, level=0):
         ]})
     else:
         raise Exception("level must be 0 or 1")
-    #df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
 
 
