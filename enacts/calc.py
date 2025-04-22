@@ -260,17 +260,17 @@ def sql2geom(shapes_sql, db_config):
     return df
 
 
-def synthesize_geom(bbox, level=0):
+def synthesize_geom(bbox, level):
     """ Synthesize a geometric object from a bounding box
 
     Parameters
     ----------
     bbox : array
         coordinates of bounding box of spatial domain as [W, S, E, N]
-    level : int, optional
+    level : int
         0 or 1 to mimick a containing admin level (0) with 1 geometry roughly smaller
         than `bbox` or a contained admin level (1) with 2 geometries partitioning
-        level 0. Default is 0.
+        level 0
     
     Returns
     -------
