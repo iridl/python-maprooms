@@ -311,7 +311,7 @@ def synthesize_geom(bbox, level):
         df = pd.DataFrame({"label" : ["Guyane"], "key": [0], "the_geom": [Polygon([
             [west, south], [west, north], [east, north], [east, south]
         ])]})
-    elif level == 1 :
+    elif level == 1 : #2 triangles partitioning level-0 box at its SW-NE diagnonal
         df = pd.DataFrame({"label" : ["NW", "SE"], "key": [1, 2],"the_geom": [
             Polygon([[west, south], [west, north], [east, north]]),
             Polygon([[west, south], [east, north], [east, south]]),
