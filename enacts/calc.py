@@ -288,36 +288,33 @@ def synthesize_geom(bbox, level):
     A level 0 contained into bbox is necessary to test the clipping feature since
     `bbox` is also used to generate the fake data.
     """
+    west, south, east, north = bbox
     assert (
-        (bbox[1] + 0.25 <= bbox[3] - 0.5),
+        (south + 0.25 <= north - 0.5),
         "Please extend latitudinal domain of bbox"
     )
-    if bbox[2] < bbox[0] :
+    if east < west :
         assert (
-            (bbox[0] + 0.25 <= bbox[2] - 0.5),
+            (west + 0.25 <= east - 0.5),
             "Please extend longitudinal domain of bbox"
         )
     else :
         assert (
-            (bbox[0] + 0.25 >= bbox[2] - 0.5),
+            (west + 0.25 >= east - 0.5),
             "Please extend longitudinal domain of bbox"
         )
-    bbox = [bbox[0] + 0.25, bbox[1] + 0.25, bbox[2] - 0.5, bbox[3] - 0.5]
+    west = west + 0.25
+    south = south + 0.25
+    east = east - 0.5
+    norht = north - 0.5
     if level == 0 :
         df = pd.DataFrame({"label" : ["Guyane"], "key": [0], "the_geom": [Polygon([
-            [bbox[0], bbox[1]], [bbox[0], bbox[3]],
-            [bbox[2], bbox[3]], [bbox[2], bbox[1]],
+            [west, south], [west, north], [east, north], [east, south]
         ])]})
     elif level == 1 :
         df = pd.DataFrame({"label" : ["NW", "SE"], "key": [1, 2],"the_geom": [
-            Polygon([
-                [bbox[0], bbox[1]], [bbox[0], bbox[3]],
-                [bbox[2], bbox[3]],
-            ]),
-            Polygon([
-                [bbox[0], bbox[1]],
-                [bbox[2], bbox[3]], [bbox[2], bbox[1]],
-            ]),
+            Polygon([[west, south], [west, north], [east, north]]),
+            Polygon([[west, south], [east, north], [east, south]]),
         ]})
     else:
         raise Exception("level must be 0 or 1")
