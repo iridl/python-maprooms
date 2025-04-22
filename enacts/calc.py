@@ -289,18 +289,15 @@ def synthesize_geom(bbox, level):
     `bbox` is also used to generate the fake data.
     """
     west, south, east, north = bbox
-    assert (
-        (south + 0.25 <= north - 0.5),
+    assert (south + 0.25) <= (north - 0.5), (
         "Please extend latitudinal domain of bbox"
     )
     if east < west :
-        assert (
-            (west + 0.25 <= east - 0.5),
+        assert (west + 0.25) >= (east - 0.5), (
             "Please extend longitudinal domain of bbox"
         )
     else :
-        assert (
-            (west + 0.25 >= east - 0.5),
+        assert (west + 0.25) <= (east - 0.5), (
             "Please extend longitudinal domain of bbox"
         )
     west = west + 0.25
