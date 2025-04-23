@@ -843,9 +843,9 @@ def _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, time_coord):
 # Time functions
 
 
-def interval_to_point(interval, to_point="mid", keep_attrs=True):
-    """ Create an xr.DataArray of the left, mid or right points of an Interval
-    dimension
+def intervals_to_points(interval, to_point="mid", keep_attrs=True):
+    """ Given an xr.DataArray of pd.Interval, return an xr.DataArray of the left,
+    mid, or right points of those Intervals.
 
     Parameters
     ----------
@@ -876,19 +876,19 @@ def interval_to_point(interval, to_point="mid", keep_attrs=True):
     could generalize the returned array name
     """
     return xr.DataArray(
-        data = [getattr(interval.values[t], to_point) for t in range(interval.size)],
-        coords = {interval.name : interval},
-        name = ( # There might be other automatic cases to cover
+        data=[getattr(interval.values[t], to_point) for t in range(interval.size)],
+        coords={interval.name : interval},
+        name=( # There might be other automatic cases to cover
             interval.name.replace("_bins", f'_{to_point}')
             if interval.name.endswith("_bins")
             else "_".join(interval.name, f'_{to_point}')
         ),
-        attrs = interval.attrs if keep_attrs else {},
+        attrs=interval.attrs if keep_attrs else {},
     )
     return data
 
 
-def swap_interval_to_assigned_point(
+def replace_intervals_with_points(
     interval_data, interval_dim, to_point="mid", keep_attrs=True
 ):
     """ Replace a coordinate whose values are pd.Interval with one whose values are
@@ -914,9 +914,9 @@ def swap_interval_to_assigned_point(
 
     See Also
     --------
-    pandas.Interval, interval_to_point, xarray.assign_coords, xarray.swap_dims
+    pandas.Interval, intervals_to_points, xarray.assign_coords, xarray.swap_dims
     """
-    point_dim = interval_to_point(
+    point_dim = intervals_to_points(
         interval_data[interval_dim], to_point=to_point, keep_attrs=keep_attrs
     )
     return (
@@ -945,7 +945,7 @@ def groupby_dekads(daily_data, time_dim="T"):
     --------
     xarray.groupby_bins, xarray.DataArrayGroupBy, xarray.DatasetGroupBy
     """
-    # dekad bins are located at midnight
+    # dekad edges are located at midnight
     dekad_edges = pd.date_range(
         start=daily_data[time_dim][0].dt.floor("D").values,
         end=(daily_data[time_dim][-1] + np.timedelta64(1, "D")).dt.floor("D").values,
@@ -960,50 +960,17 @@ def groupby_dekads(daily_data, time_dim="T"):
     return daily_data.groupby_bins(daily_data[time_dim], dekad_edges, right=False)
 
 
-def daily_to_dekad(daily_data, method=None, method_kwargs={}, time_dim="T"):
-    """ Reduce daily to dekad data
-
-    Parameters
-    ----------
-    daily_data : xr.DataArray or xr.Dataset
-        daily data
-    method : str, optional
-        xr.groupby_bins method to reduce `daily_data`
-        Default is None in which case a DataAttayGroupBy or DatasetGroupBy object is
-        returned
-    method_kwargs : dict(kwargs), optional
-        a dictionary of keyword arguments to pass to `method`
-        Default is an empty dict thus applying method default arguments
-    time_dim : str, optional
-        name of daily time dimenstion, default is "T"
-
-    Returns
-    -------
-    dekad_data : xr.DataArray or xr.Dataset or DataArrayGroupBy or DatasetGroupBy objects
-        daily data grouped by dekad if no `method` provided. Otherwise daily data
-        reduced to dekadal data according to `method`
-
-    See Also
-    --------
-    getattr, groupby_dekads, xr.groupby_bins
-    """
-    dekad_data = groupby_dekads(daily_data, time_dim=time_dim)
-    if method is not None :
-        dekad_data = getattr(dekad_data, method)(**method_kwargs)
-    return dekad_data
-
-
-def resample_interval_to_daily(time_series, extent=None, time_dim="T_bins"):
+def resample_interval_to_daily(time_series, is_intensive=None, time_dim="T_bins"):
     """ Resample any (interval-based) time series to daily
 
     Parameters
     ----------
     time_series : xr.DataArray or xr.Dataset
         data depending on time intervals greater or equal then a day
-    extent : str, optional
+    is_intensive : boolean, optional
         indicate the "extensive" or "intensive" property of `time_series` .
         Upsampling to daily requires intensive data.
-        If extensive, make intensive by dividing by length of intervals in days
+        If False, make intensive by dividing by length of intervals in days
         Default is None in which case: if units end with "/day", considers intensive,
         else, considers extensive
     time_dim : str, optional
@@ -1016,8 +983,8 @@ def resample_interval_to_daily(time_series, extent=None, time_dim="T_bins"):
 
     See Also
     --------
-    pandas.Interval, interval_to_point, swap_interval_to_assigned_point,
-    xarray.resample
+    pandas.Interval, intervals_to_points, replace_intervals_with_points,
+    xr.DataArray.resample, xr.Dataset.resample
 
     Notes
     -----
@@ -1025,22 +992,35 @@ def resample_interval_to_daily(time_series, extent=None, time_dim="T_bins"):
     time dimensions expressed as time points is considered equivalent to intervals of
     length 1 day. There may be generalization to make to adapt to the actual smallest
     time unit of this ecosystem which is the ns.
-    Extent proterty could be inferred in more cases, e.g. Kelvin is intensive.
+    In thermodynamics (at the core of climate science), quantities can be categorized
+    as being intensive or extensive to identify how they change when a system changes
+    in size: 2 systems merging add up (extensive) their mass and volume, but they
+    don't (intensive) their density (more at
+    https://en.wikipedia.org/wiki/Intensive_and_extensive_properties).
+    Closer to what we care about here, temperature is intensive so a monthly value
+    can be upsampled to daily by assigning same value to all day (implicitely
+    admitting that the monthly value is a daily average); but precipitation is
+    extensive so that so a monthly value can not be upsampled to daily by simply
+    reassigning it (if it rains 300mm in a month, it can rain 300m as well in only
+    one day of the month -- and 0 all the other days). However, monthly precipitation
+    expressed in mm/day is intensive.
+    Extent property could be inferred in more cases, e.g. Kelvin is intensive.
     Waiting for pint to figure that all out.
+    This function differ from xr.DataArray/Dataset.resample in that resample expects
+    `time_dim` to be datetime-like but it doesn't consider that pd.Interval of
+    datetime-like is (probably because it reasons in terms of frequency, ignoring
+    width (intervals)).
     """
     if isinstance(time_series[time_dim].values[0], pd._libs.interval.Interval):
         # else time_dim is not intervals thus points thus considered daily already
         # make daily for computations
-        if extent is None :
+        if is_intensive is None :
             # There are a lot more cases to cover
             if "units" in time_series.attrs :
-                extent = (
-                    "intensive" if "/day" in time_series.attrs["units"]
-                    else "extensive"
-                )
+                is_intensive = "/day" in time_series.attrs["units"]
             else :
-                extent = "extensive"
-        if extent == "extensive" : # Can only ffill intensive data
+                is_intensive = False
+        if not is_intensive : # Can only ffill intensive data
             time_series = time_series / [
                 time_series[time_dim].values[t].length.days
                 for t in range(time_series[time_dim].size)
@@ -1048,7 +1028,7 @@ def resample_interval_to_daily(time_series, extent=None, time_dim="T_bins"):
             if "units" in time_series.attrs :
                 time_series.attrs["units"] = f'{time_series.attrs["units"]}/day'
         time_dim_left = ( # There might be other automatic cases to cover
-            # Same logic as in interval_to_point
+            # Same logic as in intervals_to_points
             time_dim.replace("_bins", "_left") if time_dim.endswith("_bins")
             else "_".join(time_dim, "_left")
         )
@@ -1057,9 +1037,9 @@ def resample_interval_to_daily(time_series, extent=None, time_dim="T_bins"):
             else "_".join(time_dim, "right")
         )
         time_series = xr.concat([
-            swap_interval_to_assigned_point(time_series, time_dim, to_point="left"),
+            replace_intervals_with_points(time_series, time_dim, to_point="left"),
             # Need to cover entirely the last interval
-            swap_interval_to_assigned_point(
+            replace_intervals_with_points(
                 time_series.isel({time_dim : [-1]}), time_dim, to_point="right"
             ).rename({time_dim_right : time_dim_left}),
         ], dim=time_dim_left)
