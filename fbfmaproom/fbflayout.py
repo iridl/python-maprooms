@@ -19,6 +19,14 @@ def app_layout():
                 id="modal",
                 centered=True,
             ),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle(id="validation-title")),
+                    dbc.ModalBody(id="validation-body")
+                ],
+                id="validation-modal",
+                centered=True,
+            ),
             dcc.Location(id="location", refresh=False),
             control_layout(),
             html.Div([
@@ -305,6 +313,9 @@ def control_layout():
                             inputStyle={"margin-right": "5px"},
                             labelStyle={"display": "flex"}
                         ),
+                    ),
+                    dbc.Button(
+                        dcc.Upload("Validate file", id="upload"),
                     ),
                 ],
             ),

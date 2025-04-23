@@ -1,3 +1,4 @@
+import base64
 import cftime
 from typing import Any, Dict, Tuple, Optional
 import os
@@ -24,6 +25,7 @@ from shapely.geometry.multipoint import MultiPoint
 import psycopg2
 from psycopg2 import sql
 import math
+import sys
 import traceback
 import enum
 import itertools
@@ -1318,6 +1320,125 @@ APP.clientside_callback(
     Input("marker",  "position"),
     Input("modal", "is_open")
 )
+
+
+class ValidationException(Exception):
+    pass
+
+
+@APP.callback(
+    Output("validation-modal", "is_open"),
+    Output("validation-title", "children"),
+    Output("validation-body", "children"),
+    Input("upload", "contents"),
+    Input("location", "pathname"),
+    prevent_initial_call=True,
+)
+def validate_upload(blob, pathname):
+    if blob is None:
+        # This happens sometimes on initial page load. Is
+        # prevent_initial_call=True not taking effect?
+        return False, None, None
+
+    notes = []
+    errors = []
+
+    country_key = country(pathname)
+
+    try:
+        content_type, b64content = blob.split(',')
+        decoded = base64.b64decode(b64content).decode('utf-8')
+        try:
+            df = pd.read_csv(
+                io.StringIO(decoded),
+                names=['year', 'region', 'value'],
+                header=None,
+                dtype={
+                    'year': 'int16',
+                    'region': str,
+                    'value': 'float32',
+                },
+            )
+        except Exception as e:
+            raise ValidationException(e)
+
+        years = df['year']
+        notes.append(
+            f"Years range from {years.min()} to {years.max()}"
+        )
+        # Don't have to test for missing years because that's impossible
+        # for an integer column (it shows up as a parsing error).
+
+        r = df['region']
+        if r.isna().any():
+            errors.append("There are missing or empty region identifiers.")
+            r = r.dropna()
+        regions = set(r.unique())
+        notes.append(f"{len(regions)} regions")
+        config = CONFIG["countries"][country_key]
+        nlevels = len(config['shapes'])
+
+        query = sql.Composed([
+            sql.SQL("with "),
+            sql.SQL(", ").join(
+                sql.SQL("sub{i} as ({subquery})").format(
+                    i=sql.Literal(i),
+                    subquery=sql.SQL(config['shapes'][i]['sql']),
+                )
+                for i in range(nlevels)
+            ),
+            sql.SQL(" select * from ("),
+            sql.SQL(" union ").join(
+                sql.SQL(
+                    "select key::text from sub{i}"
+                ).format(i=sql.Literal(i))
+                for i in range(nlevels)
+            ),
+            sql.SQL(") as u where u.key::text in ("),
+            sql.SQL(", ").join(sql.Literal(r) for r in regions),
+            sql.SQL(")")
+                
+        ])
+        with psycopg2.connect(**CONFIG["db"]) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query, list(regions))
+                rows = cursor.fetchall()
+                known_regions = set(map(lambda x: x[0], rows))
+        unknown_regions = regions - known_regions
+        if len(unknown_regions) > 0:
+            examples_str = ', '.join(list(unknown_regions)[:3])
+            errors.append(f'{len(unknown_regions)} regions are unknown to the application, e.g. {examples_str}')
+
+        v = df['value']
+        notes.append(f"Values range from {v.min()} to {v.max()}")
+    except ValidationException as e:
+        errors.append(str(e))
+    except Exception:
+        traceback.print_exc(file=sys.stdout)
+        errors.append("A server error occurred.")
+
+    # The following is safe: I verified that HTML escaping is applied to m.
+    # TODO write a test demonstrating that special characters in
+    # user-provided region ids are escaped.
+    notes_text = html.P([
+        "Notes:",
+        html.Ul([html.Li(x) for x in notes])
+    ])
+
+    if len(errors) > 0:
+        title = ["Validation ", html.Span("failed", style={'color': 'red'})]
+        error_text = html.P([
+            "Errors:",
+            html.Ul([html.Li(x) for x in errors])
+        ])
+        body = [error_text, notes_text]
+    else:
+        title = ["Validation ", html.Span("passed", style={'color': 'green'})]
+        body = notes_text
+
+
+    return True, title, body
+
 
 # Endpoints
 
