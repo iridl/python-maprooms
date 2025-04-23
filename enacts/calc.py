@@ -1052,9 +1052,8 @@ def resample_interval_to_daily(time_series, is_intensive=None, time_dim="T_bins"
     return time_series
 
 
-def regroup(time_series, group="1D", method=None, method_kwargs={}, time_dim="T"):
-    """ Regroup any type of interval-based time series to another,
-    according to `method`
+def regroup(time_series, group="1D", time_dim="T"):
+    """ Regroup any type of interval-based time series to another
 
     Parameters
     ----------
@@ -1066,21 +1065,13 @@ def regroup(time_series, group="1D", method=None, method_kwargs={}, time_dim="T"
         or d Mmm - d Mmm. See Notes for details.
         As integer or array-like[pandas.DatetimeIndex],
         see xr.DataArray.groupby_bins' `bins` Parameter
-    method: str, optional
-        name of xr.core.groupby.DataArrayGroupBy's Method to apply to form the new
-        intervals. Default is None in which case no final reduction is applied
-        and returned `time_series` is a xr.core.groupby.DataArrayGroupBy object of
-        days grouped according to `group` .
-    method_kwargs: dict, optional
-        keyword arguments of `method` . Default is an empty dict in which case
-        default keywords of `method` will be applied.
     time_dim : str, optional
         name of interval time dimenstion, default is "T"
 
     Returns
     -------
-    regrouped : xr.DataArray or xr.Dataset
-        `time_series` regrouped to specified time intervals according to `method`
+    regrouped : xr.core.groupby.DataArray/DatasetGroupBy
+        `time_series` grouped to specified time intervals groups
 
     See Also
     --------
@@ -1233,10 +1224,7 @@ def regroup(time_series, group="1D", method=None, method_kwargs={}, time_dim="T"
         assert (bins.size > 1), (
             "data must span at least one full group (need 2 edges to form 1 bin)"
         )
-    regrouped = time_series.groupby_bins(time_series[time_dim], bins, right=False)
-    if method is not None :
-        regrouped = getattr(regrouped, method)(**method_kwargs)
-    return regrouped
+    return time_series.groupby_bins(time_series[time_dim], bins, right=False)
 
 
 def strftimeb2int(strftimeb):
