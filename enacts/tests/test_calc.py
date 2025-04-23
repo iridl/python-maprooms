@@ -11,7 +11,7 @@ def test_groupby_dekads_perfect_partition():
     precip = xr.DataArray(values, coords={"T": t})
     grouped = calc.groupby_dekads(precip)
 
-    assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
+    np.testing.assert_array_equal(grouped.sum(), [ 55, 155, 286, 365, 465, 565 ])
 
 
 def test_groupby_dekads_noon_days():
@@ -20,7 +20,7 @@ def test_groupby_dekads_noon_days():
     precip = xr.DataArray(values, coords={"T": t})
     grouped = calc.groupby_dekads(precip)
 
-    assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
+    np.testing.assert_array_equal(grouped.sum(), [ 55, 155, 286, 365, 465, 565 ])
 
 
 def test_groupby_dekads_overlaps():
@@ -29,7 +29,7 @@ def test_groupby_dekads_overlaps():
     precip = xr.DataArray(values, coords={"T": t})
     grouped = calc.groupby_dekads(precip)
 
-    assert (grouped.sum() == [ 55, 155, 286, 365, 465 ]).all()
+    np.testing.assert_array_equal(grouped.sum(), [ 55, 155, 286, 365, 465 ])
 
 
 def test_groupby_dekads_noon_days_overlaps():
@@ -38,7 +38,7 @@ def test_groupby_dekads_noon_days_overlaps():
     precip = xr.DataArray(values, coords={"T": t})
     grouped = calc.groupby_dekads(precip)
 
-    assert (grouped.sum() == [ 55, 155, 286, 365, 465, 565 ]).all()
+    np.testing.assert_array_equal(grouped.sum(), [ 55, 155, 286, 365, 465, 565 ])
 
 
 def test_interval_to_point_dim():
@@ -75,7 +75,9 @@ def test_daily_to_dekad_sum_default():
     precip = xr.DataArray(values, coords={"T": t})
     dekad_pr = calc.daily_to_dekad(precip, method="sum")
 
-    assert (dekad_pr.values == [ 55., 155., 286., 365., 465., 565.]).all()
+    np.testing.assert_array_equal(
+        dekad_pr.values, [ 55., 155., 286., 365., 465., 565.]
+    )
     assert isinstance(dekad_pr["T_bins"].values[0], pd._libs.interval.Interval)
 
 
@@ -89,7 +91,9 @@ def test_daily_to_dekad_sum_kwargs():
         "skipna": True, "min_count": 11, "keep_attrs": True
     })
     
-    assert (np.isnan(dekad_pr.values) == [True, True, False, True, True, True]).all()
+    np.testing.assert_array_equal(
+        np.isnan(dekad_pr.values), [True, True, False, True, True, True]
+    )
     assert dekad_pr.attrs["units"] == "mm"
     assert dekad_pr.attrs["long_name"] == "Precipitation"
 
@@ -104,7 +108,9 @@ def test_swap_interval_to_assigned_point():
     )
 
     assert "T_left" in dekad_left_pr.dims
-    assert (dekad_left_pr["T_left"].dt.day.values == [1, 11, 21, 1, 11, 21]).all()
+    np.testing.assert_array_equal(
+        dekad_left_pr["T_left"].dt.day.values, [1, 11, 21, 1, 11, 21]
+    )
 
 
 def test_regroup_daily_to_7D():
@@ -113,13 +119,9 @@ def test_regroup_daily_to_7D():
     precip = xr.DataArray(values, coords={"T": t})
     precip_int = calc.regroup(precip, group="7D", method="sum")
 
-    assert (precip_int.data == (
-        precip
-        .resample(T="7D")
-        .sum(skipna=True, min_count=7)
-        .dropna("T")
-        .data
-    )).all()
+    np.testing.assert_array_equal(
+        precip_int, precip.resample(T="7D").sum(skipna=True, min_count=7).dropna("T")
+    )
 
 
 def test_regroup_daily_to_pentad():
@@ -134,17 +136,17 @@ def test_regroup_daily_to_pentad():
     precip_pentad = calc.regroup(precip, group="pentad", method="sum")
     precip_pentad_leap = calc.regroup(precip_leap, group="pentad", method="sum")
     
-    assert (precip_pentad.data == [
+    np.testing.assert_array_equal(precip_pentad.data, [
         15.,  40.,  65.,  90., 115., 140., 165., 190., 215., 240., 265.,
         230., 310., 335., 360., 385., 410., 435.
-    ]).all()
-    assert (precip_pentad_leap.data == [
+    ])
+    np.testing.assert_array_equal(precip_pentad_leap.data, [
         15.,  40.,  65.,  90., 115., 140., 165., 190., 215., 240., 265.,
         290., 315., 340., 365., 390., 415., 440.
-    ]).all()
-    assert ((precip_pentad_leap.data - precip_pentad.data) == [
+    ])
+    np.testing.assert_array_equal((precip_pentad_leap.data - precip_pentad.data), [
         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 60., 5., 5., 5., 5., 5., 5.,
-    ]).all()
+    ])
 
 
 def test_regroup_daily_to_8day():
@@ -153,9 +155,9 @@ def test_regroup_daily_to_8day():
     precip = xr.DataArray(values, coords={"T": t})
     precip_8day = calc.regroup(precip, group="8day", method="sum")
  
-    assert (precip_8day.data == [
+    np.testing.assert_array_equal(precip_8day.data, [
         92., 156., 220., 284., 348., 412., 351., 524., 588., 652., 716.
-    ]).all()
+    ])
 
 
 def test_regroup_daily_to_dekad():
@@ -164,7 +166,9 @@ def test_regroup_daily_to_dekad():
     precip = xr.DataArray(values, coords={"T": t})
     precip_dekad = calc.regroup(precip, group="dekad", method="sum")
 
-    assert (precip_dekad.data == [55., 155., 286., 365., 465., 504.]).all()
+    np.testing.assert_array_equal(
+        precip_dekad.data, [55., 155., 286., 365., 465., 504.]
+    )
 
 
 def test_regroup_daily_to_16day():
@@ -173,7 +177,9 @@ def test_regroup_daily_to_16day():
     precip = xr.DataArray(values, coords={"T": t})
     precip_16day = calc.regroup(precip, group="16day", method="sum")
 
-    assert (precip_16day.data == [376.,  632.,  763., 1112., 1368.]).all()
+    np.testing.assert_array_equal(
+        precip_16day.data, [376.,  632.,  763., 1112., 1368.]
+    )
 
 
 def test_regroup_daily_to_1M():
@@ -182,13 +188,10 @@ def test_regroup_daily_to_1M():
     precip = xr.DataArray(values, coords={"T": t})
     precip_month = calc.regroup(precip, group="1M", method="sum")
 
-    assert (precip_month.data == (
-        precip
-        .resample(T="1M")
-        .sum(skipna=True, min_count=30)
-        .dropna("T")
-        .data
-    )).all()
+    np.testing.assert_array_equal(
+        precip_month.data,
+        precip.resample(T="1M").sum(skipna=True, min_count=30).dropna("T"),
+    )
 
 
 def test_regroup_daily_to_5M():
@@ -197,12 +200,14 @@ def test_regroup_daily_to_5M():
     precip = xr.DataArray(values, coords={"T": t})
     precip_month = calc.regroup(precip, group="5M", method="sum")
 
-    assert (precip_month.data[0] == precip.sel(
-        T=slice("2000-01-01", "2000-05-31")
-    ).sum().data).all()
-    assert (precip_month.data[-1] == precip.sel(
-        T=slice("2001-04-01", "2001-08-31")
-    ).sum().data).all()
+    xr.testing.assert_equal(
+        precip_month.isel(T_bins=0, drop=True),
+        precip.sel(T=slice("2000-01-01", "2000-05-31")).sum()
+    )
+    xr.testing.assert_equal(
+        precip_month.isel(T_bins=-1, drop=True),
+        precip.sel(T=slice("2001-04-01", "2001-08-31")).sum()
+    )
 
 
 def test_regroup_daily_to_season1():
@@ -211,21 +216,26 @@ def test_regroup_daily_to_season1():
     precip = xr.DataArray(values, coords={"T": t})
     precip_seas = calc.regroup(precip, group="14 Dec - 29 Mar", method="sum")
 
-    assert (precip_seas.data[0] == precip.sel(
-        T=slice("2000-03-30", "2000-12-13")
-    ).sum().data).all()
-    assert (precip_seas.data[1] == precip.sel(
-        T=slice("2000-12-14", "2001-03-29")
-    ).sum().data).all()
-    assert (precip_seas.data[2] == precip.sel(
-        T=slice("2001-03-30", "2001-12-13")
-    ).sum().data).all()
-    assert (precip_seas.data[3] == precip.sel(
-        T=slice("2001-12-14", "2002-03-29")
-    ).sum().data).all()
-    assert (precip_seas.data[4] == precip.sel(
-        T=slice("2002-03-30", "2002-12-13")
-    ).sum().data).all()
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=0, drop=True),
+        precip.sel(T=slice("2000-03-30", "2000-12-13")).sum()
+    )
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=1, drop=True),
+        precip.sel(T=slice("2000-12-14", "2001-03-29")).sum()
+    )
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=2, drop=True),
+        precip.sel(T=slice("2001-03-30", "2001-12-13")).sum()
+    )
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=3, drop=True),
+        precip.sel(T=slice("2001-12-14", "2002-03-29")).sum()
+    )
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=4, drop=True),
+        precip.sel(T=slice("2002-03-30", "2002-12-13")).sum()
+    )
 
 
 def test_regroup_daily_to_season2():
@@ -234,12 +244,14 @@ def test_regroup_daily_to_season2():
     precip = xr.DataArray(values, coords={"T": t})
     precip_seas = calc.regroup(precip, group="19-29 Feb", method="sum")
 
-    assert (precip_seas.data[0] == precip.sel(
-        T=slice("2000-02-19", "2000-02-29")
-    ).sum().data).all()
-    assert (precip_seas.data[2] == precip.sel(
-        T=slice("2001-02-19", "2001-02-28")
-    ).sum().data).all()
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=0, drop=True),
+        precip.sel(T=slice("2000-02-19", "2000-02-29")).sum()
+    )
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=2, drop=True),
+        precip.sel(T=slice("2001-02-19", "2001-02-28")).sum()
+    )
 
 
 def test_regroup_daily_to_season3():
@@ -248,12 +260,14 @@ def test_regroup_daily_to_season3():
     precip = xr.DataArray(values, coords={"T": t})
     precip_seas = calc.regroup(precip, group="29 Feb - 29 Mar", method="sum")
 
-    assert (precip_seas.data[0] == precip.sel(
-        T=slice("2000-03-01", "2000-03-29")
-    ).sum().data).all()
-    assert (precip_seas.data[2] == precip.sel(
-        T=slice("2001-03-01", "2001-03-29")
-    ).sum().data).all()
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=0, drop=True),
+        precip.sel(T=slice("2000-03-01", "2000-03-29")).sum()
+    )
+    xr.testing.assert_equal(
+        precip_seas.isel(T_bins=2, drop=True),
+        precip.sel(T=slice("2001-03-01", "2001-03-29")).sum()
+    )
 
 
 def test_regroup_daily_to_int():
@@ -262,13 +276,10 @@ def test_regroup_daily_to_int():
     precip = xr.DataArray(values, coords={"T": t})
     precip_int = calc.regroup(precip, group=4, method="sum")
 
-    assert (precip_int.data == (
-        precip
-        .resample(T="7D")
-        .sum(skipna=True, min_count=7)
-        .dropna("T")
-        .data
-    )).all()
+    np.testing.assert_array_equal(
+        precip_int,
+        precip.resample(T="7D").sum(skipna=True, min_count=7).dropna("T"),
+    )
 
 
 def test_resample_interval_to_daily():
@@ -278,10 +289,10 @@ def test_resample_interval_to_daily():
     precip_pentad = calc.regroup(precip, group="pentad", method="sum")
     precip_daily = calc.resample_interval_to_daily(precip_pentad)
 
-    assert (precip_daily == [
+    np.testing.assert_array_equal(precip_daily, [
         3.,  3.,  3.,  3.,  3.,  8.,  8.,  8.,  8.,  8., 13., 13., 13.,
        13., 13., 18., 18., 18., 18., 18., 23., 23., 23., 23., 23.,
-    ]).all()
+    ])
     
 
 def test_resample_interval_to_daily_intensive():
@@ -291,10 +302,10 @@ def test_resample_interval_to_daily_intensive():
     precip_pentad = calc.regroup(precip, group="pentad", method="mean")
     precip_daily = calc.resample_interval_to_daily(precip_pentad)
 
-    assert (precip_daily == [
+    np.testing.assert_array_equal(precip_daily, [
         3.,  3.,  3.,  3.,  3.,  8.,  8.,  8.,  8.,  8., 13., 13., 13.,
        13., 13., 18., 18., 18., 18., 18., 23., 23., 23., 23., 23.,
-    ]).all()
+    ])
 
 
 def test_longest_run_length():
@@ -336,14 +347,13 @@ def test_longest_run_length_all_unflagged():
 
 def test_longest_run_length_2d():
 
-    precip = xr.concat(
-        [precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])],
-        dim="stn_id",
-    )
+    precip = xr.concat([
+        precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])
+    ], dim="stn_id")
     data_cond = precip < 1
     lds = calc.longest_run_length(data_cond, "T")
 
-    assert (lds == [9, 9]).all()
+    np.testing.assert_array_equal(lds, [9, 9])
 
 
 def test_longest_run_length_where_first_is_flagged():
@@ -380,10 +390,10 @@ def test_following_dry_spell_length():
     precip[-1] = 0.1
     dsl_dry_tail = calc.following_dry_spell_length(precip, 1)
 
-    assert np.array_equal(dsl, expected)
-    assert np.array_equal(dsl_wet_head, expected)
+    np.testing.assert_array_equal(dsl, expected)
+    np.testing.assert_array_equal(dsl_wet_head, expected)
     expected[-1] = 1
-    assert np.array_equal(dsl_dry_tail, expected)
+    np.testing.assert_array_equal(dsl_dry_tail, expected)
 
 
 def test_following_dry_spell_length_heading_wet_and_tailing_dry():
@@ -395,7 +405,7 @@ def test_following_dry_spell_length_heading_wet_and_tailing_dry():
        0., 2., 1., 0., 1., 0., 2., 1., 0., 4., 3., 2., 1., 0., 0., 0., 0.,
        0., 0., 0., 6., 5., 4., 3., 2., 1.]
 
-    assert np.array_equal(dsl, expected)
+    np.testing.assert_array_equal(dsl, expected)
 
 
 def test_sel_day_and_month_1yr():
@@ -411,14 +421,14 @@ def test_sel_day_and_month_6yrs():
     precip = data_test_calc.multi_year_data_sample()
     dam = calc.sel_day_and_month(precip["T"], 19, 1)
     
-    assert (dam.values == pd.to_datetime([
+    np.testing.assert_array_equal(dam.values, pd.to_datetime([
         "2000-01-19T00:00:00.000000000",
         "2001-01-19T00:00:00.000000000",
         "2002-01-19T00:00:00.000000000",
         "2003-01-19T00:00:00.000000000",
         "2004-01-19T00:00:00.000000000",
         "2005-01-19T00:00:00.000000000",
-    ])).all()
+    ]))
 
 
 def test_sel_day_and_month_with_offset():
@@ -426,14 +436,14 @@ def test_sel_day_and_month_with_offset():
     precip = data_test_calc.multi_year_data_sample()
     dam = calc.sel_day_and_month(precip["T"], 1, 3, offset=-1)
     
-    assert (dam.values == pd.to_datetime([
+    np.testing.assert_array_equal(dam.values, pd.to_datetime([
         "2000-02-29T00:00:00.000000000",
         "2001-02-28T00:00:00.000000000",
         "2002-02-28T00:00:00.000000000",
         "2003-02-28T00:00:00.000000000",
         "2004-02-29T00:00:00.000000000",
         "2005-02-28T00:00:00.000000000",
-    ])).all()
+    ]))
 
 
 def test_water_balance_intializes_right():
@@ -469,12 +479,12 @@ def test_water_balance2():
     ]
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
     wb = calc.water_balance(precip, 5, 60, 0)
-    assert np.array_equal(wb.soil_moisture["T"], t)
+    np.testing.assert_array_equal(wb.soil_moisture["T"], t)
     expected = np.transpose([
         [0.0, 1.0, 0.0, 60.0],
         [5.0, 12.0, 21.0, 32.0],
     ])
-    assert np.array_equal(wb.soil_moisture, expected)
+    np.testing.assert_array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance2_reduce_True():
@@ -490,7 +500,7 @@ def test_water_balance2_reduce_True():
         [60.0],
         [32.0],
     ]
-    assert np.array_equal(wb.soil_moisture, expected)
+    np.testing.assert_array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance_et_is_xarray_but_has_no_T():
@@ -504,12 +514,12 @@ def test_water_balance_et_is_xarray_but_has_no_T():
     et = xr.DataArray([5, 10], dims=["X"])
     wb = calc.water_balance(precip, et, 60, 0)
 
-    assert np.array_equal(wb.soil_moisture["T"], t)
+    np.testing.assert_array_equal(wb.soil_moisture["T"], t)
     expected = np.transpose([
         [0.0, 1.0, 0.0, 60.0],
         [0.0, 2.0, 6.0, 12.0],
     ])
-    assert np.array_equal(wb.soil_moisture, expected)
+    np.testing.assert_array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance_et_is_xarray_but_has_no_T_reduce_True():
@@ -527,7 +537,7 @@ def test_water_balance_et_is_xarray_but_has_no_T_reduce_True():
         [60.0],
         [12.0],
     ]
-    assert np.array_equal(wb.soil_moisture, expected)
+    np.testing.assert_array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance_et_has_T():
@@ -542,12 +552,12 @@ def test_water_balance_et_has_T():
     et = xr.DataArray(values, dims=["T"], coords={"T": t})
     wb = calc.water_balance(precip, et, 60, 0)
 
-    assert np.array_equal(wb.soil_moisture["T"], t)
+    np.testing.assert_array_equal(wb.soil_moisture["T"], t)
     expected = np.transpose([
         [0.0, 0.0, 0.0, 56.0],
         [5.0, 7.0, 6.0, 12.0],
     ])
-    assert np.array_equal(wb.soil_moisture, expected)
+    np.testing.assert_array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance_et_has_T_reduce_True():
@@ -566,7 +576,7 @@ def test_water_balance_et_has_T_reduce_True():
         [56.0],
         [12.0],
     ]
-    assert np.array_equal(wb.soil_moisture, expected)
+    np.testing.assert_array_equal(wb.soil_moisture, expected)
 
 
 def test_daily_tobegroupedby_season_cuts_on_days():
@@ -589,9 +599,9 @@ def test_daily_tobegroupedby_season_picks_right_end_dates():
 
     precip = data_test_calc.multi_year_data_sample()
     dts = calc.daily_tobegroupedby_season(precip, 29, 11, 29, 2)
-    assert (
-        dts.seasons_ends
-        == pd.to_datetime(
+    np.testing.assert_array_equal(
+        dts.seasons_ends,
+        pd.to_datetime(
             [
                 "2001-02-28T00:00:00.000000000",
                 "2002-02-28T00:00:00.000000000",
@@ -599,8 +609,8 @@ def test_daily_tobegroupedby_season_picks_right_end_dates():
                 "2004-02-29T00:00:00.000000000",
                 "2005-02-28T00:00:00.000000000",
             ],
-        )
-    ).all()
+        ),
+    )
 
 
 def test_seasonal_onset_date_keeps_returning_same_outputs():
@@ -619,7 +629,7 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
         dry_spell_search=21,
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
-    assert np.array_equal(
+    np.testing.assert_array_equal(
         onsets,
         pd.to_datetime(
             [
@@ -630,7 +640,6 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
                 "2004-04-04T00:00:00.000000000",
             ],
         ),
-        equal_nan=True,
     )
 
 def test_seasonal_onset_date_keeps_returning_same_outputs_with_regroup():
@@ -656,7 +665,7 @@ def test_seasonal_onset_date_keeps_returning_same_outputs_with_regroup():
     # be rewritten accordingly
     onsets = (onsetsds + onsetsds["T"])
 
-    assert np.array_equal(
+    np.testing.assert_array_equal(
         onsets,
         pd.to_datetime(
             [
@@ -667,7 +676,6 @@ def test_seasonal_onset_date_keeps_returning_same_outputs_with_regroup():
                 "2004-04-04T00:00:00.000000000",
             ],
         ),
-        equal_nan=True,
     )
 
 def test_seasonal_cess_date_keeps_returning_same_outputs():
@@ -689,7 +697,7 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
         dry_spell_length_thresh=3,
     )
     cess = (cessds.cess_delta + cessds["T"]).squeeze()
-    assert np.array_equal(
+    np.testing.assert_array_equal(
         cess,
         pd.to_datetime(
             [
@@ -700,7 +708,6 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
                 "2004-09-01T00:00:00.000000000",
             ],
         ),
-        equal_nan=True,  
     )
 
 def test_seasonal_cess_date_keeps_returning_same_outputs_with_regroup():
@@ -726,7 +733,7 @@ def test_seasonal_cess_date_keeps_returning_same_outputs_with_regroup():
     # Not sure what happened to T_bins here
     cessds = cessds.isel(T=np.arange(0, cessds.size, 2), drop=True)
     cess = (cessds + cessds["T"]).squeeze()
-    assert np.array_equal(
+    np.testing.assert_array_equal(
         cess,
         pd.to_datetime(
             [
@@ -737,7 +744,6 @@ def test_seasonal_cess_date_keeps_returning_same_outputs_with_regroup():
                 "2004-09-01T00:00:00.000000000",
             ],
         ),
-        equal_nan=True,  
     )
 
 
@@ -785,7 +791,9 @@ def test_seasonal_cess_date_from_rain_keeps_returning_same_outputs_with_regroup(
 def test_seasonal_onset_date():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
     # this is rr_mrg.sel(T=slice("2000", "2005-02-28")).isel(X=150, Y=150).precip
-    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.DataArray(
+        np.zeros(t.size), dims=["T"], coords={"T": t}
+    ) + 1.1
     synthetic_precip = xr.where(
         (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
         | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
@@ -819,28 +827,27 @@ def test_seasonal_onset_date():
         dry_spell_search=21,
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
-    assert (
-        onsets
-        == pd.to_datetime(
-            xr.DataArray(
-                [
-                    "2000-03-29T00:00:00.000000000",
-                    "2001-04-30T00:00:00.000000000",
-                    "2002-04-01T00:00:00.000000000",
-                    "2003-05-16T00:00:00.000000000",
-                    "2004-03-01T00:00:00.000000000",
-                ],
-                dims=["T"],
-                coords={"T": onsets["T"]},
-            )
-        )
-    ).all()
+    xr.testing.assert_equal(
+        onsets,
+        xr.DataArray(
+            pd.to_datetime([
+                "2000-03-29T00:00:00.000000000",
+                "2001-04-30T00:00:00.000000000",
+                "2002-04-01T00:00:00.000000000",
+                "2003-05-16T00:00:00.000000000",
+                "2004-03-01T00:00:00.000000000",
+            ]),
+            dims=["T"], coords={"T": onsets["T"]},
+        ),
+    )
 
 
 def test_seasonal_onset_date_with_regroup():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
     # this is rr_mrg.sel(T=slice("2000", "2005-02-28")).isel(X=150, Y=150).precip
-    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.DataArray(
+        np.zeros(t.size), dims=["T"], coords={"T": t}
+    ) + 1.1
     synthetic_precip = xr.where(
         (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
         | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
@@ -876,28 +883,28 @@ def test_seasonal_onset_date_with_regroup():
         },
     )
     onsetsds = onsetsds.isel(T_bins=np.arange(0, onsetsds.size, 2), drop=True)
-    onsets = onsetsds + onsetsds["T"]
+    onsets = (onsetsds + onsetsds["T"]).drop_vars("T")
 
-    assert (
-        onsets
-        == pd.to_datetime(
-            xr.DataArray(
-                [
-                    "2000-03-29T00:00:00.000000000",
-                    "2001-04-30T00:00:00.000000000",
-                    "2002-04-01T00:00:00.000000000",
-                    "2003-05-16T00:00:00.000000000",
-                    "2004-03-01T00:00:00.000000000",
-                ],
-                coords={"T_bins": onsets["T_bins"]},
-            )
-        )
-    ).all()
+    xr.testing.assert_equal(
+        onsets,
+        xr.DataArray(
+            pd.to_datetime([
+                "2000-03-29T00:00:00.000000000",
+                "2001-04-30T00:00:00.000000000",
+                "2002-04-01T00:00:00.000000000",
+                "2003-05-16T00:00:00.000000000",
+                "2004-03-01T00:00:00.000000000",
+            ]),
+            coords={"T_bins": onsets["T_bins"]},
+        ),
+    )
 
 
 def test_seasonal_cess_date():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
-    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.DataArray(
+        np.zeros(t.size), dims=["T"], coords={"T": t}
+    ) + 1.1
     synthetic_precip = xr.where(
         (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
         | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
@@ -933,26 +940,28 @@ def test_seasonal_cess_date():
         dry_thresh=5,
         dry_spell_length_thresh=3,
     )
-    cess = (cessds.cess_delta + cessds["T"]).squeeze()
-    assert (
-        cess
-        == pd.to_datetime(
-            xr.DataArray(
-                [
-                    "2000-09-01T00:00:00.000000000",
-                    "2001-09-01T00:00:00.000000000",
-                    "2002-09-01T00:00:00.000000000",
-                    "2003-09-01T00:00:00.000000000",
-                    "2004-09-01T00:00:00.000000000",
-                ],dims=["T"],coords={"T": cess["T"]},
-            )
-        )
-    ).all()
+    cess = (cessds.cess_delta + cessds["T"]).squeeze(drop=True)
+
+    xr.testing.assert_equal(
+        cess,
+        xr.DataArray(
+            pd.to_datetime([
+                "2000-09-01T00:00:00.000000000",
+                "2001-09-01T00:00:00.000000000",
+                "2002-09-01T00:00:00.000000000",
+                "2003-09-01T00:00:00.000000000",
+                "2004-09-01T00:00:00.000000000",
+            ]),
+            dims=["T"], coords={"T": cess["T"]},
+        ),
+    )
 
 
 def test_seasonal_cess_date_with_regroup():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
-    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.DataArray(
+        np.zeros(t.size), dims=["T"], coords={"T": t}
+    ) + 1.1
     synthetic_precip = xr.where(
         (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
         | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
@@ -991,27 +1000,28 @@ def test_seasonal_cess_date_with_regroup():
         },
     )
     cessds = cessds.isel(T=np.arange(0, cessds.size, 2), drop=True)
-    cess = (cessds + cessds["T"]).squeeze()
+    cess = (cessds + cessds["T"]).squeeze(drop=True)
 
-    assert (
-        cess
-        == pd.to_datetime(
-            xr.DataArray(
-                [
-                    "2000-09-01T00:00:00.000000000",
-                    "2001-09-01T00:00:00.000000000",
-                    "2002-09-01T00:00:00.000000000",
-                    "2003-09-01T00:00:00.000000000",
-                    "2004-09-01T00:00:00.000000000",
-                ],dims=["T"],coords={"T": cess["T"]},
-            )
+    xr.testing.assert_equal(
+        cess,
+        xr.DataArray(
+            pd.to_datetime([
+                "2000-09-01T00:00:00.000000000",
+                "2001-09-01T00:00:00.000000000",
+                "2002-09-01T00:00:00.000000000",
+                "2003-09-01T00:00:00.000000000",
+                "2004-09-01T00:00:00.000000000",
+            ]),
+            dims=["T"], coords={"T": cess["T"]},
         )
-    ).all()
+    )
 
 
 def test_seasonal_cess_date_from_rain():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
-    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.DataArray(
+        np.zeros(t.size), dims=["T"], coords={"T": t}
+    ) + 1.1
     synthetic_precip = xr.where(
         (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
         | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
@@ -1043,25 +1053,26 @@ def test_seasonal_cess_date_from_rain():
         sminit=0,
     )
     cess = (cessds.cess_delta + cessds["T"]).squeeze()
-    assert (
-        cess
-        == pd.to_datetime(
-            xr.DataArray(
-                [
-                    "2000-09-01T00:00:00.000000000",
-                    "2001-09-01T00:00:00.000000000",
-                    "2002-09-01T00:00:00.000000000",
-                    "2003-09-01T00:00:00.000000000",
-                    "2004-09-01T00:00:00.000000000",
-                ],dims=["T"],coords={"T": cess["T"]},
-            )
-        )
-    ).all()
+    xr.testing.assert_equal(
+        cess,
+        xr.DataArray(
+            pd.to_datetime([
+                "2000-09-01T00:00:00.000000000",
+                "2001-09-01T00:00:00.000000000",
+                "2002-09-01T00:00:00.000000000",
+                "2003-09-01T00:00:00.000000000",
+                "2004-09-01T00:00:00.000000000",
+            ]),
+            dims=["T"], coords={"T": cess["T"]},
+        ),
+    )
 
 
 def test_seasonal_cess_date_from_rain_with_regroup():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
-    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.DataArray(
+        np.zeros(t.size), dims=["T"], coords={"T": t}
+    ) + 1.1
     synthetic_precip = xr.where(
         (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
         | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
@@ -1097,26 +1108,26 @@ def test_seasonal_cess_date_from_rain_with_regroup():
     cessds = cessds.isel(T=np.arange(0, cessds.size, 2), drop=True) 
     cess = (cessds + cessds["T"]).squeeze()
 
-    assert (
-        cess
-        == pd.to_datetime(
-            xr.DataArray(
-                [
-                    "2000-09-01T00:00:00.000000000",
-                    "2001-09-01T00:00:00.000000000",
-                    "2002-09-01T00:00:00.000000000",
-                    "2003-09-01T00:00:00.000000000",
-                    "2004-09-01T00:00:00.000000000",
-                ],dims=["T"],coords={"T": cess["T"]},
-            )
-        )
-    ).all()
+    xr.testing.assert_equal(
+        cess,
+        xr.DataArray(
+             pd.to_datetime([
+                "2000-09-01T00:00:00.000000000",
+                "2001-09-01T00:00:00.000000000",
+                "2002-09-01T00:00:00.000000000",
+                "2003-09-01T00:00:00.000000000",
+                "2004-09-01T00:00:00.000000000",
+            ]),
+            dims=["T"], coords={"T": cess["T"]},
+        ),
+    )
 
 
 def precip_sample():
 
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
-    # this is rr_mrg.isel(X=0, Y=124, drop=True).sel(T=slice("2000-05-01", "2000-06-30"))
+    # this is
+    # rr_mrg.isel(X=0, Y=124, drop=True).sel(T=slice("2000-05-01", "2000-06-30"))
     # fmt: off
     values = [
         0.054383,  0.      ,  0.      ,  0.027983,  0.      ,  0.      ,
@@ -1158,7 +1169,7 @@ def test_cess_date_step():
     )
     expected = xr.DataArray([-5, -33, -9, np.nan, -4]).astype("timedelta64[D]")
 
-    assert np.array_equal(cess_delta, expected, equal_nan=True)
+    xr.testing.assert_equal(cess_delta, expected)
 
 
 def test_cess_date():
@@ -1177,11 +1188,11 @@ def test_cess_date():
     )
     cess_delta = calc.cess_date_from_sm(daily_sm, 1, 3)
     expected = xr.DataArray(
-        [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
+        [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan], dims=["X"]
     ).astype("timedelta64[D]")
 
-    assert cess_delta["T"] == daily_sm["T"][0]
-    assert np.array_equal(cess_delta.squeeze("T"), expected, equal_nan=True)
+    xr.testing.assert_equal(cess_delta["T"][0], daily_sm["T"][0])
+    xr.testing.assert_equal(cess_delta.squeeze("T", drop=True), expected)
 
 
 def test_cess_date_rain():
@@ -1207,11 +1218,11 @@ def test_cess_date_rain():
         sminit=0,
     )
     expected = xr.DataArray(
-        [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
+        [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan], dims=["X"]
     ).astype("timedelta64[D]")
 
-    assert cess_delta["T"] == daily_rain["T"][0]
-    assert np.array_equal(cess_delta.squeeze("T"), expected, equal_nan=True)
+    xr.testing.assert_equal(cess_delta["T"][0], daily_rain["T"][0])
+    xr.testing.assert_equal(cess_delta.squeeze("T", drop=True), expected)
 
 
 def call_cess_date(data):
@@ -1260,10 +1271,9 @@ def test_cess_date_data():
 
 def test_onset_date_with_other_dims():
 
-    precip = xr.concat(
-        [precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])],
-        dim="dummy_dim",
-    )
+    precip = xr.concat([
+        precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])
+    ], dim="dummy_dim")
     onsets = call_onset_date(precip)
     assert (
         onsets
@@ -1277,20 +1287,18 @@ def test_onset_date_with_other_dims():
 
 def test_cess_date_with_other_dims():
 
-    sm = xr.concat(
-        [precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])],
-        dim="dummy_dim",
-    )
-    cessations = call_cess_date(sm)
+    sm = xr.concat([
+        precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])
+    ], dim="dummy_dim")
+    cessations = call_cess_date(sm).squeeze(drop=True)
 
-    assert (
-        cessations
-        == xr.DataArray(
+    xr.testing.assert_equal(
+        cessations,
+        xr.DataArray(
             [pd.Timedelta(days=0), pd.Timedelta(days=3)],
             dims=["dummy_dim"],
-            coords={"dummy_dim": cessations["dummy_dim"]},
-        )
-    ).all()
+        ),
+    )
 
 
 def test_onset_date_returns_nat():
@@ -1429,4 +1437,4 @@ def test_probExceed():
         0.026316,
         0.000000,
     ]
-    assert np.allclose(cumsum.probExceed, probExceed_values)
+    np.testing.assert_allclose(cumsum.probExceed, probExceed_values, atol=1e-05)
