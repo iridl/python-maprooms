@@ -843,25 +843,25 @@ def _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, time_coord):
 # Time functions
 
 
-def intervals_to_points(interval, to_point="mid", keep_attrs=True):
+def intervals_to_points(intervals, to_point="mid", keep_attrs=True):
     """ Given an xr.DataArray of pd.Interval, return an xr.DataArray of the left,
     mid, or right points of those Intervals.
 
     Parameters
     ----------
-    interval : xr.DataArray(pd.Interval)
+    intervals : xr.DataArray(pd.Interval)
         array of intervals
     to_point : str, optional
-        "left", "mid" or "right" point of `interval`
+        "left", "mid" or "right" point of `intervals`
         default is "mid"
     keep_attrs : boolean, optional
-        keep attributes from `interval` to point array
+        keep attributes from `intervals` to point array
         default is True
 
     Returns
     -------
     point_array : xr.DataArray
-        array of the left, mid or right points of `interval`
+        array of the left, mid or right points of `intervals`
 
     See Also
     --------
@@ -876,14 +876,14 @@ def intervals_to_points(interval, to_point="mid", keep_attrs=True):
     could generalize the returned array name
     """
     return xr.DataArray(
-        data=[getattr(interval.values[t], to_point) for t in range(interval.size)],
-        coords={interval.name : interval},
+        data=[getattr(intervals.values[t], to_point) for t in range(intervals.size)],
+        coords={intervals.name : intervals},
         name=( # There might be other automatic cases to cover
-            interval.name.replace("_bins", f'_{to_point}')
-            if interval.name.endswith("_bins")
-            else "_".join(interval.name, f'_{to_point}')
+            intervals.name.replace("_bins", f'_{to_point}')
+            if intervals.name.endswith("_bins")
+            else "_".join(intervals.name, f'_{to_point}')
         ),
-        attrs=interval.attrs if keep_attrs else {},
+        attrs=intervals.attrs if keep_attrs else {},
     )
     return data
 
