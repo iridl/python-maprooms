@@ -78,7 +78,8 @@ datasets:
 
     # Forecast data
     fcst_data:
-        forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3
+        #forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3
+        forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3/Jul-Sep
         # All the below will be deprecated once no more partner outputs tsv files
         #forecast_mu_file_pattern: NextGen_PRCPPRCP_CCAFCST_mu_SLtarget.tsv
         #forecast_var_file_pattern: NextGen_PRCPPRCP_CCAFCST_var_SLtarget.tsv
