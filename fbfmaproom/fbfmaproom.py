@@ -1417,42 +1417,44 @@ def validate_csv(country, contents):
         r = df['region']
         if r.isna().any():
             errors.append("There are missing or empty region identifiers.")
-            r = r.dropna()
-        regions = set(r.unique())
-        notes.append(f"{len(regions)} regions")
-        config = CONFIG["countries"][country]
-        nlevels = len(config['shapes'])
+        regions = set(r.dropna().unique())
+        if len(regions) > 0:
+            # if it's == 0 then we already logged that error above.
+            notes.append(f"{len(regions)} regions")
+            config = CONFIG["countries"][country]
+            nlevels = len(config['shapes'])
 
-        query = sql.Composed([
-            sql.SQL("with "),
-            sql.SQL(", ").join(
-                sql.SQL("sub{i} as ({subquery})").format(
-                    i=sql.Literal(i),
-                    subquery=sql.SQL(config['shapes'][i]['sql']),
-                )
-                for i in range(nlevels)
-            ),
-            sql.SQL(" select * from ("),
-            sql.SQL(" union ").join(
-                sql.SQL(
-                    "select key::text from sub{i}"
-                ).format(i=sql.Literal(i))
-                for i in range(nlevels)
-            ),
-            sql.SQL(") as u where u.key::text in ("),
-            sql.SQL(", ").join(sql.Literal(r) for r in regions),
-            sql.SQL(")")
+            query = sql.Composed([
+                sql.SQL("with "),
+                sql.SQL(", ").join(
+                    sql.SQL("sub{i} as ({subquery})").format(
+                        i=sql.Literal(i),
+                        subquery=sql.SQL(config['shapes'][i]['sql']),
+                    )
+                    for i in range(nlevels)
+                ),
+                sql.SQL(" select * from ("),
+                sql.SQL(" union ").join(
+                    sql.SQL(
+                        "select key::text from sub{i}"
+                    ).format(i=sql.Literal(i))
+                    for i in range(nlevels)
+                ),
+                sql.SQL(") as u where u.key::text in ("),
+                sql.SQL(", ").join(sql.Literal(r) for r in regions),
+                sql.SQL(")")
 
-        ])
-        with psycopg2.connect(**CONFIG["db"]) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query, list(regions))
-                rows = cursor.fetchall()
-                known_regions = set(map(lambda x: x[0], rows))
-        unknown_regions = regions - known_regions
-        if len(unknown_regions) > 0:
-            examples_str = ', '.join(list(unknown_regions)[:3])
-            errors.append(f'{len(unknown_regions)} regions are unknown to the application, e.g. {examples_str}')
+            ])
+            with psycopg2.connect(**CONFIG["db"]) as conn:
+                with conn.cursor() as cursor:
+                    # print(query.as_string(cursor))
+                    cursor.execute(query, list(regions))
+                    rows = cursor.fetchall()
+                    known_regions = set(map(lambda x: x[0], rows))
+            unknown_regions = regions - known_regions
+            if len(unknown_regions) > 0:
+                examples_str = ', '.join(list(unknown_regions)[:3])
+                errors.append(f'{len(unknown_regions)} regions are unknown to the application, e.g. {examples_str}')
 
         v = df['value']
         notes.append(f"Values range from {v.min()} to {v.max()}")
