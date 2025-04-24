@@ -1454,7 +1454,9 @@ def validate_csv(country, contents):
             unknown_regions = regions - known_regions
             if len(unknown_regions) > 0:
                 examples_str = ', '.join(list(unknown_regions)[:3])
-                errors.append(f'{len(unknown_regions)} regions are unknown to the application, e.g. {examples_str}')
+                if len(unknown_regions) > 3:
+                    examples_str += ", ..."
+                errors.append(f'{len(unknown_regions)} regions are unknown to the application: {examples_str}')
 
         v = df['value']
         notes.append(f"Values range from {v.min()} to {v.max()}")

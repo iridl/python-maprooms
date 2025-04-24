@@ -517,6 +517,19 @@ def test_validate_unknown_region():
     contents = '1982,XXX,6'
     errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
     assert len(errors) == 1
+    assert not errors[0].endswith('...')
+
+def test_validate_many_unknown_regions():
+    contents = (
+'''1982,XXX,6
+1982,XXY,6
+1982,XXZ,6
+1982,XXA,6
+1982,ET05,6
+''')
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+    assert errors[0].endswith('...')
 
 def test_validate_missing_region():
     contents = '1982,ET05,6\n1982,,6'
