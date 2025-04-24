@@ -314,9 +314,7 @@ def control_layout():
                             labelStyle={"display": "flex"}
                         ),
                     ),
-                    dbc.Button(
-                        dcc.Upload("Validate file", id="upload"),
-                    ),
+                    dcc.Upload(dbc.Button("Validate file"), id="upload"),
                 ],
             ),
 
