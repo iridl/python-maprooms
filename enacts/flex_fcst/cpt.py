@@ -9,6 +9,28 @@ from . import predictions
 
 
 def get_fcst_SandL(fcst_conf):
+    """ Returns lists of starts and leads/targets
+
+    Parameters
+    ----------
+    fcst_conf: dict
+        the forecast_path of the dataset (see Notes for tsv case)
+    
+    Returns
+    -------
+    start_dates, lead_times: [str("%b-%-d-%Y")], list
+        lists of starts and leads/targets
+
+    See Also
+    --------
+    starts_list, read_pycptv2dataset
+
+    Notes
+    -----
+    Mostly there to accommodate initialization of tsv case that needs to get S and
+    L/target information from the config file, while pyCPTv2 files can be figured out
+    through direct reading
+    """
     if "forecast_mu_file_pattern" in fcst_conf :
         start_dates = starts_list(
             fcst_conf["forecast_path"],
@@ -34,6 +56,34 @@ def get_fcst_SandL(fcst_conf):
 
 
 def get_targets_dict(fcst_conf, start_date=None):
+    """ Create dictionaries of targets and leads for a given `start_date`
+
+    Parameters
+    ----------
+    fcst_conf: dict
+        the forecast_path of the dataset (see Notes for tsv case)
+    start_date: str("%YYYY-%mm-%dd"), optional
+        start date of the forecast. Default is None in which case
+        returns dictionary of targets and leads for the last start
+
+    Returns
+    -------
+    targets, default, is_target: dict, float, boolean
+        targets is a list of dictionaries where keys are label and value and their
+        values are respectively a formatted string of the target dates and a number
+        of their lead times, for a given start date.
+        is_target applies only to tsv case for which `fcst_conf` can inform on
+        targets/leads as targets or as leads
+
+    See Also
+    --------
+    pycptv2_targets_dict, read_cpt_fcst_leads
+
+    Notes
+    -----
+    While pyCPTv2 datasets allow to figure all S/L/target just from the content of
+    path of the data files, tsv case needs those informed in the config file.
+    """
     if "forecast_mu_file_pattern" in fcst_conf :
         targets, default_choice, is_target = read_cpt_fcst_leads(
             fcst_conf, start_date
@@ -47,37 +97,62 @@ def get_targets_dict(fcst_conf, start_date=None):
 
 
 def pycptv2_targets_dict(fcst_conf, start_date=None):
+    """ Create dictionaries of targets and leads for a given `start_date`
+
+    Parameters
+    ----------
+    fcst_conf: dict
+        the forecast_path of the dataset
+    start_date: str("%YYYY-%mm-%dd"), optional
+        start date of the forecast. Default is None in which case
+        returns dictionary of targets and leads for the last start
+
+    Returns
+    -------
+    targets, default: dict, float
+        targets is a list of dictionaries where keys are label and value and their
+        values are respectively a formatted string of the target dates and a number
+        of their lead times, for a given start date.
+
+    See Also
+    --------
+    read_pycptv2dataset, predictions.target_range_formatting
+    """
     fcst_ds, _ = read_pycptv2dataset(fcst_conf["forecast_path"])
     if start_date is None :
-        fcst_ds = fcst_ds.isel(S=-1)
+        fcst_ds = fcst_ds.isel(S=[-1])
     else :
-        fcst_ds = fcst_ds.sel(S=start_date)
+        fcst_ds = fcst_ds.sel(S=[start_date])
     if "L" in fcst_ds.dims:        
         targets = [
             {
                 "label": predictions.target_range_formatting(
-                    fcst_ds['Ti'].sel(L=lead).values,
-                    fcst_ds['Tf'].sel(L=lead).values,
+                    fcst_ds['Ti'].squeeze().sel(L=lead).values,
+                    fcst_ds['Tf'].squeeze().sel(L=lead).values,
                     "months",
                 ),
                 "value": lead,
             } for lead in fcst_ds["L"].where(
-                ~np.isnat(fcst_ds["T"]), drop=True
+                ~np.isnat(fcst_ds["T"].squeeze()), drop=True
             ).values
         ]
     else:
-        lead_times = [{
+        targets = [{
             "label": predictions.target_range_formatting(
-                fcst_ds['Ti'].values, fcst_ds['Tf'].values, "months"
+                fcst_ds['Ti'].squeeze().values,
+                fcst_ds['Tf'].squeeze().values,
+                "months"
             ),
-            "value": ((
+            "value": (((
                 fcst_ds['Ti'].dt.month - fcst_ds['S'].dt.month
-             ) + 12) % 12  
+             ) + 12) % 12).data
         }]
     return targets, targets[0]["value"]
 
 
 def read_cpt_fcst_leads(fcst_conf, start_date):
+    """ Returns dictionary of CPT (tsv case only) targets for a given `start_date`
+    """
     if fcst_conf["leads"] is not None and fcst_conf["targets"] is not None:
         raise Exception("I am not sure which of leads or targets to use")
     elif fcst_conf["leads"] is not None:
@@ -108,6 +183,47 @@ def read_cpt_fcst_leads(fcst_conf, start_date):
 
 
 def get_fcst(fcst_conf, lead_time=None, start_date=None, y_transform=False):
+    """ Create a forecast and obs dataset expected by maproom from either a set of
+    pyCPTv2 nc files or a set of CPT tsv files
+
+    Parameters
+    ----------
+    fcst_conf: dict
+        dictionary indicating py/CPT datasets configuration (see config)
+    lead_time: str, optional
+        optional lead to select the dataset against. Default is None in which case
+        returns all leads (see specific case of tsv files in Notes)
+    start_date: str("%YYYY-%mm-%dd"), optional
+        optional start to select the dataset against. Default is None in which case
+        returns all starts (see specific case of tsv files in Notes)
+    y_transform: boolean, optional
+        Set to True if forecast was generated with a y-transform, in which case
+        hindcast is read too (only applies to tsv case)
+
+    Returns
+    -------
+    fcst_ds, obs : xr.Dataset, xr.DataArray
+        dataset of forecast mean and variance and their obs
+
+    See Also
+    --------
+    read_pycptv2dataset, read_cptdataset, read_cpt_fcst_leads, get_fcst_starts
+
+    Notes
+    -----
+    read_cptdataset (tsv case) reads only one S/L/target at a time which are set to
+    last start and first lead/target if not specified. read_cptdataset can (and must)
+    take lead_time as a lead (int) or a target (str) which is why lead_time is a str
+    which is also what type the callbacks get as Input. Finally, read_cptdataset
+    covers the y_transform case.
+    read_pycptv2dataset needs not to know beforehand S/L/target to read the data
+    files and thus here can return them all. However it never happens in the app and
+    there is no state of the app with multiple S/L/target except for the S and target
+    controls, that have their own specific get functions. At the moment, there are no
+    cases of pyCPTv2 datasets with a y_transform, so it's not covered here and
+    hopefully if the case arise, it can be covered automatically by reading the
+    files.
+    """
     if "forecast_mu_file_pattern" in fcst_conf :
         _, default_choice, is_target = read_cpt_fcst_leads(
             fcst_conf, start_date=start_date
@@ -204,6 +320,9 @@ def read_file(
 
 
 def read_cptdataset(lead_time, is_target, start_date, fcst_conf, y_transform=False):
+    """ Creates mean, variance, observation and hindcasts of a single
+    Start/Target/Lead CPT forecast (tsv files)
+    """
     target_time = lead_time if is_target else None
     if is_target : lead_time = None
     fcst_mu = read_file(
@@ -305,6 +424,36 @@ def starts_list(
 
 
 def read_pycptv2dataset(data_path):
+    """ Create a xr.Dataset from yearly pyCPT nc files for one or more targets of the
+    year, for a forecast mean and variance variables, appending multiple Starts; and
+    the corresponding xr.DataArray of the observations time series used to train
+    those targets
+
+    Parameters
+    ----------
+    data_path: str
+        path of set of nc files, organized by targets if multiple ones.
+
+    Returns
+    -------
+    fcst_ds, obs : xr.Dataset, xr.DataArray
+        dataset of forecast mean and variance from `data_path` and their obs
+
+    See Also
+    --------
+    read_pycptv2dataset_single_target
+
+    Notes
+    -----
+    Whether `data_path` contains multiple targets or not is determined by whether the
+    observation obs.nc file(s) is a direct child of `data_path` or under target-wise
+    folders that have no restriction on how they are named.
+    If multiple targets, `fcst_ds` is expanded in to a square with the L dimension,
+    and so are the Ts coordinates that are turned into variables.
+    If single target, `fcst_ds` remains 1D against S only and Ts remain coordiantes
+    of S.
+    `obs` is in any case always appended and sorted into a natural 1D time series
+    """
     data_path = Path(data_path)
     children = list(data_path.iterdir())
     if 'obs.nc' in map(lambda x: str(x.name), children):
@@ -329,6 +478,34 @@ def read_pycptv2dataset(data_path):
 
 
 def read_pycptv2dataset_single_target(data_path, expand_L=False):
+    """ Create a xr.Dataset from yearly pyCPT nc files for a single target of the
+    year, for a forecast mean and variance variables, appending multiple Starts; and
+    the corresponding xr.DataArray of the observations time series used to train that
+    target
+
+    Parameters
+    ----------
+    data_path: str
+        path of set of nc files for a single target, organized under one or more
+        Start month of the year folders mm:02
+    expand_L: boolean, optional
+        Expand xr.Dataset with a lead L dimension. Default is False
+
+    Returns
+    -------
+    fcst_ds, obs : xr.Dataset, xr.DataArray
+        dataset of forecast mean and variance from `data_path` and their obs
+
+    See Also
+    --------
+    open_var
+
+    Notes
+    -----
+    To use in read_pycptv2dataset expecting multiple targets, expand_L must be True
+    in which case T coordinates become variables and L is expanded to all variables.
+    If single target, expand_L muse be False and Ts remain coordinates of S only.
+    """
     mu_slices = []
     var_slices = []
     for mm in (np.arange(12) + 1) :
@@ -357,6 +534,29 @@ def open_mfdataset_nodask(filenames):
 
 
 def open_var(path, filepattern, expand_L=False):
+    """ Create a xr.Dataset of yearly pyCPT nc files for a single Start of the year
+    and target of the year (or lead), for a single variable
+
+    Parameters
+    ----------
+    path: pathlib(Path)
+        path where nc files are
+    filepattern: str
+        files name pattern with year replaced by a *
+    expand_L: boolean, optional
+        Expand xr.Dataset with a lead L dimension. Default is False
+
+    Returns
+    -------
+    ds : xr.Dataset
+        dataset of `filepattern` variable
+
+    Notes
+    -----
+    To use in read_pycptv2dataset expecting multiple targets, expand_L must be True
+    in which case T coordinates become variables and L is expanded to all variables.
+    If single target, expand_L muse be False and Ts remain coordinates of S only.
+    """
     filenames = path.glob(filepattern)
     slices = (xr.open_dataset(f) for f in filenames)
     ds = xr.concat(slices, 'T').swap_dims(T='S')
