@@ -1340,17 +1340,62 @@ def validate_upload(blob, pathname):
         # prevent_initial_call=True not taking effect?
         return False, None, None
 
-    notes = []
-    errors = []
-
     country_key = country(pathname)
 
     try:
         content_type, b64content = blob.split(',')
         decoded = base64.b64decode(b64content).decode('utf-8')
+        errors, notes = validate_csv(country_key, decoded)
+    except Exception:
+        traceback.print_exc(file=sys.stdout)
+        errors = ["A server error occurred."]
+        notes = []
+
+    # The following is safe: I verified that HTML escaping is applied to m.
+    # TODO write a test demonstrating that special characters in
+    # user-provided region ids are escaped.
+    notes_text = html.P([
+        "Notes:",
+        html.Ul([html.Li(x) for x in notes])
+    ])
+
+    if len(errors) > 0:
+        title = ["Validation ", html.Span("failed", style={'color': 'red'})]
+        error_text = html.P([
+            "Errors:",
+            html.Ul([html.Li(x) for x in errors])
+        ])
+        body = [error_text, notes_text]
+    else:
+        title = ["Validation ", html.Span("passed", style={'color': 'green'})]
+        body = notes_text
+
+
+    return True, title, body
+
+
+def validate_csv(country, contents):
+    errors = []
+    notes = []
+
+    try:
+        # Error-handling strategy:
+        #
+        #    - If we know that the error is caused by bad data,
+        #
+        #        - If the error will prevent any further processing,
+        #          raise ValidationException with a meaningful error
+        #          message.
+        #
+        #        - If we can continue looking for further errors,
+        #          append an error message to "errors" and continue.
+        #
+        #    - If the error might be caused by a programming bug
+        #      rather than a problem with the uploaded file, raise
+        #      anything other than ValidationError.
         try:
             df = pd.read_csv(
-                io.StringIO(decoded),
+                io.StringIO(contents),
                 names=['year', 'region', 'value'],
                 header=None,
                 dtype={
@@ -1375,7 +1420,7 @@ def validate_upload(blob, pathname):
             r = r.dropna()
         regions = set(r.unique())
         notes.append(f"{len(regions)} regions")
-        config = CONFIG["countries"][country_key]
+        config = CONFIG["countries"][country]
         nlevels = len(config['shapes'])
 
         query = sql.Composed([
@@ -1397,7 +1442,7 @@ def validate_upload(blob, pathname):
             sql.SQL(") as u where u.key::text in ("),
             sql.SQL(", ").join(sql.Literal(r) for r in regions),
             sql.SQL(")")
-                
+
         ])
         with psycopg2.connect(**CONFIG["db"]) as conn:
             with conn.cursor() as cursor:
@@ -1411,33 +1456,11 @@ def validate_upload(blob, pathname):
 
         v = df['value']
         notes.append(f"Values range from {v.min()} to {v.max()}")
+
     except ValidationException as e:
         errors.append(str(e))
-    except Exception:
-        traceback.print_exc(file=sys.stdout)
-        errors.append("A server error occurred.")
 
-    # The following is safe: I verified that HTML escaping is applied to m.
-    # TODO write a test demonstrating that special characters in
-    # user-provided region ids are escaped.
-    notes_text = html.P([
-        "Notes:",
-        html.Ul([html.Li(x) for x in notes])
-    ])
-
-    if len(errors) > 0:
-        title = ["Validation ", html.Span("failed", style={'color': 'red'})]
-        error_text = html.P([
-            "Errors:",
-            html.Ul([html.Li(x) for x in errors])
-        ])
-        body = [error_text, notes_text]
-    else:
-        title = ["Validation ", html.Span("passed", style={'color': 'green'})]
-        body = notes_text
-
-
-    return True, title, body
+    return errors, notes
 
 
 # Endpoints
