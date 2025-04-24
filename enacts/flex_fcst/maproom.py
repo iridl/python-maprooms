@@ -129,13 +129,13 @@ def register(FLASK, config):
 
 
     @APP.callback(
-    Output("map_title", "children"),
-    Input("start_date", "value"),
-    Input("lead_time", "value"),
-    Input("lead_time", "options"),
-    Input("lead_time_control", "style"),
+        Output("map_title", "children"),
+        Input("start_date", "value"),
+        Input("lead_time", "value"),
+        Input("lead_time", "options"),
+        Input("lead_time_control", "style"),
     )
-    def write_map_title(start_date, lead_time, targets, lead_time_control):
+    def write_map_title(start_date, lead_time, targets, lead_time_control):          
         for option in targets :
             if option["value"] == lead_time :
                 target = option["label"]
