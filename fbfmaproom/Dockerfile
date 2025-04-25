@@ -1,6 +1,6 @@
 FROM centos:7.9.2009 as common
 
-ARG PIXI_VERSION="v0.41.4"
+ARG PIXI_VERSION="v0.46.0"
 
 COPY docker/CentOS-Vault.repo /etc/yum.repos.d/
 RUN rm /etc/yum.repos.d/CentOS-Base.repo
