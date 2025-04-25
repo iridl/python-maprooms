@@ -1,4 +1,0 @@
-#!/bin/bash
-
-rm -f /run/httpd/httpd.pid /run/httpd/authdigest_shm.1
-exec /usr/sbin/httpd -D FOREGROUND
