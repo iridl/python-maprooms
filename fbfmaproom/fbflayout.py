@@ -19,6 +19,14 @@ def app_layout():
                 id="modal",
                 centered=True,
             ),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle(id="validation-title")),
+                    dbc.ModalBody(id="validation-body")
+                ],
+                id="validation-modal",
+                centered=True,
+            ),
             dcc.Location(id="location", refresh=False),
             control_layout(),
             html.Div([
@@ -167,7 +175,7 @@ def map_layout():
     )
 
 
-def control(label, tool, ctrl, width=None, min_width='105px'):
+def control(label, tool, ctrl, width=None, min_width='105px', grow=True):
     style = {
         "display": "inline-block",
         "padding": "10px",
@@ -175,7 +183,8 @@ def control(label, tool, ctrl, width=None, min_width='105px'):
     }
 
     if width is None:
-        style["flexGrow"] = 1
+        if grow:
+            style["flexGrow"] = 1
         if min_width is not None:
             style["minWidth"] = min_width
     else:
@@ -237,7 +246,7 @@ def control_layout():
                         "Forecast",
                         "Which forecast to display on the map",
                         dcc.Dropdown(id="map_column", clearable=False, optionHeight=45),
-                        min_width='130px',
+                        # min_width='130px',
                     ),
 
 
@@ -305,6 +314,13 @@ def control_layout():
                             inputStyle={"margin-right": "5px"},
                             labelStyle={"display": "flex"}
                         ),
+                        grow=False,
+                    ),
+                    control(
+                        "CSV Validator",
+                        "Validate a bad years or vulnerability CSV file",
+                        dcc.Upload(dbc.Button("Validate"), id="upload"),
+                        grow=False,
                     ),
                 ],
             ),

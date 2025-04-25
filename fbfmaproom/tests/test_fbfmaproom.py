@@ -491,3 +491,75 @@ def test_regions_endpoint():
         assert len(regions) == 11
         assert regions[0]['key'] == 'ET0508'
         assert regions[0]['label'] == 'Afder'
+
+
+def test_validate_ok():
+    contents = (
+'''1981,ET05,9
+1982,ET05,8
+1981,ET0501,7
+''')
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 0
+    assert len(notes) > 0
+
+def test_validate_ill_formed():
+    contents = "<HTML>error</HTML>"
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+
+def test_validate_multiple_errors():
+    contents = '1982,XXX,6\n1983,,5'
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 2
+
+def test_validate_unknown_region():
+    contents = '1982,XXX,6'
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+    assert not errors[0].endswith('...')
+
+def test_validate_many_unknown_regions():
+    contents = (
+'''1982,XXX,6
+1982,XXY,6
+1982,XXZ,6
+1982,XXA,6
+1982,ET05,6
+''')
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+    assert errors[0].endswith('...')
+
+def test_validate_missing_region():
+    contents = '1982,ET05,6\n1982,,6'
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+
+def test_validate_only_missing_region():
+    # This case requires special handling because SQL doesn't allow
+    # an empty list in WHERE/IN.
+    contents = '1982,,6'
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+
+def test_validate_non_int_year():
+    contents = 'abc,ET05,6'
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+
+def test_validate_missing_year():
+    contents = ',ET05,6'
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+
+def test_validate_non_int_value():
+    contents = '1982,ET05,abc'
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 1
+
+def test_validate_missing_value():
+    # This is allowed.
+    contents = '1981,ET05'
+    errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
+    assert len(errors) == 0
