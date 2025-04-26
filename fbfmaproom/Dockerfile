@@ -1,20 +1,7 @@
-FROM centos:7.9.2009 as common
+ARG PIXI_VERSION=0.46.0@sha256:c12bcbe8ba5dfd71867495d3471b95a6993b79cc7de7eafec016f8f59e4e4961
+ARG CENTOS_VERSION=stream9-minimal@sha256:5b62dfd81b3357910f498a65dc40e42a16249531c7b509272419283a937ce98d
 
-ARG PIXI_VERSION="v0.46.0"
-
-COPY docker/CentOS-Vault.repo /etc/yum.repos.d/
-RUN rm /etc/yum.repos.d/CentOS-Base.repo
-
-
-
-FROM common as build
-
-# install pixi
-RUN curl --silent --location \
-    https://github.com/prefix-dev/pixi/releases/download/${PIXI_VERSION}/pixi-x86_64-unknown-linux-musl.tar.gz \
-    | tar zxf - --to-stdout \
-    > /usr/local/bin/pixi \
-    && chmod +x /usr/local/bin/pixi
+FROM ghcr.io/prefix-dev/pixi:${PIXI_VERSION} as build
 
 # build pixi environment
 WORKDIR /app
@@ -24,7 +11,7 @@ RUN pixi shell-hook --locked --shell bash --environment prod > activate
 
 
 
-FROM common
+FROM quay.io/centos/centos:${CENTOS_VERSION}
 
 COPY --from=build /app /app
 COPY . /app
