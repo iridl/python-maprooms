@@ -68,22 +68,17 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Malawi'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Malawi' group by 1, 2
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Malawi'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Malawi' group by 1, 2
 
             - name: District
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Malawi'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Malawi' group by 1, 2
+
         datasets:
             defaults:
                 predictors:
@@ -137,9 +132,7 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: DJF
@@ -162,24 +155,18 @@ countries:
                   from iridb.g2015_2014_1 g where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
                   group by 1, 2
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
             - name: District
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
         datasets:
             defaults:
@@ -371,9 +358,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: DJF
@@ -396,24 +381,18 @@ countries:
                   from iridb.g2015_2014_1 g where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
                   group by 1, 2
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
             - name: District
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
         datasets:
             defaults:
@@ -527,9 +506,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: NDJ
@@ -552,24 +529,19 @@ countries:
                   from iridb.g2015_2014_1 g where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
                   group by 1, 2
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
+
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
             - name: District
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Madagascar'
                   and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
         datasets:
             defaults:
@@ -705,9 +677,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: OND
@@ -735,31 +705,18 @@ countries:
               sql: select (admin1pcod) as key, admin1name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.eth_regions_2024
                   where admin1pcod = 'ET05' #Somali
-              vuln_sql:
-                  select cast(null as varchar) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
             - name: Zonal
               sql: select (admin2pcod) as key, admin2name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.eth_zones_2024
                   where admin1pcod = 'ET05' #Somali
-              vuln_sql:
-                  select cast(null as varchar) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
             - name: Woreda
               sql: select (admin3pcod) as key, admin3name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.eth_woredas_2024
                   where admin1pcod = 'ET05' #Somali
-              vuln_sql:
-                  select cast(null as varchar) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
 
         datasets:
             defaults:
@@ -984,9 +941,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: MAM
@@ -1178,9 +1133,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season2:
                 label: OND
@@ -1204,11 +1157,7 @@ countries:
                   from iridb.eth_zones_2024
                   where admin2pcod in ('ET0410','ET0411', 'ET0412','ET0414','ET0415','ET0421','ET0422')
                   group by 1, 2
-              vuln_sql:
-                  select cast(null as varchar) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
             - name: Zonal
               sql: select admin2pcod as key, admin2name as label,
@@ -1216,22 +1165,14 @@ countries:
                   from iridb.eth_zones_2024 
                   where admin2pcod in ('ET0410','ET0411', 'ET0412','ET0414','ET0415','ET0421','ET0422')
 
-              vuln_sql:
-                  select cast(null as varchar) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
             - name: Woreda
               sql: select admin3pcod as key, admin3name as label,
                   ST_AsBinary(the_geom) as the_geom
                   from iridb.eth_woredas_2024 
                   where admin2pcod in ('ET0410','ET0411', 'ET0412','ET0414','ET0415','ET0421','ET0422')
-              vuln_sql:
-                  select cast(null as varchar) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
         datasets:
             defaults:
                 predictors:
@@ -1478,9 +1419,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: MAM
@@ -1706,9 +1645,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: OND
@@ -1727,27 +1664,22 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Niger'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Niger' group by 1, 2
+
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Niger'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Niger' group by 1, 2
 
             - name: Department
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Niger'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Niger' group by 1, 2
 
             - name: Commune
               sql: select rowcacode3 as key, adm_03 as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.ner_adm03_feb2018
-              vuln_sql: select null as key, 0 as year, 0 as vuln where 1 = 2
+
               # ^ placeholder sql until we have vulnerabilities for the Commune level.
               # note that the type of each column must be correct or the generated
               # query will fail (in this case vuln needs to be a number), even if
@@ -2176,9 +2108,7 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: yes
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: JAS
@@ -2198,22 +2128,16 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Mali'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Mali' group by 1, 2
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Mali'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Mali' group by 1, 2
 
             - name: Department
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Mali'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Mali' group by 1, 2
 
         datasets:
             defaults:
@@ -2340,9 +2264,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: JAS
@@ -2362,31 +2284,19 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Chad'
-              vuln_sql:
-                  select (null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+  
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Chad'
-              vuln_sql:
-                  select (null::int, null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
             - name: Department
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Chad'
-              vuln_sql:
-                  select (null::int, null::int, null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
         datasets:
             defaults:
@@ -2513,9 +2423,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: JAS
@@ -2535,31 +2443,19 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Burkina Faso'
-              vuln_sql:
-                  select (null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Burkina Faso'
-              vuln_sql:
-                  select (null::int, null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
             - name: Department
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Burkina Faso'
-              vuln_sql:
-                  select (null::int, null::int, null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
         datasets:
             defaults:
@@ -2686,9 +2582,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: JAS
@@ -2708,31 +2602,18 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Mauritania'
-              vuln_sql:
-                  select (null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Mauritania'
-              vuln_sql:
-                  select (null::int, null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
 
             - name: Department
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Mauritania'
-              vuln_sql:
-                  select (null::int, null::int, null::int) as key,
-                  0 as year,
-                  0 as vuln
-                  where 1 = 2
+
 
         datasets:
             defaults:
@@ -2859,9 +2740,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: JAS
@@ -2883,22 +2762,16 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Guatemala'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Guatemala'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
             - name: District
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Guatemala'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
         datasets:
             defaults:
@@ -2942,9 +2815,7 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: OND
@@ -2965,22 +2836,16 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Guatemala'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
             - name: Department
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Guatemala'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
             - name: Municipality
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Guatemala'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
         datasets:
             defaults:
@@ -3094,9 +2959,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: JJA
@@ -3118,22 +2981,16 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Guatemala'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
             - name: Department
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Guatemala'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
             - name: Municipality
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Guatemala'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
         datasets:
             defaults:
@@ -3212,9 +3069,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: ASO
@@ -3236,22 +3091,16 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Guatemala'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
             - name: Department
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Guatemala'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
             - name: Municipality
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Guatemala'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
         datasets:
             defaults:
@@ -3306,9 +3155,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: May
@@ -3331,20 +3178,18 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
             - name: Regional
               sql: select code as key, INITCAP(district) as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
-              vuln_sql: select null as key, 0 as year, 0 as vuln
+
               # vuln_sql: select code as key, year, sum(vulnerability) as vuln
               #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
             - name: District
               sql: select adm2_pcode as key, adm2_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
-              vuln_sql: select null as key, 0 as year, 0 as vuln
+
               # vuln_sql: select adm2_pcode as key, year, sum(vulnerability) as vuln
               #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
@@ -3458,9 +3303,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: JAS
@@ -3481,20 +3324,17 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
             - name: Regional
               sql: select code as key, INITCAP(district) as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
-              vuln_sql: select null as key, 0 as year, 0 as vuln
               # vuln_sql: select code as key, year, sum(vulnerability) as vuln
               #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
             - name: District
               sql: select adm2_pcode as key, adm2_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
-              vuln_sql: select null as key, 0 as year, 0 as vuln
+
               # vuln_sql: select adm2_pcode as key, year, sum(vulnerability) as vuln
               #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
@@ -3609,9 +3449,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: MAM
@@ -3632,20 +3470,18 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
             - name: Regional
               sql: select code as key, INITCAP(district) as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
-              vuln_sql: select null as key, 0 as year, 0 as vuln
+
               # vuln_sql: select code as key, year, sum(vulnerability) as vuln
               #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
             - name: District
               sql: select adm2_pcode as key, adm2_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
-              vuln_sql: select null as key, 0 as year, 0 as vuln
+
               # vuln_sql: select adm2_pcode as key, year, sum(vulnerability) as vuln
               #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
@@ -3770,9 +3606,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: OND
@@ -3792,20 +3626,18 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
             - name: Regional
               sql: select code as key, INITCAP(district) as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
-              vuln_sql: select null as key, 0 as year, 0 as vuln
+
               # vuln_sql: select code as key, year, sum(vulnerability) as vuln
               #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
             - name: District
               sql: select adm2_pcode as key, adm2_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
-              vuln_sql: select null as key, 0 as year, 0 as vuln
+
               # vuln_sql: select adm2_pcode as key, year, sum(vulnerability) as vuln
               #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
 
@@ -3909,9 +3741,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: JJAS
@@ -3932,23 +3762,16 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Lesotho'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Lesotho' group by 1, 2
 
             - name: District
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Lesotho'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Lesotho' group by 1, 2
 
             - name: Council
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Lesotho'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Lesotho' group by 1, 2
-
         datasets:
             defaults:
                 predictors:
@@ -4107,9 +3930,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: DJF
@@ -4129,22 +3950,16 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Lesotho'
-              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Lesotho' group by 1, 2
 
             - name: District
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Lesotho'
-              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Lesotho' group by 1, 2
 
             - name: Council
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Lesotho'
-              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability where adm0_name = 'Lesotho' group by 1, 2
 
         datasets:
             defaults:
@@ -4304,9 +4119,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-            vuln:
-                colormap: vulnerability
-                range: [0.0, 5.0]
+
         seasons:
             season1:
                 label: OND
