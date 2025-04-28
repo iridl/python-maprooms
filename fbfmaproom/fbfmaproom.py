@@ -310,7 +310,7 @@ def year_label(midpoint, season_length):
 def geometry_containing_point(
     country_key: str, point: Tuple[float, float], mode: str
 ):
-    df = retrieve_vulnerability(country_key, mode, 2020)  # arbitrary year
+    df = retrieve_shapes(country_key, mode)  # arbitrary year
     x, y = point
     p = Point(x, y)
     geom, attrs = None, None
@@ -322,6 +322,19 @@ def geometry_containing_point(
             break
     return geom, attrs
 
+
+def retrieve_shapes(country_key: str, mode: str) -> pd.DataFrame:
+    config = CONFIG["countries"][country_key]
+    sc = config["shapes"][int(mode)]
+    with psycopg2.connect(**CONFIG["db"]) as conn:
+        s = sql.Composed([
+            sql.SQL("with g as ("),
+            sql.SQL(sc["sql"]),
+            sql.SQL(") select g.label, g.key, g.the_geom from g")
+        ])
+        df = pd.read_sql(s, conn)
+    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    return df
 
 def retrieve_vulnerability(
     country_key: str, mode: str, year: int
@@ -819,7 +832,6 @@ APP.clientside_callback(
     Output("map", "zoom"),
     Output("season", "options"),
     Output("season", "value"),
-    Output("vuln_colorbar", "colorscale"),
     Output("mode", "options"),
     Output("mode", "value"),
     Output("predictand", "options"),
@@ -848,7 +860,7 @@ def initial_setup(pathname, qstring):
         for k in sorted(c["seasons"].keys())
     ]
     cx, cy = c["center"]
-    vuln_cs = CMAPS[c["datasets"]["vuln"]["colormap"]].to_dash_leaflet()
+    
     mode_options = [
         dict(
             label=k["name"],
@@ -936,7 +948,6 @@ def initial_setup(pathname, qstring):
         c["zoom"],
         season_options,
         season_value,
-        vuln_cs,
         mode_options,
         mode_value,
         predictand_options,
@@ -967,6 +978,8 @@ def custom_static(relpath):
     State("location", "search"),
 )
 def forecast_selectors(season, col_name, pathname, qstring):
+    if season is None:
+        raise PreventUpdate
     try:
         country_key = country(pathname)
         country_conf = CONFIG["countries"][country_key]
@@ -1212,6 +1225,8 @@ def update_severity_color(value):
 )
 def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_key, season_id):
     colorscale = None  # default value in case an exception is raised
+    if season_id is None:
+        raise PreventUpdate
     try:
         country_key = country(pathname)
         country_config = CONFIG["countries"][country_key]
@@ -1248,19 +1263,6 @@ def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_k
             traceback.print_exc()
 
     return tile_url, error, colorscale
-
-
-@APP.callback(
-    Output("vuln_layer", "url"),
-    Input("year", "value"),
-    Input("location", "pathname"),
-    Input("mode", "value"),
-)
-def _(year, pathname, mode):
-    country_key = country(pathname)
-    return f"{TILE_PFX}/vuln/{{z}}/{{x}}/{{y}}/{country_key}/{mode}/{year}"
-
-
 @APP.callback(
     Output("borders", "data"),
     Input("location", "pathname"),
@@ -1271,14 +1273,20 @@ def borders(pathname, mode):
         shapes = []
     else:
         country_key = country(pathname)
-        # TODO We don't actually need vuln data, just reusing an existing
-        # query function as an expediency. Year is arbitrary. Optimize
-        # later.
-        shapes = (
-            retrieve_vulnerability(country_key, mode, 2020)
-            ["the_geom"]
-            .apply(shapely.geometry.mapping)
+        config = CONFIG["countries"][country_key]
+        base_query = config["shapes"][int(mode)]["sql"]
+        query = sql.Composed(
+            [
+                sql.SQL("WITH a AS ("),
+                sql.SQL(base_query),
+                sql.SQL(") SELECT the_geom FROM a"),
+            ]
         )
+        with psycopg2.connect(**CONFIG["db"]) as conn:
+            df = pd.read_sql(query, conn)
+        df["the_geom"] = df["the_geom"].apply(lambda x: shapely.wkb.loads(x.tobytes()))
+        shapes = df["the_geom"].apply(shapely.geometry.mapping)
+
     return {"features": shapes}
 
 
@@ -1499,45 +1507,6 @@ def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
     clipping, _ = geometry_containing_point(country_key, p, "0")
     resp = pingrid.tile(da, tx, ty, tz, clipping)
     return resp
-
-
-@SERVER.route(
-    f"{TILE_PFX}/vuln/<int:tz>/<int:tx>/<int:ty>/<country_key>/<mode>/<int:year>"
-)
-def vuln_tiles(tz, tx, ty, country_key, mode, year):
-    im = produce_bkg_tile(Color(0, 0, 0, 0))
-    if mode != "pixel":
-        df = retrieve_vulnerability(country_key, mode, year)
-        cfg = CONFIG["countries"][country_key]["datasets"]["vuln"]
-        scale_min, scale_max = cfg["range"]
-        shapes = [
-            (
-                r["the_geom"],
-                pingrid.impl.DrawAttrs(
-                    Color(255, 0, 0, 255),
-                    pingrid.impl.with_alpha(
-                        CMAPS[cfg["colormap"]].to_rgba_array()[
-                            min(
-                                255,
-                                int(
-                                    (r["normalized"] - scale_min)
-                                    * 255
-                                    / (scale_max - scale_min)
-                                ),
-                            )
-                        ],
-                        255,
-                    )
-                    if r["normalized"] is not None and not np.isnan(r["normalized"])
-                    else Color(0, 0, 0, 0),
-                    1,
-                    cv2.LINE_AA,
-                ),
-            )
-            for _, r in df.iterrows()
-        ]
-        im = pingrid.impl.produce_shape_tile(im, shapes, tx, ty, tz, oper="intersection")
-    return pingrid.image_resp(im)
 
 
 def produce_bkg_tile(
