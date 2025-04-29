@@ -938,12 +938,13 @@ def groupby_dekads(daily_data, time_dim="T"):
 
     Returns
     -------
-    grouped : xr.DataArrayGroupBy or xr.DatasetGroupBy
+    grouped : xr.core.groupby.DataArrayGroupBy or xr.core.groupby.DataArrayGroupBy
         `daily_data` grouped by dekads
 
     See Also
     --------
-    xarray.groupby_bins, xarray.DataArrayGroupBy, xarray.DatasetGroupBy
+    xarray.groupby_bins, xarray.core.groupby.DataArrayGroupBy,
+    xarray.core.groupby.DataArrayGroupBy
     """
     # dekad edges are located at midnight
     dekad_edges = pd.date_range(
