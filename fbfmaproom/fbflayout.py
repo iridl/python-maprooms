@@ -206,33 +206,16 @@ def control_layout():
                 children=[
                     dcc.Store(id="geom_key"),
                     html.Div(
-                        [html.H4("AA Design")],
                         style={
-                            "top": "10px",
-                            "width": "120px",
-                            "left": "90px",
-                            "height": "fit-content",
-                            "paddingleft": "10px",
-                            "paddingRight": "10px",
-                            "display": "inline-block",
-                            "verticalAlign": "middle",
+                            'display': 'flex',
+                            'flex-direction': 'column',
+                            'padding-right': '5px',
                         },
+                        children=[
+                            html.H4("AA Design"),
+                            html.Img(id="logo"),
+                        ],
                     ),
-
-                    html.Div(
-                        [html.Img(id="logo")],
-                        style={
-                            "top": "10px",
-                            "width": "fit-content",
-                            "left": "90px",
-                            "height": "fit-content",
-                            "paddingleft": "10px",
-                            "paddingRight": "10px",
-                            "display": "inline-block",
-                            "verticalAlign": "middle",
-                        },
-                    ),
-
                     control(
                         "Mode",
                         "The spatial resolution such as National, Regional, District or Pixel level",

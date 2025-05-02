@@ -3320,7 +3320,7 @@ countries:
 
 
     djibouti:
-        logo: Djibouti_IRI.svg
+        logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
         center: [43, 12]
         zoom: 8
@@ -3483,7 +3483,7 @@ countries:
                 start_year: 1990
 
     djibouti-mam:
-        logo: Djibouti_IRI.svg
+        logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
         center: [43, 12]
         zoom: 8
@@ -3634,7 +3634,7 @@ countries:
                 start_year: 1991
 
     djibouti-ond:
-        logo: Djibouti_IRI.svg
+        logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
         center: [43, 12]
         zoom: 8
@@ -3794,7 +3794,7 @@ countries:
                 issue_months: [6, 7, 8]
                 start_year: 1991
     djibouti-jjas:
-        logo: Djibouti_IRI.svg
+        logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
         center: [43, 12]
         zoom: 8
