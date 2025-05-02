@@ -20,6 +20,12 @@ USER nobody
 WORKDIR /app
 ENTRYPOINT ["/app/docker/entrypoint"]
 
+# OPENBLAS multithreading is incompatible with gunicorn's use of fork().
+# Also its default is to use one thread per CPU, which isn't appropriate
+# in a multi-application, multi-user environment.
+ENV OPENBLAS_NUM_THREADS=1
+
 # Use environment variable WEB_CONCURRENCY to set number of worker
 # processes.
+
 CMD ["gunicorn", "--bind=0.0.0.0", "fbfmaproom:SERVER"]
