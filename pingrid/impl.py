@@ -1277,7 +1277,7 @@ def client_side_error(e):
 
 REQUIRED = object()
 
-def parse_arg(name, conversion=str, default=REQUIRED, qstring=None):
+def parse_arg(name: str, conversion=str, default=REQUIRED, qstring: Optional[str] = None):
     '''Stricter version of flask.request.args.get. Raises an exception in
 cases where args.get ignores the problem and silently falls back on a
 default behavior:
