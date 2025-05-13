@@ -841,6 +841,126 @@ def _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, time_coord):
 
 
 # Time functions
+
+
+def intervals_to_points(intervals, to_point="mid", keep_attrs=True):
+    """ Given an xr.DataArray of pd.Interval, return an xr.DataArray of the left,
+    mid, or right points of those Intervals.
+
+    Parameters
+    ----------
+    intervals : xr.DataArray(pd.Interval)
+        array of intervals
+    to_point : str, optional
+        "left", "mid" or "right" point of `intervals`
+        default is "mid"
+    keep_attrs : boolean, optional
+        keep attributes from `intervals` to point array
+        default is True
+
+    Returns
+    -------
+    point_array : xr.DataArray
+        array of the left, mid or right points of `intervals`
+
+    See Also
+    --------
+    pandas.Interval
+
+    Notes
+    -----
+    Should work for any type of array, not just time.
+    xr.groupby_bins against dim renames the Interval dim_bins,
+    not sure if xr.groupby does the same,
+    and what other Xarray functions return Intervals but, depending,
+    could generalize the returned array name
+    """
+    return xr.DataArray(
+        data=[getattr(intervals.values[t], to_point) for t in range(intervals.size)],
+        coords={intervals.name : intervals},
+        name=( # There might be other automatic cases to cover
+            intervals.name.replace("_bins", f'_{to_point}')
+            if intervals.name.endswith("_bins")
+            else "_".join(intervals.name, f'_{to_point}')
+        ),
+        attrs=intervals.attrs if keep_attrs else {},
+    )
+    return data
+
+
+def replace_intervals_with_points(
+    interval_data, interval_dim, to_point="mid", keep_attrs=True
+):
+    """ Replace a coordinate whose values are pd.Interval with one whose values are
+    the left edge, center (mid), or right edge of those intervals.
+
+    Parameters
+    ----------
+    interval_data : xr.DataArray or xr.Dataset
+        data depending on a pd.Interval dimension
+    interval_dim : str
+        name of pd.Interval dimension to be replaced
+    to_point : str, optional
+        "left", "mid" or "right" point of `interval_dim` intervals
+        default is "mid"
+    keep_attrs : boolean, optional
+        keep attributes from `interval_dim` to replacing point-wise dimension
+        default is True
+
+    Returns
+    -------
+    point_data : xr.DataArray or xr.Dataset
+        of which interval dimension has been replaced by point dimension
+
+    See Also
+    --------
+    pandas.Interval, intervals_to_points, xarray.assign_coords, xarray.swap_dims
+    """
+    point_dim = intervals_to_points(
+        interval_data[interval_dim], to_point=to_point, keep_attrs=keep_attrs
+    )
+    return (
+        interval_data
+        .assign_coords({point_dim.name : (interval_dim, point_dim.data)})
+        .swap_dims({interval_dim: point_dim.name})
+    )
+
+
+def groupby_dekads(daily_data, time_dim="T"):
+    """ Groups `daily_data` by dekads for grouping operations
+
+    Parameters
+    ----------
+    daily_data : xr.DataArray or xr.Dataset
+        daily data
+    time_dim : str, optional
+        name of daily time dimenstion, default is "T"
+
+    Returns
+    -------
+    grouped : xr.core.groupby.DataArrayGroupBy or xr.core.groupby.DataArrayGroupBy
+        `daily_data` grouped by dekads
+
+    See Also
+    --------
+    xarray.groupby_bins, xarray.core.groupby.DataArrayGroupBy,
+    xarray.core.groupby.DataArrayGroupBy
+    """
+    # dekad edges are located at midnight
+    dekad_edges = pd.date_range(
+        start=daily_data[time_dim][0].dt.floor("D").values,
+        end=(daily_data[time_dim][-1] + np.timedelta64(1, "D")).dt.floor("D").values,
+        freq="1D",
+    )
+    dekad_edges = dekad_edges.where(
+        (dekad_edges.day == 1) | (dekad_edges.day == 11) | (dekad_edges.day == 21)
+    ).dropna()
+    assert dekad_edges.size > 1, (
+        "daily_data must span at least one full dekad (need 2 edges to form 1 bin)"
+    )
+    return daily_data.groupby_bins(daily_data[time_dim], dekad_edges, right=False)
+
+
 def strftimeb2int(strftimeb):
     """Convert month values to integers (1-12) from strings.
  
