@@ -418,7 +418,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - prcp-v1
+                    - prcp-v2
                     - enacts-precip-mon
                 predictand: bad-years-ndj
             observations:
@@ -518,6 +518,19 @@ countries:
                     label: Forecast prob non-exc v1
                     description: NextGen forecast probability of non-exceedance of the selected percentile, version 1 (configuration selected March 2025)
                     path: madagascar/prcp-ndj-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                prcp-v2:
+                    label: Forecast prob non-exc v2
+                    description: NextGen forecast probability of non-exceedance of the selected percentile, version 1 (configuration selected May 2025)
+                    path: madagascar/prcp-ndj-v2.zarr
                     var_names:
                         value: pne
                         lat: Y
