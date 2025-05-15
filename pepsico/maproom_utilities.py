@@ -262,6 +262,20 @@ def make_adm_overlay(
 
 
 def initialize_map(data):
+    """
+    Map initialization based on `data` spatial domain
+
+    Parameters
+    ----------
+    data: xr.DataArray
+        spatial data of which longitude and latitude coordinates are X and Y
+
+    Returns
+    -------
+    lat_min, lat_max, lat_label, lon_min, lon_max, lon_label, center_of_the_map : tuple
+        respectively: minimum, maximum, label for latitude and longitude pick a point
+        control, center of the map coordinates values as a list
+    """
     center_of_the_map = [
         ((data["Y"][int(data["Y"].size/2)].values)),
         ((data["X"][int(data["X"].size/2)].values)),
@@ -282,6 +296,22 @@ def initialize_map(data):
 
 
 def picked_location(data, initialization_cases, click_lat_lng, latitude, longitude):
+    """
+    Inputs for map loc_marker and pick location lat/lon controls
+
+    Parameters
+    ----------
+    data: xr.DataArray
+        spatial data of which longitude and latitude coordinates are X and Y
+    initialization_cases: list[str]
+        list of Input of which changes reinitialize the map
+    click_lat_lng: list[str]
+        dlf Input from clicking map (lat and lon)
+    latitude: str
+        Input from latitude pick a point control
+    latitude: str
+        Input from latitude pick a point control
+    """
     if (
         dash.ctx.triggered_id == None
         or dash.ctx.triggered_id in initialization_cases
@@ -310,6 +340,33 @@ def layers_controls(
     adm_conf, global_conf, adm_id_suffix="adm",
     street=True, topo=True,
 ):
+    """
+    Input to dbf.LayersControl
+
+    Parameters
+    ----------
+    url_str: str
+        dlf.TileLayer's url
+    url_id: str
+        dlf.Overlay's id where dlf.TileLayer is
+    url_name: str
+        dlf.Overlay's name where dlf.TileLayer is
+    adm_conf: dict
+        configuration of administrative boundaries overlays
+    global_conf: dict
+        configuration of maproom app
+    adm_id_suffix: str, optional
+        suffix in `adm_conf` dictionary that identifies the set of admin to use
+    street: boolean, optional
+        use cartodb street map as dlf.BaseLayer
+    topo: boolean, optional
+        use opentopomap topographic map as dlf.BaseLayer
+
+    Returns
+    -------
+    layers: list
+        list of dlf.BaseLayer and dlf.Overlay
+    """
     layers = [
         make_adm_overlay(
             adm_name=adm["name"],
