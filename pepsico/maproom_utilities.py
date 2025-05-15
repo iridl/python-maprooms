@@ -16,7 +16,7 @@ STD_TIME_FORMAT = "%Y-%m-%d"
 HUMAN_TIME_FORMAT = "%-d %b %Y"
 
 
-def get_geom(level, conf):
+def get_geom(level, conf, shapes_adm_name):
     """ Form a geometric object from sql query or synthetic
 
     Parameters
@@ -41,7 +41,7 @@ def get_geom(level, conf):
     if "bbox" in conf["datasets"] :
         return synthesize_geom(conf["datasets"]["bbox"], level=level)
     else:
-        return sql2geom(conf["datasets"]["shapes_adm"][level]["sql"], conf["db"])
+        return sql2geom(conf["datasets"][shapes_adm_name][level]["sql"], conf["db"])
 
 
 def sql2GeoJSON(shapes_sql, db_config):
@@ -261,7 +261,7 @@ def make_adm_overlay(
     )
 
 
-def intialize_map(data):
+def initialize_map(data):
     center_of_the_map = [
         ((data["Y"][int(data["Y"].size/2)].values)),
         ((data["X"][int(data["X"].size/2)].values)),
@@ -314,7 +314,11 @@ def layers_controls(
         make_adm_overlay(
             adm_name=adm["name"],
             adm_id=f'{adm["name"]}_{adm_id_suffix}',
-            adm_geojson=geom2GeoJSON(get_geom(level=i, conf=global_conf)),
+            adm_geojson=geom2GeoJSON(get_geom(
+                level=i,
+                conf=global_conf,
+                shapes_adm_name=f'shapes_adm_{adm_id_suffix}',
+            )),
             adm_color=adm["color"],
             adm_lev=i+1,
             adm_weight=len(adm_conf)-i,
