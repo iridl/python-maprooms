@@ -1,3 +1,4 @@
+import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import pingrid
@@ -544,7 +545,8 @@ def register(FLASK, config):
             send_alarm = True
         return mru.layers_controls(
             url_str, f"change_{region}", "Change",
-            GLOBAL_CONFIG["datasets"][f"shapes_adm_{region}"], adm_id_suffix=region,
+            GLOBAL_CONFIG["datasets"][f"shapes_adm_{region}"], GLOBAL_CONFIG,
+            adm_id_suffix=region,
         ), send_alarm
 
 
