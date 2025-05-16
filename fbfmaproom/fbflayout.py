@@ -109,11 +109,6 @@ def map_layout():
                         name="Forecast",
                         checked=True,
                     ),
-                    dlf.Overlay(
-                        dlf.TileLayer(opacity=0.8, id="vuln_layer"),
-                        name="Vulnerability",
-                        checked=False,
-                    ),
                 ],
                 position="topleft",
                 id="layers_control",
@@ -144,17 +139,6 @@ def map_layout():
             ),
             dlf.ScaleControl(imperial=False, position="topleft"),
             dlf.Colorbar(
-                "Vulnerability",
-                id="vuln_colorbar",
-                position="bottomleft",
-                width=300,
-                height=10,
-                min=0,
-                max=5,
-                nTicks=5,
-                opacity=0.8,
-            ),
-            dlf.Colorbar(
                 id="raster_colorbar",
                 position="bottomleft",
                 width=300,
@@ -164,6 +148,7 @@ def map_layout():
                 nTicks=5,
                 opacity=0.8,
                 tooltip=True,
+                style={"marginBottom": "45px"}
             ),
         ],
         id="map",
