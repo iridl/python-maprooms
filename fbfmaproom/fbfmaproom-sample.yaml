@@ -397,7 +397,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - prcp-v1
+                    - prcp-v2
                     - enacts-precip-mon
                 predictand: bad-years-ndj
             observations:
@@ -506,7 +506,19 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-
+                prcp-v2:
+                    label: Forecast prob non-exc v2
+                    description: NextGen forecast probability of non-exceedance of the selected percentile, version 1 (configuration selected May 2025)
+                    path: madagascar/prcp-ndj-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
         seasons:
             season1:
                 label: NDJ
@@ -2995,7 +3007,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v2
+                    - pnep-v3
                     - rain
                 predictand: bad-years
             observations:
@@ -3069,7 +3081,19 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-
+                pnep-v3:
+                    label: Forecast prob non-exc v3
+                    description: NextGen forecast probability of non-exceedance of selected percentile v3
+                    path: guatemala/prcp-aso-v3.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
         seasons:
             season1:
                 label: ASO
@@ -3167,7 +3191,7 @@ countries:
 
 
     djibouti:
-        logo: Djibouti_IRI.svg
+        logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
         center: [43, 12]
         zoom: 8
@@ -3196,7 +3220,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v2
+                    - pnep-v3
                     - rain
                 predictand: bad-years-rank-v2
             observations:
@@ -3303,7 +3327,19 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-
+                pnep-v3:
+                    label: Forecast prob non-exc v3
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 3 (configuration selected April 2025)
+                    path: djibouti/prcp-jas-v3.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
         seasons:
             season1:
                 label: JAS
@@ -3313,7 +3349,7 @@ countries:
                 start_year: 1990
 
     djibouti-mam:
-        logo: Djibouti_IRI.svg
+        logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
         center: [43, 12]
         zoom: 8
@@ -3459,7 +3495,7 @@ countries:
                 start_year: 1991
 
     djibouti-ond:
-        logo: Djibouti_IRI.svg
+        logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
         center: [43, 12]
         zoom: 8
@@ -3615,7 +3651,7 @@ countries:
                 issue_months: [6, 7, 8]
                 start_year: 1991
     djibouti-jjas:
-        logo: Djibouti_IRI.svg
+        logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
         center: [43, 12]
         zoom: 8

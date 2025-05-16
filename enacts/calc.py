@@ -7,6 +7,7 @@ from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
+from shapely.geometry import Polygon
 
 # Date Reading functions
 
@@ -122,6 +123,34 @@ def synthesize_enacts(variable, time_res, bbox):
     )
 
 
+def get_geom(level, conf):
+    """ Form a geometric object from sql query or synthetic
+
+    Parameters
+    ----------
+    level: int
+        level from the enumeration of a suite of administrative boundaries listed in
+        `conf` . Synthetic case limited to 0 and 1. 
+    conf: dict
+        dictionary listing desired administrative shapes and their attributes.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        a pd.DF with columns "label" (dtype=string),
+        "key" (string or int depending on the table),
+        and "the_geom" (shapely.Geometry)
+
+    See Also
+    --------
+        synthesize_geom, sql2geom
+    """
+    if "bbox" in conf["datasets"] :
+        return synthesize_geom(conf["datasets"]["bbox"], level=level)
+    else:
+        return sql2geom(conf["datasets"]["shapes_adm"][level]["sql"], conf["db"])
+
+
 def sql2GeoJSON(shapes_sql, db_config):
     """ Form a GeoJSON dict from sql request to a database
 
@@ -228,6 +257,64 @@ def sql2geom(shapes_sql, db_config):
         )
         df = pd.read_sql(s, conn)
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    return df
+
+
+def synthesize_geom(bbox, level):
+    """ Synthesize a geometric object from a bounding box
+
+    Parameters
+    ----------
+    bbox : array
+        coordinates of bounding box of spatial domain as [W, S, E, N]
+    level : int
+        0 or 1 to mimick a containing admin level (0) with 1 geometry roughly smaller
+        than `bbox` or a contained admin level (1) with 2 geometries partitioning
+        level 0
+    
+    Returns
+    -------
+    df : pandas.DataFrame
+        a pd.DF with columns "label" (dtype=string),
+        "key" (string or int depending on the table),
+        and "the_geom" (shapely.Geometry)
+
+    See Also
+    --------
+    shapely.geometry.Polygon
+
+    Notes
+    -----
+    A level 0 contained into bbox is necessary to test the clipping feature since
+    `bbox` is also used to generate the fake data.
+    """
+    west, south, east, north = bbox
+    assert (south + 0.25) <= (north - 0.5), (
+        "Please extend latitudinal domain of bbox"
+    )
+    if east < west :
+        assert (west + 0.25) >= (east - 0.5), (
+            "Please extend longitudinal domain of bbox"
+        )
+    else :
+        assert (west + 0.25) <= (east - 0.5), (
+            "Please extend longitudinal domain of bbox"
+        )
+    west = west + 0.25
+    south = south + 0.25
+    east = east - 0.5
+    norht = north - 0.5
+    if level == 0 :
+        df = pd.DataFrame({"label" : ["Guyane"], "key": [0], "the_geom": [Polygon([
+            [west, south], [west, north], [east, north], [east, south]
+        ])]})
+    elif level == 1 : #2 triangles partitioning level-0 box at its SW-NE diagnonal
+        df = pd.DataFrame({"label" : ["NW", "SE"], "key": [1, 2],"the_geom": [
+            Polygon([[west, south], [west, north], [east, north]]),
+            Polygon([[west, south], [east, north], [east, south]]),
+        ]})
+    else:
+        raise Exception("level must be 0 or 1")
     return df
 
 
@@ -754,6 +841,126 @@ def _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, time_coord):
 
 
 # Time functions
+
+
+def intervals_to_points(intervals, to_point="mid", keep_attrs=True):
+    """ Given an xr.DataArray of pd.Interval, return an xr.DataArray of the left,
+    mid, or right points of those Intervals.
+
+    Parameters
+    ----------
+    intervals : xr.DataArray(pd.Interval)
+        array of intervals
+    to_point : str, optional
+        "left", "mid" or "right" point of `intervals`
+        default is "mid"
+    keep_attrs : boolean, optional
+        keep attributes from `intervals` to point array
+        default is True
+
+    Returns
+    -------
+    point_array : xr.DataArray
+        array of the left, mid or right points of `intervals`
+
+    See Also
+    --------
+    pandas.Interval
+
+    Notes
+    -----
+    Should work for any type of array, not just time.
+    xr.groupby_bins against dim renames the Interval dim_bins,
+    not sure if xr.groupby does the same,
+    and what other Xarray functions return Intervals but, depending,
+    could generalize the returned array name
+    """
+    return xr.DataArray(
+        data=[getattr(intervals.values[t], to_point) for t in range(intervals.size)],
+        coords={intervals.name : intervals},
+        name=( # There might be other automatic cases to cover
+            intervals.name.replace("_bins", f'_{to_point}')
+            if intervals.name.endswith("_bins")
+            else "_".join(intervals.name, f'_{to_point}')
+        ),
+        attrs=intervals.attrs if keep_attrs else {},
+    )
+    return data
+
+
+def replace_intervals_with_points(
+    interval_data, interval_dim, to_point="mid", keep_attrs=True
+):
+    """ Replace a coordinate whose values are pd.Interval with one whose values are
+    the left edge, center (mid), or right edge of those intervals.
+
+    Parameters
+    ----------
+    interval_data : xr.DataArray or xr.Dataset
+        data depending on a pd.Interval dimension
+    interval_dim : str
+        name of pd.Interval dimension to be replaced
+    to_point : str, optional
+        "left", "mid" or "right" point of `interval_dim` intervals
+        default is "mid"
+    keep_attrs : boolean, optional
+        keep attributes from `interval_dim` to replacing point-wise dimension
+        default is True
+
+    Returns
+    -------
+    point_data : xr.DataArray or xr.Dataset
+        of which interval dimension has been replaced by point dimension
+
+    See Also
+    --------
+    pandas.Interval, intervals_to_points, xarray.assign_coords, xarray.swap_dims
+    """
+    point_dim = intervals_to_points(
+        interval_data[interval_dim], to_point=to_point, keep_attrs=keep_attrs
+    )
+    return (
+        interval_data
+        .assign_coords({point_dim.name : (interval_dim, point_dim.data)})
+        .swap_dims({interval_dim: point_dim.name})
+    )
+
+
+def groupby_dekads(daily_data, time_dim="T"):
+    """ Groups `daily_data` by dekads for grouping operations
+
+    Parameters
+    ----------
+    daily_data : xr.DataArray or xr.Dataset
+        daily data
+    time_dim : str, optional
+        name of daily time dimenstion, default is "T"
+
+    Returns
+    -------
+    grouped : xr.core.groupby.DataArrayGroupBy or xr.core.groupby.DataArrayGroupBy
+        `daily_data` grouped by dekads
+
+    See Also
+    --------
+    xarray.groupby_bins, xarray.core.groupby.DataArrayGroupBy,
+    xarray.core.groupby.DataArrayGroupBy
+    """
+    # dekad edges are located at midnight
+    dekad_edges = pd.date_range(
+        start=daily_data[time_dim][0].dt.floor("D").values,
+        end=(daily_data[time_dim][-1] + np.timedelta64(1, "D")).dt.floor("D").values,
+        freq="1D",
+    )
+    dekad_edges = dekad_edges.where(
+        (dekad_edges.day == 1) | (dekad_edges.day == 11) | (dekad_edges.day == 21)
+    ).dropna()
+    assert dekad_edges.size > 1, (
+        "daily_data must span at least one full dekad (need 2 edges to form 1 bin)"
+    )
+    return daily_data.groupby_bins(daily_data[time_dim], dekad_edges, right=False)
+
+
 def strftimeb2int(strftimeb):
     """Convert month values to integers (1-12) from strings.
  

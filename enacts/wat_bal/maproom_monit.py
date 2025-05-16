@@ -30,8 +30,6 @@ PRECIP_PARAMS = {
     "variable": "precip", "time_res": "daily", "ds_conf": GLOBAL_CONFIG["datasets"]
 }
 
-ADMIN_CONFIG = GLOBAL_CONFIG["datasets"]["shapes_adm"]
-
 def register(FLASK, config):
 
     PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{config["core_path"]}'
@@ -304,13 +302,15 @@ def register(FLASK, config):
         ] + [
             mapr_u.make_adm_overlay(
                 adm_name=adm["name"],
-                adm_geojson=calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
-                adm_clor=adm["color"],
+                adm_geojson=calc.geom2GeoJSON(
+                    calc.get_geom(level=i, conf=GLOBAL_CONFIG)
+                ),
+                adm_color=adm["color"],
                 adm_lev=i+1,
-                adm_weight=len(ADMIN_CONFIG)-i,
+                adm_weight=len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
                 is_checked=adm["is_checked"],
             )
-            for i, adm in enumerate(ADMIN_CONFIG)
+            for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
         ] + [
             dlf.Overlay(
                 dlf.TileLayer(
@@ -812,9 +812,7 @@ def register(FLASK, config):
         map = map.rename(X="lon", Y="lat")
         map.attrs["scale_min"] = 0
         map.attrs["scale_max"] = map_max
-        clip_shape = calc.sql2geom(
-            ADMIN_CONFIG[0]['sql'], GLOBAL_CONFIG["db"]
-        )["the_geom"][0]
+        clip_shape = calc.get_geom(level=0, conf=GLOBAL_CONFIG)["the_geom"][0]
         return pingrid.tile(map, tx, ty, tz, clip_shape)
 
 
