@@ -310,7 +310,7 @@ def year_label(midpoint, season_length):
 def geometry_containing_point(
     country_key: str, point: Tuple[float, float], mode: str
 ):
-    df = retrieve_shapes(country_key, mode)  # arbitrary year
+    df = retrieve_shapes(country_key, mode)
     x, y = point
     p = Point(x, y)
     geom, attrs = None, None
@@ -335,60 +335,6 @@ def retrieve_shapes(country_key: str, mode: str) -> pd.DataFrame:
         df = pd.read_sql(s, conn)
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
-
-def retrieve_vulnerability(
-    country_key: str, mode: str, year: int
-) -> pd.DataFrame:
-    config = CONFIG["countries"][country_key]
-    sc = config["shapes"][int(mode)]
-    vuln_sql = sc.get(
-        "vuln_sql",
-        "select cast(null as int) as key, 0 as year, 0 as vuln where 1 = 2"
-    )
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        s = sql.Composed(
-            [
-                sql.SQL("with v as ("),
-                sql.SQL(vuln_sql),
-                sql.SQL("), g as ("),
-                sql.SQL(sc["sql"]),
-                sql.SQL(
-                    """
-                    ), a as (
-                        select
-                            key,
-                            avg(vuln) as mean,
-                            stddev_pop(vuln) as stddev
-                        from v
-                        group by key
-                    )
-                    select
-                        g.label, g.key, g.the_geom,
-                        v.year,
-                        v.vuln as vulnerability,
-                        a.mean as mean,
-                        a.stddev as stddev,
-                        v.vuln / a.mean as normalized,
-                        coalesce(to_char(v.vuln,'999,999,999,999'),'N/A') as "Vulnerability",
-                        coalesce(to_char(a.mean,'999,999,999,999'),'N/A') as "Mean",
-                        coalesce(to_char(a.stddev,'999,999,999,999'),'N/A') as "Stddev",
-                        coalesce(to_char(v.vuln / a.mean,'999,990D999'),'N/A') as "Normalized"
-                    from (g left outer join a using (key))
-                        left outer join v on(g.key=v.key and v.year=%(year)s)
-                    """
-                ),
-            ]
-        )
-        # print(s.as_string(conn))
-        df = pd.read_sql(
-            s,
-            conn,
-            params=dict(year=year),
-        )
-    # print("bytes: ", sum(df.the_geom.apply(lambda x: len(x.tobytes()))))
-    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-    return df
-
 
 def generate_tables(
     country_key,
@@ -978,8 +924,6 @@ def custom_static(relpath):
     State("location", "search"),
 )
 def forecast_selectors(season, col_name, pathname, qstring):
-    if season is None:
-        raise PreventUpdate
     try:
         country_key = country(pathname)
         country_conf = CONFIG["countries"][country_key]
@@ -1273,20 +1217,8 @@ def borders(pathname, mode):
         shapes = []
     else:
         country_key = country(pathname)
-        config = CONFIG["countries"][country_key]
-        base_query = config["shapes"][int(mode)]["sql"]
-        query = sql.Composed(
-            [
-                sql.SQL("WITH a AS ("),
-                sql.SQL(base_query),
-                sql.SQL(") SELECT the_geom FROM a"),
-            ]
-        )
-        with psycopg2.connect(**CONFIG["db"]) as conn:
-            df = pd.read_sql(query, conn)
-        df["the_geom"] = df["the_geom"].apply(lambda x: shapely.wkb.loads(x.tobytes()))
+        df = retrieve_shapes(country_key, mode)
         shapes = df["the_geom"].apply(shapely.geometry.mapping)
-
     return {"features": shapes}
 
 

@@ -148,6 +148,7 @@ def map_layout():
                 nTicks=5,
                 opacity=0.8,
                 tooltip=True,
+                style={"marginBottom": "45px"}
             ),
         ],
         id="map",
