@@ -77,23 +77,9 @@ datasets:
     taw_file: /data/remic/mydatafiles/soilgrids/Senegal/GYGA_ERZD_wat_cap_abs_anacim_enacts3.nc
 
     # Forecast data
-    fcst_data:
-        #forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3
-        forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3/Jul-Sep
-        # All the below will be deprecated once no more partner outputs tsv files
-        #forecast_mu_file_pattern: NextGen_PRCPPRCP_CCAFCST_mu_SLtarget.tsv
-        #forecast_var_file_pattern: NextGen_PRCPPRCP_CCAFCST_var_SLtarget.tsv
-        #obs_file_pattern: obs_PRCP_SLtarget.tsv
-        #hcst_file_pattern: None
-        #start_regex: '[A-Z][a-z]{2}\d{4}'
-        #start_format_in: '%b%Y'
-        #start_format_out: '%b%Y'
-        # S,L, target dates options
-        #leads: null
-        #targets: ["Feb-May", "Jun-Sep"]
-        #target_period_length: 4
-        #time_units: months
-
+    fcst_data: #Use one or the above to test the nc multiple/single cases
+        forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3
+        #forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3/Jul-Sep
 
 maprooms:
     # Onset
