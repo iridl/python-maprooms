@@ -132,7 +132,7 @@ def register(FLASK, config):
         Input("lead_time", "options"),
         Input("lead_time_control", "style"),
     )
-    def write_map_title(start_date, lead_time, targets, lead_time_control):          
+    def write_map_title(start_date, lead_time, targets, lead_time_control):
         for option in targets :
             if option["value"] == lead_time :
                 target = option["label"]
@@ -465,13 +465,9 @@ def register(FLASK, config):
         ] + [
             mapr_u.make_adm_overlay(
                 adm_name=adm["name"],
-<<<<<<< HEAD
                 adm_geojson=calc.geom2GeoJSON(
                     calc.get_geom(level=i, conf=GLOBAL_CONFIG)
                 ),
-=======
-                adm_geojson=calc.sql2GeoJSON(adm["sql"], GLOBAL_CONFIG["db"]),
->>>>>>> ad29b88 (left to test single target cast and document functions)
                 adm_color=adm["color"],
                 adm_lev=i+1,
                 adm_weight=len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
