@@ -1,4 +1,6 @@
 import xarray as xr
+import numpy as np
+import pandas as pd
 
 
 #This is what we should need for the app
@@ -90,6 +92,37 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
         .assign_coords(seasons_ends=end_edges)
         .assign_coords(seasons_starts=seasons_starts)
     )
+
+
+def groupby_seasons(
+    daily_data, start_day, start_month, end_day, end_month, time_dim="T",
+):
+    edges_base = pd.date_range(
+        start=daily_data[time_dim][0].dt.floor("D").values,
+        # need one more day since right is excluded
+        end=(daily_data[time_dim][-1] + np.timedelta64(1, "D")).dt.floor("D").values,
+        freq="1D",
+    )
+    if start_day == 29 and start_month == 2 :
+        # don't allow start on 29 Feb: this is pushy
+        start_day = 1
+        start_month = 3
+    offset = 1
+    if end_day == 29 and end_month == 2 :
+        end_day = 1
+        end_month = "Mar"
+        offset = 0
+    bins = edges_base.where(
+        (
+            (edges_base.day == start_day)
+            & (edges_base.month == start_month)
+        )
+        | ( # group end is inclusive
+            ((edges_base - pd.Timedelta(offset, "D")).day == end_day)
+            & ((edges_base - pd.Timedelta(offset, "D")).month == end_month)
+        )
+    ).dropna()
+    return daily_data.groupby_bins(daily_data[time_dim], bins, right=False)
 
 
 def unit_conversion(variable):
