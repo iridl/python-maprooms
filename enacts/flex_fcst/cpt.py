@@ -1,162 +1,228 @@
 import glob
-import re
-from datetime import datetime
 import numpy as np
-import cptio
 import xarray as xr
 from pathlib import Path
+from . import predictions
 
 
-def read_file(
-    data_path,
-    filename_pattern,
-    start_date,
-    lead_time=None,
-    target_time=None,
-    ):
-    """ Reads a single cpt file for a given start and lead into a xr.Dataset.
+def pycptv2_targets_dict(fcst_ds, start_date=None):
+    """ Create dictionaries of targets and leads for a given `start_date`
 
     Parameters
     ----------
-    data_path : str
-        String of the path pointing to cpt datasets.
-    filename_pattern : str
-        String of the filename pattern name for a given variable's data file.
-    lead_time : str
-         String of the lead time value to be selected for as is represented in the file name.
-    start_date : str
-        String of the start date to be selected for as is represented in the file name.
+    fcst_ds: xr.Dataset
+        pycptv2-like xarray.Dataset
+    start_date: str("%YYYY-%mm-%dd"), optional
+        start date of the forecast. Default is None in which case
+        returns dictionary of targets and leads for the last start
+
     Returns
     -------
-    file_selected : xarray Dataset
-        Single CPT data file as multidimensional xarray dataset.
-    Notes
-    -----
-    `filename_pattern` should be most common denominator for any group of datasets,
-    so that a single file can be selected using only `lead_time` and `start_date`.
-    Examples
+    targets, default: dict, float
+        targets is a list of dictionaries where keys are label and value and their
+        values are respectively a formatted string of the target dates and a number
+        of their lead times, for a given start date.
+
+    See Also
     --------
-    For files which have naming structure such as the example file:
-        CFSv2_SubXPRCP_CCAFCST_mu_Apr_Apr-1-2022_wk1.txt
-    And where this file's `lead_time` and `start_date`:
-        `lead_time` == 'wk1' and `start_date` == 'Apr-1-2022'
-    `filename_pattern` == 'CFSv2_SubXPRCP_CCAFCST_mu_Apr_mystartandlead.txt'
+    read_pycptv2dataset, predictions.target_range_formatting
     """
-    if lead_time is not None:
-        pattern = f"{start_date}_{lead_time}"
+    if start_date is None :
+        fcst_ds = fcst_ds.isel(S=[-1])
+    else :
+        fcst_ds = fcst_ds.sel(S=[start_date])
+    if "L" in fcst_ds.dims:        
+        targets = [
+            {
+                "label": predictions.target_range_formatting(
+                    fcst_ds['Ti'].squeeze().sel(L=lead).values,
+                    fcst_ds['Tf'].squeeze().sel(L=lead).values,
+                    "months",
+                ),
+                "value": lead,
+            } for lead in fcst_ds["L"].where(
+                ~np.isnat(fcst_ds["T"].squeeze()), drop=True
+            ).values
+        ]
     else:
-        if filename_pattern == "obs_PRCP_SLtarget.tsv":
-            pattern = f"{target_time}"
-        else:
-            pattern = f"{target_time}_{start_date}"
-    full_path = f"{data_path}/{filename_pattern}"
-    expanded_name = glob.glob(full_path.replace("SLtarget",pattern))
-    if len(expanded_name) == 0:
-        read_ds = None
-    else:
-        file_name = expanded_name[0]
-        read_ds = cptio.open_cptdataset(file_name)
-    return read_ds
+        targets = [{
+            "label": predictions.target_range_formatting(
+                fcst_ds['Ti'].squeeze().values,
+                fcst_ds['Tf'].squeeze().values,
+                "months"
+            ),
+            "value": (((
+                fcst_ds['Ti'].dt.month - fcst_ds['S'].dt.month
+             ) + 12) % 12).data
+        }]
+    return targets, targets[0]["value"]
 
 
-def starts_list(
-    data_path,
-    filename_pattern,
-    regex_search_pattern,
-    format_in="%b-%d-%Y",
-    format_out="%b-%-d-%Y",
-):
-    """ Get list of all start dates from CPT files.
+def get_fcst(fcst_conf):
+    """ Create a forecast and obs dataset expected by maproom from a set of
+    pyCPTv2 nc files
 
     Parameters
     ----------
-    data_path : str
-        String of the path pointing to cpt datasets.
-    filename_pattern : str
-        String of the filename pattern name for a given variable's data file.
-    regex_search_pattern : str
-        String representing regular expression search pattern to find dates in file names.
-    format_in : str
-        String representing dates format found in file names
-    format_out : str
-        String representing desired output dates format.
+    fcst_conf: dict
+        dictionary indicating pyCPT datasets configuration (see config)
+
     Returns
     -------
-    start_dates : list
-        List of strings representing all start dates for the data within `data_path`.
-    Notes
-    -----
-    For more information on regex visit: https://docs.python.org/3/library/re.html
-    Test your regex code here: https://regexr.com/
-    Examples
+    fcst_ds, obs : xr.Dataset, xr.DataArray
+        dataset of forecast mean and variance and their obs
+
+    See Also
     --------
-    Regex expression "\w{3}-\w{1,2}-\w{4}" matches expressions that are:
-    '{word of 3 chars}-{word between 1,2 chars}-{word of 4 chars}'
-    will match dates of format 'Apr-4-2022', 'dec-14-2022', etc.
+    read_pycptv2dataset
     """
-    filename_pattern = filename_pattern.replace("SLtarget", "*")
-    files_name_list = glob.glob(f'{data_path}/{filename_pattern}')
-    start_dates = []
-    for file in files_name_list:
-        start_date = re.search(regex_search_pattern, file)
-        start_date_dt = datetime.strptime(start_date.group(), format_in)
-        start_dates.append(start_date_dt)
-    start_dates = sorted(set(start_dates)) #finds unique dates in the case there are files with the same date due to multiple lead times
-    start_dates = [i.strftime(format_out) for i in start_dates]
-    return start_dates
+    if "forecast_path" in fcst_conf :
+        fcst_ds, obs = read_pycptv2dataset(fcst_conf["forecast_path"])
+    else :
+        raise Exception("No synthetic case as of yet")
+    return fcst_ds, obs
 
 
 def read_pycptv2dataset(data_path):
+    """ Create a xr.Dataset from yearly pyCPT nc files for one or more targets of the
+    year, for a forecast mean and variance variables, appending multiple Starts; and
+    the corresponding xr.DataArray of the observations time series used to train
+    those targets
+
+    Parameters
+    ----------
+    data_path: str
+        path of set of nc files, organized by targets if multiple ones.
+
+    Returns
+    -------
+    fcst_ds, obs : xr.Dataset, xr.DataArray
+        dataset of forecast mean and variance from `data_path` and their obs
+
+    See Also
+    --------
+    read_pycptv2dataset_single_target
+
+    Notes
+    -----
+    Whether `data_path` contains multiple targets or not is determined by whether the
+    observation obs.nc file(s) is a direct child of `data_path` or under target-wise
+    folders that have no restriction on how they are named.
+    If multiple targets, `fcst_ds` is expanded in to a square with the L dimension,
+    and so are the Ts coordinates that are turned into variables.
+    If single target, `fcst_ds` remains 1D against S only and Ts remain coordiantes
+    of S.
+    `obs` is in any case always appended and sorted into a natural 1D time series
+    """
     data_path = Path(data_path)
     children = list(data_path.iterdir())
-
     if 'obs.nc' in map(lambda x: str(x.name), children):
-        fcst_mu, fcst_var, obs = read_pycptv2dataset_single_target(data_path)
+        fcst_ds, obs = read_pycptv2dataset_single_target(data_path)
     else:
-        mu_mslices = []
-        var_mslices = []
-        obs_slices = []
-        for target in children:
-            new_mu, new_var, new_obs = read_pycptv2dataset_single_target(target)
-            if len(children) > 1:
-                L = (((new_mu["Ti"].dt.month - new_mu["S"].dt.month).squeeze() + 12) % 12).values
-                new_mu = new_mu.assign_coords({"L": L}).expand_dims(dim="L")
-                new_var = new_var.assign_coords({"L": L}).expand_dims(dim="L")
-            mu_mslices.append(new_mu)
-            var_mslices.append(new_var)
-            obs_slices.append(new_obs)
-        fcst_mu = xr.combine_by_coords(mu_mslices)["deterministic"]
-        fcst_var = xr.combine_by_coords(var_mslices)["prediction_error_variance"]
+        expand_L = True if (len(children) > 1) else False
+        fcst_ds, obs_slices =  read_pycptv2dataset_single_target(
+            children[0], expand_L=expand_L
+        )
+        obs_slices = [obs_slices]
+        if len(children) > 1 :
+            for target in children[1:] :
+                new_fcst_ds, new_obs = read_pycptv2dataset_single_target(
+                    target, expand_L=expand_L
+                )
+                fcst_ds, new_fcst_ds = xr.align(fcst_ds, new_fcst_ds, join="outer")
+                fcst_ds = fcst_ds.fillna(new_fcst_ds)
+                obs_slices.append(new_obs)
         obs = xr.concat(obs_slices, "T")
         obs = obs.sortby(obs["T"])
-    return fcst_mu, fcst_var, obs 
+    return fcst_ds, obs
 
 
-def read_pycptv2dataset_single_target(data_path):
+def read_pycptv2dataset_single_target(data_path, expand_L=False):
+    """ Create a xr.Dataset from yearly pyCPT nc files for a single target of the
+    year, for a forecast mean and variance variables, appending multiple Starts; and
+    the corresponding xr.DataArray of the observations time series used to train that
+    target
+
+    Parameters
+    ----------
+    data_path: str
+        path of set of nc files for a single target, organized under one or more
+        Start month of the year folders mm:02
+    expand_L: boolean, optional
+        Expand xr.Dataset with a lead L dimension. Default is False
+
+    Returns
+    -------
+    fcst_ds, obs : xr.Dataset, xr.DataArray
+        dataset of forecast mean and variance from `data_path` and their obs
+
+    See Also
+    --------
+    open_var
+
+    Notes
+    -----
+    To use in read_pycptv2dataset expecting multiple targets, expand_L must be True
+    in which case T coordinates become variables and L is expanded to all variables.
+    If single target, expand_L muse be False and Ts remain coordinates of S only.
+    """
     mu_slices = []
     var_slices = []
     for mm in (np.arange(12) + 1) :
         monthly_path = Path(data_path) / f'{mm:02}'
         if monthly_path.exists():
-            mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc'))
-            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance_*.nc'))
-    fcst_mu = xr.concat(mu_slices, "S")["deterministic"]
-    fcst_mu = fcst_mu.sortby(fcst_mu["S"])
-    fcst_var = xr.concat(var_slices, "S")["prediction_error_variance"]
-    fcst_var = fcst_var.sortby(fcst_var["S"])
+            mu_slices.append(open_var(
+                monthly_path, 'MME_deterministic_forecast_*.nc', expand_L=expand_L
+            ))
+            var_slices.append(open_var(
+                monthly_path,
+                'MME_forecast_prediction_error_variance_*.nc',
+                expand_L=expand_L,
+            ))
+    fcst_mu = xr.concat(mu_slices, "S")
+    fcst_var = xr.concat(var_slices, "S")
+    fcst_ds = fcst_mu.merge(fcst_var)
+    fcst_ds = fcst_ds.sortby(fcst_ds["S"])
     obs = xr.open_dataset(data_path / f"obs.nc")
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
-    return fcst_mu, fcst_var, obs
+    return fcst_ds, obs
 
 
 def open_mfdataset_nodask(filenames):
     return xr.concat((xr.open_dataset(f) for f in filenames), 'T')
 
 
-def open_var(path, filepattern):
+def open_var(path, filepattern, expand_L=False):
+    """ Create a xr.Dataset of yearly pyCPT nc files for a single Start of the year
+    and target of the year (or lead), for a single variable
+
+    Parameters
+    ----------
+    path: pathlib(Path)
+        path where nc files are
+    filepattern: str
+        files name pattern with year replaced by a *
+    expand_L: boolean, optional
+        Expand xr.Dataset with a lead L dimension. Default is False
+
+    Returns
+    -------
+    ds : xr.Dataset
+        dataset of `filepattern` variable
+
+    Notes
+    -----
+    To use in read_pycptv2dataset expecting multiple targets, expand_L must be True
+    in which case T coordinates become variables and L is expanded to all variables.
+    If single target, expand_L muse be False and Ts remain coordinates of S only.
+    """
     filenames = path.glob(filepattern)
     slices = (xr.open_dataset(f) for f in filenames)
     ds = xr.concat(slices, 'T').swap_dims(T='S')
+    if expand_L :
+        L = (((
+            ds.isel(S=[0])["Ti"].dt.month - ds.isel(S=[0])["S"].dt.month
+        ) + 12) % 12).data
+        ds = ds.reset_coords(["T", "Ti", "Tf"]).expand_dims(dim={"L": L})
     return ds
-   
