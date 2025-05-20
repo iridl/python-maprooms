@@ -12,7 +12,6 @@ import pandas as pd
 from . import predictions
 from . import cpt
 import maproom_utilities as mapr_u
-import urllib
 import dash_leaflet as dlf
 from globals_ import FLASK, GLOBAL_CONFIG
 import calc
@@ -59,10 +58,18 @@ def register(FLASK, config):
     def initialize(lead_time_label_style, lead_time_control_style, path):
         #Initialization for start date dropdown to get a list of start dates
         # according to files available
-        start_dates, lead_times = cpt.get_fcst_SandL(
-            GLOBAL_CONFIG["datasets"]["fcst_data"]
-        )
         fcst_ds, obs = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        start_dates = fcst_ds["S"].dt.strftime("%b-%-d-%Y").values
+        if "L" in fcst_ds.dims :
+            lead_times = fcst_ds["L"].values
+            target_display = "inline-block" if (lead_times.size > 1) else "none"
+        else :
+            lead_times = None
+            target_display = "none"
+        lead_time_label_style = dict(lead_time_label_style, display=target_display)
+        lead_time_control_style = dict(
+            lead_time_control_style, display=target_display
+        )
         center_of_the_map = [
             ((fcst_ds["Y"][int(fcst_ds["Y"].size/2)].values)),
             ((fcst_ds["X"][int(fcst_ds["X"].size/2)].values)),
@@ -76,14 +83,6 @@ def register(FLASK, config):
         lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
         lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
         phys_units = [" "+obs.attrs["units"]] if "units" in obs.attrs else ""
-        target_display = "none"
-        if lead_times is not None :
-            if lead_times.size > 1 :
-                target_display = "inline-block"
-        lead_time_label_style = dict(lead_time_label_style, display=target_display)
-        lead_time_control_style = dict(
-            lead_time_control_style, display=target_display
-        )
         return (
             phys_units,
             start_dates, start_dates[-1],
@@ -122,10 +121,8 @@ def register(FLASK, config):
         Input("start_date","value"),
     )
     def target_range_options(start_date):
-        targets, default_choice, _ = cpt.get_targets_dict(
-            GLOBAL_CONFIG["datasets"]["fcst_data"], start_date=start_date
-        )
-        return targets, default_choice
+        fcst_ds, _ = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        return cpt.pycptv2_targets_dict(fcst_ds, start_date=start_date)
 
 
     @APP.callback(
@@ -187,11 +184,12 @@ def register(FLASK, config):
         # Reading
         lat = marker_pos[0]
         lng = marker_pos[1]
-        fcst_ds, obs = cpt.get_fcst(
-            GLOBAL_CONFIG["datasets"]["fcst_data"],
-            lead_time=lead_time,
-            start_date=start_date,
-            y_transform=config["y_transform"],
+        fcst_ds, obs = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        fcst_ds = fcst_ds.sel(S=start_date)
+        if "L" in fcst_ds.dims :
+            fcst_ds = fcst_ds.sel(L=int(lead_time))
+        obs = obs.where(
+            obs["T"].dt.month == fcst_ds.squeeze()["T"].dt.month.values, drop=True,
         )
         # Errors handling
         try:
@@ -227,7 +225,7 @@ def register(FLASK, config):
                     return error_fig, error_fig
         except KeyError:
             error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
-            return error_fig, error_f
+            return error_fig, error_fig
         # CDF from 499 quantiles
         quantiles = np.arange(1, 500) / 500
         quantiles = xr.DataArray(
@@ -500,11 +498,12 @@ def register(FLASK, config):
     )
     def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
         # Reading
-        fcst_ds, obs = cpt.get_fcst(
-            GLOBAL_CONFIG["datasets"]["fcst_data"],
-            lead_time=lead_time,
-            start_date=start_date,
-            y_transform=config["y_transform"],
+        fcst_ds, obs = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        fcst_ds = fcst_ds.sel(S=start_date)
+        if "L" in fcst_ds.dims :
+            fcst_ds = fcst_ds.sel(L=int(lead_time))
+        obs = obs.where(
+            obs["T"].dt.month == fcst_ds.squeeze()["T"].dt.month.values, drop=True,
         )
         # Obs CDF
         if variable == "Percentile":
