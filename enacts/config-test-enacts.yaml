@@ -77,7 +77,7 @@ datasets:
     taw_file: /data/remic/mydatafiles/soilgrids/Senegal/GYGA_ERZD_wat_cap_abs_anacim_enacts3.nc
 
     # Forecast data
-    fcst_data: #Use one or the above to test the nc multiple/single cases
+    fcst_data: #Use one or the other to test the nc multiple/single cases
         forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3
         #forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3/Jul-Sep
 

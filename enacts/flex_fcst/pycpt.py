@@ -183,14 +183,8 @@ def read_pycptv2dataset_single_target(data_path, expand_L=False):
     fcst_var = xr.concat(var_slices, "S")
     fcst_ds = fcst_mu.merge(fcst_var)
     fcst_ds = fcst_ds.sortby(fcst_ds["S"])
-    obs = xr.open_dataset(data_path / f"obs.nc")
-    obs_name = list(obs.data_vars)[0]
-    obs = obs[obs_name]
+    obs = xr.open_dataarray(data_path / "obs.nc")
     return fcst_ds, obs
-
-
-def open_mfdataset_nodask(filenames):
-    return xr.concat((xr.open_dataset(f) for f in filenames), 'T')
 
 
 def open_var(path, filepattern, expand_L=False):
@@ -225,4 +219,5 @@ def open_var(path, filepattern, expand_L=False):
             ds.isel(S=[0])["Ti"].dt.month - ds.isel(S=[0])["S"].dt.month
         ) + 12) % 12).data
         ds = ds.reset_coords(["T", "Ti", "Tf"]).expand_dims(dim={"L": L})
+        print(ds)
     return ds

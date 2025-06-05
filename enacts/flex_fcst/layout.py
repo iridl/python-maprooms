@@ -4,8 +4,6 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
 from controls import Block
 
-from . import cpt
-
 from globals_ import GLOBAL_CONFIG
 
 IRI_BLUE = "rgb(25,57,138)"

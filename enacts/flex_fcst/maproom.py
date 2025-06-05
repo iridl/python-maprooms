@@ -10,7 +10,7 @@ import xarray as xr
 from scipy.stats import t, norm
 import pandas as pd
 from . import predictions
-from . import cpt
+from . import pycpt
 import maproom_utilities as mapr_u
 import dash_leaflet as dlf
 from globals_ import FLASK, GLOBAL_CONFIG
@@ -58,7 +58,7 @@ def register(FLASK, config):
     def initialize(lead_time_label_style, lead_time_control_style, path):
         #Initialization for start date dropdown to get a list of start dates
         # according to files available
-        fcst_ds, obs = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        fcst_ds, obs = pycpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
         start_dates = fcst_ds["S"].dt.strftime("%b-%-d-%Y").values
         if "L" in fcst_ds.dims :
             lead_times = fcst_ds["L"].values
@@ -121,8 +121,8 @@ def register(FLASK, config):
         Input("start_date","value"),
     )
     def target_range_options(start_date):
-        fcst_ds, _ = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
-        return cpt.pycptv2_targets_dict(fcst_ds, start_date=start_date)
+        fcst_ds, _ = pycpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        return pycpt.pycptv2_targets_dict(fcst_ds, start_date=start_date)
 
 
     @APP.callback(
@@ -150,7 +150,7 @@ def register(FLASK, config):
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Reading
-        fcst_ds, _ = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        fcst_ds, _ = pycpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
         if dash.ctx.triggered_id == None:
             lat = fcst_ds["Y"][int(fcst_ds["Y"].size/2)].values
             lng = fcst_ds["X"][int(fcst_ds["X"].size/2)].values
@@ -184,7 +184,7 @@ def register(FLASK, config):
         # Reading
         lat = marker_pos[0]
         lng = marker_pos[1]
-        fcst_ds, obs = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        fcst_ds, obs = pycpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
         fcst_ds = fcst_ds.sel(S=start_date)
         if "L" in fcst_ds.dims :
             fcst_ds = fcst_ds.sel(L=int(lead_time))
@@ -494,7 +494,7 @@ def register(FLASK, config):
     )
     def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
         # Reading
-        fcst_ds, obs = cpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
+        fcst_ds, obs = pycpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
         fcst_ds = fcst_ds.sel(S=start_date)
         if "L" in fcst_ds.dims :
             fcst_ds = fcst_ds.sel(L=int(lead_time))
