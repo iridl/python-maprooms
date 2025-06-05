@@ -31,16 +31,16 @@ def pycptv2_targets_dict(fcst_ds, start_date=None):
         fcst_ds = fcst_ds.isel(S=[-1])
     else :
         fcst_ds = fcst_ds.sel(S=[start_date])
-    if "L" in fcst_ds.dims:        
+    if "Li" in fcst_ds.dims:        
         targets = [
             {
                 "label": predictions.target_range_formatting(
-                    fcst_ds['Ti'].squeeze().sel(L=lead).values,
-                    fcst_ds['Tf'].squeeze().sel(L=lead).values,
+                    fcst_ds['Ti'].squeeze().sel(Li=lead).values,
+                    fcst_ds['Tf'].squeeze().sel(Li=lead).values,
                     "months",
                 ),
                 "value": lead,
-            } for lead in fcst_ds["L"].where(
+            } for lead in fcst_ds["Li"].where(
                 ~np.isnat(fcst_ds["T"].squeeze()), drop=True
             ).values
         ]
@@ -149,7 +149,7 @@ def read_pycptv2dataset_single_target(data_path, expand_L=False):
         path of set of nc files for a single target, organized under one or more
         Start month of the year folders mm:02
     expand_L: boolean, optional
-        Expand xr.Dataset with a lead L dimension. Default is False
+        Expand xr.Dataset with a lead Li dimension. Default is False
 
     Returns
     -------
@@ -163,7 +163,7 @@ def read_pycptv2dataset_single_target(data_path, expand_L=False):
     Notes
     -----
     To use in read_pycptv2dataset expecting multiple targets, expand_L must be True
-    in which case T coordinates become variables and L is expanded to all variables.
+    in which case T coordinates become variables and Li is expanded to all variables.
     If single target, expand_L muse be False and Ts remain coordinates of S only.
     """
     mu_slices = []
@@ -198,7 +198,7 @@ def open_var(path, filepattern, expand_L=False):
     filepattern: str
         files name pattern with year replaced by a *
     expand_L: boolean, optional
-        Expand xr.Dataset with a lead L dimension. Default is False
+        Expand xr.Dataset with a lead Li dimension. Default is False
 
     Returns
     -------
@@ -208,16 +208,15 @@ def open_var(path, filepattern, expand_L=False):
     Notes
     -----
     To use in read_pycptv2dataset expecting multiple targets, expand_L must be True
-    in which case T coordinates become variables and L is expanded to all variables.
+    in which case T coordinates become variables and Li is expanded to all variables.
     If single target, expand_L muse be False and Ts remain coordinates of S only.
     """
     filenames = path.glob(filepattern)
     slices = (xr.open_dataset(f) for f in filenames)
     ds = xr.concat(slices, 'T').swap_dims(T='S')
     if expand_L :
-        L = (((
+        Li = (((
             ds.isel(S=[0])["Ti"].dt.month - ds.isel(S=[0])["S"].dt.month
         ) + 12) % 12).data
-        ds = ds.reset_coords(["T", "Ti", "Tf"]).expand_dims(dim={"L": L})
-        print(ds)
+        ds = ds.reset_coords(["T", "Ti", "Tf"]).expand_dims(dim={"Li": Li})
     return ds

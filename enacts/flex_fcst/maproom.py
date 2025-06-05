@@ -60,8 +60,8 @@ def register(FLASK, config):
         # according to files available
         fcst_ds, obs = pycpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
         start_dates = fcst_ds["S"].dt.strftime("%b-%-d-%Y").values
-        if "L" in fcst_ds.dims :
-            lead_times = fcst_ds["L"].values
+        if "Li" in fcst_ds.dims :
+            lead_times = fcst_ds["Li"].values
             target_display = "inline-block" if (lead_times.size > 1) else "none"
         else :
             lead_times = None
@@ -186,8 +186,8 @@ def register(FLASK, config):
         lng = marker_pos[1]
         fcst_ds, obs = pycpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
         fcst_ds = fcst_ds.sel(S=start_date)
-        if "L" in fcst_ds.dims :
-            fcst_ds = fcst_ds.sel(L=int(lead_time))
+        if "Li" in fcst_ds.dims :
+            fcst_ds = fcst_ds.sel(Li=int(lead_time))
         obs = obs.where(
             obs["T"].dt.month == fcst_ds.squeeze()["T"].dt.month.values, drop=True,
         )
@@ -496,8 +496,8 @@ def register(FLASK, config):
         # Reading
         fcst_ds, obs = pycpt.get_fcst(GLOBAL_CONFIG["datasets"]["fcst_data"])
         fcst_ds = fcst_ds.sel(S=start_date)
-        if "L" in fcst_ds.dims :
-            fcst_ds = fcst_ds.sel(L=int(lead_time))
+        if "Li" in fcst_ds.dims :
+            fcst_ds = fcst_ds.sel(Li=int(lead_time))
         obs = obs.where(
             obs["T"].dt.month == fcst_ds.squeeze()["T"].dt.month.values, drop=True,
         )
