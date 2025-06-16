@@ -359,9 +359,9 @@ countries:
                     colormap: pne_25
                     is_poe: no
         subpages:
-            default: "madagascar"
-            ndj: "madagascar-ndj"
-            ond: "madagascar-ond"
+            DJF: "madagascar"
+            NDJ: "madagascar-ndj"
+            OND: "madagascar-ond"
         seasons:
             season1:
                 label: DJF
@@ -523,9 +523,9 @@ countries:
                     colormap: pne_25
                     is_poe: no
         subpages:
-            default: "madagascar"
-            ndj: "madagascar-ndj"
-            ond: "madagascar-ond"
+            DJF: "madagascar"
+            NDJ: "madagascar-ndj"
+            OND: "madagascar-ond"
         seasons:
             season1:
                 label: NDJ
@@ -697,9 +697,9 @@ countries:
                     colormap: pne_25
                     is_poe: no
         subpages:
-            default: "madagascar"
-            ndj: "madagascar-ndj"
-            ond: "madagascar-ond"
+            DJF: "madagascar"
+            NDJ: "madagascar-ndj"
+            OND: "madagascar-ond"
         seasons:
             season1:
                 label: OND

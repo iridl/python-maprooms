@@ -779,6 +779,7 @@ APP.clientside_callback(
     Output("season", "options"),
     Output("season", "value"),
     Output("season_links", "children"),
+    Output("season_links", "label"),
     Output("mode", "options"),
     Output("mode", "value"),
     Output("predictand", "options"),
@@ -807,11 +808,14 @@ def initial_setup(pathname: str, qstring: str):
         for k in sorted(c["seasons"].keys())
     ]
 
-    subpages = c.get("subpages", {})
+    subpages = c.get("subpages", {"DEFAULT": country_key})
     season_link_options = [
-        dbc.DropdownMenuItem(subpage, href=f"/fbfmaproom/{subpage_link}")
+        dbc.DropdownMenuItem(subpage, href=f"{PFX}/{subpage_link}", active=(subpage_link == country_key))
         for subpage, subpage_link in subpages.items()
     ]
+    active_seasons = [subpage for subpage, subpage_link in subpages.items() if subpage_link==country_key]
+    active_season = active_seasons[0] if len(active_seasons) > 0 else ""
+
     cx, cy = c["center"]
     
     mode_options = [
@@ -902,6 +906,7 @@ def initial_setup(pathname: str, qstring: str):
         season_options,
         season_value,
         season_link_options,
+        active_season,
         mode_options,
         mode_value,
         predictand_options,
