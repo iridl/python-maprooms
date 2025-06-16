@@ -117,28 +117,34 @@ def read_pycptv2dataset(data_path):
     data_path = Path(data_path)
     children = list(data_path.iterdir())
     if 'obs.nc' in map(lambda x: str(x.name), children):
-        fcst_ds, obs = read_pycptv2dataset_single_target(data_path)
+        mu_slices, var_slices, obs = read_pycptv2dataset_single_target(data_path)
     else:
         expand_L = True if (len(children) > 1) else False
-        fcst_ds, obs_slices =  read_pycptv2dataset_single_target(
+        mu_slices, var_slices, obs_slices =  read_pycptv2dataset_single_target(
             children[0], expand_L=expand_L
         )
         obs_slices = [obs_slices]
         if len(children) > 1 :
             for target in children[1:] :
-                new_fcst_ds, new_obs = read_pycptv2dataset_single_target(
+                new_mu_slices, new_var_slices, new_obs = read_pycptv2dataset_single_target(
                     target, expand_L=expand_L
                 )
-                fcst_ds, new_fcst_ds = xr.align(fcst_ds, new_fcst_ds, join="outer")
-                fcst_ds = fcst_ds.fillna(new_fcst_ds)
+                for nms in new_mu_slices:
+                    mu_slices.append(nms)
+                for nvs in new_var_slices:
+                    var_slices.append(nvs)
                 obs_slices.append(new_obs)
         obs = xr.concat(obs_slices, "T")
-        obs = obs.sortby(obs["T"])
+    fcst_ds = (
+        xr.combine_by_coords(mu_slices)
+        .merge(xr.combine_by_coords(var_slices)["prediction_error_variance"])
+    )
+    obs = obs.sortby(obs["T"])
     return fcst_ds, obs
 
 
 def read_pycptv2dataset_single_target(data_path, expand_L=False):
-    """ Create a xr.Dataset from yearly pyCPT nc files for a single target of the
+    """ Lists DataArrays from yearly pyCPT nc files for a single target of the
     year, for a forecast mean and variance variables, appending multiple Starts; and
     the corresponding xr.DataArray of the observations time series used to train that
     target
@@ -153,8 +159,9 @@ def read_pycptv2dataset_single_target(data_path, expand_L=False):
 
     Returns
     -------
-    fcst_ds, obs : xr.Dataset, xr.DataArray
-        dataset of forecast mean and variance from `data_path` and their obs
+    mu_slices, var_slices, obs : tuple(list[xr.DataArray])
+        tuple of list of forecast mean and list of forecast variance from `data_path`
+        and their obs
 
     See Also
     --------
@@ -179,12 +186,8 @@ def read_pycptv2dataset_single_target(data_path, expand_L=False):
                 'MME_forecast_prediction_error_variance_*.nc',
                 expand_L=expand_L,
             ))
-    fcst_mu = xr.concat(mu_slices, "S")
-    fcst_var = xr.concat(var_slices, "S")
-    fcst_ds = fcst_mu.merge(fcst_var)
-    fcst_ds = fcst_ds.sortby(fcst_ds["S"])
     obs = xr.open_dataarray(data_path / "obs.nc")
-    return fcst_ds, obs
+    return mu_slices, var_slices, obs
 
 
 def open_var(path, filepattern, expand_L=False):
