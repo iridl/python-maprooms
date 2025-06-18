@@ -126,13 +126,10 @@ def read_pycptv2dataset(data_path):
                 read_pycptv2dataset_single_target(target, expand_L=expand_L)
             )
             mu_slices += new_mu_slices
-            var_slices =+ new_var_slices
+            var_slices += new_var_slices
             obs.append(new_obs)
         obs = xr.concat(obs, "T")
-    fcst_ds = (
-        xr.combine_by_coords(mu_slices)
-        .merge(xr.combine_by_coords(var_slices)["prediction_error_variance"])
-    )
+    fcst_ds = xr.combine_by_coords(mu_slices).merge(xr.combine_by_coords(var_slices))
     obs = obs.sortby(obs["T"])
     return fcst_ds, obs
 
