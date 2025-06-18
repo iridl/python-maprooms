@@ -120,21 +120,17 @@ def read_pycptv2dataset(data_path):
         mu_slices, var_slices, obs = read_pycptv2dataset_single_target(data_path)
     else:
         expand_L = True if (len(children) > 1) else False
-        mu_slices, var_slices, obs_slices =  read_pycptv2dataset_single_target(
-            children[0], expand_L=expand_L
-        )
-        obs_slices = [obs_slices]
-        if len(children) > 1 :
-            for target in children[1:] :
-                new_mu_slices, new_var_slices, new_obs = read_pycptv2dataset_single_target(
-                    target, expand_L=expand_L
-                )
-                for nms in new_mu_slices:
-                    mu_slices.append(nms)
-                for nvs in new_var_slices:
-                    var_slices.append(nvs)
-                obs_slices.append(new_obs)
-        obs = xr.concat(obs_slices, "T")
+        mu_slices, var_slices, obs = [], [], []
+        for target in children :
+            new_mu_slices, new_var_slices, new_obs = (
+                read_pycptv2dataset_single_target(target, expand_L=expand_L)
+            )
+            for nms in new_mu_slices:
+                mu_slices.append(nms)
+            for nvs in new_var_slices:
+                var_slices.append(nvs)
+            obs.append(new_obs)
+        obs = xr.concat(obs, "T")
     fcst_ds = (
         xr.combine_by_coords(mu_slices)
         .merge(xr.combine_by_coords(var_slices)["prediction_error_variance"])
