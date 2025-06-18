@@ -125,10 +125,8 @@ def read_pycptv2dataset(data_path):
             new_mu_slices, new_var_slices, new_obs = (
                 read_pycptv2dataset_single_target(target, expand_L=expand_L)
             )
-            for nms in new_mu_slices:
-                mu_slices.append(nms)
-            for nvs in new_var_slices:
-                var_slices.append(nvs)
+            mu_slices += new_mu_slices
+            var_slices =+ new_var_slices
             obs.append(new_obs)
         obs = xr.concat(obs, "T")
     fcst_ds = (
