@@ -226,13 +226,14 @@ def control_layout():
                             clearable=False,
                         ),
                     ),
-
+                    # TODO: A hidden dropdown is used to store the season variable.
+                    # This can be removed once season is refactored to be contained in a single page
+                    html.Div(dcc.Dropdown(id="season"), style={"display": "none"}),
                     control(
                         "Season",
                         "The rainy season being forecasted",
-                        dcc.Dropdown(
-                            id="season",
-                            clearable=False,
+                        dbc.DropdownMenu(
+                            id="season_links",
                         ),
                     ),
 

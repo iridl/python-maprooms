@@ -26,7 +26,8 @@ body {
 #main_row {
     display: flex;
     flex-grow: 1;
-    min-height: 0; /* otherwise it gets sized to fit the table content and overflows the viewport. */
+    min-height: 0;
+    /* otherwise it gets sized to fit the table content and overflows the viewport. */
 }
 
 #lcol {
@@ -102,7 +103,8 @@ table.supertable {
     display: block;
 }
 
-table.supertable td, table.supertable th {
+table.supertable td,
+table.supertable th {
     border-right-style: solid;
     border-right-width: 1px;
     border-right-color: rgb(200, 200, 200);
@@ -173,4 +175,36 @@ table.supertable tbody {
 
 .cell-excluded {
     background-color: rgb(150, 150, 150);
+}
+
+#season_links .btn-primary {
+    line-height: 22px;
+    width: 100%;
+    text-align: left;
+    padding: 10px;
+    border-radius: 4px;
+    font: 14px / 16px Arial, Helvetica, sans-serif;
+    --bs-btn-color: #333;
+    --bs-btn-bg: white;
+    --bs-btn-border-color: #ccc;
+    --bs-btn-hover-border-color: #ccc;
+    --bs-btn-hover-bg: white;
+    --bs-btn-hover-color: #333;
+    --bs-btn-active-color: #333;
+    --bs-btn-active-border-color: #ccc;
+    --bs-btn-active-bg: white;
+    --bs-btn-disabled-color: #333;
+    --bs-btn-disabled-bg: white;
+}
+
+#season_links .dropdown-toggle::after {
+    float: right;
+    margin: 5px;
+    border-width: 5px 5px 2.5px;
+    color: #999;
+}
+
+#season_links .dropdown-item {
+    --bs-dropdown-link-active-bg: #cfe2ff;
+    --bs-dropdown-link-active-color: black;
 }
