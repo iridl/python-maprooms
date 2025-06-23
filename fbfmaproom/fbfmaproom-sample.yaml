@@ -971,6 +971,9 @@ countries:
                 length: 3.0
                 issue_months: [11, 0, 1]
                 start_year: 1983
+        subpages:
+            MAM: "ethiopia"
+            OND: "ethiopia-ond"
     ethiopia-ond:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1163,6 +1166,9 @@ countries:
                 length: 3.0
                 issue_months: [8, 7, 6]
                 start_year: 1982
+        subpages:
+            MAM: "ethiopia"
+            OND: "ethiopia-ond"
     southern-oromia:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1449,6 +1455,9 @@ countries:
                 length: 3.0
                 issue_months: [11, 0, 1]
                 start_year: 1983
+        subpages:
+            MAM: "southern-oromia"
+            OND: "southern-oromia-ond"
     southern-oromia-ond:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1675,6 +1684,9 @@ countries:
                 length: 3.0
                 issue_months: [6, 7, 8]
                 start_year: 1983
+        subpages:
+            MAM: "southern-oromia"
+            OND: "southern-oromia-ond"
 
     south-ethiopia:
         logo: Ethiopia_IRI_98x48.png
@@ -1936,6 +1948,9 @@ countries:
                 length: 3.0
                 issue_months: [11, 0, 1]
                 start_year: 1983
+        subpages:
+            MAM: "south-ethiopia"
+            OND: "south-ethiopia-ond"
 
     south-ethiopia-ond:
         logo: Ethiopia_IRI_98x48.png
@@ -2129,6 +2144,9 @@ countries:
                 length: 3.0
                 issue_months: [8, 7, 6]
                 start_year: 1982
+        subpages:
+            MAM: "south-ethiopia"
+            OND: "south-ethiopia-ond"
 
     niger:
         logo: Niger_IRI_120x48.png
@@ -3295,6 +3313,10 @@ countries:
                 length: 3.0
                 issue_months: [8]
                 start_year: 1996
+        subpages:
+            OND: guatemala
+            JJA: guatemala-jja
+            ASO: guatemala-aso
 
     guatemala-jja:
         logo: Guatemala_IRI_120x48.png
@@ -3439,6 +3461,10 @@ countries:
                 length: 3.0
                 issue_months: [0, 1, 2, 3, 4]
                 start_year: 1996
+        subpages:
+            OND: guatemala
+            JJA: guatemala-jja
+            ASO: guatemala-aso
 
 
     guatemala-aso:
@@ -3561,7 +3587,10 @@ countries:
                 length: 3.0
                 issue_months: [3, 4, 5, 6]
                 start_year: 1996
-
+        subpages:
+            OND: guatemala
+            JJA: guatemala-jja
+            ASO: guatemala-aso
 
     guatemala-may:
         logo: Guatemala_IRI_120x48.png
@@ -3801,6 +3830,11 @@ countries:
                 length: 3.0
                 issue_months: [3, 4, 5]
                 start_year: 1990
+        subpages:
+            JJAS: djibouti-jjas
+            JAS: djibouti
+            MAM: djibouti-mam
+            OND: djibouti-ond
 
     djibouti-mam:
         logo: Djibouti_IRI_96x48.svg
@@ -3942,6 +3976,11 @@ countries:
                 length: 3.0
                 issue_months: [11, 0, 1]
                 start_year: 1991
+        subpages:
+            JJAS: djibouti-jjas
+            JAS: djibouti
+            MAM: djibouti-mam
+            OND: djibouti-ond
 
     djibouti-ond:
         logo: Djibouti_IRI_96x48.svg
@@ -4093,6 +4132,11 @@ countries:
                 length: 3.0
                 issue_months: [6, 7, 8]
                 start_year: 1991
+        subpages:
+            JJAS: djibouti-jjas
+            JAS: djibouti
+            MAM: djibouti-mam
+            OND: djibouti-ond
     djibouti-jjas:
         logo: Djibouti_IRI_96x48.svg
         resolution: [.25, .25]
@@ -4222,6 +4266,11 @@ countries:
                 length: 4.0
                 issue_months: [2, 3, 4]
                 start_year: 1991
+        subpages:
+            JJAS: djibouti-jjas
+            JAS: djibouti
+            MAM: djibouti-mam
+            OND: djibouti-ond
 
     lesotho:
         logo: Lesotho_IRI_94x48.png
@@ -4411,6 +4460,9 @@ countries:
                 length: 3.0
                 issue_months: [8, 9, 10]
                 start_year: 1983
+        subpages:
+            OND: lesotho-ond
+            DJF: lesotho
     lesotho-ond:
         logo: Lesotho_IRI_94x48.png
         resolution: [.0375, .0375]
@@ -4600,3 +4652,6 @@ countries:
                 length: 3.0
                 issue_months: [5, 6, 7, 8]
                 start_year: 1983
+        subpages:
+            OND: lesotho-ond
+            DJF: lesotho
