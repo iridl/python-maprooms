@@ -3239,6 +3239,68 @@ countries:
                 issue_months: [0, 1, 2, 3, 4, 5]
                 start_year: 1991
 
+    zambia:
+        logo: IRI_128x128.png
+        resolution: [.25, .25]
+        center: [27, -15]
+        zoom: 6
+        rotation: 0
+        marker:  [25, -17]
+        origin: [0, 0]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Zambia'
+
+            - name: Province
+              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
+                  where adm0_name = 'Zambia'
+
+            - name: District
+              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
+                  where adm0_name = 'Zambia'
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep
+                predictand: bad-years
+            observations:
+                enso_state: *enso_3mo
+                bad-years:
+                    label: Reported bad years
+                    path: zambia/bad_years-national.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+            forecasts:
+                pnep:
+                    label: Forecast prob non-exc
+                    description: NextGen forecast probability of non-exceedance of selected percentile
+                    path: zambia/prcp-ndj-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+
+        seasons:
+            season1:
+                label: NDJ
+                target_month: 11.5
+                length: 3.0
+                issue_months: [7,8,9]
+                start_year: 1982
+
 
     guatemala:
         logo: Guatemala_IRI_120x48.png
