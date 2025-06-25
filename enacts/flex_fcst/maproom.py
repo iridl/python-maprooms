@@ -13,7 +13,7 @@ from . import predictions
 from . import pycpt
 import maproom_utilities as mapr_u
 import dash_leaflet as dlf
-from globals_ import FLASK, GLOBAL_CONFIG
+from globals_ import GLOBAL_CONFIG
 import calc
 
 def register(FLASK, config):
@@ -302,7 +302,7 @@ def register(FLASK, config):
                 + "<br>%{x:.1f} "
                 + obs.attrs["units"],
                 name="obs (empirical)",
-                line=pgo.scatter.Line(color="blue"),
+                line=pgo.scatter.Line(color="forestgreen"),
             )
         )
         cdf_graph.update_traces(mode="lines", connectgaps=False)
