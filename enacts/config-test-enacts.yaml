@@ -76,6 +76,10 @@ datasets:
     # Soil data
     taw_file: /data/remic/mydatafiles/soilgrids/Senegal/GYGA_ERZD_wat_cap_abs_anacim_enacts3.nc
 
+    # Forecast data
+    fcst_data: #Use one or the other to test the nc multiple/single cases
+        forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3
+        #forecast_path: /data/remic/mydatafiles/ANACIM/cpt_demo/UCSBV3/Jul-Sep
 
 maprooms:
     # Onset
@@ -131,4 +135,6 @@ maprooms:
           min_wet_days: 60 #days
           wet_day_def: 1 #mm
 
-    flex_fcst: null
+    flex_fcst:
+      - y_transform: false
+        variable: Precipitation
