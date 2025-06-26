@@ -198,7 +198,7 @@ def control_layout():
                         },
                         children=[
                             html.H4("AA Design"),
-                            html.Img(id="logo"),
+                            html.Img(id="logo", height=48),
                         ],
                     ),
                     control(

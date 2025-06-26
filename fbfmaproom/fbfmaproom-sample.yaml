@@ -3241,7 +3241,7 @@ countries:
                 start_year: 1991
 
     zambia:
-        logo: IRI_128x128.png
+        logo: IRI_icon_Blue.svg
         resolution: [.25, .25]
         center: [27, -15]
         zoom: 6
