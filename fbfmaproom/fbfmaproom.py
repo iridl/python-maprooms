@@ -808,7 +808,8 @@ def initial_setup(pathname: str, qstring: str):
         for k in sorted(c["seasons"].keys())
     ]
 
-    subpages = c.get("subpages", {"DEFAULT": country_key})
+    season = next(iter(c['seasons'].values()))['label']
+    subpages = c.get("subpages", {season: country_key})
     season_link_options = [
         dbc.DropdownMenuItem(subpage, href=f"{PFX}/{subpage_link}", active=(subpage_link == country_key))
         for subpage, subpage_link in subpages.items()
