@@ -3246,7 +3246,7 @@ countries:
         zoom: 6
         rotation: 0
         marker:  [25, -17]
-        origin: [0, 0]
+        origin: [0.125, 0.125]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
@@ -3300,7 +3300,8 @@ countries:
                 length: 3.0
                 issue_months: [7,8,9]
                 start_year: 1982
-
+        subpages:
+            NDJ: "zambia"
 
     guatemala:
         logo: Guatemala_IRI_120x48.png
