@@ -3321,12 +3321,12 @@ countries:
 
     guatemala-jja:
         logo: Guatemala_IRI_120x48.png
-        resolution: [.1, .1]
+        resolution: [.05, .05]
         center: [-89, 16]
         zoom: 8
         rotation: 0
         marker:  [-90, 16]
-        origin: [0, 0]
+        origin: [0, .025]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
