@@ -2150,7 +2150,8 @@ countries:
 
     niger:
         logo: Niger_IRI_120x48.png
-        resolution: [0.05, 0.05]
+        resolution: [0.25, 0.25]
+        origin: [0.125, 0.125]
         center: [8.1, 17]
         zoom: 6
         rotation: 0
