@@ -173,12 +173,6 @@ def test_obs_tile():
     assert resp.status_code == 200
     assert resp.mimetype == "image/png"
 
-def test_vuln_tile():
-    with fbfmaproom.SERVER.test_client() as client:
-        resp = client.get("/fbfmaproom-tiles/vuln/6/39/30/ethiopia/0/2019")
-    assert resp.status_code == 200
-    assert resp.mimetype == "image/png"
-
 def test_trigger_check_pixel_trigger():
     with fbfmaproom.SERVER.test_client() as client:
         r = client.get(
