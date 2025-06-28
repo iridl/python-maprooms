@@ -30,7 +30,7 @@ def test_table_cb():
         issue_month_abbrev = 'feb',
         freq=30,
         mode='0',
-        geom_key='ET05',
+        position=(6.875, 43.875),
         pathname='/fbfmaproom/ethiopia',
         severity=0,
         predictand_key="bad-years",
@@ -345,7 +345,7 @@ def test_stats():
         assert resp.status_code == 200
 
 def test_update_selected_region_pixel():
-    feature_collection, key = fbfmaproom.update_selected_region.__wrapped__(
+    feature_collection = fbfmaproom.update_selected_region.__wrapped__(
         [6.875, 43.875],
         'pixel',
         '/fbfmaproom/ethiopia',
@@ -365,25 +365,22 @@ def test_update_selected_region_pixel():
         ]
     }
     assert feature_collection == expected
-    assert key == "[[6.75, 43.75], [7.0, 44.0]]"
 
 def test_update_selected_region_level0():
-    feature_collection, key = fbfmaproom.update_selected_region.__wrapped__(
+    feature_collection = fbfmaproom.update_selected_region.__wrapped__(
         [6.875, 43.875],
         '0',
         '/fbfmaproom/ethiopia',
     )
     assert len(feature_collection['features'][0]['coordinates'][0][0]) == 1322
-    assert key == "ET05"
 
 def test_update_selected_region_level1():
-    feature_collection, key = fbfmaproom.update_selected_region.__wrapped__(
+    feature_collection = fbfmaproom.update_selected_region.__wrapped__(
         [6.875, 43.875],
         '1',
         '/fbfmaproom/ethiopia',
     )
     assert len(feature_collection['features'][0]['coordinates'][0][0]) == 143
-    assert key == "ET0505"
 
 def test_update_popup_pixel():
     content = fbfmaproom.update_popup.__wrapped__(

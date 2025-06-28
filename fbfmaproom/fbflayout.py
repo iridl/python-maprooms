@@ -189,7 +189,6 @@ def control_layout():
             html.Div(
                 id="control_row",
                 children=[
-                    dcc.Store(id="geom_key"),
                     html.Div(
                         style={
                             'display': 'flex',

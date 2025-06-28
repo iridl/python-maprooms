@@ -1016,36 +1016,15 @@ def map_click(pathname, lat_lng, qstring):
 
 @APP.callback(
     Output("outline", "data"),
-    Output("geom_key", "data"),
     Input("marker", "position"),
     Input("mode", "value"),
     State("location", "pathname"),
 )
 def update_selected_region(position, mode, pathname):
     country_key = country(pathname)
-    y, x = position
-    c = CONFIG["countries"][country_key]
-    selected_shape = None
-    key = None
-    if mode == "pixel":
-        (x0, y0), (x1, y1) = calculate_bounds(
-            (x, y), c["resolution"], c.get("origin", (0, 0))
-        )
-        pixel = box(x0, y0, x1, y1)
-        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), "0")
-        if pixel.intersects(geom):
-            selected_shape = box(x0, y0, x1, y1)
-        key = str([[y0, x0], [y1, x1]])
-    else:
-        geom, attrs = geometry_containing_point(country_key, (x, y), mode)
-        if geom is not None:
-            selected_shape = geom
-            key = str(attrs["key"])
-    if selected_shape is None:
-        selected_shape = ZERO_SHAPE
-
+    selected_shape, _, _ = get_shape(position, mode, country_key)
     geojson = shapely.geometry.mapping(selected_shape)
-    return {'features': [geojson]}, key
+    return {'features': [geojson]}
 
 
 def box(x0, y0, x1, y1):
@@ -1063,26 +1042,19 @@ ZERO_SHAPE = box(0, 0, 0, 0)
 )
 def update_popup(pathname, position, mode):
     country_key = country(pathname)
-    y, x = position
-    c = CONFIG["countries"][country_key]
+    selected_shape, geom_key, label = get_shape(position, mode, country_key)
     title = "No Data"
-    content = []
     if mode == "pixel":
-        (x0, y0), (x1, y1) = calculate_bounds(
-            (x, y), c["resolution"], c.get("origin", (0, 0))
-        )
-        pixel = box(x0, y0, x1, y1)
-        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), "0")
-        if pixel.intersects(geom):
+        if geom_key is not None:
+            [[y0, x0], [y1, x1]] = json.loads(geom_key)
             px = (x0 + x1) / 2
             pxs = "E" if px > 0.0 else "W" if px < 0.0 else ""
             py = (y0 + y1) / 2
             pys = "N" if py > 0.0 else "S" if py < 0.0 else ""
             title = f"{np.abs(py):.5f}° {pys} {np.abs(px):.5f}° {pxs}"
     else:
-        _, attrs = geometry_containing_point(country_key, (x, y), mode)
-        if attrs is not None:
-            title = attrs["label"]
+        if label is not None:
+            title = label
     return [html.H3(title)]
 
 
@@ -1091,7 +1063,7 @@ def update_popup(pathname, position, mode):
     Input("issue_month", "value"),
     Input("freq", "value"),
     Input("mode", "value"),
-    Input("geom_key", "data"),
+    Input("marker", "position"),
     Input("location", "pathname"),
     Input("severity", "value"),
     Input("predictand", "value"),
@@ -1099,7 +1071,7 @@ def update_popup(pathname, position, mode):
     Input("include_upcoming", "value"),
     State("season", "value"),
 )
-def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predictand_key, predictor_keys, include_upcoming, season_id):
+def table_cb(issue_month_abbrev, freq, mode, position, pathname, severity, predictand_key, predictor_keys, include_upcoming, season_id):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     season_config = config["seasons"][season_id]
@@ -1125,6 +1097,8 @@ def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predi
         predictand_key,
         season_config["length"],
     )
+
+    _, geom_key, _ = get_shape(position, mode, country_key)
 
     try:
         if geom_key is None:
@@ -1160,6 +1134,30 @@ def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predi
         # nothing left over from the previous location that could be
         # mistaken for data for the current location.
         return None
+
+
+def get_shape(position, mode, country_key):
+    y, x = position
+    c = CONFIG["countries"][country_key]
+    selected_shape = ZERO_SHAPE
+    key = None
+    label = None
+    if mode == "pixel":
+        (x0, y0), (x1, y1) = calculate_bounds(
+            (x, y), c["resolution"], c.get("origin", (0, 0))
+        )
+        pixel = box(x0, y0, x1, y1)
+        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), "0")
+        if pixel.intersects(geom):
+            selected_shape = box(x0, y0, x1, y1)
+            key = str([[y0, x0], [y1, x1]])
+    else:
+        geom, attrs = geometry_containing_point(country_key, (x, y), mode)
+        if geom is not None:
+            selected_shape = geom
+            key = str(attrs["key"])
+            label = attrs["label"]
+    return selected_shape, key, label
 
 
 @APP.callback(
