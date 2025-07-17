@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 from scipy.stats import norm
+import operator as op
 
 
 #This is what we should need for the app
@@ -623,3 +624,56 @@ def spells_length(flagged_data, dim):
     spells = spells_only.roll(**{dim: -1})
     # Turns remaining 0s to NaN
     return spells.where(spells > 0)
+
+
+def number_extreme_events_within_days(
+    daily_data, operator, threshold, window, dim="T"
+):
+    """Count extreme events
+    
+    Extreme events constitute cumulative `daily_data` over `window` -day
+    (or shorther) verifying the `operator` `threshold`
+    
+    Parameters
+    ----------
+    daily_data : DataArray
+        Array of daily data
+    operator : str
+        "lt", "le", "gt", "ge"
+        determines the condition to meet with respect to `threshold`
+    threshold : float
+        threshold to meet in `daily_data` units
+    window : int
+        maximum length of days to cumulate over to constitute an event
+    dim : str, optional
+        name of `daily_data` time dimension
+        
+    Returns
+    -------
+    DataArray
+        Array of count of extreme events
+    
+    Notes
+    -----
+    Is meant to be used to produce yearly seasonal time series
+    
+    Examples
+    --------
+    Number of rain events of >80mm in 2 days or less:
+    number_extreme_events_within_days(rain_daily_data_in_mm, "gt", 80, 2)    
+    """
+    count = 0
+    #Start with shortest events
+    for w in range(1, window+1):
+        for t in range(len(daily_data[dim])-(w-1)):
+            #Assert new event
+            new_event = getattr(op, operator)(
+                daily_data.isel({dim: slice(t, t+w)}).sum(dim), threshold
+            )
+            #Mask days having formed a new event so that they won't account again
+            #for following events (t loop) or longer events (w loop)
+            daily_data[{dim: slice(t, t+w)}] = (
+                daily_data[{dim: slice(t, t+w)}].where(~new_event)
+            )
+            count = count + new_event
+    return count
