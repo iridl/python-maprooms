@@ -8,10 +8,75 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry import Polygon
+from pathlib import Path
+
 
 # Date Reading functions
 
 np.random.seed(123)
+
+def set_up_dims(xda, time_res="daily"):
+    """Sets up spatial and temporal dimensions from a set of time-dependent netcdf
+    ENACTS files.
+
+    To be used in `preprocess` of `xarray.open_mfdataset` .
+    Using some Ingrid naming conventions.
+
+    Parameters
+    ----------
+    xda : DataArray
+        from the list of `paths` from `xarray.open_mfdataset`
+    time_res : str, optional
+        indicates the time resolution of the set of time-dependent files.
+        Default is "daily" and other option is "dekadal"
+    
+    Returns
+    -------
+    DataArray of X (longitude), Y (latitude) and T (time, daily or dekadal)
+
+    See Also
+    --------
+    xarray.open_mfdataset, filename2datetime64
+    """    
+    return xda.expand_dims(T = [filename2datetime64(
+        Path(xda.encoding["source"]), time_res=time_res,
+    )]).rename({'Lon': 'X','Lat': 'Y'})
+
+
+def filename2datetime64(file, time_res="daily"):
+    """Return time associated with an ENACTS filename in datetime
+
+    In case of dekadal, returns the first day of the dekad (i.e. 1, 11, or 21)
+
+    Parameters
+    ----------
+    file : pathlib(Path)
+        file to extract date from name
+    time_res : str, optional
+        indicates the time resolution of the file.
+        Default is "daily" and other option is "dekadal"
+    
+    Returns
+    -------
+    numpy.datetime64
+
+    See Also
+    --------
+    set_up_dims, convert
+    """
+    datestr = file.name.split("_")[2]
+    year = int(datestr[0:4])
+    month = int(datestr[4:6])
+    if time_res == "daily":
+        day = int(datestr[6:8])
+    elif time_res == "dekadal":
+        day = (int(datestr[6:7]) - 1) * 10 + 1
+    else:
+        raise Exception(
+            "time resolution must be 'daily' or 'dekadal' "
+        )
+    return np.datetime64(datetime.datetime(year, month, day))
+
 
 def get_data(variable, time_res, ds_conf):
     """ Gets ENACTS data for ENACTS Maprooms, read from files or synthetic
@@ -841,7 +906,6 @@ def _cess_date(dry_thresh, dry_spell_length_thresh, sm_func, time_coord):
 
 
 # Time functions
-
 
 def intervals_to_points(intervals, to_point="mid", keep_attrs=True):
     """ Given an xr.DataArray of pd.Interval, return an xr.DataArray of the left,
