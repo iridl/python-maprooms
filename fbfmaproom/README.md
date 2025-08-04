@@ -9,7 +9,7 @@ For now, these instructions are specific to developers working on an IRI server.
 Choose port on which to run your development server. You must choose one that isn't in use by another developer on the same server. Log into the server (shortfin01 in the example) and forward your chosen port (1234 in the example).
 
 ```
-ssh -L 1234:localhost:1234 shortfin01.iri.columbia.edu
+ssh -L 1234:localhost:1234 mako.iri.columbia.edu
 ```
 
 ### On the server, create an ssh key to use with GitHub
@@ -39,17 +39,6 @@ cd python-maprooms/fbfmaproom
 module load python/miniconda3.9.5
 ```
 
-### Create a conda environment containing this project's dependencies
-
-```
-conda create -n fbfmaproom2 --file conda-linux-64.lock
-```
-(substituting osx or win for linux as appropriate)
-
-You don't need to install conda-lock for this.
-
-Note that the command is `conda create`, not `conda env create`. Both exist, and they're different :-(
-
 ### Create a local configuration file
 
 Create a file called `config-local.yaml` with the following contents, modified as noted in the comments.
@@ -60,7 +49,7 @@ dev_server_port: 1234 # the port you chose earlier
 ```
 
 ## Running the application in your development environment
-### Activate the conda environment
+### Activate the conda environment (pre-installed on the development server)
 ```
 conda activate fbfmaproom2
 ```
