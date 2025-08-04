@@ -8,6 +8,8 @@ For now, these instructions are specific to developers working on an IRI server.
 
 Choose port on which to run your development server. You must choose one that isn't in use by another developer on the same server. Log into the server (mako in the example) and forward your chosen port (xxxx in the example). Your chosen port should be a number greater than 1000. 
 
+An easy way to ensure that you are using a unique port number is to use your Unix User ID. You can determine this ID by logging into the server and running the command 'id -u'. 
+
 ```
 ssh -L xxxx:localhost:xxxx mako.iri.columbia.edu
 ```
