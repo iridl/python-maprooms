@@ -3094,6 +3094,19 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
+                pnep-v6:
+                    label: Forecast prob non-exc v6
+                    description: NextGen forecast probability of non-exceedance of selected percentile v6
+                    path: guatemala/prcp-jja-v6.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
             vuln:
                 colormap: vulnerability
                 range: [0.0, 5.0]
@@ -3203,6 +3216,19 @@ countries:
                     label: Forecast prob non-exc v2
                     description: NextGen forecast probability of non-exceedance of selected percentile v2
                     path: guatemala/prcp-aso-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v4:
+                    label: Forecast prob non-exc v4
+                    description: NextGen forecast probability of non-exceedance of selected percentile v4
+                    path: guatemala/prcp-aso-v4.zarr
                     var_names:
                         value: pne
                         lat: Y
