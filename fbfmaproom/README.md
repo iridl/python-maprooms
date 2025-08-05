@@ -6,10 +6,12 @@ For now, these instructions are specific to developers working on an IRI server.
 
 ### Log into the server, with port forwarding enabled
 
-Choose port on which to run your development server. You must choose one that isn't in use by another developer on the same server. Log into the server (shortfin01 in the example) and forward your chosen port (1234 in the example).
+Choose port on which to run your development server. You must choose one that isn't in use by another developer on the same server. Log into the server (mako in the example) and forward your chosen port (xxxx in the example). Your chosen port should be a number greater than 1000. 
+
+An easy way to ensure that you are using a unique port number is to use your Unix User ID. You can determine this ID by logging into the server and running the command 'id -u'. 
 
 ```
-ssh -L 1234:localhost:1234 shortfin01.iri.columbia.edu
+ssh -L xxxx:localhost:xxxx mako.iri.columbia.edu
 ```
 
 ### On the server, create an ssh key to use with GitHub
@@ -36,19 +38,8 @@ cd python-maprooms/fbfmaproom
 ### Enable conda
 
 ```
-module load python/miniconda3.9.5
+module load python/miniconda3
 ```
-
-### Create a conda environment containing this project's dependencies
-
-```
-conda create -n fbfmaproom2 --file conda-linux-64.lock
-```
-(substituting osx or win for linux as appropriate)
-
-You don't need to install conda-lock for this.
-
-Note that the command is `conda create`, not `conda env create`. Both exist, and they're different :-(
 
 ### Create a local configuration file
 
@@ -56,11 +47,11 @@ Create a file called `config-local.yaml` with the following contents, modified a
 ```
 db:
     password: itsasecret # get the real db password from another developer
-dev_server_port: 1234 # the port you chose earlier
+dev_server_port: xxxx # the port you chose earlier
 ```
 
 ## Running the application in your development environment
-### Activate the conda environment
+### Activate the conda environment (pre-installed on the development server)
 ```
 conda activate fbfmaproom2
 ```
@@ -83,7 +74,7 @@ All datasets used by the application are stored in zarr format. There are two ca
 
 The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. First read the script and find the name of the dataset you want to update, e.g. `ethiopia/rain-mam`. Then run the script as follows, substituting the chosen dataset name. Note that we run this script in the enactsmaproom conda environment, not the fbfmaproom environment. The fbfmaproom environment is missing the netcdf library, which the script requires; using the enactsmaproom environment is a lazy workaround.
 ```
-conda activate /home/aaron/miniconda3/envs/enactsmaproom
+conda activate enactsmaproom
 CONFIG=fbfmaproom-sample.py python fbf-update-data.py ethiopia/pnep
 ```
  
