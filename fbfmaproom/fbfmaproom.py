@@ -325,19 +325,21 @@ def geometry_containing_point(
     return geom, attrs
 
 
-def retrieve_shapes_local(country_key: str, mode: str) -> pd.DataFrame:
-    """Read shapes from local GADM shapefiles"""
+def retrieve_shapes(country_key: str, mode: str) -> pd.DataFrame:
+    """Read shapes from local shapefiles"""
     config = CONFIG["countries"][country_key]
     shape_config = config["shapes"][int(mode)]
     
-    # Path to shapefiles
-    shapefile_path = f"data/djibouti/dji_adm_gadm_2022_shp/{shape_config['local_file']}"
+    # Build path 
+    data_root = CONFIG["data_root"]
+    shapes_version = config.get("shapes_version")  
+    shapefile_path = f"{data_root}/{country_key}/shapes/{shapes_version}/{shape_config['local_file']}"
     
     try:
         # Read the shapefile
         gdf = gpd.read_file(shapefile_path)
         
-        # Map GADM columns to expected format
+        # Map shapefile columns to expected format
         df = pd.DataFrame({
             'key': gdf[shape_config['key_field']],
             'label': gdf[shape_config['label_field']],
@@ -416,7 +418,9 @@ def region_shape(mode, country_key, geom_key):
         # Try local shapefile first
         if 'local_file' in shape_config:
             try:
-                shapefile_path = f"data/djibouti/dji_adm_gadm_2022_shp/{shape_config['local_file']}"
+                data_root = CONFIG["data_root"]
+                shapes_version = config.get("shapes_version")
+                shapefile_path = f"{data_root}/{country_key}/shapes/{shapes_version}/{shape_config['local_file']}"
                 gdf = gpd.read_file(shapefile_path)
                 
                 # Find the row with matching key
@@ -431,7 +435,7 @@ def region_shape(mode, country_key, geom_key):
         # Fall back to database
         try:
             base_query = shape_config["sql"]
-            response = subquery_unique(base_query, geom_key, "the_geom")
+            response = subquery_unique(base_query, geom_key, "the_geom", country_key)
             if hasattr(response, 'tobytes'):
                 shape = wkb.loads(response.tobytes())
             else:
@@ -440,8 +444,7 @@ def region_shape(mode, country_key, geom_key):
         except Exception as e:
             print(f"Database shape lookup failed: {e}")
         
-        # Return a default bounding box for Djibouti as final fallback
-        return Polygon([(42.5, 11.5), (42.5, 12.5), (43.5, 12.5), (43.5, 11.5)])
+        raise NotFoundError(f"Could not find shape for region {geom_key} in country {country_key}")
 
 
 def region_label(country_key: str, mode: int, region_key: str):
@@ -454,7 +457,9 @@ def region_label(country_key: str, mode: int, region_key: str):
         # Try local shapefile first
         if 'local_file' in shape_config:
             try:
-                shapefile_path = f"data/djibouti/dji_adm_gadm_2022_shp/{shape_config['local_file']}"
+                data_root = CONFIG["data_root"]
+                shapes_version = config.get("shapes_version")
+                shapefile_path = f"{data_root}/{country_key}/shapes/{shapes_version}/{shape_config['local_file']}"
                 gdf = gpd.read_file(shapefile_path)
                 
                 # Find the row with matching key
@@ -469,19 +474,21 @@ def region_label(country_key: str, mode: int, region_key: str):
         # Fall back to database
         try:
             base_query = shape_config["sql"]
-            label = subquery_unique(base_query, region_key, "label")
+            label = subquery_unique(base_query, region_key, "label", country_key)
             return label
         except Exception as e:
             print(f"Database label lookup failed: {e}")
             return f"Region {region_key}"
 
 
-def subquery_unique_local(base_query, key, field, mode):
+def subquery_unique(base_query, key, field, mode, country_key):
     """Query local shapefile data instead of database"""
-    config = CONFIG["countries"]["djibouti"]
+    config = CONFIG["countries"][country_key]
     shape_config = config["shapes"][int(mode)]
     
-    shapefile_path = f"data/djibouti/dji_adm_gadm_2022_shp/{shape_config['local_file']}"
+    data_root = CONFIG["data_root"]
+    shapes_version = config.get("shapes_version")
+    shapefile_path = f"{data_root}/{country_key}/shapes/{shapes_version}/{shape_config['local_file']}"
     
     try:
         gdf = gpd.read_file(shapefile_path)
@@ -506,24 +513,27 @@ def subquery_unique_local(base_query, key, field, mode):
         if field == "label":
             return f"Region {key}"
         elif field == "the_geom":
-            from shapely.geometry import Polygon
-            return Polygon([(42.5, 11.5), (42.5, 12.5), (43.5, 12.5), (43.5, 11.5)])
+            raise NotFoundError(f"Could not find geometry for region {key} in country {country_key}")
         else:
             return None
 
 
-def subquery_unique(base_query, key, field):
+def subquery_unique(base_query, key, field, country_key=None):
     # Try to determine mode from the base_query context
     # This is a simplified approach - in practice, you might need to pass mode as parameter
     mode = 0  # Default to national level
     
     # Check if we have local shapefile configuration
-    config = CONFIG["countries"]["djibouti"]
-    if len(config["shapes"]) > mode and 'local_file' in config["shapes"][mode]:
-        try:
-            return subquery_unique_local(base_query, key, field, mode)
-        except Exception as e:
-            print(f"Local shapefile query failed, trying database: {e}")
+    if country_key is None:
+        # Fallback to database if no country_key provided
+        pass
+    else:
+        config = CONFIG["countries"][country_key]
+        if len(config["shapes"]) > mode and 'local_file' in config["shapes"][mode]:
+            try:
+                return subquery_unique(base_query, key, field, mode, country_key)
+            except Exception as e:
+                print(f"Local shapefile query failed, trying database: {e}")
     
     # Fall back to database
     try:
@@ -544,8 +554,7 @@ def subquery_unique(base_query, key, field):
         if field == "label":
             return f"Region {key}"
         elif field == "the_geom":
-            from shapely.geometry import Polygon
-            return Polygon([(42.5, 11.5), (42.5, 12.5), (43.5, 12.5), (43.5, 11.5)])
+            raise NotFoundError(f"Could not find geometry for region {key} in database")
         else:
             return None
 
@@ -1810,7 +1819,10 @@ def regions_endpoint():
     # Try local shapefile first
     if 'local_file' in shapes_config:
         try:
-            shapefile_path = f"data/djibouti/dji_adm_gadm_2022_shp/{shapes_config['local_file']}"
+            data_root = CONFIG["data_root"]
+            country_config = CONFIG["countries"][country_key]
+            shapes_version = country_config.get("shapes_version")
+            shapefile_path = f"{data_root}/{country_key}/shapes/{shapes_version}/{shapes_config['local_file']}"
             gdf = gpd.read_file(shapefile_path)
             
             df = pd.DataFrame({
