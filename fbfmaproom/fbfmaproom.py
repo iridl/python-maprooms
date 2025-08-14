@@ -324,7 +324,7 @@ def geometry_containing_point(
     return geom, attrs
 
 
-def retrieve_shapes(country_key: str, mode: str) -> pd.DataFrame:
+def retrieve_shapes_local(country_key: str, mode: str) -> pd.DataFrame:
     """Read shapes from local shapefiles"""
     config = CONFIG["countries"][country_key]
     shape_config = config["shapes"][int(mode)]
@@ -480,7 +480,7 @@ def region_label(country_key: str, mode: int, region_key: str):
             return f"Region {region_key}"
 
 
-def subquery_unique(base_query, key, field, mode, country_key):
+def subquery_unique_local(base_query, key, field, mode, country_key):
     """Query local shapefile data instead of database"""
     config = CONFIG["countries"][country_key]
     shape_config = config["shapes"][int(mode)]
@@ -530,7 +530,7 @@ def subquery_unique(base_query, key, field, country_key=None):
         config = CONFIG["countries"][country_key]
         if len(config["shapes"]) > mode and 'local_file' in config["shapes"][mode]:
             try:
-                return subquery_unique(base_query, key, field, mode, country_key)
+                return subquery_unique_local(base_query, key, field, mode, country_key)
             except Exception as e:
                 print(f"Local shapefile query failed, trying database: {e}")
     
