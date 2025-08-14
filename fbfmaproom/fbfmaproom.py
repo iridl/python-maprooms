@@ -19,7 +19,6 @@ from dash import html
 from dash.dependencies import Output, Input, State, ALL
 from dash.exceptions import PreventUpdate
 import shapely
-from shapely import wkb
 from shapely.geometry import Polygon, Point
 from shapely.geometry.multipoint import MultiPoint
 import geopandas as gpd
