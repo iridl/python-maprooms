@@ -375,3 +375,67 @@ def strftimeb2int(strftimeb):
     }
     strftimebint = strftimeb_all[strftimeb]
     return strftimebint
+
+
+def _cumsum_flagged_diff(flagged_data, dim):
+    """ Discrete difference of cumulative flags keeping only the unflagged data
+    
+    Last 0s before a 1 return the count of consecutive 1s after that 0, except for
+    the first value that will return 0 if 0, and the number of consecutive 1s if 1,
+    and the last value that is dropped.
+    The result is expressed in the units of `dim`, that is assumed evenly spaced.
+    
+    Parameters
+    ----------
+    flagged_data : DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to search for runs
+        
+    Returns
+    -------
+    DataArray
+        Array of lengths of spells of flags along `dim`
+        
+    See Also
+    --------
+    
+    Notes
+    -----
+    Because diff needs at least 2 points,
+    we need to keep (where) the unflagged and first and last
+    with the cumulative value for last and 0 for first.
+    Cumulative flags, where kept, need be propagated by bfill
+    so that diff returns 0 or the length of runs.
+    
+    I believe that it works for unevenly spaced `dim`,
+    only we then don't know what the units of the result are.
+
+    Is meant to be further reduced to for instance find the longest spell, or the
+    numbers of days in spells, etc.
+    
+    Examples
+    --------
+    >>> t = pd.date_range(start="2000-05-01", end="2000-05-29", freq="1D")
+    >>> values = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+    ... 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0]
+    >>> flags = xr.DataArray(values, dims=["T"], coords={"T": t})
+    >>> _cumsum_flagged_diff(flags, "T")
+    <xarray.DataArray ()>
+    array(0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,
+    ... 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 2, 0, 0, 0)    
+    """
+    
+    # Special case coord.size = 1
+    lrl = flagged_data
+    if lrl[dim].size != 1:
+        # Points to apply diff to
+        unflagged_and_ends = (flagged_data == 0) * 1
+        unflagged_and_ends[{dim: [0, -1]}] = 1
+    
+        lrl = lrl.cumsum(dim=dim).where(unflagged_and_ends, other = np.nan).where(
+            # first cumul point must be set to 0
+            lambda x: x[dim] != lrl[dim][0], other=0
+        ).bfill(dim).diff(dim)
+    lrl.attrs = dict(description="Longest Run Length")
+    return lrl
