@@ -399,6 +399,8 @@ def _cumsum_flagged_diff(flagged_data, dim):
         
     See Also
     --------
+    count_days_in_spell, length_of_longest_spell, mean_length_of_spell,
+    median_length_of_spell
     
     Notes
     -----
@@ -427,15 +429,126 @@ def _cumsum_flagged_diff(flagged_data, dim):
     """
     
     # Special case coord.size = 1
-    lrl = flagged_data
-    if lrl[dim].size != 1:
+    cfd = flagged_data
+    if cfd[dim].size != 1:
         # Points to apply diff to
         unflagged_and_ends = (flagged_data == 0) * 1
         unflagged_and_ends[{dim: [0, -1]}] = 1
     
-        lrl = lrl.cumsum(dim=dim).where(unflagged_and_ends, other = np.nan).where(
+        cfd = cfd.cumsum(dim=dim).where(unflagged_and_ends, other = np.nan).where(
             # first cumul point must be set to 0
-            lambda x: x[dim] != lrl[dim][0], other=0
+            lambda x: x[dim] != cfd[dim][0], other=0
         ).bfill(dim).diff(dim)
-    lrl.attrs = dict(description="Longest Run Length")
-    return lrl
+    return cfd
+
+def count_days_in_spells(flagged_data, dim, min_spell_length=1):
+    """ Counts number of days in spells.
+    
+    Parameters
+    ----------
+    flagged_data : DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+    min_spell_length: int, optional
+        minimum length of for a spell to be accounted for
+        
+    Returns
+    -------
+    DataArray
+        Array of number of days found in spells along `dim`
+        
+    See Also
+    --------
+    _cumsum_flagged_diff
+    
+    Examples
+    --------   
+    """
+
+    return _cumsum_flagged_diff(flagged_data, dim).where(
+        lambda x : x >= min_spell_length
+    ).sum(dim=dim)
+
+def length_of_longest_spell(flagged_data, dim):
+    """ Length of longest spells.
+    
+    Parameters
+    ----------
+    flagged_data : DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+        
+    Returns
+    -------
+    DataArray
+        Array of lengths of longest spells along `dim`
+        
+    See Also
+    --------
+    _cumsum_flagged_diff
+    
+    Examples
+    --------   
+    """
+
+    return _cumsum_flagged_diff(flagged_data, dim).max(dim=dim)
+
+def mean_length_of_spells(flagged_data, dim, min_spell_length=1):
+    """ Mean length of spells.
+    
+    Parameters
+    ----------
+    flagged_data : DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+    min_spell_length: int, optional
+        minimum length of for a spell to be accounted for
+        
+    Returns
+    -------
+    DataArray
+        Array of mean length of spells along `dim`
+        
+    See Also
+    --------
+    _cumsum_flagged_diff
+    
+    Examples
+    --------   
+    """
+
+    return _cumsum_flagged_diff(flagged_data, dim).where(
+        lambda x : x >= min_spell_length
+    ).mean(dim=dim)
+
+def median_length_of_spells(flagged_data, dim, min_spell_length=1):
+    """ Median length of spells.
+    
+    Parameters
+    ----------
+    flagged_data : DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+    min_spell_length: int, optional
+        minimum length of for a spell to be accounted for
+        
+    Returns
+    -------
+    DataArray
+        Array of median length of spells along `dim`
+        
+    See Also
+    --------
+    _cumsum_flagged_diff
+    
+    Examples
+    --------   
+    """
+
+    return _cumsum_flagged_diff(flagged_data, dim).where(
+        lambda x : x >= min_spell_length
+    ).median(dim=dim)
