@@ -56,3 +56,40 @@ def test__cumsum_flagged_diff_coord_size_1():
 
     assert spells1 == 1
     assert spells0 == 0
+
+def test_count_days_in_spells():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
+    values = np.array([1, 0, 1, 1, 0, 0, 1, 1, 1, 0])
+    precip = xr.DataArray(values, coords={"T": t})
+    days_in_spells = app_calc.count_days_in_spells(precip, "T", min_spell_length=2)
+
+    assert days_in_spells == 5
+
+def test_length_of_longest_spell():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
+    values = np.array([1, 0, 1, 1, 0, 0, 1, 1, 1, 0])
+    precip = xr.DataArray(values, coords={"T": t})
+    longest_spell = app_calc.length_of_longest_spell(precip, "T")
+
+    assert longest_spell == 3
+
+def test_mean_length_of_spells():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
+    values = np.array([1, 0, 1, 1, 0, 0, 1, 1, 1, 0])
+    precip = xr.DataArray(values, coords={"T": t})
+    mean_spell = app_calc.mean_length_of_spells(precip, "T", min_spell_length=2)
+
+    assert mean_spell == 2.5
+
+def test_median_length_of_spells():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
+    values = np.array([1, 0, 1, 1, 0, 0, 1, 1, 1, 0])
+    precip = xr.DataArray(values, coords={"T": t})
+    mendian_spell = app_calc.median_length_of_spells(precip, "T")
+
+    assert mendian_spell == 2
+    
