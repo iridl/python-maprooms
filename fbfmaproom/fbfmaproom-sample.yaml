@@ -496,7 +496,7 @@ countries:
                     format: number0
                     units: rank
                 bad-years-ndj-v3:
-                  label: Drought humanitarian ranking
+                  label: Drought humanitarian ranking v3
                   description: Drought ranking of expert committee humanitarian data review Sept 2025
                   path: madagascar/bad-years-ndj-v3.zarr
                   var_names:
