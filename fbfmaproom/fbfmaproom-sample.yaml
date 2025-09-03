@@ -402,7 +402,7 @@ countries:
                 predictors:
                     - prcp-v3
                     - enacts-precip-mon
-                predictand: bad-years-ndj
+                predictand: bad-years-ndj-v3
             observations:
                 enacts-precip-mon:
                     label: ENACTS MON precip
