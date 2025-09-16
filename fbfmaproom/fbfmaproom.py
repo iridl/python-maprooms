@@ -369,12 +369,12 @@ def generate_tables(
     return main_df, summary_df, thresholds
 
 
-def region_shape(mode, country_key, geom_key):
+def region_shape(country_key, mode, region_key):
     if mode == "pixel":
-        [[y0, x0], [y1, x1]] = json.loads(geom_key)
+        [[y0, x0], [y1, x1]] = json.loads(region_key)
         shape = Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])
     else:
-        shape = retrieve_shapes_unique(country_key, int(mode), geom_key, "the_geom")
+        (shape,) = retrieve_shape(country_key, int(mode), ("the_geom",), region_key)
     return shape
 
 
@@ -382,16 +382,16 @@ def region_label(country_key: str, mode: str, region_key: str):
     if mode == "pixel":
         label = None
     else:
-        label = retrieve_shapes_unique(country_key, int(mode), region_key, "label")
+        (label,) = retrieve_shape(country_key, int(mode), ("label",), region_key)
     return label
 
 
-def retrieve_shapes_unique(country_key, level, key, field):
-    df = retrieve_shapes(country_key, level, fields=(field,), key=key)
+def retrieve_shape(country_key, level, fields, key):
+    df = retrieve_shapes(country_key, level, fields=fields, key=key)
     if len(df) == 0:
         raise InvalidRequestError(f"invalid region {key}")
     assert len(df) == 1
-    return df.iloc[0][field]
+    return tuple(df.iloc[0])
 
 
 def select_forecast(country_key, forecast_key, issue_month0, target_month0,
@@ -493,7 +493,7 @@ def fundamental_table_data(country_key, table_columns,
             if col["type"] is ColType.FORECAST
         }
     )
-    shape = region_shape(mode, country_key, geom_key)
+    shape = region_shape(country_key, mode, geom_key)
 
     forecast_ds = value_for_geom(forecast_ds, country_key, geom_key, shape)
 
@@ -1524,7 +1524,7 @@ def trigger_check():
         geom_key = bounds
     else:
         geom_key = region
-    shape = region_shape(mode, country_key, geom_key)
+    shape = region_shape(country_key, mode, geom_key)
 
     if var_is_forecast:
         data = select_forecast(country_key, var, issue_month0,
