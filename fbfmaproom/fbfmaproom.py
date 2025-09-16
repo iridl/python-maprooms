@@ -310,7 +310,7 @@ def year_label(midpoint, season_length):
 def geometry_containing_point(
     country_key: str, point: Tuple[float, float], mode: str
 ):
-    df = retrieve_shapes(country_key, mode)
+    df = retrieve_shapes(country_key, int(mode))
     x, y = point
     p = Point(x, y)
     geom, attrs = None, None
@@ -323,18 +323,25 @@ def geometry_containing_point(
     return geom, attrs
 
 
-def retrieve_shapes(country_key: str, mode: str) -> pd.DataFrame:
+def retrieve_shapes(country_key, level, fields=('key', 'label', 'the_geom')):
     config = CONFIG["countries"][country_key]
-    sc = config["shapes"][int(mode)]
+    sc = config["shapes"][level]
+    subquery = sql.SQL(sc["sql"])
+    sql_fields = sql.SQL(", ").join(
+        sql.Identifier(f) for f in fields
+    )
+    s = sql.SQL(
+        "with g as ({subquery}) select {fields} from g"
+    ).format(
+        subquery=subquery,
+        fields=sql_fields,
+    )
     with psycopg2.connect(**CONFIG["db"]) as conn:
-        s = sql.Composed([
-            sql.SQL("with g as ("),
-            sql.SQL(sc["sql"]),
-            sql.SQL(") select g.label, g.key, g.the_geom from g")
-        ])
         df = pd.read_sql(s, conn)
-    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    if "the_geom" in fields:
+        df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
+
 
 def generate_tables(
     country_key,
@@ -1231,7 +1238,7 @@ def borders(pathname, mode):
         shapes = []
     else:
         country_key = country(pathname)
-        df = retrieve_shapes(country_key, mode)
+        df = retrieve_shapes(country_key, int(mode), fields=('the_geom'))
         shapes = df["the_geom"].apply(shapely.geometry.mapping)
     return {"features": shapes}
 
