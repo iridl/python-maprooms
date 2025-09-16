@@ -389,7 +389,7 @@ def region_label(country_key: str, mode: str, region_key: str):
 def retrieve_shape(country_key, level, fields, key):
     df = retrieve_shapes(country_key, level, fields=fields, key=key)
     if len(df) == 0:
-        raise InvalidRequestError(f"invalid region {key}")
+        raise InvalidRequestError(f"no such region: {country_key=} {level=} {key=}")
     assert len(df) == 1
     return tuple(df.iloc[0])
 
