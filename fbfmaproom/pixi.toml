@@ -39,6 +39,7 @@ shapely = "*"
 werkzeug = "<2.1" # werkzeug 2.1 spews warnings at dev server startup
 xarray = "*"
 zarr = "*"
+fiona = "*"
 
 [feature.dev.dependencies]
 netcdf4 = "*"

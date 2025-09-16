@@ -39,6 +39,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/expat-2.6.4-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fasteners-0.19-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ffmpeg-7.1.0-gpl_hf09ebf5_710.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/fiona-1.10.1-py39h4bd6204_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-2.1.3-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-compress-1.17-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
@@ -308,6 +309,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/expat-2.6.4-h240833e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fasteners-0.19-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ffmpeg-7.1.0-gpl_hf97d1e1_110.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/fiona-1.10.1-py39h0546fa5_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-2.1.3-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-compress-1.17-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
@@ -502,6 +504,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/expat-2.6.4-h286801f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fasteners-0.19-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ffmpeg-7.1.0-gpl_h7c3f5a8_110.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fiona-1.10.1-py39h77209e7_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-2.1.3-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-compress-1.17-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
@@ -704,6 +707,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/expat-2.6.4-h5888daf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fasteners-0.19-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ffmpeg-7.1.0-gpl_hf09ebf5_710.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/fiona-1.10.1-py39h4bd6204_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-2.1.3-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-compress-1.17-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
@@ -965,6 +969,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/expat-2.6.4-h240833e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fasteners-0.19-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ffmpeg-7.1.0-gpl_hf97d1e1_110.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/fiona-1.10.1-py39h0546fa5_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-2.1.3-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-compress-1.17-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
@@ -1151,6 +1156,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/expat-2.6.4-h286801f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/fasteners-0.19-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ffmpeg-7.1.0-gpl_h7c3f5a8_110.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/fiona-1.10.1-py39h77209e7_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-2.1.3-pyhd8ed1ab_0.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/noarch/flask-compress-1.17-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2
@@ -2096,6 +2102,68 @@ packages:
   license_family: GPL
   size: 9146518
   timestamp: 1738952024698
+- conda: https://conda.anaconda.org/conda-forge/linux-64/fiona-1.10.1-py39h4bd6204_3.conda
+  sha256: ce8aea7c20826bdb7e31677fd7eb5b0a7769a3cbd06fcc796455fb5e861b7503
+  md5: f7a18b2b249a4da6f7479c6a74c17206
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - attrs >=19.2.0
+  - click >=8.0,<9.dev0
+  - click-plugins >=1.0
+  - cligj >=0.5
+  - importlib-metadata
+  - libgcc >=13
+  - libgdal-core >=3.10.0,<3.11.0a0
+  - libstdcxx >=13
+  - pyparsing
+  - python >=3.9,<3.10.0a0
+  - python_abi 3.9.* *_cp39
+  - shapely
+  license: BSD-3-Clause
+  license_family: BSD
+  size: 1144557
+  timestamp: 1733507676751
+- conda: https://conda.anaconda.org/conda-forge/osx-64/fiona-1.10.1-py39h0546fa5_3.conda
+  sha256: 5144cd842f51cf4eae5045d8964ed239ce4b05047e235c267262791afb379d76
+  md5: 6f6c98e9bd128880ce0001279c7d05a8
+  depends:
+  - __osx >=10.13
+  - attrs >=19.2.0
+  - click >=8.0,<9.dev0
+  - click-plugins >=1.0
+  - cligj >=0.5
+  - importlib-metadata
+  - libcxx >=18
+  - libgdal-core >=3.10.0,<3.11.0a0
+  - pyparsing
+  - python >=3.9,<3.10.0a0
+  - python_abi 3.9.* *_cp39
+  - shapely
+  license: BSD-3-Clause
+  license_family: BSD
+  size: 996692
+  timestamp: 1733507736405
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/fiona-1.10.1-py39h77209e7_3.conda
+  sha256: 8d3ef517a5b7d20d64b3dc9e44bf9f2259f3e7a3e67b69c1ec35a75c3239aa44
+  md5: 843f2f43f1c94c1c844d15dbc7023392
+  depends:
+  - __osx >=11.0
+  - attrs >=19.2.0
+  - click >=8.0,<9.dev0
+  - click-plugins >=1.0
+  - cligj >=0.5
+  - importlib-metadata
+  - libcxx >=18
+  - libgdal-core >=3.10.0,<3.11.0a0
+  - pyparsing
+  - python >=3.9,<3.10.0a0
+  - python >=3.9,<3.10.0a0 *_cpython
+  - python_abi 3.9.* *_cp39
+  - shapely
+  license: BSD-3-Clause
+  license_family: BSD
+  size: 1001630
+  timestamp: 1733507968660
 - conda: https://conda.anaconda.org/conda-forge/noarch/flask-2.1.3-pyhd8ed1ab_0.tar.bz2
   sha256: de8f2eb0b86e28b672839ae4ad0032eda30e09fee28a19b79159b35673f25a42
   md5: 4b95b1c750d6d737905cdb447f097b9c
