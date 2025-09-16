@@ -312,10 +312,8 @@ def geometry_containing_point(
 ):
     df = retrieve_shapes(country_key, level, fields=('key', 'label', 'the_geom'))
     x, y = point
-    p = Point(x, y)
     for key, label, the_geom in df.itertuples(index=False):
-        minx, miny, maxx, maxy = the_geom.bounds
-        if minx <= x <= maxx and miny <= y <= maxy and the_geom.contains(p):
+        if shapely.contains_xy(the_geom, x, y):
             break
     else:
         key, label, the_geom = None, None, None
