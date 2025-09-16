@@ -310,17 +310,16 @@ def year_label(midpoint, season_length):
 def geometry_containing_point(
     country_key: str, point: Tuple[float, float], level: int
 ):
-    df = retrieve_shapes(country_key, level)
+    df = retrieve_shapes(country_key, level, fields=('key', 'label', 'the_geom'))
     x, y = point
     p = Point(x, y)
-    geom, attrs = None, None
-    for _, r in df.iterrows():
-        minx, miny, maxx, maxy = r["the_geom"].bounds
-        if minx <= x <= maxx and miny <= y <= maxy and r["the_geom"].contains(p):
-            geom = r["the_geom"]
-            attrs = {k: v for k, v in r.items() if k not in ("the_geom")}
+    for key, label, the_geom in df.itertuples(index=False):
+        minx, miny, maxx, maxy = the_geom.bounds
+        if minx <= x <= maxx and miny <= y <= maxy and the_geom.contains(p):
             break
-    return geom, attrs
+    else:
+        key, label, the_geom = None, None, None
+    return key, label, the_geom
 
 
 def retrieve_shapes(country_key, level, fields=('key', 'label', 'the_geom')):
@@ -1039,15 +1038,13 @@ def update_selected_region(position, mode, pathname):
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
         pixel = box(x0, y0, x1, y1)
-        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), 0)
+        _, _, geom = geometry_containing_point(country_key, tuple(c["marker"]), 0)
         if pixel.intersects(geom):
             selected_shape = box(x0, y0, x1, y1)
         key = str([[y0, x0], [y1, x1]])
     else:
-        geom, attrs = geometry_containing_point(country_key, (x, y), int(mode))
-        if geom is not None:
-            selected_shape = geom
-            key = str(attrs["key"])
+        key, _, geom = geometry_containing_point(country_key, (x, y), int(mode))
+        selected_shape = geom
     if selected_shape is None:
         selected_shape = ZERO_SHAPE
 
@@ -1079,7 +1076,7 @@ def update_popup(pathname, position, mode):
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
         pixel = box(x0, y0, x1, y1)
-        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), 0)
+        _, _, geom = geometry_containing_point(country_key, tuple(c["marker"]), 0)
         if pixel.intersects(geom):
             px = (x0 + x1) / 2
             pxs = "E" if px > 0.0 else "W" if px < 0.0 else ""
@@ -1087,9 +1084,9 @@ def update_popup(pathname, position, mode):
             pys = "N" if py > 0.0 else "S" if py < 0.0 else ""
             title = f"{np.abs(py):.5f}° {pys} {np.abs(px):.5f}° {pxs}"
     else:
-        _, attrs = geometry_containing_point(country_key, (x, y), int(mode))
-        if attrs is not None:
-            title = attrs["label"]
+        _, label, _ = geometry_containing_point(country_key, (x, y), int(mode))
+        if label is not None:
+            title = label
     return [html.H3(title)]
 
 
@@ -1442,7 +1439,7 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
     da = select_forecast(country_key, forecast_key, issue_month0, target_month0, target_year, freq)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     if config.get("clip", True):
-        clipping = lambda: geometry_containing_point(country_key, p, 0)[0]
+        clipping = lambda: geometry_containing_point(country_key, p, 0)[2]
     else:
         clipping = None
     resp = pingrid.tile(da, tx, ty, tz, clipping)
@@ -1457,7 +1454,7 @@ def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
     target_month0 = season_config["target_month"]
     da = select_obs(country_key, [obs_key], target_month0, target_year)[obs_key]
     p = tuple(CONFIG["countries"][country_key]["marker"])
-    clipping, _ = geometry_containing_point(country_key, p, 0)
+    _, _, clipping = geometry_containing_point(country_key, p, 0)
     resp = pingrid.tile(da, tx, ty, tz, clipping)
     return resp
 
