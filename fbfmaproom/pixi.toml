@@ -2,7 +2,7 @@
 authors = ["Aaron Kaplan <aaron@iri.columbia.edu>"]
 channels = ["conda-forge", "iridl"]
 name = "fbfmaproom2"
-platforms = ["linux-64", "osx-64", "osx-arm64"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
 [tasks]
 
