@@ -320,21 +320,25 @@ def geometry_containing_point(
     return key, label, the_geom
 
 
-def retrieve_shapes(country_key, level, fields=('key', 'label', 'the_geom')):
+def retrieve_shapes(
+        country_key, level, fields=('key', 'label', 'the_geom'), key=None
+):
     config = CONFIG["countries"][country_key]
     sc = config["shapes"][level]
     subquery = sql.SQL(sc["sql"])
     sql_fields = sql.SQL(", ").join(
         sql.Identifier(f) for f in fields
     )
-    s = sql.SQL(
+    query = sql.SQL(
         "with g as ({subquery}) select {fields} from g"
     ).format(
         subquery=subquery,
         fields=sql_fields,
     )
+    if key is not None:
+        query = query + sql.SQL(" where key::text = %(key)s")
     with psycopg2.connect(**CONFIG["db"]) as conn:
-        df = pd.read_sql(s, conn)
+        df = pd.read_sql(query, conn, params={"key": key})
     if "the_geom" in fields:
         df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
@@ -370,37 +374,20 @@ def region_shape(mode, country_key, geom_key):
         [[y0, x0], [y1, x1]] = json.loads(geom_key)
         shape = Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])
     else:
-        config = CONFIG["countries"][country_key]
-        base_query = config["shapes"][int(mode)]["sql"]
-        response = subquery_unique(base_query, geom_key, "the_geom")
-        shape = wkb.loads(response.tobytes())
+        shape = retrieve_shapes_unique(country_key, int(mode), geom_key, "the_geom")
     return shape
 
 
-def region_label(country_key: str, mode: int, region_key: str):
+def region_label(country_key: str, mode: str, region_key: str):
     if mode == "pixel":
         label = None
     else:
-        config = CONFIG["countries"][country_key]
-        base_query = config["shapes"][int(mode)]["sql"]
-        label = subquery_unique(base_query, region_key, "label")
+        label = retrieve_shapes_unique(country_key, int(mode), region_key, "label")
     return label
 
 
-def subquery_unique(base_query, key, field):
-    query = sql.Composed(
-        [
-            sql.SQL(
-                "with a as (",
-            ),
-            sql.SQL(base_query),
-            sql.SQL(
-                ") select {} from a where key::text = %(key)s"
-            ).format(sql.Identifier(field)),
-        ]
-    )
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        df = pd.read_sql(query, conn, params={"key": key})
+def retrieve_shapes_unique(country_key, level, key, field):
+    df = retrieve_shapes(country_key, level, fields=(field,), key=key)
     if len(df) == 0:
         raise InvalidRequestError(f"invalid region {key}")
     assert len(df) == 1
