@@ -1,11 +1,12 @@
 from cftime import Datetime360Day as DT360
+from collections import OrderedDict
 from dash import html
 import dash_bootstrap_components as dbc
 import datetime
 import io
 import numpy as np
 import pandas as pd
-from collections import OrderedDict
+import shapely
 import xarray as xr
 
 import fbfmaproom
@@ -557,3 +558,24 @@ def test_validate_missing_value():
     contents = '1981,ET05'
     errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
     assert len(errors) == 0
+
+def test_retrieve_shapes_default_fields():
+    df = fbfmaproom.retrieve_shapes('ethiopia', 1)
+    print(df)
+    assert len(df) == 11
+    assert tuple(df.columns) == ('key', 'label', 'the_geom')
+    key, label, geom = df.iloc[0]
+    assert key == 'ET0508'
+    assert label == 'Afder'
+    assert isinstance(geom, shapely.MultiPolygon)
+
+def test_retrieve_shapes_one_field():
+    df = fbfmaproom.retrieve_shapes('ethiopia', 2, fields=('label',))
+    print(df)
+    assert len(df) == 98
+    assert tuple(df.columns) == ('label',)
+    assert df['label'][0] == 'Debeweyin'
+
+def test_retrieve_shape():
+    (label,) = fbfmaproom.retrieve_shape('ethiopia', 1, fields=('label',), key='ET0508')
+    assert label == 'Afder'
