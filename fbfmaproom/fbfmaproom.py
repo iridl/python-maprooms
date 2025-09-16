@@ -1366,34 +1366,10 @@ def validate_csv(country, contents):
             notes.append(f"{len(regions)} regions")
             config = CONFIG["countries"][country]
             nlevels = len(config['shapes'])
-
-            query = sql.Composed([
-                sql.SQL("with "),
-                sql.SQL(", ").join(
-                    sql.SQL("sub{i} as ({subquery})").format(
-                        i=sql.Literal(i),
-                        subquery=sql.SQL(config['shapes'][i]['sql']),
-                    )
-                    for i in range(nlevels)
-                ),
-                sql.SQL(" select * from ("),
-                sql.SQL(" union ").join(
-                    sql.SQL(
-                        "select key::text from sub{i}"
-                    ).format(i=sql.Literal(i))
-                    for i in range(nlevels)
-                ),
-                sql.SQL(") as u where u.key::text in ("),
-                sql.SQL(", ").join(sql.Literal(r) for r in regions),
-                sql.SQL(")")
-
-            ])
-            with psycopg2.connect(**CONFIG["db"]) as conn:
-                with conn.cursor() as cursor:
-                    # print(query.as_string(cursor))
-                    cursor.execute(query, list(regions))
-                    rows = cursor.fetchall()
-                    known_regions = set(map(lambda x: x[0], rows))
+            known_regions = set().union(*(
+                retrieve_shapes(country, level, ("key",))["key"]
+                for level in range(nlevels)
+            ))
             unknown_regions = regions - known_regions
             if len(unknown_regions) > 0:
                 examples_str = ', '.join(list(unknown_regions)[:3])
