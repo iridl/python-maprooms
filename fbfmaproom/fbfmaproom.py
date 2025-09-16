@@ -1621,15 +1621,7 @@ def export_endpoint(country_key):
 def regions_endpoint():
     country_key = parse_arg("country")
     level = parse_arg("level", int)
-
-    shapes_config = CONFIG["countries"][country_key]["shapes"][level]
-    query = sql.Composed([
-        sql.SQL("with a as ("),
-        sql.SQL(shapes_config["sql"]),
-        sql.SQL(") select key, label from a"),
-    ])
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        df = pd.read_sql(query, conn)
+    df = retrieve_shapes(country_key, level, fields=("key", "label"))
     d = {'regions': df.to_dict(orient="records")}
     return flask.jsonify(d)
 
