@@ -3753,16 +3753,22 @@ countries:
         origin: [.125, 125]
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm0_2022
+              key_field: ADM0_PCODE
+              label_field: ADM0_EN
 
             - name: Regional
-              sql: select code as key, INITCAP(district) as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm1_2022
+              key_field: ADM1_PCODE
+              label_field: ADM1_EN
 
             - name: District
-              sql: select adm2_pcode as key, adm2_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm2_2022
+              key_field: ADM2_PCODE
+              label_field: ADM2_EN
 
         datasets:
             defaults:
@@ -3910,16 +3916,22 @@ countries:
         origin: [.125, 125]
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm0_2022
+              key_field: ADM0_PCODE
+              label_field: ADM0_EN
 
             - name: Regional
-              sql: select code as key, INITCAP(district) as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm1_2022
+              key_field: ADM1_PCODE
+              label_field: ADM1_EN
 
             - name: District
-              sql: select adm2_pcode as key, adm2_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm2_2022
+              key_field: ADM2_PCODE
+              label_field: ADM2_EN
 
         datasets:
             defaults:
@@ -4056,16 +4068,22 @@ countries:
         origin: [.125, 125]
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm0_2022
+              key_field: ADM0_PCODE
+              label_field: ADM0_EN
 
             - name: Regional
-              sql: select code as key, INITCAP(district) as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm1_2022
+              key_field: ADM1_PCODE
+              label_field: ADM1_EN
 
             - name: District
-              sql: select adm2_pcode as key, adm2_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm2_2022
+              key_field: ADM2_PCODE
+              label_field: ADM2_EN
 
         datasets:
             defaults:
@@ -4211,16 +4229,22 @@ countries:
         origin: [.125, 125]
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm0_2022
+              key_field: ADM0_PCODE
+              label_field: ADM0_EN
 
             - name: Regional
-              sql: select code as key, INITCAP(district) as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm1_2022
+              key_field: ADM1_PCODE
+              label_field: ADM1_EN
 
             - name: District
-              sql: select adm2_pcode as key, adm2_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
+              file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
+              layer: dji_admbnda_gadm_adm2_2022
+              key_field: ADM2_PCODE
+              label_field: ADM2_EN
 
         datasets:
             defaults:

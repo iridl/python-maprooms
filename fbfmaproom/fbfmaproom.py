@@ -32,6 +32,7 @@ import itertools
 import uuid
 import warnings
 import yaml
+import fiona
 
 import __about__ as about
 import pingrid
@@ -325,22 +326,41 @@ def retrieve_shapes(
 ):
     config = CONFIG["countries"][country_key]
     sc = config["shapes"][level]
-    subquery = sql.SQL(sc["sql"])
-    sql_fields = sql.SQL(", ").join(
-        sql.Identifier(f) for f in fields
-    )
-    query = sql.SQL(
-        "with g as ({subquery}) select {fields} from g"
-    ).format(
-        subquery=subquery,
-        fields=sql_fields,
-    )
-    if key is not None:
-        query = query + sql.SQL(" where key::text = %(key)s")
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        df = pd.read_sql(query, conn, params={"key": key})
-    if "the_geom" in fields:
-        df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    if "sql" in sc:
+        subquery = sql.SQL(sc["sql"])
+        sql_fields = sql.SQL(", ").join(
+            sql.Identifier(f) for f in fields
+        )
+        query = sql.SQL(
+            "with g as ({subquery}) select {fields} from g"
+        ).format(
+            subquery=subquery,
+            fields=sql_fields,
+        )
+        if key is not None:
+            query = query + sql.SQL(" where key::text = %(key)s")
+        with psycopg2.connect(**CONFIG["db"]) as conn:
+            df = pd.read_sql(query, conn, params={"key": key})
+        if "the_geom" in fields:
+            df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    elif 'file' in sc:
+        filepath = Path(CONFIG["data_root"]) / sc["file"]
+        with fiona.open(f"zip://{filepath}", layer=sc["layer"]) as collection:
+            tuples = [
+                (
+                    feature['properties'][sc["key_field"]],
+                    feature['properties'][sc["label_field"]],
+                    shapely.geometry.shape(feature["geometry"]),
+                )
+                for feature in collection
+                if key is None or feature['properties'][sc["key_field"]] == key
+            ]
+        df = pd.DataFrame(data=tuples, columns=["key", "label", "the_geom"])
+        # TODO don't parse all the shapes if we're just going to
+        # discard them.
+        df = df[list(fields)]
+    else:
+        assert False, 'Invalid shape configuration for {country_key=}, {level=}'
     return df
 
 
@@ -1220,7 +1240,7 @@ def borders(pathname, mode):
         shapes = []
     else:
         country_key = country(pathname)
-        df = retrieve_shapes(country_key, int(mode), fields=('the_geom'))
+        df = retrieve_shapes(country_key, int(mode), fields=('the_geom',))
         shapes = df["the_geom"].apply(shapely.geometry.mapping)
     return {"features": shapes}
 
