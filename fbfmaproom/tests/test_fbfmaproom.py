@@ -559,7 +559,7 @@ def test_validate_missing_value():
     errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
     assert len(errors) == 0
 
-def test_retrieve_shapes_default_fields():
+def test_retrieve_shapes_db_default_fields():
     df = fbfmaproom.retrieve_shapes('ethiopia', 1)
     print(df)
     assert len(df) == 11
@@ -569,13 +569,37 @@ def test_retrieve_shapes_default_fields():
     assert label == 'Afder'
     assert isinstance(geom, shapely.MultiPolygon)
 
-def test_retrieve_shapes_one_field():
+def test_retrieve_shapes_db_one_field():
     df = fbfmaproom.retrieve_shapes('ethiopia', 2, fields=('label',))
     print(df)
     assert len(df) == 98
     assert tuple(df.columns) == ('label',)
     assert df['label'][0] == 'Debeweyin'
 
-def test_retrieve_shape():
+def test_retrieve_shape_db():
     (label,) = fbfmaproom.retrieve_shape('ethiopia', 1, fields=('label',), key='ET0508')
     assert label == 'Afder'
+
+def test_retrieve_shapes_file_default_fields():
+    df = fbfmaproom.retrieve_shapes('djibouti', 1)
+    print(df)
+    assert len(df) == 6
+    assert tuple(df.columns) == ('key', 'label', 'the_geom')
+    key, label, geom = df.iloc[0]
+    assert key == 'DJ01'
+    assert label == 'Obock'
+    assert isinstance(geom, shapely.Geometry)
+
+def test_retrieve_shapes_file_one_field():
+    df = fbfmaproom.retrieve_shapes('djibouti', 2, fields=('label',))
+    print(df)
+    assert len(df) == 20
+    assert tuple(df.columns) == ('label',)
+    assert df['label'][0] == 'Ali Adde'
+
+def test_retrieve_shape_file():
+    (label,) = fbfmaproom.retrieve_shape(
+        'djibouti', 1, fields=('label',), key='DJ01'
+    )
+    assert label == 'Obock'
+
