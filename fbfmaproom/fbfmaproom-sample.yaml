@@ -3750,7 +3750,7 @@ countries:
         zoom: 8
         rotation: 0
         marker:  [43, 12]
-        origin: [.125, 125]
+        origin: [.125, .125]
         shapes:
             - name: National
               file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
@@ -3913,7 +3913,7 @@ countries:
         zoom: 8
         rotation: 0
         marker:  [43, 12]
-        origin: [.125, 125]
+        origin: [.125, .125]
         shapes:
             - name: National
               file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
@@ -4065,7 +4065,7 @@ countries:
         zoom: 8
         rotation: 0
         marker:  [43, 12]
-        origin: [.125, 125]
+        origin: [.125, .125]
         shapes:
             - name: National
               file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
@@ -4226,7 +4226,7 @@ countries:
         zoom: 8
         rotation: 0
         marker:  [43, 12]
-        origin: [.125, 125]
+        origin: [.125, .125]
         shapes:
             - name: National
               file: djibouti/shapes/2025-08/dji_adm_gadm_2022_shp.zip
