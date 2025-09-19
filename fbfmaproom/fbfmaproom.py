@@ -32,6 +32,7 @@ import itertools
 import uuid
 import warnings
 import yaml
+import fiona
 
 import __about__ as about
 import pingrid
@@ -308,33 +309,60 @@ def year_label(midpoint, season_length):
 
 
 def geometry_containing_point(
-    country_key: str, point: Tuple[float, float], mode: str
+    country_key: str, point: Tuple[float, float], level: int
 ):
-    df = retrieve_shapes(country_key, mode)
+    df = retrieve_shapes(country_key, level, fields=('key', 'label', 'the_geom'))
     x, y = point
-    p = Point(x, y)
-    geom, attrs = None, None
-    for _, r in df.iterrows():
-        minx, miny, maxx, maxy = r["the_geom"].bounds
-        if minx <= x <= maxx and miny <= y <= maxy and r["the_geom"].contains(p):
-            geom = r["the_geom"]
-            attrs = {k: v for k, v in r.items() if k not in ("the_geom")}
+    for key, label, the_geom in df.itertuples(index=False):
+        if shapely.contains_xy(the_geom, x, y):
             break
-    return geom, attrs
+    else:
+        key, label, the_geom = None, None, None
+    return key, label, the_geom
 
 
-def retrieve_shapes(country_key: str, mode: str) -> pd.DataFrame:
+def retrieve_shapes(
+        country_key, level, fields=('key', 'label', 'the_geom'), key=None
+):
     config = CONFIG["countries"][country_key]
-    sc = config["shapes"][int(mode)]
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        s = sql.Composed([
-            sql.SQL("with g as ("),
-            sql.SQL(sc["sql"]),
-            sql.SQL(") select g.label, g.key, g.the_geom from g")
-        ])
-        df = pd.read_sql(s, conn)
-    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    sc = config["shapes"][level]
+    if "sql" in sc:
+        subquery = sql.SQL(sc["sql"])
+        sql_fields = sql.SQL(", ").join(
+            sql.Identifier(f) for f in fields
+        )
+        query = sql.SQL(
+            "with g as ({subquery}) select {fields} from g"
+        ).format(
+            subquery=subquery,
+            fields=sql_fields,
+        )
+        if key is not None:
+            query = query + sql.SQL(" where key::text = %(key)s")
+        with psycopg2.connect(**CONFIG["db"]) as conn:
+            df = pd.read_sql(query, conn, params={"key": key})
+        if "the_geom" in fields:
+            df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    elif 'file' in sc:
+        filepath = Path(CONFIG["data_root"]) / sc["file"]
+        with fiona.open(f"zip://{filepath}", layer=sc["layer"]) as collection:
+            tuples = [
+                (
+                    feature['properties'][sc["key_field"]],
+                    feature['properties'][sc["label_field"]],
+                    shapely.geometry.shape(feature["geometry"]),
+                )
+                for feature in collection
+                if key is None or feature['properties'][sc["key_field"]] == key
+            ]
+        df = pd.DataFrame(data=tuples, columns=["key", "label", "the_geom"])
+        # TODO don't parse all the shapes if we're just going to
+        # discard them.
+        df = df[list(fields)]
+    else:
+        assert False, 'Invalid shape configuration for {country_key=}, {level=}'
     return df
+
 
 def generate_tables(
     country_key,
@@ -361,46 +389,29 @@ def generate_tables(
     return main_df, summary_df, thresholds
 
 
-def region_shape(mode, country_key, geom_key):
+def region_shape(country_key, mode, region_key):
     if mode == "pixel":
-        [[y0, x0], [y1, x1]] = json.loads(geom_key)
+        [[y0, x0], [y1, x1]] = json.loads(region_key)
         shape = Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])
     else:
-        config = CONFIG["countries"][country_key]
-        base_query = config["shapes"][int(mode)]["sql"]
-        response = subquery_unique(base_query, geom_key, "the_geom")
-        shape = wkb.loads(response.tobytes())
+        (shape,) = retrieve_shape(country_key, int(mode), ("the_geom",), region_key)
     return shape
 
 
-def region_label(country_key: str, mode: int, region_key: str):
+def region_label(country_key: str, mode: str, region_key: str):
     if mode == "pixel":
         label = None
     else:
-        config = CONFIG["countries"][country_key]
-        base_query = config["shapes"][int(mode)]["sql"]
-        label = subquery_unique(base_query, region_key, "label")
+        (label,) = retrieve_shape(country_key, int(mode), ("label",), region_key)
     return label
 
 
-def subquery_unique(base_query, key, field):
-    query = sql.Composed(
-        [
-            sql.SQL(
-                "with a as (",
-            ),
-            sql.SQL(base_query),
-            sql.SQL(
-                ") select {} from a where key::text = %(key)s"
-            ).format(sql.Identifier(field)),
-        ]
-    )
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        df = pd.read_sql(query, conn, params={"key": key})
+def retrieve_shape(country_key, level, fields, key):
+    df = retrieve_shapes(country_key, level, fields=fields, key=key)
     if len(df) == 0:
-        raise InvalidRequestError(f"invalid region {key}")
+        raise InvalidRequestError(f"no such region: {country_key=} {level=} {key=}")
     assert len(df) == 1
-    return df.iloc[0][field]
+    return tuple(df.iloc[0])
 
 
 def select_forecast(country_key, forecast_key, issue_month0, target_month0,
@@ -502,7 +513,7 @@ def fundamental_table_data(country_key, table_columns,
             if col["type"] is ColType.FORECAST
         }
     )
-    shape = region_shape(mode, country_key, geom_key)
+    shape = region_shape(country_key, mode, geom_key)
 
     forecast_ds = value_for_geom(forecast_ds, country_key, geom_key, shape)
 
@@ -1032,15 +1043,13 @@ def update_selected_region(position, mode, pathname):
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
         pixel = box(x0, y0, x1, y1)
-        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), "0")
+        _, _, geom = geometry_containing_point(country_key, tuple(c["marker"]), 0)
         if pixel.intersects(geom):
             selected_shape = box(x0, y0, x1, y1)
         key = str([[y0, x0], [y1, x1]])
     else:
-        geom, attrs = geometry_containing_point(country_key, (x, y), mode)
-        if geom is not None:
-            selected_shape = geom
-            key = str(attrs["key"])
+        key, _, geom = geometry_containing_point(country_key, (x, y), int(mode))
+        selected_shape = geom
     if selected_shape is None:
         selected_shape = ZERO_SHAPE
 
@@ -1072,7 +1081,7 @@ def update_popup(pathname, position, mode):
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
         pixel = box(x0, y0, x1, y1)
-        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), "0")
+        _, _, geom = geometry_containing_point(country_key, tuple(c["marker"]), 0)
         if pixel.intersects(geom):
             px = (x0 + x1) / 2
             pxs = "E" if px > 0.0 else "W" if px < 0.0 else ""
@@ -1080,9 +1089,9 @@ def update_popup(pathname, position, mode):
             pys = "N" if py > 0.0 else "S" if py < 0.0 else ""
             title = f"{np.abs(py):.5f}° {pys} {np.abs(px):.5f}° {pxs}"
     else:
-        _, attrs = geometry_containing_point(country_key, (x, y), mode)
-        if attrs is not None:
-            title = attrs["label"]
+        _, label, _ = geometry_containing_point(country_key, (x, y), int(mode))
+        if label is not None:
+            title = label
     return [html.H3(title)]
 
 
@@ -1231,7 +1240,7 @@ def borders(pathname, mode):
         shapes = []
     else:
         country_key = country(pathname)
-        df = retrieve_shapes(country_key, mode)
+        df = retrieve_shapes(country_key, int(mode), fields=('the_geom',))
         shapes = df["the_geom"].apply(shapely.geometry.mapping)
     return {"features": shapes}
 
@@ -1377,34 +1386,10 @@ def validate_csv(country, contents):
             notes.append(f"{len(regions)} regions")
             config = CONFIG["countries"][country]
             nlevels = len(config['shapes'])
-
-            query = sql.Composed([
-                sql.SQL("with "),
-                sql.SQL(", ").join(
-                    sql.SQL("sub{i} as ({subquery})").format(
-                        i=sql.Literal(i),
-                        subquery=sql.SQL(config['shapes'][i]['sql']),
-                    )
-                    for i in range(nlevels)
-                ),
-                sql.SQL(" select * from ("),
-                sql.SQL(" union ").join(
-                    sql.SQL(
-                        "select key::text from sub{i}"
-                    ).format(i=sql.Literal(i))
-                    for i in range(nlevels)
-                ),
-                sql.SQL(") as u where u.key::text in ("),
-                sql.SQL(", ").join(sql.Literal(r) for r in regions),
-                sql.SQL(")")
-
-            ])
-            with psycopg2.connect(**CONFIG["db"]) as conn:
-                with conn.cursor() as cursor:
-                    # print(query.as_string(cursor))
-                    cursor.execute(query, list(regions))
-                    rows = cursor.fetchall()
-                    known_regions = set(map(lambda x: x[0], rows))
+            known_regions = set().union(*(
+                retrieve_shapes(country, level, ("key",))["key"]
+                for level in range(nlevels)
+            ))
             unknown_regions = regions - known_regions
             if len(unknown_regions) > 0:
                 examples_str = ', '.join(list(unknown_regions)[:3])
@@ -1435,7 +1420,7 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
     da = select_forecast(country_key, forecast_key, issue_month0, target_month0, target_year, freq)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     if config.get("clip", True):
-        clipping = lambda: geometry_containing_point(country_key, p, "0")[0]
+        clipping = lambda: geometry_containing_point(country_key, p, 0)[2]
     else:
         clipping = None
     resp = pingrid.tile(da, tx, ty, tz, clipping)
@@ -1450,7 +1435,7 @@ def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
     target_month0 = season_config["target_month"]
     da = select_obs(country_key, [obs_key], target_month0, target_year)[obs_key]
     p = tuple(CONFIG["countries"][country_key]["marker"])
-    clipping, _ = geometry_containing_point(country_key, p, "0")
+    _, _, clipping = geometry_containing_point(country_key, p, 0)
     resp = pingrid.tile(da, tx, ty, tz, clipping)
     return resp
 
@@ -1535,7 +1520,7 @@ def trigger_check():
         geom_key = bounds
     else:
         geom_key = region
-    shape = region_shape(mode, country_key, geom_key)
+    shape = region_shape(country_key, mode, geom_key)
 
     if var_is_forecast:
         data = select_forecast(country_key, var, issue_month0,
@@ -1656,15 +1641,7 @@ def export_endpoint(country_key):
 def regions_endpoint():
     country_key = parse_arg("country")
     level = parse_arg("level", int)
-
-    shapes_config = CONFIG["countries"][country_key]["shapes"][level]
-    query = sql.Composed([
-        sql.SQL("with a as ("),
-        sql.SQL(shapes_config["sql"]),
-        sql.SQL(") select key, label from a"),
-    ])
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        df = pd.read_sql(query, conn)
+    df = retrieve_shapes(country_key, level, fields=("key", "label"))
     d = {'regions': df.to_dict(orient="records")}
     return flask.jsonify(d)
 
