@@ -98,7 +98,7 @@ def map_layout():
                             options={
                                 "fill": False,
                                 "color": "black",
-                                "weight": .25,
+                                "weight": 1,
                             },
                         ),
                         name="Borders",
@@ -120,7 +120,7 @@ def map_layout():
                             color="rgb(49, 109, 150)",
                             fillColor="orange",
                             fillOpacity=0.1,
-                            weight=2,
+                            weight=4,
                         ),
                         id="outline",
                     ),
