@@ -338,7 +338,7 @@ def retrieve_shapes(
             fields=sql_fields,
         )
         if key is not None:
-            query = query + sql.SQL(" where key::text = %(key)s")
+            query = query + sql.SQL(" where key::text = %(key)s::text")
         with psycopg2.connect(**CONFIG["db"]) as conn:
             df = pd.read_sql(query, conn, params={"key": key})
         if "the_geom" in fields:
