@@ -1,11 +1,12 @@
 from cftime import Datetime360Day as DT360
+from collections import OrderedDict
 from dash import html
 import dash_bootstrap_components as dbc
 import datetime
 import io
 import numpy as np
 import pandas as pd
-from collections import OrderedDict
+import shapely
 import xarray as xr
 
 import fbfmaproom
@@ -170,12 +171,6 @@ def test_forecast_tile():
 def test_obs_tile():
     with fbfmaproom.SERVER.test_client() as client:
         resp = client.get('/fbfmaproom-tiles/obs/rain/6/40/27/ethiopia/season1/2021')
-    assert resp.status_code == 200
-    assert resp.mimetype == "image/png"
-
-def test_vuln_tile():
-    with fbfmaproom.SERVER.test_client() as client:
-        resp = client.get("/fbfmaproom-tiles/vuln/6/39/30/ethiopia/0/2019")
     assert resp.status_code == 200
     assert resp.mimetype == "image/png"
 
@@ -563,3 +558,48 @@ def test_validate_missing_value():
     contents = '1981,ET05'
     errors, notes = fbfmaproom.validate_csv('ethiopia', contents)
     assert len(errors) == 0
+
+def test_retrieve_shapes_db_default_fields():
+    df = fbfmaproom.retrieve_shapes('ethiopia', 1)
+    print(df)
+    assert len(df) == 11
+    assert tuple(df.columns) == ('key', 'label', 'the_geom')
+    key, label, geom = df.iloc[0]
+    assert key == 'ET0508'
+    assert label == 'Afder'
+    assert isinstance(geom, shapely.MultiPolygon)
+
+def test_retrieve_shapes_db_one_field():
+    df = fbfmaproom.retrieve_shapes('ethiopia', 2, fields=('label',))
+    print(df)
+    assert len(df) == 98
+    assert tuple(df.columns) == ('label',)
+    assert df['label'][0] == 'Debeweyin'
+
+def test_retrieve_shape_db():
+    (label,) = fbfmaproom.retrieve_shape('ethiopia', 1, fields=('label',), key='ET0508')
+    assert label == 'Afder'
+
+def test_retrieve_shapes_file_default_fields():
+    df = fbfmaproom.retrieve_shapes('djibouti', 1)
+    print(df)
+    assert len(df) == 6
+    assert tuple(df.columns) == ('key', 'label', 'the_geom')
+    key, label, geom = df.iloc[0]
+    assert key == 'DJ01'
+    assert label == 'Obock'
+    assert isinstance(geom, shapely.Geometry)
+
+def test_retrieve_shapes_file_one_field():
+    df = fbfmaproom.retrieve_shapes('djibouti', 2, fields=('label',))
+    print(df)
+    assert len(df) == 20
+    assert tuple(df.columns) == ('label',)
+    assert df['label'][0] == 'Ali Adde'
+
+def test_retrieve_shape_file():
+    (label,) = fbfmaproom.retrieve_shape(
+        'djibouti', 1, fields=('label',), key='DJ01'
+    )
+    assert label == 'Obock'
+

@@ -2,7 +2,7 @@
 authors = ["Aaron Kaplan <aaron@iri.columbia.edu>"]
 channels = ["conda-forge", "iridl"]
 name = "fbfmaproom2"
-platforms = ["linux-64", "osx-64", "osx-arm64"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
 [tasks]
 
@@ -23,7 +23,6 @@ dash = "2.3.1.*"
 
 dash-leaflet-iri = "*"
 dash-bootstrap-components = "*"
-gunicorn = "*"
 numpy = "==1.24.2" # pinned to suppress warning caused by pinned pandas
 opencv = "*"
 
@@ -39,6 +38,10 @@ shapely = "*"
 werkzeug = "<2.1" # werkzeug 2.1 spews warnings at dev server startup
 xarray = "*"
 zarr = "*"
+fiona = "*"
+
+[target.linux-64.dependencies]
+gunicorn = "*" # only needed in prod; not packaged for Windows.
 
 [feature.dev.dependencies]
 netcdf4 = "*"
