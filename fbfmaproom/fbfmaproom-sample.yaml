@@ -4756,3 +4756,163 @@ countries:
         subpages:
             OND: lesotho-ond
             DJF: lesotho
+    senegal:
+        logo: Senegal_IRI_120x48.png
+        resolution: [.25, .25]
+        origin: [.125, .125]
+        center: [-14, 14]
+        zoom: 7
+        rotation: 0
+        marker: [-14, 14]
+        shapes:
+            - name: National
+              file: senegal/shapes/2025-10/sen_admbnd_anat_20240520_ab_shp.zip
+              layer: sen_admbnda_adm0_anat_20240520
+              key_field: ADM0_PCODE
+              label_field: ADM0_FR
+
+            - name: Regional
+              file: senegal/shapes/2025-10/sen_admbnd_anat_20240520_ab_shp.zip
+              layer: sen_admbnda_adm1_anat_20240520
+              key_field: ADM1_PCODE
+              label_field: ADM1_FR
+
+            - name: Department
+              file: senegal/shapes/2025-10/sen_admbnd_anat_20240520_ab_shp.zip
+              layer: sen_admbnda_adm2_anat_20240520
+              key_field: ADM2_PCODE
+              label_field: ADM2_FR
+
+        datasets:
+            defaults:
+                predictors:
+                    - prcp-v1
+                    - chirps-precip-jas
+                predictand: bad-years-humanitarian
+            observations:
+                chirps-precip-jun:
+                    label: CHIRPS Precip Jun
+                    description: CHIRPS total precipitation for Jun
+                    path: senegal/chirps-precip-jun-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jjaso:
+                    label: CHIRPS Precip Jun-Oct
+                    description: CHIRPS total precipitation for Jun-Oct
+                    path: senegal/chirps-precip-jjaso.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jas:
+                    label: CHIRPS Precip JAS
+                    description: CHIRPS total precipitation for Jul-Sep
+                    path: senegal/chirps-precip-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirp-spi-jj:
+                    label: CHIRP SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from CHIRP
+                    path: senegal/chirp-spi-jj-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-spi-jas:
+                    label: CHIRP SPI JAS
+                    description: Average SPI in July-September, calculated from CHIRP
+                    path: senegal/chirp-spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-rainfall-sep:
+                    label: CHIRP Rain Sep
+                    description: Total rainfall in September according to CHIRP
+                    path: senegal/chirp-rainfall-sep-jas.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirps-dryspell:
+                    label: Dry Spell
+                    description: Longest dry spell, calculated from CHIRPS
+                    path: senegal/chirps-dryspell-jas.zarr
+                    var_names:
+                        value: lls
+                        lat: Y
+                        lon: X
+                        time: T
+                    units: days
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number2
+                enso_state: *enso_3mo
+                bad-years-emdat:
+                    label: EM-DAT Bad Years
+                    path: senegal/bad-years-emdat.zarr
+                    description: Drought Years collected from EM-DAT
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
+                bad-years-humanitarian:
+                    label: Humanitarian Bad Years
+                    path: senegal/bad-years-dummy.zarr
+                    description: Drought Years collected from Humanitarian Partners - March 2025
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+            forecasts:
+                prcp-v1:
+                    label: JAS fcst v1
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
+                    path: senegal/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+
+        seasons:
+            season1:
+                label: JAS
+                target_month: 7.5
+                length: 3.0
+                issue_months: [3, 4, 5]
+                start_year: 1991
