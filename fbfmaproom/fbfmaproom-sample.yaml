@@ -1921,13 +1921,13 @@ countries:
                     format: number3
                 bad-years:
                     label: Reported bad years
-                    path: ethiopia/bad-years-mam.zarr
+                    path: ethiopia/southethiopia_badyears_mam.zarr
                     var_names:
-                        value: bad
+                        value: rank
                         time: T
                     colormap: precip
-                    lower_is_worse: no
-                    format: bad
+                    lower_is_worse: yes
+                    format: number0
             forecasts:
                 pnep:
                     label: Forecast prob non-exc v1
@@ -2143,13 +2143,13 @@ countries:
                 enso_state: *enso_3mo
                 bad-years:
                     label: Reported bad years
-                    path: ethiopia/bad-years-ond.zarr
+                    path: ethiopia/southethiopia_badyears_ond.zarr
                     var_names:
-                        value: bad
+                        value: rank
                         time: T
                     colormap: precip
-                    lower_is_worse: no
-                    format: bad
+                    lower_is_worse: yes
+                    format: number0
             forecasts:
                 pnep:
                     label: Forecast v1 prob non-exc
