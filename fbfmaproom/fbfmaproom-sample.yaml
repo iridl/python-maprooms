@@ -1737,22 +1737,26 @@ countries:
         shapes: &south_ethiopia_shapes
             - name: Regional
               sql: select (admin1pcod) as key, admin1name as label,
-                  ST_AsBinary(ST_Union(the_geom)) as the_geom from iridb.eth_zones_2024
+                  ST_AsBinary(ST_Union(the_geom)) as the_geom from iridb.eth_woredas_2024
                   where admin1pcod = 'ET08'
-                  and admin2pcod in ('ET0812','ET0806','ET0807','ET0809','ET0810')
+                  and admin2pcod in ('ET0812','ET0806','ET0807','ET0809','ET0810','ET0803','ET0802')
+                  and admin3pcod in ('ET080601','ET080801','ET081001','ET080701','ET080212','ET080202','ET080211','ET080310','ET080904','ET080902','ET080905','ET080901','ET081206','ET081203','ET081201','ET081202','ET081204','ET081205')
                   group by 1, 2
 
             - name: Zonal
               sql: select (admin2pcod) as key, admin2name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.eth_zones_2024
+                  ST_AsBinary(ST_Union(the_geom)) as the_geom from iridb.eth_woredas_2024
                   where admin1pcod = 'ET08'
-                  and admin2pcod in ('ET0812','ET0806','ET0807','ET0809','ET0810')
+                  and admin2pcod in ('ET0812','ET0806','ET0807','ET0809','ET0810','ET0803','ET0802')
+                  and admin3pcod in ('ET080601','ET080801','ET081001','ET080701','ET080212','ET080202','ET080211','ET080310','ET080904','ET080902','ET080905','ET080901','ET081206','ET081203','ET081201','ET081202','ET081204','ET081205')
+                  group by 1, 2
 
             - name: Woreda
               sql: select (admin3pcod) as key, admin3name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.eth_woredas_2024
                   where admin1pcod = 'ET08'
-                  and admin2pcod in ('ET0812','ET0806','ET0807','ET0809','ET0810')
+                  and admin2pcod in ('ET0812','ET0806','ET0807','ET0809','ET0810','ET0803','ET0802')
+                  and admin3pcod in ('ET080601','ET080801','ET081001','ET080701','ET080212','ET080202','ET080211','ET080310','ET080904','ET080902','ET080905','ET080901','ET081206','ET081203','ET081201','ET081202','ET081204','ET081205')
 
         datasets:
             defaults:
