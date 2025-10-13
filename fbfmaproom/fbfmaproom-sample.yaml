@@ -140,22 +140,22 @@ countries:
         clip: no
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(ST_Union(the_geom)) as the_geom
-                  from iridb.g2015_2014_1 g where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-                  group by 1, 2
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM0_PCODE
+              label_field: ADM0_EN
 
             - name: Regional
-              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
-                  where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM1_PCODE
+              label_field: ADM1_EN
 
             - name: District
-              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
-                  where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM2_PCODE
+              label_field: ADM2_EN
 
         datasets:
             defaults:
@@ -382,22 +382,22 @@ countries:
         clip: no
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(ST_Union(the_geom)) as the_geom
-                  from iridb.g2015_2014_1 g where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-                  group by 1, 2
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM0_PCODE
+              label_field: ADM0_EN
 
             - name: Regional
-              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
-                  where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM1_PCODE
+              label_field: ADM1_EN
 
             - name: District
-              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
-                  where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM2_PCODE
+              label_field: ADM2_EN
 
         datasets:
             defaults:
@@ -577,23 +577,22 @@ countries:
         clip: no
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(ST_Union(the_geom)) as the_geom
-                  from iridb.g2015_2014_1 g where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
-                  group by 1, 2
-
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM0_PCODE
+              label_field: ADM0_EN
 
             - name: Regional
-              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
-                  where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM1_PCODE
+              label_field: ADM1_EN
 
             - name: District
-              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
-                  where adm0_name = 'Madagascar'
-                  and adm1_name in ('Androy', 'Anosy', 'Atsimo Andrefana', 'Atsimo Atsinanana')
+              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              layer: mdg_bnd_adm2_dis_pam
+              key_field: ADM2_PCODE
+              label_field: ADM2_EN
 
         datasets:
             defaults:
