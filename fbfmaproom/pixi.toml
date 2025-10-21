@@ -16,6 +16,7 @@ libc = {family = "glibc", version = "2.17"}
 python = "3.9.*"
 
 cftime = "*"
+cptio = "*"
 
 # some later version removes the __wrapped__ attribute on callbacks,
 # which is used by some tests
