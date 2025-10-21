@@ -1,7 +1,7 @@
 ARG PIXI_VERSION=0.55.0@sha256:423daf63e4e876ab42b1be9ddee3fc867ba8b9fa511e0634de3b9df12ff1a90d
 ARG CENTOS_VERSION=stream9@sha256:9c72223c683a903d91f188e6f41f032a3d912aa67afbbfa1331cf027ff2d495b
 
-FROM ghcr.io/prefix-dev/pixi:${PIXI_VERSION} as build
+FROM ghcr.io/prefix-dev/pixi:${PIXI_VERSION} AS build
 
 # build pixi environment
 WORKDIR /app
