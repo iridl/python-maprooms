@@ -1,7 +1,8 @@
 #!/bin/bash
 
 source /app/activate
-# Get pingrid on the python path, as it's not installed.
+# Get pingrid on the python path, as it's not installed in the pixi
+# environment. Needed for data-conversion-scripts.
 export PYTHONPATH=/app
 
 exec "$@"
