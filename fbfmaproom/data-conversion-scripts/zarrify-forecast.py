@@ -3,6 +3,7 @@ import cftime
 import cptio
 import numpy as np
 from pathlib import Path
+import pingrid
 import scipy.stats
 import xarray as xr
 import zarr
@@ -126,7 +127,9 @@ def open_one(path):
     return da
 
 def open_multi(paths):
-    da = next(iter(xr.open_mfdataset(paths).data_vars.values()))
+    dss = [pingrid.open_dataset(p) for p in paths]
+    ds = xr.concat(dss, 'T')
+    da = next(iter(ds.data_vars.values()))
     return da
 
 
