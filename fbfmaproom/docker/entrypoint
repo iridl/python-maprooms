@@ -1,4 +1,7 @@
 #!/bin/bash
 
 source /app/activate
+# Get pingrid on the python path, as it's not installed.
+export PYTHONPATH=/app
+
 exec "$@"
