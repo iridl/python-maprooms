@@ -1,0 +1,7 @@
+[project]
+name = "pingrid"
+version = "0"
+
+[tool.setuptools]
+packages = []
+py-modules = ['pingrid']
