@@ -3,7 +3,6 @@ authors = ["IRI <pycpt-help@iri.columbia.edu>"]
 channels = ["conda-forge", "iridl", "iri-nextgen"]
 name = "fbfmaproom2"
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
-preview = ["pixi-build"]
 
 [tasks]
 
@@ -43,8 +42,6 @@ werkzeug = "<2.1" # werkzeug 2.1 spews warnings at dev server startup
 xarray = "*"
 zarr = "*"
 fiona = "*"
-
-pingrid = {path = "../pingrid"}
 
 [target.linux-64.dependencies]
 gunicorn = "*" # only needed in prod; not packaged for Windows.
