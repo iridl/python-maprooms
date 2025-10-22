@@ -6,7 +6,7 @@ FROM ghcr.io/prefix-dev/pixi:${PIXI_VERSION} AS build
 # build pixi environment
 WORKDIR /app
 COPY pixi.lock pixi.toml .
-RUN pixi install --locked --environment prod
+RUN pixi -v install --locked --environment prod
 RUN pixi shell-hook --locked --shell bash --environment prod > activate
 
 
