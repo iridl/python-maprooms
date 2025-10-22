@@ -26,6 +26,7 @@ dash-leaflet-iri = "*"
 dash-bootstrap-components = "*"
 netcdf4 = "*"
 numpy = "==1.24.2" # pinned to suppress warning caused by pinned pandas
+scipy = "*"
 opencv = "*"
 
 # Newer versions of Pandas emit warnings when passed a psycopg2
