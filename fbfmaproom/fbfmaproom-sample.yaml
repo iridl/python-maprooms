@@ -141,19 +141,19 @@ countries:
         shapes:
             - name: National
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm0
               key_field: ADM0_PCODE
               label_field: ADM0_EN
 
             - name: Regional
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm1
               key_field: ADM1_PCODE
               label_field: ADM1_EN
 
             - name: District
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm2
               key_field: ADM2_PCODE
               label_field: ADM2_EN
 
@@ -383,19 +383,19 @@ countries:
         shapes:
             - name: National
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm0
               key_field: ADM0_PCODE
               label_field: ADM0_EN
 
             - name: Regional
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm1
               key_field: ADM1_PCODE
               label_field: ADM1_EN
 
             - name: District
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm2
               key_field: ADM2_PCODE
               label_field: ADM2_EN
 
@@ -578,19 +578,19 @@ countries:
         shapes:
             - name: National
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm0
               key_field: ADM0_PCODE
               label_field: ADM0_EN
 
             - name: Regional
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm1
               key_field: ADM1_PCODE
               label_field: ADM1_EN
 
             - name: District
               file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
-              layer: mdg_bnd_adm2_dis_pam
+              layer: mdg_adm2
               key_field: ADM2_PCODE
               label_field: ADM2_EN
 
