@@ -1,12 +1,12 @@
-ARG PIXI_VERSION=0.46.0@sha256:c12bcbe8ba5dfd71867495d3471b95a6993b79cc7de7eafec016f8f59e4e4961
-ARG CENTOS_VERSION=7.9.2009
+ARG PIXI_VERSION=0.55.0@sha256:423daf63e4e876ab42b1be9ddee3fc867ba8b9fa511e0634de3b9df12ff1a90d
+ARG CENTOS_VERSION=stream9
 
-FROM ghcr.io/prefix-dev/pixi:${PIXI_VERSION} as build
+FROM ghcr.io/prefix-dev/pixi:${PIXI_VERSION} AS build
 
 # build pixi environment
 WORKDIR /app
 COPY pixi.lock pixi.toml .
-RUN pixi install --locked --environment prod
+RUN pixi -v install --locked --environment prod
 RUN pixi shell-hook --locked --shell bash --environment prod > activate
 
 

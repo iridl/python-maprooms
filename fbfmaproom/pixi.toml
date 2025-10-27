@@ -1,6 +1,6 @@
 [project]
-authors = ["Aaron Kaplan <aaron@iri.columbia.edu>"]
-channels = ["conda-forge", "iridl"]
+authors = ["IRI <pycpt-help@iri.columbia.edu>"]
+channels = ["conda-forge", "iridl", "iri-nextgen"]
 name = "fbfmaproom2"
 platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
@@ -16,6 +16,7 @@ libc = {family = "glibc", version = "2.17"}
 python = "3.9.*"
 
 cftime = "*"
+cptio = "*"
 
 # some later version removes the __wrapped__ attribute on callbacks,
 # which is used by some tests
@@ -23,11 +24,13 @@ dash = "2.3.1.*"
 
 dash-leaflet-iri = "*"
 dash-bootstrap-components = "*"
+netcdf4 = "*"
 numpy = "==1.24.2" # pinned to suppress warning caused by pinned pandas
+scipy = "*"
 opencv = "*"
 
 # Newer versions of Pandas emit warnings when passed a psycopg2
-# connection. To upgrade, use psycopg2 via SLQAlchemy.
+# connection. To upgrade, use psycopg2 via SQLAlchemy.
 pandas = "1.3.*"
 
 pip = "*" # to support compilation of mod_wsgi from source
@@ -44,7 +47,6 @@ fiona = "*"
 gunicorn = "*" # only needed in prod; not packaged for Windows.
 
 [feature.dev.dependencies]
-netcdf4 = "*"
 pytest = "*"
 
 [environments]

@@ -35,11 +35,10 @@ git clone git@github.com:iridl/python-maprooms
 cd python-maprooms/fbfmaproom
 ```
 
-### Enable conda
+### Make sure pixi is installed
 
-```
-module load python/miniconda3
-```
+If you're working on mako, pixi is already installed. Elsewhere, you may need to follow instructions from https://pixi.sh
+
 
 ### Create a local configuration file
 
@@ -51,15 +50,11 @@ dev_server_port: xxxx # the port you chose earlier
 ```
 
 ## Running the application in your development environment
-### Activate the conda environment (pre-installed on the development server)
-```
-conda activate fbfmaproom2
-```
 
 ### Launch the development server
 
 ```
-CONFIG=fbfmaproom-sample.yaml:config-local.yaml python fbfmaproom.py
+CONFIG=fbfmaproom-sample.yaml:config-local.yaml pixi run python fbfmaproom.py
 ```
 
 ### Test the application in a browser 
@@ -72,10 +67,9 @@ All datasets used by the application are stored in zarr format. There are two ca
 
 ### Datasets from the Data Library
 
-The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. First read the script and find the name of the dataset you want to update, e.g. `ethiopia/rain-mam`. Then run the script as follows, substituting the chosen dataset name. Note that we run this script in the enactsmaproom conda environment, not the fbfmaproom environment. The fbfmaproom environment is missing the netcdf library, which the script requires; using the enactsmaproom environment is a lazy workaround.
+The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. First read the script and find the name of the dataset you want to update, e.g. `ethiopia/rain-mam`. Then run the script as follows, substituting the chosen dataset name.
 ```
-conda activate enactsmaproom
-CONFIG=fbfmaproom-sample.py python fbf-update-data.py ethiopia/pnep
+CONFIG=fbfmaproom-sample.py pixi run python fbf-update-data.py ethiopia/pnep
 ```
  
 ### Datasets not from the Data Library
@@ -88,12 +82,7 @@ For `zarrify-forecast.py`, edit the end of the script to indicate which dataset 
 
 ## Adding or removing python dependencies
 
-Edit `environment.yml`, then regenerate the lock files as follows:
-```
-conda install conda-lock
-conda-lock lock -f environment.yml -f environment-dev.yml
-conda-lock render
-```
+Use `pixi add` or `pixi remove` followed by `pixi lock`. After testing, commit changes to `pixi.toml` and `pixi.lock`.
 
 ## Adding a foreign table
 

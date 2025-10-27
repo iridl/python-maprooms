@@ -748,7 +748,11 @@ if __name__ == '__main__':
             assert os.path.exists(ncfilepath)
         zarrpath = "%s/%s.zarr" % (opts.datadir, name)
         print("Converting to zarr")
-        ds = pingrid.open_mfdataset([f'{opts.datadir}/{name}-{i}.nc' for i in range(len(slices))])
+        dss = [
+            pingrid.open_dataset(f'{opts.datadir}/{name}-{i}.nc')
+            for i in range(len(slices))
+        ]
+        ds = xr.concat(dss, 'T')
         # TODO do this in Ingrid
         if 'Y' in ds and ds['Y'][0] > ds['Y'][1]:
             ds = ds.reindex(Y=ds['Y'][::-1])

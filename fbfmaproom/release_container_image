@@ -44,7 +44,7 @@ existing_tags=$(curl -s https://registry.hub.docker.com/v1/repositories/$registr
 echo $existing_tags | grep \"$version\" > /dev/null && \
     fail "There is already an image tagged $version."
 
-tar ch . | \
+tar c --dereference --exclude .pixi . | \
   docker build \
   -t $registry/$imagename:latest \
   -t $registry/$imagename:$version \
