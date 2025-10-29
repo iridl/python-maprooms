@@ -23,5 +23,6 @@ dependencies:
   - shapely
   - werkzeug<2.1  # 2.1 spews warnings at dev server start
   - xarray
+  - xcdat
   - yaml
   - zarr
