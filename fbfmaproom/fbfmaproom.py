@@ -1142,7 +1142,7 @@ def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predi
 
     try:
         if geom_key is None:
-            raise NotFoundError("No region found")
+            raise Exception("No region found")
 
         main_df, summary_df, thresholds = generate_tables(
             country_key,
