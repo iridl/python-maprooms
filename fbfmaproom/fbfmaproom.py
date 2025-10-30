@@ -344,9 +344,13 @@ def retrieve_shapes(
             df = pd.read_sql(query, conn, params={"key": key})
         if "the_geom" in fields:
             df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-    elif 'file' in sc:
-        filepath = Path(CONFIG["data_root"]) / sc["file"]
-        with fiona.open(f"zip://{filepath}", layer=sc["layer"]) as collection:
+    elif "file" in sc:
+        if sc["file"].endswith(".zip"):
+            prefix = "zip://"
+        else:
+            prefix = ""
+        file_arg = f"{prefix}{CONFIG['data_root']}/{sc['file']}"
+        with fiona.open(file_arg, layer=sc["layer"]) as collection:
             tuples = [
                 (
                     feature['properties'][sc["key_field"]],

@@ -140,19 +140,19 @@ countries:
         clip: no
         shapes:
             - name: National
-              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              file: madagascar/shapes/2025-10/mdg_adm0.shp
               layer: mdg_adm0
               key_field: ADM0_PCODE
               label_field: ADM0_EN
 
             - name: Regional
-              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              file: madagascar/shapes/2025-10/mdg_adm1.shp
               layer: mdg_adm1
               key_field: ADM1_PCODE
               label_field: ADM1_EN
 
             - name: District
-              file: madagascar/shapes/2025-10/SHP_ADM2_UPDATE.zip
+              file: madagascar/shapes/2025-10/mdg_adm2.shp
               layer: mdg_adm2
               key_field: ADM2_PCODE
               label_field: ADM2_EN
