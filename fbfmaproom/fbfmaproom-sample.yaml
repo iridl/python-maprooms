@@ -998,6 +998,10 @@ countries:
         subpages:
             MAM: "ethiopia"
             OND: "ethiopia-ond"
+            OromiaMAM: "southern-oromia"
+            OromiaOND: "southern-oromia-ond"
+            SouthEthiopiaMAM: "south-ethiopia"
+            SouthEthiopiaOND: "south-ethiopia-ond"
     ethiopia-ond:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1205,6 +1209,10 @@ countries:
         subpages:
             MAM: "ethiopia"
             OND: "ethiopia-ond"
+            OromiaMAM: "southern-oromia"
+            OromiaOND: "southern-oromia-ond"
+            SouthEthiopiaMAM: "south-ethiopia"
+            SouthEthiopiaOND: "south-ethiopia-ond"
     southern-oromia:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1494,6 +1502,10 @@ countries:
         subpages:
             MAM: "southern-oromia"
             OND: "southern-oromia-ond"
+            SomaliMAM: "ethiopia"
+            SomaliOND: "ethiopia-ond"
+            SouthEthiopiaMAM: "south-ethiopia"
+            SouthEthiopiaOND: "south-ethiopia-ond"
     southern-oromia-ond:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1735,6 +1747,10 @@ countries:
         subpages:
             MAM: "southern-oromia"
             OND: "southern-oromia-ond"
+            SomaliMAM: "ethiopia"
+            SomaliOND: "ethiopia-ond"
+            SouthEthiopiaMAM: "south-ethiopia"
+            SouthEthiopiaOND: "south-ethiopia-ond"
 
     south-ethiopia:
         logo: Ethiopia_IRI_98x48.png
@@ -2003,6 +2019,10 @@ countries:
         subpages:
             MAM: "south-ethiopia"
             OND: "south-ethiopia-ond"
+            SomaliMAM: "ethiopia"
+            SomaliOND: "ethiopia-ond"
+            OromiaMAM: "southern-oromia"
+            OromiaOND: "southern-oromia-ond"
 
     south-ethiopia-ond:
         logo: Ethiopia_IRI_98x48.png
