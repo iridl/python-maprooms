@@ -996,12 +996,12 @@ countries:
                 issue_months: [11, 0, 1]
                 start_year: 1983
         subpages:
-            MAM: "ethiopia"
-            OND: "ethiopia-ond"
-            OromiaMAM: "southern-oromia"
-            OromiaOND: "southern-oromia-ond"
-            SouthEthiopiaMAM: "south-ethiopia"
-            SouthEthiopiaOND: "south-ethiopia-ond"
+            Somali MAM: "ethiopia"
+            Somali OND: "ethiopia-ond"
+            Oromia MAM: "southern-oromia"
+            Oromia OND: "southern-oromia-ond"
+            South Ethiopia MAM: "south-ethiopia"
+            South Ethiopia OND: "south-ethiopia-ond"
     ethiopia-ond:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1207,12 +1207,12 @@ countries:
                 issue_months: [8, 7, 6]
                 start_year: 1982
         subpages:
-            MAM: "ethiopia"
-            OND: "ethiopia-ond"
-            OromiaMAM: "southern-oromia"
-            OromiaOND: "southern-oromia-ond"
-            SouthEthiopiaMAM: "south-ethiopia"
-            SouthEthiopiaOND: "south-ethiopia-ond"
+            Somali MAM: "ethiopia"
+            Somali OND: "ethiopia-ond"
+            Oromia MAM: "southern-oromia"
+            Oromia OND: "southern-oromia-ond"
+            South Ethiopia MAM: "south-ethiopia"
+            South Ethiopia OND: "south-ethiopia-ond"
     southern-oromia:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1500,12 +1500,12 @@ countries:
                 issue_months: [11, 0, 1]
                 start_year: 1983
         subpages:
-            MAM: "southern-oromia"
-            OND: "southern-oromia-ond"
-            SomaliMAM: "ethiopia"
-            SomaliOND: "ethiopia-ond"
-            SouthEthiopiaMAM: "south-ethiopia"
-            SouthEthiopiaOND: "south-ethiopia-ond"
+            Oromia MAM: "southern-oromia"
+            Oromia OND: "southern-oromia-ond"
+            Somali MAM: "ethiopia"
+            Somali OND: "ethiopia-ond"
+            South Ethiopia MAM: "south-ethiopia"
+            South Ethiopia OND: "south-ethiopia-ond"
     southern-oromia-ond:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
@@ -1745,12 +1745,12 @@ countries:
                 issue_months: [6, 7, 8]
                 start_year: 1983
         subpages:
-            MAM: "southern-oromia"
-            OND: "southern-oromia-ond"
-            SomaliMAM: "ethiopia"
-            SomaliOND: "ethiopia-ond"
-            SouthEthiopiaMAM: "south-ethiopia"
-            SouthEthiopiaOND: "south-ethiopia-ond"
+            Oromia MAM: "southern-oromia"
+            Oromia OND: "southern-oromia-ond"
+            Somali MAM: "ethiopia"
+            Somali OND: "ethiopia-ond"
+            South Ethiopia MAM: "south-ethiopia"
+            South Ethiopia OND: "south-ethiopia-ond"
 
     south-ethiopia:
         logo: Ethiopia_IRI_98x48.png
@@ -2017,12 +2017,12 @@ countries:
                 issue_months: [11, 0, 1]
                 start_year: 1983
         subpages:
-            MAM: "south-ethiopia"
-            OND: "south-ethiopia-ond"
-            SomaliMAM: "ethiopia"
-            SomaliOND: "ethiopia-ond"
-            OromiaMAM: "southern-oromia"
-            OromiaOND: "southern-oromia-ond"
+            South Ethiopia MAM: "south-ethiopia"
+            South Ethiopia OND: "south-ethiopia-ond"
+            Somali MAM: "ethiopia"
+            Somali OND: "ethiopia-ond"
+            Oromia MAM: "southern-oromia"
+            Oromia OND: "southern-oromia-ond"
 
     south-ethiopia-ond:
         logo: Ethiopia_IRI_98x48.png
@@ -2229,8 +2229,12 @@ countries:
                 issue_months: [8, 7, 6]
                 start_year: 1982
         subpages:
-            MAM: "south-ethiopia"
-            OND: "south-ethiopia-ond"
+            South Ethiopia MAM: "south-ethiopia"
+            South Ethiopia OND: "south-ethiopia-ond"
+            Somali MAM: "ethiopia"
+            Somali OND: "ethiopia-ond"
+            Oromia MAM: "southern-oromia"
+            Oromia OND: "southern-oromia-ond"
 
     niger:
         logo: Niger_IRI_120x48.png
