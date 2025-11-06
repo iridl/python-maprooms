@@ -9,7 +9,7 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 
-def app_layout_1(navbar, description, map, local):
+def app_1(navbar, description, map, local):
     """
     Layout with controls in navbar at the top,
     2 columns: a narrow left one with descriptions and right one with
@@ -56,7 +56,7 @@ def app_layout_1(navbar, description, map, local):
     )
 
 
-def navbar_layout(title, *elems):
+def navbar(title, *elems):
     """
     A title followed by a line-up of controls
     and a dbc.Alert
@@ -83,7 +83,7 @@ def navbar_layout(title, *elems):
     )
 
 
-def description_layout(title, subtitle, *elems):
+def description(title, subtitle, *elems):
     """
     An H5 title, a subtitle sentence followed by a series of paragraphs
     or other html elements
@@ -100,7 +100,7 @@ def description_layout(title, subtitle, *elems):
     )
 
 
-def map_layout(
+def map(
     default_zoom,
     layers_control_position="topleft", scale_control_position="bottomright",
     cb_nTicks=9, cb_opacity=1, cb_tooltip=True,
@@ -160,7 +160,7 @@ def map_layout(
     )
 
 
-def local_single_tabbed_layout(label, download_button=False):
+def local_single_tabbed(label, download_button=False):
     """
     Single tabbed local graph with or without a download data button
     """
@@ -176,19 +176,3 @@ def local_single_tabbed_layout(label, download_button=False):
             html.Div([dbc.Spinner(dcc.Graph(id="local_graph"))]),
         ],
         label=label)])
-
-
-def help_layout(buttonname, id_name, message):
-    """
-    Can be tagged to a control to have it display a helpful tooltip
-    when moused over
-    """
-    return html.Div(
-        [
-            html.Label(
-                f"{buttonname}:", id=id_name,
-                style={"cursor": "pointer","font-size": "100%","padding-left":"3px"},
-            ),
-            dbc.Tooltip(f"{message}", target=id_name, className="tooltiptext"),
-        ]
-    )

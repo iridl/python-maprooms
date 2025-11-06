@@ -12,9 +12,9 @@ LIGHT_GRAY = "#eeeeee"
 
 def app_layout():
 
-    return lou.app_layout_1(
+    return lou.app_1(
 
-        lou.navbar_layout("CCA",  
+        lou.navbar("CCA",  
             Block("Region",
                 Select(
                     id="region",
@@ -116,7 +116,7 @@ def app_layout():
             ),
         ),
 
-        lou.description_layout(
+        lou.description(
             "Climate Change Analysis",
             """
             This Maproom displays seasonal projected change of key climate
@@ -145,9 +145,9 @@ def app_layout():
             ),
         ),
         
-        lou.map_layout(GLOBAL_CONFIG["zoom"]),
+        lou.map(GLOBAL_CONFIG["zoom"]),
         
-        lou.local_single_tabbed_layout(
+        lou.local_single_tabbed(
             "Local History and Projections", download_button=True
         ),
     )
