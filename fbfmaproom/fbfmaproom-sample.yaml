@@ -28,30 +28,6 @@ db:
     user: dero  # user name
     password: SNIP
 
-enso_3mo: &enso_3mo
-    label: ENSO State
-    units:
-    path: enso.zarr
-    var_names:
-        time: T
-        value: dominant_class
-    range: [1, 3]
-    colormap: rainbow
-    lower_is_worse: no
-    format: enso
-
-enso_4mo: &enso_4mo
-    label: ENSO State
-    units:
-    path: enso-4mo.zarr
-    var_names:
-        time: T
-        value: dominant_class
-    range: [1, 3]
-    colormap: rainbow
-    lower_is_worse: no
-    format: enso
-
 data_root: /data/aaron/fbf-candidate
 
 custom_asset_path: /path/to/my/custom/icons/directory
@@ -89,6 +65,7 @@ countries:
                 rain:
                     label: Rain
                     description: CMAP average precipitation over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.Merged_Analysis/.monthly/.latest/.ver2/.prcp_est/X/32/36/RANGE/Y/-17/-9/RANGE/T/(Dec-Feb)/seasonalAverage/"
                     path: rain-malawi.zarr
                     var_names:
                         value: prcp_est
@@ -97,7 +74,18 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                enso_state: *enso_3mo
+                enso_state: &enso_3mo
+                    label: ENSO State
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCDC/.ERSST/.version5/.sst/zlev/removeGRID/X/-170/-120/RANGE/Y/-5/5/RANGEEDGES/dup/T/12.0/splitstreamgrid/dup/T2/(1856)/last/RANGE/T2/30.0/12.0/mul/runningAverage/T2/12.0/5.0/mul/STEP/%5BT2%5DregridLB/nip/T2/12/pad1/T/unsplitstreamgrid/sub/%7BY/cosd%7D%5BX/Y%5Dweighted-average/T/3/1.0/runningAverage/%7BLaNina/-0.45/Neutral/0.45/ElNino%7Dclassify/T/-2/1/2/shiftdata/%5BT_lag%5Dsum/5/flagge/T/-2/1/2/shiftdata/%5BT_lag%5Dsum/1.0/flagge/dup/a%3A/sst/(LaNina)/VALUE/%3Aa%3A/sst/(ElNino)/VALUE/%3Aa/add/1/maskge/dataflag/1/index/2/flagge/add/sst/(phil)/unitmatrix/sst_out/(Neutral)/VALUE/mul/exch/sst/(phil2)/unitmatrix/sst_out/(LaNina)/(ElNino)/VALUES/%5Bsst_out%5Dsum/mul/add/%5Bsst%5Ddominant_class//long_name/(ENSO%20Phase)/def/startcolormap/DATA/1/3/RANGE/blue/blue/blue/grey/red/red/endcolormap/T/(1980)/last/RANGE/"
+                    units:
+                    path: enso.zarr
+                    var_names:
+                        time: T
+                        value: dominant_class
+                    range: [1, 3]
+                    colormap: rainbow
+                    lower_is_worse: no
+                    format: enso
                 bad-years:
                     label: Reported bad years
                     path: malawi/bad-years.zarr
@@ -257,6 +245,10 @@ countries:
                 subseas-dry-tercile-snov-l22-djf:
                     label: November biweekly forecast, 3wk lead
                     description: Biweekly rainfall forecast issued in early November for the two week period starting two weeks after the issue date. Probability of the driest tercile.
+                    url: "{url}"
+                    url_args:
+                        - url: "http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Hindcast/.Subx_biweekly_Precipitation/.MME_v21_Precipitation_ELR/.prob/L/22/VALUE/L/removeGRID/S/(0000%206%20Nov%201999)/(0000%204%20Nov%202000)/(0000%203%20Nov%202001)/(0000%202%20Nov%202002)/(0000%201%20Nov%202003)/(0000%206%20Nov%202004)/(0000%205%20Nov%202005)/(0000%204%20Nov%202006)/(0000%203%20Nov%202007)/(0000%201%20Nov%202008)/(0000%207%20Nov%202009)/(0000%206%20Nov%202010)/(0000%205%20Nov%202011)/(0000%203%20Nov%202012)/(0000%202%20Nov%202013)/(0000%201%20Nov%202014)/(0000%207%20Nov%202015)/(0000%205%20Nov%202016)/VALUES/C/(Below_Normal)/VALUE/C/removeGRID/X/42.525/48.975/RANGEEDGES/Y/-25.9875/-20.025/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/2.5/shiftGRID/S//T/renameGRID/"
+                        - url: "https://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Tercile_Forecast/.Subx_biweekly_Precipitation/.MMEv21_Precipitation_ELR/.prob/L/22/VALUE/L/removeGRID/C/(Below_Normal)/VALUE/C/removeGRID/S/(0000%206%20Nov%202020)/(0000%205%20Nov%202021)/(0000%204%20Nov%202022)/(0000%203%20Nov%202023)/VALUES/X/42.525/48.975/RANGEEDGES/Y/-25.9875/-20.025/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/2.5/shiftGRID/S//T/renameGRID/"
                     path: madagascar/subseas-dry-tercile-snov-l22-djf.zarr
                     var_names:
                         value: prob
@@ -3808,6 +3800,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jul-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/'
                     path: djibouti/rain-jas.zarr
                     var_names:
                         value: prcp
@@ -4314,7 +4307,18 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number4
-                enso_state: *enso_4mo
+                enso_state:
+                    label: ENSO State
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCDC/.ERSST/.version5/.sst/zlev/removeGRID/X/-170/-120/RANGE/Y/-5/5/RANGEEDGES/dup/T/12.0/splitstreamgrid/dup/T2/(1856)/last/RANGE/T2/30.0/12.0/mul/runningAverage/T2/12.0/5.0/mul/STEP/%5BT2%5DregridLB/nip/T2/12/pad1/T/unsplitstreamgrid/sub/%7BY/cosd%7D%5BX/Y%5Dweighted-average/T/4/1.0/runningAverage/%7BLaNina/-0.45/Neutral/0.45/ElNino%7Dclassify/T/-2/1/2/shiftdata/%5BT_lag%5Dsum/5/flagge/T/-2/1/2/shiftdata/%5BT_lag%5Dsum/1.0/flagge/dup/a%3A/sst/(LaNina)/VALUE/%3Aa%3A/sst/(ElNino)/VALUE/%3Aa/add/1/maskge/dataflag/1/index/2/flagge/add/sst/(phil)/unitmatrix/sst_out/(Neutral)/VALUE/mul/exch/sst/(phil2)/unitmatrix/sst_out/(LaNina)/(ElNino)/VALUES/%5Bsst_out%5Dsum/mul/add/%5Bsst%5Ddominant_class//long_name/(ENSO%20Phase)/def/startcolormap/DATA/1/3/RANGE/blue/blue/blue/grey/red/red/endcolormap/T/(1980)/last/RANGE/"
+                    units:
+                    path: enso-4mo.zarr
+                    var_names:
+                        time: T
+                        value: dominant_class
+                    range: [1, 3]
+                    colormap: rainbow
+                    lower_is_worse: no
+                    format: enso
                 bad-years:
                     label: Reported bad years (lower is worse)
                     path: djibouti/bad-years-jjas.zarr

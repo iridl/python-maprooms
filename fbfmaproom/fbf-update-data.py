@@ -6,21 +6,7 @@ import shutil
 
 import pingrid
 
-base = "http://iridl.ldeo.columbia.edu"
-
 url_datasets = [
-    (
-        "enso",
-        "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCDC/.ERSST/.version5/.sst/zlev/removeGRID/X/-170/-120/RANGE/Y/-5/5/RANGEEDGES/dup/T/12.0/splitstreamgrid/dup/T2/(1856)/last/RANGE/T2/30.0/12.0/mul/runningAverage/T2/12.0/5.0/mul/STEP/%5BT2%5DregridLB/nip/T2/12/pad1/T/unsplitstreamgrid/sub/%7BY/cosd%7D%5BX/Y%5Dweighted-average/T/3/1.0/runningAverage/%7BLaNina/-0.45/Neutral/0.45/ElNino%7Dclassify/T/-2/1/2/shiftdata/%5BT_lag%5Dsum/5/flagge/T/-2/1/2/shiftdata/%5BT_lag%5Dsum/1.0/flagge/dup/a%3A/sst/(LaNina)/VALUE/%3Aa%3A/sst/(ElNino)/VALUE/%3Aa/add/1/maskge/dataflag/1/index/2/flagge/add/sst/(phil)/unitmatrix/sst_out/(Neutral)/VALUE/mul/exch/sst/(phil2)/unitmatrix/sst_out/(LaNina)/(ElNino)/VALUES/%5Bsst_out%5Dsum/mul/add/%5Bsst%5Ddominant_class//long_name/(ENSO%20Phase)/def/startcolormap/DATA/1/3/RANGE/blue/blue/blue/grey/red/red/endcolormap/T/(1980)/last/RANGE/"
-    ),
-    (
-        "enso-4mo",
-        "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCDC/.ERSST/.version5/.sst/zlev/removeGRID/X/-170/-120/RANGE/Y/-5/5/RANGEEDGES/dup/T/12.0/splitstreamgrid/dup/T2/(1856)/last/RANGE/T2/30.0/12.0/mul/runningAverage/T2/12.0/5.0/mul/STEP/%5BT2%5DregridLB/nip/T2/12/pad1/T/unsplitstreamgrid/sub/%7BY/cosd%7D%5BX/Y%5Dweighted-average/T/4/1.0/runningAverage/%7BLaNina/-0.45/Neutral/0.45/ElNino%7Dclassify/T/-2/1/2/shiftdata/%5BT_lag%5Dsum/5/flagge/T/-2/1/2/shiftdata/%5BT_lag%5Dsum/1.0/flagge/dup/a%3A/sst/(LaNina)/VALUE/%3Aa%3A/sst/(ElNino)/VALUE/%3Aa/add/1/maskge/dataflag/1/index/2/flagge/add/sst/(phil)/unitmatrix/sst_out/(Neutral)/VALUE/mul/exch/sst/(phil2)/unitmatrix/sst_out/(LaNina)/(ElNino)/VALUES/%5Bsst_out%5Dsum/mul/add/%5Bsst%5Ddominant_class//long_name/(ENSO%20Phase)/def/startcolormap/DATA/1/3/RANGE/blue/blue/blue/grey/red/red/endcolormap/T/(1980)/last/RANGE/",
-    ),
-    (
-        "rain-malawi",
-        "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.Merged_Analysis/.monthly/.latest/.ver2/.prcp_est/X/32/36/RANGE/Y/-17/-9/RANGE/T/(Dec-Feb)/seasonalAverage/",
-    ),
     (
         "pnep-malawi",
         "http://iridl.ldeo.columbia.edu/home/.remic/.IRI/.FD/.NMME_Seasonal_HFcast_Combined/.malawi/.nonexceed/.prob/",
@@ -578,10 +564,6 @@ url_datasets = [
         'guatemala/vhi-may',
         'https://iridl.ldeo.columbia.edu/home/.aaron/.nesdis/.VHP_16km/.VH/.VHI/X/-92.5/-88/RANGE/Y/13/18/RANGE/T/(1%20Jan%201996)/last/RANGE/T/(May)/seasonalAverage/',
     ),
-   (
-        'djibouti/rain-jas',
-        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jul-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/'
-    ),
     (
         'djibouti/rain-mam',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Mar-May)/seasonalAverage/30/mul//units/(mm/month)/def/'
@@ -706,30 +688,37 @@ url_datasets = [
 
 
 if __name__ == '__main__':
+    config = pingrid.load_config(os.environ["CONFIG"])
+
     os.umask(0o002)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--cookiefile', type=os.path.expanduser)
     parser.add_argument(
         '--datadir',
-        default='/data/aaron/fbf-candidate',
+        default=config['data_root'],
         type=os.path.expanduser,
     )
     parser.add_argument('datasets', nargs='*')
     opts = parser.parse_args()
 
-    selected_url_datasets = opts.datasets or [ds[0] for ds in url_datasets]
+    datasets = {
+        ds['path'].removesuffix('.zarr'): ds
+        for country_config in config['countries'].values()
+        for ds in (
+                country_config['datasets']['observations'] |
+                country_config['datasets']['forecasts']
+        ).values()
+        if 'url' in ds
+    }
 
-    for dataset in url_datasets:
-        name = dataset[0]
-        pattern = dataset[1]
-        if len(dataset) == 3:
-            slices = dataset[2]
-        else:
-            slices = ({},)
+    if opts.datasets:
+        datasets = {key: datasets[key] for key in opts.datasets}
 
-        if name not in selected_url_datasets:
-            continue
+    for key, ds in datasets.items():
+        name = key
+        pattern = ds['url']
+        slices = ds.get('url_args', [{}])
         print(name)
         for i, args in enumerate(slices):
             ncfilepath = f'{opts.datadir}/{name}-{i}.nc'
@@ -744,7 +733,9 @@ if __name__ == '__main__':
                 cookieopt = f"-b {opts.cookiefile}"
 
             url = pattern.format(**args)
-            os.system(f"curl {cookieopt} -o {ncfilepath} '{url}data.nc'")
+            status = os.system(f"curl {cookieopt} -o {ncfilepath} '{url}data.nc'")
+            if status != 0:
+                raise Exception(f"Download failed: {url}")
             assert os.path.exists(ncfilepath)
         zarrpath = "%s/%s.zarr" % (opts.datadir, name)
         print("Converting to zarr")

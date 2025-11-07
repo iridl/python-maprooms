@@ -81,7 +81,8 @@ DEFAULT = object()
 class Dataset:
     def __init__(
             self, *, label, description=None, units=DEFAULT, path,
-            var_names, colormap, format='number1', range=None
+            var_names, colormap, format='number1', range=None,
+            url=None, url_args=None
     ):
         # TODO: some datasets we pulled from ingrid already have colormap,
         # scale_max, and scale_min attributes. Should we just use those,
