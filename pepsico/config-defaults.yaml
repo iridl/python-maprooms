@@ -92,3 +92,7 @@ maprooms:
         # App set up
         - title: Projections
           core_path: projections
+
+    proj_wwc:
+        - title: WWC Projections
+          core_path: proj_wwc
