@@ -67,9 +67,9 @@ All datasets used by the application are stored in zarr format. There are two ca
 
 ### Datasets from the Data Library
 
-The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. First read the script and find the name of the dataset you want to update, e.g. `ethiopia/rain-mam`. Then run the script as follows, substituting the chosen dataset name.
+The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. Find the dataset you want to update in `fbfmaproom-sample.yaml`. Copy its `path` attribute, remove the `.zarr` suffix, and give the result to `fbf-update-data.py`. For example, to update `ethiopia/rain-mam.zarr`, run this command:
 ```
-CONFIG=fbfmaproom-sample.py pixi run python fbf-update-data.py ethiopia/pnep
+CONFIG=fbfmaproom-sample.yaml:config-local.yaml pixi run python fbf-update-data.py ethiopia/rain-mam
 ```
  
 ### Datasets not from the Data Library
