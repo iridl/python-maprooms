@@ -110,6 +110,7 @@ countries:
                 pnep:
                     label: Forecast prob non-exc
                     description: IRI Flexible Seasonal Forecast probability of non-exceedance of the selected percentile
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.IRI/.FD/.NMME_Seasonal_HFcast_Combined/.malawi/.nonexceed/.prob/"
                     path: pnep-malawi.zarr
                     var_names:
                         value: prob
@@ -166,6 +167,7 @@ countries:
                 enacts-precip-mon:
                     label: ENACTS MON precip
                     description: ENACTS monitoring average precipitation over the season
+                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/"
                     path: madagascar/enacts-precip-mon-djf.zarr
                     var_names:
                         value: rfe
@@ -177,6 +179,7 @@ countries:
                 enacts-precip-all:
                     label: ENACTS All precip
                     description: ENACTS average precipitation over the season
+                    url:  "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/"
                     path: madagascar/enacts-precip-djf.zarr
                     var_names:
                         value: rfe
@@ -188,6 +191,7 @@ countries:
                 chirps-precip-djf:
                     label: CHIRPS Precip
                     description: CHIRPS average precipitation over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Dec-Feb)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: madagascar/chirps-precip-djf.zarr
                     var_names:
                         value: precipitation
@@ -199,6 +203,7 @@ countries:
                 ndvi:
                     label: NDVI (MODIS 6)
                     description: MODIS NDVI average over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/42.525/.0375/48.975/GRID/Y/-25.9875/.0375/-20.025/GRID/T/(Dec-Feb)/seasonalAverage/"
                     path: madagascar/ndvi-djf.zarr
                     var_names:
                         value: NDVI
@@ -211,6 +216,7 @@ countries:
                 ndvi-viirs:
                     label: NDVI (VIIRS)
                     description: VIIRS NDVI average over the season
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/42.525/.25/48.975/GRID/Y/-25.9875/.25/-20.025/GRID/T/(Dec-Feb)/seasonalAverage/"
                     path: madagascar/ndvi-viirs-djf.zarr
                     var_names:
                         value: NDVI
@@ -222,6 +228,7 @@ countries:
                     format: number4
                 wrsi:
                     label: WRSI
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Dec-Feb)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/"
                     path: madagascar/wrsi-djf.zarr
                     var_names:
                         value: do
@@ -233,6 +240,7 @@ countries:
                 spi:
                     label: ENACTS MON SPI
                     description: SPI calculated from ENACTS monitoring product
+                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Dec-Feb)/VALUES/"
                     path: madagascar/enacts-mon-spi-djf.zarr
                     var_names:
                         value: spi
@@ -260,6 +268,7 @@ countries:
                 obs-subseas-rainfall:
                     label: Observed subseasonal rainfall
                     description: Observed rainfall during subseasonal forecast target period (mm)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/T/14/runningAverage/c%3A/14.0//units//days/def/%3Ac/mul/T/(1200%2021%20Nov%201999%20-%201200%205%20Dec%201999)/(1200%2019%20Nov%202000%20-%201200%203%20Dec%202000)/(1200%2018%20Nov%202001%20-%201200%202%20Dec%202001)/(1200%2017%20Nov%202002%20-%201200%201%20Dec%202002)/(1200%2016%20Nov%202003%20-%201200%2030%20Nov%202003)/(1200%2021%20Nov%202004%20-%201200%205%20Dec%202004)/(1200%2020%20Nov%202005%20-%201200%204%20Dec%202005)/(1200%2019%20Nov%202006%20-%201200%203%20Dec%202006)/(1200%2018%20Nov%202007%20-%201200%202%20Dec%202007)/(1200%2016%20Nov%202008%20-%201200%2030%20Nov%202008)/(1200%2022%20Nov%202009%20-%201200%206%20Dec%202009)/(1200%2021%20Nov%202010%20-%201200%205%20Dec%202010)/(1200%2020%20Nov%202011%20-%201200%204%20Dec%202011)/(1200%2018%20Nov%202012%20-%201200%202%20Dec%202012)/(1200%2017%20Nov%202013%20-%201200%201%20Dec%202013)/(1200%2016%20Nov%202014%20-%201200%2030%20Nov%202014)/(1200%2022%20Nov%202015%20-%201200%206%20Dec%202015)/(1200%2020%20Nov%202016%20-%201200%204%20Dec%202016)/(1200%2019%20Nov%202017%20-%201200%203%20Dec%202017)/(1200%2018%20Nov%202018%20-%201200%202%20Dec%202018)/(1200%2017%20Nov%202019%20-%201200%201%20Dec%202019)/(1200%2022%20Nov%202020%20-%201200%206%20Dec%202020)/(1200%2021%20Nov%202021%20-%201200%205%20Dec%202021)/(1200%2020%20Nov%202022%20-%201200%204%20Dec%202022)/(1200%2019%20Nov%202023%20-%201200%203%20Dec%202023)/VALUES/T//pointwidth/0/def/pop/T/(months%20since%201960-01-01)/streamgridunitconvert/T/toi4/use_as_grid/T/2.5/shiftGRID/X/42.525/48.975/RANGEEDGES/Y/-25.9875/-20.025/RANGEEDGES/"
                     path: madagascar/obs-subseas-rainfall.zarr
                     var_names:
                         value: aprod
@@ -314,6 +323,7 @@ countries:
                 pnep:
                     label: Forecast prob non-exc v1
                     description: NextGen forecast probability of non-exceedance of the selected percentile, version 1
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.DGM/.Forecast/.Seasonal/.NextGen/.Madagascar_Full/.DJF/.NextGen/.FbF/.pne/S/(0000%201%20Sep)/(0000%201%20Oct)/(0000%201%20Nov)/VALUES/"
                     path: madagascar/pnep-djf.zarr
                     var_names:
                         value: pne
@@ -399,6 +409,7 @@ countries:
                 enacts-precip-mon:
                     label: ENACTS MON precip
                     description: ENACTS monitoring average precipitation over the season
+                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Nov-Jan)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/"
                     path: madagascar/enacts-precip-mon-ndj.zarr
                     var_names:
                         value: rfe
@@ -410,6 +421,7 @@ countries:
                 enacts-precip-all:
                     label: ENACTS All precip
                     description: ENACTS average precipitation over the season
+                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Nov-Jan)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/"
                     path: madagascar/enacts-precip-ndj.zarr
                     var_names:
                         value: rfe
@@ -421,6 +433,7 @@ countries:
                 chirps-precip-djf:
                     label: CHIRPS Precip
                     description: CHIRPS average precipitation over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Nov-Jan)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: madagascar/chirps-precip-ndj.zarr
                     var_names:
                         value: precipitation
@@ -432,6 +445,7 @@ countries:
                 ndvi:
                     label: NDVI (MODIS 6)
                     description: MODIS NDVI average over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/42.525/.0375/48.975/GRID/Y/-25.9875/.0375/-20.025/GRID/T/(Nov-Jan)/seasonalAverage/"
                     path: madagascar/ndvi-ndj.zarr
                     var_names:
                         value: NDVI
@@ -444,6 +458,7 @@ countries:
                 ndvi-viirs:
                     label: NDVI (VIIRS)
                     description: VIIRS NDVI average over the season
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/42.525/.25/48.975/GRID/Y/-25.9875/.25/-20.025/GRID/T/(Dec-Feb)/seasonalAverage/"
                     path: madagascar/ndvi-viirs-ndj.zarr
                     var_names:
                         value: NDVI
@@ -455,6 +470,7 @@ countries:
                     format: number4
                 wrsi:
                     label: WRSI
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Nov-Jan)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/"
                     path: madagascar/wrsi-ndj.zarr
                     var_names:
                         value: do
@@ -466,6 +482,7 @@ countries:
                 spi:
                     label: ENACTS MON SPI
                     description: SPI calculated from ENACTS monitoring product
+                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Nov-Jan)/VALUES/"
                     path: madagascar/enacts-mon-spi-ndj.zarr
                     var_names:
                         value: spi
@@ -588,6 +605,7 @@ countries:
                 enacts-precip-mon:
                     label: ENACTS MON precip
                     description: ENACTS monitoring average precipitation over the season
+                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/"
                     path: madagascar/enacts-precip-mon-ond.zarr
                     var_names:
                         value: rfe
@@ -599,6 +617,7 @@ countries:
                 enacts-precip:
                     label: ENACTS ALL precip
                     description: ENACTS all stations average precipitation over the season
+                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/"
                     path: madagascar/enacts-precip-ond.zarr
                     var_names:
                         value: rfe
@@ -610,6 +629,7 @@ countries:
                 chirps-precip-ond:
                     label: CHIRPS Precip
                     description: CHIRPS average precipitation over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Oct-Dec)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: madagascar/chirps-precip-ond.zarr
                     var_names:
                         value: precipitation
@@ -621,6 +641,7 @@ countries:
                 ndvi:
                     label: NDVI (MODIS 6)
                     description: MODIS NDVI average over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/42.525/.0375/48.975/GRID/Y/-25.9875/.0375/-20.025/GRID/T/(Oct-Dec)/seasonalAverage/"
                     path: madagascar/ndvi-ond.zarr
                     var_names:
                         value: NDVI
@@ -633,6 +654,7 @@ countries:
                 ndvi-viirs:
                     label: NDVI (VIIRS)
                     description: VIIRS NDVI average over the season
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/42.525/.25/48.975/GRID/Y/-25.9875/.25/-20.025/GRID/T/(Oct-Dec)/seasonalAverage/"
                     path: madagascar/ndvi-viirs-ond.zarr
                     var_names:
                         value: NDVI
@@ -644,6 +666,7 @@ countries:
                     format: number4
                 wrsi:
                     label: WRSI
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Oct-Dec)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/"
                     path: madagascar/wrsi-ond.zarr
                     var_names:
                         value: do
@@ -655,6 +678,7 @@ countries:
                 spi:
                     label: ENACTS MON SPI
                     description: SPI calculated from ENACTS monitoring product
+                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Oct-Dec)/VALUES/"
                     path: madagascar/enacts-mon-spi-ond.zarr
                     var_names:
                         value: spi
@@ -689,6 +713,7 @@ countries:
                 pnep:
                     label: Forecast prob non-exc v1
                     description: NextGen forecast probability of non-exceedance of the selected percentile, version 1
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.DGM/.Forecast/.Seasonal/.NextGen/.Madagascar_Full/.OND/.NextGen/.FbF/.pne/S/(1%20Jul)/(1%20Aug)/(1%20Sep)/VALUES/"
                     path: madagascar/pnep-ond.zarr
                     var_names:
                         value: pne
@@ -766,6 +791,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Mar-May)/seasonalAverage/30/mul//units/(mm/month)/def/"
                     path: ethiopia/rain-mam.zarr
                     var_names:
                         value: prcp
@@ -778,6 +804,7 @@ countries:
                 ndvi-nov:
                     label: NDVI (MODIS 6) November
                     description: Average NDVI for November 1-16
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/0.25/48.375/GRID/Y/2.625/0.25/15.375/GRID/T/%281-16%20Nov%29seasonalAverage/T/toi4/use_as_grid/T//pointwidth/0/def/5.5/shiftGRID/"
                     path: ethiopia/ndvi-nov-mam.zarr
                     var_names:
                         value: NDVI
@@ -790,6 +817,7 @@ countries:
                 ndvi-dec:
                     label: NDVI (MODIS 6) December
                     description: Average NDVI for December
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Dec)/seasonalAverage/T/4/shiftGRID/"
                     path: ethiopia/ndvi-dec-mam.zarr
                     var_names:
                         value: NDVI
@@ -802,6 +830,7 @@ countries:
                 ndvi-jan:
                     label: NDVI (MODIS 6) January
                     description: Average NDVI for January
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jan)/seasonalAverage/T/3/shiftGRID/"
                     path: ethiopia/ndvi-jan-mam.zarr
                     var_names:
                         value: NDVI
@@ -814,6 +843,7 @@ countries:
                 ndvi-feb:
                     label: NDVI (MODIS 6) February
                     description: Average NDVI for February
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Feb)/seasonalAverage/T/2/shiftGRID/"
                     path: ethiopia/ndvi-feb-mam.zarr
                     var_names:
                         value: NDVI
@@ -826,6 +856,7 @@ countries:
                 ndvi-viirs-oct:
                     label: NDVI (VIIRS) October
                     description: Average NDVI (VIIRS) for October
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Oct)/seasonalAverage/T/6/shiftGRID/"
                     path: ethiopia/ndvi-viirs-oct-mam.zarr
                     var_names:
                         value: NDVI
@@ -838,6 +869,7 @@ countries:
                 ndvi-viirs-nov:
                     label: NDVI (VIIRS) November
                     description: Average NDVI (VIIRS) for November 1-16
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/%281-16%20Nov%29seasonalAverage/T/toi4/use_as_grid/T//pointwidth/0/def/5.5/shiftGRID/"
                     path: ethiopia/ndvi-viirs-nov-mam.zarr
                     var_names:
                         value: NDVI
@@ -850,6 +882,7 @@ countries:
                 ndvi-viirs-dec:
                     label: NDVI (VIIRS) December
                     description: Average NDVI (VIIRS) for December
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Dec)/seasonalAverage/T/4/shiftGRID/"
                     path: ethiopia/ndvi-viirs-dec-mam.zarr
                     var_names:
                         value: NDVI
@@ -862,6 +895,7 @@ countries:
                 ndvi-viirs-jan:
                     label: NDVI (VIIRS) January
                     description: Average NDVI (VIIRS) for January
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jan)/seasonalAverage/T/3/shiftGRID/"
                     path: ethiopia/ndvi-viirs-jan-mam.zarr
                     var_names:
                         value: NDVI
@@ -874,6 +908,7 @@ countries:
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/monthlyAverage/30/mul/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/3/runningAverage/T/12/splitstreamgrid/0./flaggt/%5BT2%5Daverage/1./3./div/flaggt/1./masklt/%5BT%5D/REORDER/CopyStream/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/T/(Mar-May%201981)/last/12/RANGESTEP/"
                     path: ethiopia/spi-mam.zarr
                     var_names:
                         value: spi
@@ -886,6 +921,7 @@ countries:
                 rain-prev-seas:
                     label: Rain prev OND
                     description: CHIRPS average precipitation over the previous OND season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Oct-Dec)/seasonalAverage/30/mul//units/(mm/month)/def/T/5/shiftGRID/"
                     path: ethiopia/rain-prev-seas-mam.zarr
                     var_names:
                         value: prcp
@@ -897,6 +933,7 @@ countries:
                 rain-partial-prev-seas:
                     label: Rain prev ON
                     description: CHIRP average precipitation over the previous ON season
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.daily/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Oct-Nov)/seasonalAverage/30/mul//units/(mm/month)/def/T/5.5/shiftGRID/"
                     path: ethiopia/rain-prev-partial-mam.zarr
                     var_names:
                         value: prcp
@@ -908,6 +945,7 @@ countries:
                 spi-prev-seas:
                     label: SPI prev OND
                     description: SPI calculated from CHIRPS for previous OND season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/monthlyAverage/30/mul/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/3/runningAverage/T/12/splitstreamgrid/0./flaggt/%5BT2%5Daverage/1./3./div/flaggt/1./masklt/%5BT%5D/REORDER/CopyStream/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/T/(Oct-Dec%201981)/last/12/RANGESTEP/T/5/shiftGRID/"
                     path: ethiopia/spi-prev-seas-mam.zarr
                     var_names:
                         value: spi
@@ -930,6 +968,7 @@ countries:
                 pnep:
                     label: Forecast prob non-exc v1
                     description: NextGen forecast probability of non-exceedance of selected percentile, version 1
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Ethiopia/.CPT/.NextGen/.MAM_PRCP/.Ethiopia/.NextGen/.FbF/.pne/P//P//percentile/0/5/5/95/NewEvenGRID/replaceGRID/"
                     path: ethiopia/pnep-mam.zarr
                     var_names:
                         value: pne
@@ -1014,6 +1053,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/30/mul/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Oct-Dec)/seasonalAverage//units/(mm/month)/def/"
                     path: ethiopia/rain-ond.zarr
                     var_names:
                         value: prcp
@@ -1024,6 +1064,7 @@ countries:
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI (MODIS 6)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Oct-Dec)/seasonalAverage/"
                     path: ethiopia/ndvi-ond.zarr
                     var_names:
                         value: NDVI
@@ -1036,6 +1077,7 @@ countries:
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/monthlyAverage/30/mul/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/3/runningAverage/T/12/splitstreamgrid/0./flaggt/%5BT2%5Daverage/1./3./div/flaggt/1./masklt/%5BT%5D/REORDER/CopyStream/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/T/(Oct-Dec%201981)/last/12/RANGESTEP/"
                     path: ethiopia/spi-ond.zarr
                     var_names:
                         value: spi
@@ -1048,6 +1090,7 @@ countries:
                 ndvi-jun:
                     label: NDVI (MODIS 6) June
                     description: Average NDVI for June
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jun)/seasonalAverage/T/5/shiftGRID/"
                     path: ethiopia/ndvi-jun-ond.zarr
                     var_names:
                         value: NDVI
@@ -1060,6 +1103,7 @@ countries:
                 ndvi-jul:
                     label: NDVI (MODIS 6) July
                     description: Average NDVI for July
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jul)/seasonalAverage/T/4/shiftGRID/"
                     path: ethiopia/ndvi-jul-ond.zarr
                     var_names:
                         value: NDVI
@@ -1072,6 +1116,7 @@ countries:
                 ndvi-aug:
                     label: NDVI (MODIS 6) August
                     description: Average NDVI for August
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Aug)/seasonalAverage/T/3/shiftGRID/"
                     path: ethiopia/ndvi-aug-ond.zarr
                     var_names:
                         value: NDVI
@@ -1084,6 +1129,7 @@ countries:
                 ndvi-viirs-may:
                     label: NDVI (VIIRS) May
                     description: Average NDVI (VIIRS) for May
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(May)/seasonalAverage/T/6/shiftGRID/"
                     path: ethiopia/ndvi-viirs-may-ond.zarr
                     var_names:
                         value: NDVI
@@ -1096,6 +1142,7 @@ countries:
                 ndvi-viirs-jun:
                     label: NDVI (VIIRS) June
                     description: Average NDVI (VIIRS) for June
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jun)/seasonalAverage/T/5/shiftGRID/"
                     path: ethiopia/ndvi-viirs-jun-ond.zarr
                     var_names:
                         value: NDVI
@@ -1108,6 +1155,7 @@ countries:
                 ndvi-viirs-jul:
                     label: NDVI (VIIRS) July
                     description: Average NDVI (VIIRS) for July
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jul)/seasonalAverage/T/4/shiftGRID/"
                     path: ethiopia/ndvi-viirs-jul-ond.zarr
                     var_names:
                         value: NDVI
@@ -1120,6 +1168,7 @@ countries:
                 ndvi-viirs-aug:
                     label: NDVI (VIIRS) August
                     description: Average NDVI (VIIRS) for August
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Aug)/seasonalAverage/T/3/shiftGRID/"
                     path: ethiopia/ndvi-viirs-aug-ond.zarr
                     var_names:
                         value: NDVI
@@ -1132,6 +1181,7 @@ countries:
                 spi-prev-seas:
                     label: SPI prev MAM
                     description: SPI for previous MAM season, calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/monthlyAverage/30/mul/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/3/runningAverage/T/12/splitstreamgrid/0./flaggt/%5BT2%5Daverage/1./3./div/flaggt/1./masklt/%5BT%5D/REORDER/CopyStream/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/T/(Mar-May%201981)/last/12/RANGESTEP/T/7/shiftGRID/"
                     path: ethiopia/spi-prev-seas-ond.zarr
                     var_names:
                         value: spi
@@ -1155,6 +1205,7 @@ countries:
                 pnep:
                     label: Forecast v1 prob non-exc
                     description: NextGen forecast probability of non-exceedance of selected percentile
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Ethiopia/.CPT/.NextGen/.OND_PRCP/.Ethiopia/.NextGen/.FbF/.pne/P//P//percentile/0/5/5/95/NewEvenGRID/replaceGRID/"
                     path: ethiopia/pnep-ond.zarr
                     var_names:
                         value: pne
@@ -1258,6 +1309,7 @@ countries:
                 enso_state: *enso_3mo
                 ndvi:
                     label: NDVI (MODIS 6)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Mar-May)/seasonalAverage/"
                     path: ethiopia/ndvi-mam.zarr
                     var_names:
                         value: NDVI
@@ -1389,6 +1441,7 @@ countries:
                 ndvi-prev-seas:
                     label: NDVI prev OND
                     description: Average NDVI over the previous OND season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Oct-Dec)/seasonalAverage/T/5/shiftGRID/"
                     path: ethiopia/ndvi-prev-seas-mam.zarr
                     var_names:
                         value: NDVI
@@ -1552,6 +1605,7 @@ countries:
                 rain-prev-seas:
                     label: Rain prev MAM
                     description: CHIRPS average precipitation over the previous MAM season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Mar-May)/seasonalAverage/30/mul//units/(mm/month)/def/T/7/shiftGRID/"
                     path: ethiopia/rain-prev-seas-ond.zarr
                     var_names:
                         value: prcp
@@ -1563,6 +1617,7 @@ countries:
                 ndvi-prev-seas:
                     label: NDVI (MODIS 6) prev MAM
                     description: Average NDVI over the previous MAM season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Mar-May)/seasonalAverage/T/7/shiftGRID/"
                     path: ethiopia/ndvi-prev-seas-ond.zarr
                     var_names:
                         value: NDVI
@@ -2266,6 +2321,10 @@ countries:
                 subseas-dry-tercile-sjul-l15:
                     label: Jul biweekly forecast, 2wk lead
                     description: Biweekly rainfall forecast issued in early July for the following two weeks. Probability of the driest tercile.
+                    url: "{url}"
+                    url_args:
+                      - url: "http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Hindcast/.Subx_biweekly_Precipitation/.MME_v21_Precipitation_ELR/.prob/L/15/VALUE/L/removeGRID/S/(0000%203%20Jul%201999)/(0000%201%20Jul%202000)/(0000%207%20Jul%202001)/(0000%206%20Jul%202002)/(0000%205%20Jul%202003)/(0000%203%20Jul%202004)/(0000%202%20Jul%202005)/(0000%201%20Jul%202006)/(0000%207%20Jul%202007)/(0000%205%20Jul%202008)/(0000%204%20Jul%202009)/(0000%203%20Jul%202010)/(0000%202%20Jul%202011)/(0000%207%20Jul%202012)/(0000%206%20Jul%202013)/(0000%205%20Jul%202014)/(0000%204%20Jul%202015)/(0000%202%20Jul%202016)/VALUES/C/(Below_Normal)/VALUE/C/removeGRID/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/1.5/shiftGRID/S//T/renameGRID/"
+                      - url: "http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Tercile_Forecast/.Subx_biweekly_Precipitation/.MMEv21_Precipitation_ELR/.prob/L/15/VALUE/L/removeGRID/C/(Below_Normal)/VALUE/C/removeGRID/S/(Jul)/VALUES/S/(1%20Jul)/VALUES/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/1.5/shiftGRID/S//T/renameGRID/"
                     path: niger/subseas-dry-tercile-sjul-l15.zarr
                     var_names:
                         value: prob
@@ -2277,6 +2336,7 @@ countries:
                 obs-subseas-rainfall:
                     label: Observed subseasonal rainfall
                     description: Observed rainfall during subseasonal forecast target period (mm)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/T/14/runningAverage/c%3A/14.0//units//days/def/%3Ac/mul/T/(1200%2010%20Jul%201999%20-%201200%2024%20Jul%201999)/(1200%20%208%20Jul%202000%20-%201200%2022%20Jul%202000)/(1200%2014%20Jul%202001%20-%201200%2028%20Jul%202001)/(1200%2013%20Jul%202002%20-%201200%2027%20Jul%202002)/(1200%2012%20Jul%202003%20-%201200%2026%20Jul%202003)/(1200%2010%20Jul%202004%20-%201200%2024%20Jul%202004)/(1200%20%209%20Jul%202005%20-%201200%2023%20Jul%202005)/(1200%20%208%20Jul%202006%20-%201200%2022%20Jul%202006)/(1200%2014%20Jul%202007%20-%201200%2028%20Jul%202007)/(1200%2012%20Jul%202008%20-%201200%2026%20Jul%202008)/(1200%2011%20Jul%202009%20-%201200%2025%20Jul%202009)/(1200%2010%20Jul%202010%20-%201200%2024%20Jul%202010)/(1200%20%209%20Jul%202011%20-%201200%2023%20Jul%202011)/(1200%2014%20Jul%202012%20-%201200%2028%20Jul%202012)/(1200%2013%20Jul%202013%20-%201200%2027%20Jul%202013)/(1200%2012%20Jul%202014%20-%201200%2026%20Jul%202014)/(1200%2011%20Jul%202015%20-%201200%2025%20Jul%202015)/(1200%20%209%20Jul%202016%20-%201200%2023%20Jul%202016)/(1200%20%208%20Jul%202017%20-%201200%2022%20Jul%202017)/(1200%2014%20Jul%202018%20-%201200%2028%20Jul%202018)/(1200%2013%20Jul%202019%20-%201200%2027%20Jul%202019)/(1200%2011%20Jul%202020%20-%201200%2025%20Jul%202020)/(1200%2010%20Jul%202021%20-%201200%2024%20Jul%202021)/(1200%20%209%20Jul%202022%20-%201200%2023%20Jul%202022)/VALUES/T//pointwidth/0/def/pop/T/(months%20since%201960-01-01)/streamgridunitconvert/T/toi4/use_as_grid/T/1.5/shiftGRID/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/"
                     path: niger/obs-subseas-rainfall.zarr
                     var_names:
                         value: aprod
@@ -2288,6 +2348,7 @@ countries:
                 enacts-precip-jas:
                     label: ENACTS Precip JAS
                     description: ENACTS total precipitation for Jul-Sep
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.ENACTS/.monthly/.rainfall/.CHIRPS/.rfe_merged/T/(1991)/last/RANGE/T/(Jul-Sep)/seasonalAverage/3/mul///name//obs/def/Y/first/17/RANGE/"
                     path: niger/enacts-precip-jas.zarr
                     var_names:
                         value: obs
@@ -2299,6 +2360,7 @@ countries:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
                     description: CHIRPS total precipitation for Jun
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(Jun)/seasonalAverage/T//pointwidth/0/def/2/shiftGRID/c%3A/1//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: niger/chirps-precip-jun.zarr
                     var_names:
                         value: precipitation
@@ -2310,6 +2372,7 @@ countries:
                 chirps-precip-jjaso:
                     label: CHIRPS Precip Jun-Oct
                     description: CHIRPS total precipitation for Jun-Oct
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(Jun-Oct)/seasonalAverage/c%3A/5//units//months/def/%3Ac/mul/T//pointwidth/0/def/pop//name//precipitation/def/"
                     path: niger/chirps-precip-jjaso.zarr
                     var_names:
                         value: precipitation
@@ -2321,6 +2384,7 @@ countries:
                 chirps-precip-jas:
                     label: CHIRPS Precip JAS
                     description: CHIRPS total precipitation for Jul-Sep
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(Jul-Sep)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: niger/chirps-precip-jas.zarr
                     var_names:
                         value: precipitation
@@ -2332,6 +2396,7 @@ countries:
                 enacts-spi-jas:
                     label: ENACTS SPI JAS
                     description: Average SPI over the season, calculated from ENACTS
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.ENACTS/.seasonal/.rainfall/.CHIRPS/.SPI-3-month/.spi/T/(Jul-Sep)/VALUES/Y/first/17/RANGE/"
                     path: niger/enacts-spi-jas.zarr
                     var_names:
                         value: spi
@@ -2344,6 +2409,7 @@ countries:
                 enacts-spi-jj:
                     label: ENACTS SPI Jun-Jul
                     description: Average SPI in June-July, calculated from ENACTS
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.ENACTS/.seasonal/.rainfall/.CHIRPS/.SPI-2-month/.spi/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/Y/first/17/RANGE/"
                     path: niger/enacts-spi-jj.zarr
                     var_names:
                         value: spi
@@ -2356,6 +2422,7 @@ countries:
                 enacts-mon-spi-jj:
                     label: ENACTS MON SPI Jun-Jul
                     description: Average SPI in June-July, calculated from ENACTS monitoring product
+                    url: 'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.seasonal/.rainfall/.CHIRP/.SPI-2-month/.spi/T/%28Jun-Jul%29VALUES/T/1.5/shiftGRID/Y/first/17/RANGE/'
                     path: niger/enacts-mon-spi-jj.zarr
                     var_names:
                         value: spi
@@ -2368,6 +2435,7 @@ countries:
                 enacts-mon-spi-jas:
                     label: ENACTS MON SPI JAS
                     description: Average SPI in July-September, calculated from ENACTS monitoring product
+                    url: 'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.seasonal/.rainfall/.CHIRP/.SPI-3-month/.spi/T/%28Jul-Sep%29VALUES/Y/first/17/RANGE/'
                     path: niger/enacts-mon-spi-jas.zarr
                     var_names:
                         value: spi
@@ -2380,6 +2448,7 @@ countries:
                 enacts-mon-spi-jas-excess:
                     label: ENACTS MON SPI JAS Excess
                     description: Average SPI in July-September, calculated from ENACTS monitoring product, highlighting wettest years
+                    # same file as enacts-mon-spi-jas, but with lower_is_worse: no
                     path: niger/enacts-mon-spi-jas.zarr
                     var_names:
                         value: spi
@@ -2392,6 +2461,7 @@ countries:
                 enacts-mon-rainfall-sep:
                     label: ENACTS MON Sep
                     description: Total rainfall in September according to ENACTS MON
+                    url: 'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.monthly/.rainfall/.CHIRP/.rfe_merged/T/(Sep)/VALUES/Y/first/17/RANGE/T/-1/shiftGRID/'
                     path: niger/enacts-mon-rainfall-sep.zarr
                     var_names:
                         value: rfe_merged
@@ -2404,6 +2474,7 @@ countries:
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3./mul/2/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/2/gammaprobs/2/gammastandardize/T//pointwidth/2/def//defaultvalue/%7Blast%7Ddef/-0.5/shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/'
                     path: niger/chirp-spi-jj.zarr
                     var_names:
                         value: spi
@@ -2416,6 +2487,7 @@ countries:
                 chirp-spi-jas:
                     label: CHIRP SPI JAS
                     description: Average SPI in July-September, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7Ddef/(Jul-Sep)/VALUES//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/'
                     path: niger/chirp-spi-jas.zarr
                     var_names:
                         value: spi
@@ -2428,6 +2500,7 @@ countries:
                 chirp-rainfall-sep:
                     label: CHIRP Rain Sep
                     description: Total rainfall in September according to CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/'
                     path: niger/chirp-rainfall-sep.zarr
                     var_names:
                         value: prcp
@@ -2440,6 +2513,7 @@ countries:
                 chirps-dryspell:
                     label: Dry Spell
                     description: Longest dry spell, calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/"
                     path: niger/chirps-dryspell.zarr
                     var_names:
                         value: lls
@@ -2453,6 +2527,12 @@ countries:
                 chirps-onset:
                     label: Onset
                     description: Onset of rain, calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/({start})/({end})/RANGE/T/(1%20May)/122/0.1/3/20/1/15/30/onsetDate/T/sub/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/3.5/shiftGRID/"
+                    url_args:
+                      - {start: 1991, end: 2000}
+                      - {start: 2001, end: 2010}
+                      - {start: 2011, end: 2020}
+                      - {start: 2021, end: 2022}
                     path: niger/chirps-onset.zarr
                     var_names:
                         value: adif
@@ -2522,6 +2602,7 @@ countries:
                     format: number3
                 wrsi-jas:
                     label: WRSI
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.WAF/.Millet/.do/X/0.125/15.875/RANGE/Y/11.125/16.875/RANGE/T/(Jul-Sep)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/"
                     path: niger/wrsi-jas.zarr
                     var_names:
                         value: do
@@ -2565,6 +2646,7 @@ countries:
                 pnep:
                     label: JAS fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season
+                    url: "https://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JAS_v3/.NextGen/.FbF/.pne/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
                     path: niger/pnep-jas-v3.zarr
                     var_names:
                         value: pne
@@ -2604,6 +2686,7 @@ countries:
                 pnep-jj:
                     label: JJ fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JJ/.NextGen/.FbF/.pne/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
                     path: niger/pnep-jj.zarr
                     var_names:
                         value: pne
@@ -2630,6 +2713,7 @@ countries:
                 pnep-jjaso:
                     label: JJASO fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July-August-September-October
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JJASO/.NextGen/.FbF/.pne/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
                     path: niger/pnep-jjaso.zarr
                     var_names:
                         value: pne
@@ -2656,6 +2740,10 @@ countries:
                 poe-onset:
                     label: Onset fcst
                     description: NextGen onset date forecast probability of exceedance of the selected percentile
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPonset_CCAFCST_{part}/.NextGen/.FbF/.pne/100/exch/sub//name//poe/def//long_name/(Probability%2520of%2520exceedance)/def/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
+                    url_args:
+                      - part: "N"
+                      - part: "S"
                     path: niger/poe-onset.zarr
                     var_names:
                         value: poe
@@ -2669,6 +2757,7 @@ countries:
                 poe-dryspell:
                     label: Dry spell fcst
                     description: NextGen max dry spell length forecast probability of exceedance of the selected percentile
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPmaxDS_CCAFCST_JA/.NextGen/.FbF/.pne/100/exch/sub//name//poe/def//long_name/(Probability%20of%20exceedance)/def/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
                     path: niger/poe-dryspell.zarr
                     var_names:
                         value: poe
@@ -2720,6 +2809,7 @@ countries:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
                     description: CHIRPS total precipitation for Jun
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-12.5)/(5)/RANGE/Y/(9)/(25)/RANGE/T/(Jun)/seasonalAverage/T//pointwidth/0/def/2/shiftGRID/c%3A/1//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: mali/chirps-precip-jun-jas.zarr
                     var_names:
                         value: precipitation
@@ -2731,6 +2821,7 @@ countries:
                 chirps-precip-jjaso:
                     label: CHIRPS Precip Jun-Oct
                     description: CHIRPS total precipitation for Jun-Oct
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-12.5)/(5)/RANGE/Y/(9)/(25)/RANGE/T/(Jun-Oct)/seasonalAverage/c%3A/5//units//months/def/%3Ac/mul/T//pointwidth/0/def/pop//name//precipitation/def/"
                     path: mali/chirps-precip-jjaso.zarr
                     var_names:
                         value: precipitation
@@ -2742,6 +2833,7 @@ countries:
                 chirps-precip-jas:
                     label: CHIRPS Precip JAS
                     description: CHIRPS total precipitation for Jul-Sep
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-12.5)/(5)/RANGE/Y/(9)/(25)/RANGE/T/(Jul-Sep)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: mali/chirps-precip-jas.zarr
                     var_names:
                         value: precipitation
@@ -2753,6 +2845,7 @@ countries:
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-12.5/5/RANGE/Y/9/25/RANGE/monthlyAverage/3./mul/2/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/2/gammaprobs/2/gammastandardize/T//pointwidth/2/def//defaultvalue/%7Blast%7Ddef/-0.5/shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/"
                     path: mali/chirp-spi-jj-jas.zarr
                     var_names:
                         value: spi
@@ -2765,6 +2858,7 @@ countries:
                 chirp-spi-jas:
                     label: CHIRP SPI JAS
                     description: Average SPI in July-September, calculated from CHIRP
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-12.5/5/RANGE/Y/9/25/RANGE/monthlyAverage/3.0/mul/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7Ddef/(Jul-Sep)/VALUES//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/"
                     path: mali/chirp-spi-jas.zarr
                     var_names:
                         value: spi
@@ -2777,6 +2871,7 @@ countries:
                 chirp-rainfall-sep:
                     label: CHIRP Rain Sep
                     description: Total rainfall in September according to CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-12.5/5/RANGE/Y/9/25/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/'
                     path: mali/chirp-rainfall-sep-jas.zarr
                     var_names:
                         value: prcp
@@ -2789,6 +2884,7 @@ countries:
                 chirps-dryspell:
                     label: Dry Spell
                     description: Longest dry spell, calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(-12.5)/(5)/RANGE/Y/(9)/(25)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/"
                     path: mali/chirps-dryspell-jas.zarr
                     var_names:
                         value: lls
@@ -2879,6 +2975,7 @@ countries:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
                     description: CHIRPS total precipitation for Jun
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(13)/(24.5)/RANGE/Y/(7)/(25)/RANGE/T/(Jun)/seasonalAverage/T//pointwidth/0/def/2/shiftGRID/c%3A/1//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: chad/chirps-precip-jun-jas.zarr
                     var_names:
                         value: precipitation
@@ -2890,6 +2987,7 @@ countries:
                 chirps-precip-jjaso:
                     label: CHIRPS Precip Jun-Oct
                     description: CHIRPS total precipitation for Jun-Oct
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(13)/(24.5)/RANGE/Y/(7)/(25)/RANGE/T/(Jun-Oct)/seasonalAverage/c%3A/5//units//months/def/%3Ac/mul/T//pointwidth/0/def/pop//name//precipitation/def/'
                     path: chad/chirps-precip-jjaso.zarr
                     var_names:
                         value: precipitation
@@ -2901,6 +2999,7 @@ countries:
                 chirps-precip-jas:
                     label: CHIRPS Precip JAS
                     description: CHIRPS total precipitation for Jul-Sep
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(13)/(24.5)/RANGE/Y/(7)/(25)/RANGE/T/(Jul-Sep)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/'
                     path: chad/chirps-precip-jas.zarr
                     var_names:
                         value: precipitation
@@ -2912,6 +3011,7 @@ countries:
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/13/24.5/RANGE/Y/7/25/RANGE/monthlyAverage/3./mul/2/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/2/gammaprobs/2/gammastandardize/T//pointwidth/2/def//defaultvalue/%7Blast%7Ddef/-0.5/shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/'
                     path: chad/chirp-spi-jj-jas.zarr
                     var_names:
                         value: spi
@@ -2924,6 +3024,7 @@ countries:
                 chirp-spi-jas:
                     label: CHIRP SPI JAS
                     description: Average SPI in July-September, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/13/24.5/RANGE/Y/7/25/RANGE/monthlyAverage/3.0/mul/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7Ddef/(Jul-Sep)/VALUES//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/'
                     path: chad/chirp-spi-jas.zarr
                     var_names:
                         value: spi
@@ -2936,6 +3037,7 @@ countries:
                 chirp-rainfall-sep:
                     label: CHIRP Rain Sep
                     description: Total rainfall in September according to CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/13/24.5/RANGE/Y/7/25/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/'
                     path: chad/chirp-rainfall-sep-jas.zarr
                     var_names:
                         value: prcp
@@ -2948,6 +3050,7 @@ countries:
                 chirps-dryspell:
                     label: Dry Spell
                     description: Longest dry spell, calculated from CHIRPS
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(13)/(24.5)/RANGE/Y/(7)/(25)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/'
                     path: chad/chirps-dryspell-jas.zarr
                     var_names:
                         value: lls
@@ -3038,6 +3141,7 @@ countries:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
                     description: CHIRPS total precipitation for Jun
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-11)/(3)/RANGE/Y/(9)/(16)/RANGE/T/(Jun)/seasonalAverage/T//pointwidth/0/def/2/shiftGRID/c%3A/1//units//months/def/%3Ac/mul//name//precipitation/def/'
                     path: burkinafaso/chirps-precip-jun-jas.zarr
                     var_names:
                         value: precipitation
@@ -3049,6 +3153,7 @@ countries:
                 chirps-precip-jjaso:
                     label: CHIRPS Precip Jun-Oct
                     description: CHIRPS total precipitation for Jun-Oct
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-11)/(3)/RANGE/Y/(9)/(16)/RANGE/T/(Jun-Oct)/seasonalAverage/c%3A/5//units//months/def/%3Ac/mul/T//pointwidth/0/def/pop//name//precipitation/def/'
                     path: burkinafaso/chirps-precip-jjaso.zarr
                     var_names:
                         value: precipitation
@@ -3060,6 +3165,7 @@ countries:
                 chirps-precip-jas:
                     label: CHIRPS Precip JAS
                     description: CHIRPS total precipitation for Jul-Sep
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-11)/(3)/RANGE/Y/(9)/(16)/RANGE/T/(Jul-Sep)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/'
                     path: burkinafaso/chirps-precip-jas.zarr
                     var_names:
                         value: precipitation
@@ -3071,6 +3177,7 @@ countries:
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-11/3/RANGE/Y/9/16/RANGE/monthlyAverage/3./mul/2/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/2/gammaprobs/2/gammastandardize/T//pointwidth/2/def//defaultvalue/%7Blast%7Ddef/-0.5/shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/'
                     path: burkinafaso/chirp-spi-jj-jas.zarr
                     var_names:
                         value: spi
@@ -3083,6 +3190,7 @@ countries:
                 chirp-spi-jas:
                     label: CHIRP SPI JAS
                     description: Average SPI in July-September, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-11/3/RANGE/Y/9/16/RANGE/monthlyAverage/3.0/mul/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7Ddef/(Jul-Sep)/VALUES//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/'
                     path: burkinafaso/chirp-spi-jas.zarr
                     var_names:
                         value: spi
@@ -3095,6 +3203,7 @@ countries:
                 chirp-rainfall-sep:
                     label: CHIRP Rain Sep
                     description: Total rainfall in September according to CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-11/3/RANGE/Y/9/16/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/'
                     path: burkinafaso/chirp-rainfall-sep-jas.zarr
                     var_names:
                         value: prcp
@@ -3107,6 +3216,7 @@ countries:
                 chirps-dryspell:
                     label: Dry Spell
                     description: Longest dry spell, calculated from CHIRPS
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(-11)/(3)/RANGE/Y/(9)/(16)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/'
                     path: burkinafaso/chirps-dryspell-jas.zarr
                     var_names:
                         value: lls
@@ -3196,6 +3306,7 @@ countries:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
                     description: CHIRPS total precipitation for Jun
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-18)/(-4)/RANGE/Y/(12)/(27)/RANGE/T/(Jun)/seasonalAverage/T//pointwidth/0/def/2/shiftGRID/c%3A/1//units//months/def/%3Ac/mul//name//precipitation/def/'
                     path: mauritania/chirps-precip-jun-jas.zarr
                     var_names:
                         value: precipitation
@@ -3207,6 +3318,7 @@ countries:
                 chirps-precip-jjaso:
                     label: CHIRPS Precip Jun-Oct
                     description: CHIRPS total precipitation for Jun-Oct
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-18)/(-4)/RANGE/Y/(12)/(27)/RANGE/T/(Jun-Oct)/seasonalAverage/c%3A/5//units//months/def/%3Ac/mul/T//pointwidth/0/def/pop//name//precipitation/def/'
                     path: mauritania/chirps-precip-jjaso.zarr
                     var_names:
                         value: precipitation
@@ -3218,6 +3330,7 @@ countries:
                 chirps-precip-jas:
                     label: CHIRPS Precip JAS
                     description: CHIRPS total precipitation for Jul-Sep
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-18)/(-4)/RANGE/Y/(12)/(27)/RANGE/T/(Jul-Sep)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/'
                     path: mauritania/chirps-precip-jas.zarr
                     var_names:
                         value: precipitation
@@ -3229,6 +3342,7 @@ countries:
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-18/-4/RANGE/Y/12/27/RANGE/monthlyAverage/3./mul/2/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/2/gammaprobs/2/gammastandardize/T//pointwidth/2/def//defaultvalue/%7Blast%7Ddef/-0.5/shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/'
                     path: mauritania/chirp-spi-jj-jas.zarr
                     var_names:
                         value: spi
@@ -3241,6 +3355,7 @@ countries:
                 chirp-spi-jas:
                     label: CHIRP SPI JAS
                     description: Average SPI in July-September, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-18/-4/RANGE/Y/12/27/RANGE/monthlyAverage/3.0/mul/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7Ddef/(Jul-Sep)/VALUES//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/'
                     path: mauritania/chirp-spi-jas.zarr
                     var_names:
                         value: spi
@@ -3253,6 +3368,7 @@ countries:
                 chirp-rainfall-sep:
                     label: CHIRP Rain Sep
                     description: Total rainfall in September according to CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/-18/-4/RANGE/Y/12/27/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/'
                     path: mauritania/chirp-rainfall-sep-jas.zarr
                     var_names:
                         value: prcp
@@ -3265,6 +3381,7 @@ countries:
                 chirps-dryspell:
                     label: Dry Spell
                     description: Longest dry spell, calculated from CHIRPS
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(-18)/(-4)/RANGE/Y/(12)/(27)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/0/replaceNaN/'
                     path: mauritania/chirps-dryspell-jas.zarr
                     var_names:
                         value: lls
@@ -3417,6 +3534,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Oct-Dec)/seasonalAverage//name//prcp_est/def/'
                     path: rain-guatemala.zarr
                     var_names:
                         value: prcp_est
@@ -3439,6 +3557,7 @@ countries:
                 pnep:
                     label: Forecast prob non-exc
                     description: NextGen forecast probability of non-exceedance of selected percentile
+                    url: 'http://iridl.ldeo.columbia.edu/home/.xchourio/.ACToday/.CPT/.NextGen/.Seasonal/.CHIRPS/.GTM-FbF/.NextGen/.FbF/.pne/S/%281%20Sep%29VALUES/P/grid://name//P/def//units//percent/def/5/5/95/:grid/replaceGRID/L/removeGRID/'
                     path: pnep-guatemala.zarr
                     var_names:
                         value: pne
@@ -3495,6 +3614,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Jun-Aug)/seasonalAverage//name//prcp_est/def/'
                     path: guatemala/rain-jja.zarr
                     var_names:
                         value: prcp_est
@@ -3506,6 +3626,7 @@ countries:
                 rain-jj:
                     label: Rain Jun-Jul
                     description: CHIRPS average precipitation for June and July
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Jun-Jul)/seasonalAverage//name//prcp_est/def/T/.5/shiftGRID/'
                     path: guatemala/rain-jj-jja.zarr
                     var_names:
                         value: prcp_est
@@ -3517,6 +3638,7 @@ countries:
                 rain-ja:
                     label: Rain Jul-Aug
                     description: CHIRPS average precipitation for July and August
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Jul-Aug)/seasonalAverage//name//prcp_est/def/T/-.5/shiftGRID/'
                     path: guatemala/rain-ja-jja.zarr
                     var_names:
                         value: prcp_est
@@ -3528,6 +3650,7 @@ countries:
                 rain-may:
                     label: Rain May
                     description: CHIRPS average precipitation for May
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(May)/seasonalAverage//name//prcp_est/def/T/2/shiftGRID/'
                     path: guatemala/rain-may-jja.zarr
                     var_names:
                         value: prcp_est
@@ -3549,6 +3672,12 @@ countries:
                 vhi:
                     label: VHI
                     description: Seasonal average Vegetation Health Index from NESDIS STAR
+                    # Static (non-updating) snapshot of
+                    # http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NESDIS/.STAR/.VHP/.16km/.VHI
+                    # which is doubly broken: the upstram URL has changed, plus they had a
+                    # crash and lost all their data. Estimated time for restoring the data is
+                    # "a long time."
+                    url: "https://iridl.ldeo.columbia.edu/home/.aaron/.nesdis/.VHP_16km/.VH/.VHI/X/-92.5/-88/RANGE/Y/13/18/RANGE/T/(1%20Jan%201996)/last/RANGE/T/(Jun-Aug)/seasonalAverage/"
                     path: guatemala/vhi-jja.zarr
                     var_names:
                         value: VHI
@@ -3656,6 +3785,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Aug-Oct)/seasonalAverage//name//prcp_est/def/'
                     path: guatemala/rain-aso.zarr
                     var_names:
                         value: prcp_est
@@ -3667,6 +3797,7 @@ countries:
                 rain-oct:
                     label: Rain Oct
                     description: CHIRPS average precipitation for Oct
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Oct)/seasonalAverage//name//prcp_est/def/T/-1/shiftGRID/'
                     path: guatemala/rain-oct-aso.zarr
                     var_names:
                         value: prcp_est
@@ -3688,6 +3819,12 @@ countries:
                 vhi:
                     label: VHI
                     description: Seasonal average Vegetation Health Index from NESDIS STAR
+                    # Static (non-updating) snapshot of
+                    # http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NESDIS/.STAR/.VHP/.16km/.VHI
+                    # which is doubly broken: the upstram URL has changed, plus they had a
+                    # crash and lost all their data. Estimated time for restoring the data is
+                    # "a long time."
+                    url: "https://iridl.ldeo.columbia.edu/home/.aaron/.nesdis/.VHP_16km/.VH/.VHI/X/-92.5/-88/RANGE/Y/13/18/RANGE/T/(1%20Jan%201996)/last/RANGE/T/(Aug-Oct)/seasonalAverage/"
                     path: guatemala/vhi-aso.zarr
                     var_names:
                         value: VHI
@@ -3811,6 +3948,7 @@ countries:
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI (MODIS 6)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Jul-Sep)/seasonalAverage/"
                     path: djibouti/ndvi-jas.zarr
                     var_names:
                         value: NDVI
@@ -3822,6 +3960,7 @@ countries:
                     format: number4
                 ndvi-viirs:
                     label: NDVI (VIIRS)
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Jul-Sep)/seasonalAverage/"
                     path: djibouti/ndvi-viirs-jas.zarr
                     var_names:
                         value: NDVI
@@ -3835,6 +3974,7 @@ countries:
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/monthlyAverage/T/(days%20since%201960-01-01)/streamgridunitconvert/T/differential_mul/T/(months%20since%201960-01-01)/streamgridunitconvert/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/(Jul-Sep%201991)/last/12/RANGESTEP//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/(Jul-Sep)/seasonalAverage/0./flaggt/%5BT%5Daverage/1./3./div/flaggt/1./masklt/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/"
                     path: djibouti/spi-jas.zarr
                     var_names:
                         value: spi
@@ -3878,6 +4018,7 @@ countries:
                 pnep:
                     label: Forecast prob non-exc
                     description: NextGen forecast probability of non-exceedance of selected percentile
+                    url: 'http://iridl.ldeo.columbia.edu/home/.aaron/.Djibouti/.PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/'
                     path: djibouti/pnep-jas.zarr
                     var_names:
                         value: pne
@@ -3964,6 +4105,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Mar-May)/seasonalAverage/30/mul//units/(mm/month)/def/'
                     path: djibouti/rain-mam.zarr
                     var_names:
                         value: prcp
@@ -3974,6 +4116,7 @@ countries:
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI (MODIS 6)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Mar-May)/seasonalAverage/"
                     path: djibouti/ndvi-mam.zarr
                     var_names:
                         value: NDVI
@@ -3985,6 +4128,7 @@ countries:
                     format: number4
                 ndvi-viirs:
                     label: NDVI (VIIRS)
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Mar-May)/seasonalAverage/"
                     path: djibouti/ndvi-viirs-mam.zarr
                     var_names:
                         value: NDVI
@@ -4028,6 +4172,7 @@ countries:
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/monthlyAverage/T/(days%20since%201960-01-01)/streamgridunitconvert/T/differential_mul/T/(months%20since%201960-01-01)/streamgridunitconvert/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/(Mar-May%201991)/last/12/RANGESTEP//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/(Mar-May)/seasonalAverage/0./flaggt/%5BT%5Daverage/1./3./div/flaggt/1./masklt/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/"
                     path: djibouti/spi-mam.zarr
                     var_names:
                         value: spi
@@ -4042,6 +4187,7 @@ countries:
                 pnep:
                     label: Forecast prob non-exc v1
                     description: NextGen forecast probability of non-exceedance of selected percentile, version 1
+                    url: 'http://iridl.ldeo.columbia.edu/home/.aaron/.ICPAC/.Forecasts/.CPT/.Djibouti/.PRCP_MME/.NextGen/.FbF/.pne/'
                     path: djibouti/pnep-mam.zarr
                     var_names:
                         value: pne
@@ -4116,6 +4262,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Oct-Dec)/seasonalAverage/30/mul//units/(mm/month)/def/'
                     path: djibouti/rain-ond.zarr
                     var_names:
                         value: prcp
@@ -4126,6 +4273,7 @@ countries:
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI (MODIS 6)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Oct-Dec)/seasonalAverage/"
                     path: djibouti/ndvi-ond.zarr
                     var_names:
                         value: NDVI
@@ -4137,6 +4285,7 @@ countries:
                     format: number4
                 ndvi-viirs:
                     label: NDVI (VIIRS)
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Oct-Dec)/seasonalAverage/"
                     path: djibouti/ndvi-viirs-ond.zarr
                     var_names:
                         value: NDVI
@@ -4180,6 +4329,7 @@ countries:
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/monthlyAverage/T/(days%20since%201960-01-01)/streamgridunitconvert/T/differential_mul/T/(months%20since%201960-01-01)/streamgridunitconvert/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/(Oct-Dec%201991)/last/12/RANGESTEP//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/(Oct-Dec)/seasonalAverage/0./flaggt/%5BT%5Daverage/1./3./div/flaggt/1./masklt/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/"
                     path: djibouti/spi-ond.zarr
                     var_names:
                         value: spi
@@ -4192,6 +4342,7 @@ countries:
                 wrsi:
                     label: WRSI
                     description: Seasonal average of FEWS rangeland WRSI
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.EAF/.short_rains_rangelands/.do/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Oct-Dec)/seasonalAverage/"
                     path: djibouti/wrsi-ond.zarr
                     var_names:
                         value: do
@@ -4277,6 +4428,7 @@ countries:
                 rain:
                     label: Rain
                     description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jun-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/'
                     path: djibouti/rain-jjas.zarr
                     var_names:
                         value: prcp
@@ -4287,6 +4439,7 @@ countries:
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI (MODIS 6)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Jun-Sep)/seasonalAverage/"
                     path: djibouti/ndvi-jjas.zarr
                     var_names:
                         value: NDVI
@@ -4298,6 +4451,7 @@ countries:
                     format: number4
                 ndvi-viirs:
                     label: NDVI (VIIRS)
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Jun-Sep)/seasonalAverage/"
                     path: djibouti/ndvi-viirs-jjas.zarr
                     var_names:
                         value: NDVI
@@ -4331,6 +4485,7 @@ countries:
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/monthlyAverage/T/(days%20since%201960-01-01)/streamgridunitconvert/T/differential_mul/T/(months%20since%201960-01-01)/streamgridunitconvert/a%3A/4/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/4/gammaprobs/4/gammastandardize/T//pointwidth/4/def//defaultvalue/%7Blast%7D/def/-1.5/shiftGRID//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/4/runningAverage/T/12/splitstreamgrid/0./flaggt/%5BT2%5Daverage/1./3./div/flaggt/1./masklt/%5BT%5D/REORDER/CopyStream/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/T/(Jun-Sep%201981)/last/12/RANGESTEP/"
                     path: djibouti/spi-jjas.zarr
                     var_names:
                         value: spi
@@ -4343,6 +4498,7 @@ countries:
                 wrsi:
                     label: WRSI
                     description: Seasonal average of FEWS rangeland WRSI
+                    url: "https://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.EAF/.long_rains_rangelands/.do/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jun-Sep)/seasonalAverage/"
                     path: djibouti/wrsi-jjas.zarr
                     var_names:
                         value: do
@@ -4424,6 +4580,7 @@ countries:
                 rain:
                     label: ENACTS rain
                     description: ENACTS average precipitation over the season
+                    url: "https://iridl.ldeo.columbia.edu/home/.aaron/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage/3/mul/"
                     path: lesotho/enacts-precip-djf.zarr
                     var_names:
                         value: rfe
@@ -4436,6 +4593,7 @@ countries:
                 chirps:
                     label: CHIRPS rain
                     description: CHIRPS average precipitation over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Dec-Feb)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: lesotho/chirps-djf.zarr
                     var_names:
                         value: precipitation
@@ -4447,6 +4605,7 @@ countries:
                 ndvi:
                     label: NDVI
                     description: MODIS NDVI average over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/26.925/.0375/29.5875/GRID/Y/-30.7875/.0375/-28.425/GRID/T/(Dec-Feb)/seasonalAverage/"
                     path: lesotho/ndvi-djf.zarr
                     var_names:
                         value: NDVI
@@ -4458,6 +4617,7 @@ countries:
                     format: number4
                 wrsi:
                     label: WRSI
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Dec-Feb)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/"
                     path: lesotho/wrsi-djf.zarr
                     var_names:
                         value: do
@@ -4536,6 +4696,7 @@ countries:
                 pnep:
                     label: Forecast prob non-exc v1
                     description: NextGen forecast probability of non-exceedance of selected percentile
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.Lesotho/.Forecasts/.NextGen/.DJF_PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/"
                     path: lesotho/pnep-djf.zarr
                     var_names:
                         value: pne
@@ -4616,6 +4777,7 @@ countries:
                 rain:
                     label: ENACTS rain
                     description: ENACTS average precipitation over the season
+                    url: "https://iridl.ldeo.columbia.edu/home/.aaron/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage/3/mul/"
                     path: lesotho/enacts-precip-ond.zarr
                     var_names:
                         value: rfe
@@ -4627,6 +4789,7 @@ countries:
                 chirps:
                     label: CHIRPS rain
                     description: CHIRPS average precipitation over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Oct-Dec)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/"
                     path: lesotho/chirps-ond.zarr
                     var_names:
                         value: precipitation
@@ -4639,6 +4802,7 @@ countries:
                 ndvi:
                     label: NDVI
                     description: MODIS NDVI average over the season
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/26.925/.0375/29.5875/GRID/Y/-30.7875/.0375/-28.425/GRID/T/(Oct-Dec)/seasonalAverage/"
                     path: lesotho/ndvi-ond.zarr
                     var_names:
                         value: NDVI
@@ -4650,6 +4814,7 @@ countries:
                     format: number4
                 wrsi:
                     label: WRSI
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Oct-Dec)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/"
                     path: lesotho/wrsi-ond.zarr
                     var_names:
                         value: do
@@ -4728,6 +4893,7 @@ countries:
                 pnep:
                     label: Rain fcst v1
                     description: NextGen forecast probability of non-exceedance of selected percentile, configuration selected in 2022
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.Lesotho/.Forecasts/.NextGen/.OND_PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/"
                     path: lesotho/pnep-ond.zarr
                     var_names:
                         value: pne
@@ -4825,6 +4991,7 @@ countries:
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
                     description: CHIRPS total precipitation for Jun
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-18)/(-10)/RANGE/Y/(11)/(17)/RANGE/T/(Jun)/seasonalAverage/T//pointwidth/0/def/2/shiftGRID/c%3A/1//units//months/def/%3Ac/mul//name//precipitation/def/'
                     path: senegal/chirps-precip-jun-jas.zarr
                     var_names:
                         value: precipitation
@@ -4836,6 +5003,7 @@ countries:
                 chirps-precip-jjaso:
                     label: CHIRPS Precip Jun-Oct
                     description: CHIRPS total precipitation for Jun-Oct
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-18)/(-10)/RANGE/Y/(11)/(17)/RANGE/T/(Jun-Oct)/seasonalAverage/c%3A/5//units//months/def/%3Ac/mul/T//pointwidth/0/def/pop//name//precipitation/def/'
                     path: senegal/chirps-precip-jjaso.zarr
                     var_names:
                         value: precipitation
@@ -4847,6 +5015,7 @@ countries:
                 chirps-precip-jas:
                     label: CHIRPS Precip JAS
                     description: CHIRPS total precipitation for Jul-Sep
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(-18)/(-10)/RANGE/Y/(11)/(17)/RANGE/T/(Jul-Sep)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/'
                     path: senegal/chirps-precip-jas.zarr
                     var_names:
                         value: precipitation
@@ -4858,6 +5027,7 @@ countries:
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/(-18)/(-10)/RANGE/Y/(11)/(17)/RANGE/monthlyAverage/3./mul/2/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/2/gammaprobs/2/gammastandardize/T//pointwidth/2/def//defaultvalue/%7Blast%7Ddef/-0.5/shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/'
                     path: senegal/chirp-spi-jj-jas.zarr
                     var_names:
                         value: spi
@@ -4870,6 +5040,7 @@ countries:
                 chirp-spi-jas:
                     label: CHIRP SPI JAS
                     description: Average SPI in July-September, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/(-18)/(-10)/RANGE/Y/(11)/(17)/RANGE/monthlyAverage/3.0/mul/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7Ddef/(Jul-Sep)/VALUES//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/'
                     path: senegal/chirp-spi-jas.zarr
                     var_names:
                         value: spi
@@ -4882,6 +5053,7 @@ countries:
                 chirp-rainfall-sep:
                     label: CHIRP Rain Sep
                     description: Total rainfall in September according to CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/(-18)/(-10)/RANGE/Y/(11)/(17)/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/'
                     path: senegal/chirp-rainfall-sep-jas.zarr
                     var_names:
                         value: prcp
@@ -4894,6 +5066,7 @@ countries:
                 chirps-dryspell:
                     label: Dry Spell
                     description: Longest dry spell, calculated from CHIRPS
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(-18)/(-10)/RANGE/Y/(11)/(17)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/0/replaceNaN/'
                     path: senegal/chirps-dryspell-jas.zarr
                     var_names:
                         value: lls
