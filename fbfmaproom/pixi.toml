@@ -17,7 +17,7 @@ python = "3.9.*"
 
 cftime = "*"
 cptio = "*"
-
+curl = "*"
 # some later version removes the __wrapped__ attribute on callbacks,
 # which is used by some tests
 dash = "2.3.1.*"
