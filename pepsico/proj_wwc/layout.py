@@ -20,7 +20,7 @@ def app_layout():
                     id="region",
                     options=["Thailand", "US-CA"],
                     labels=["Thailand", "United States and Canada"],
-                    init=3,
+                    init=1,
                 ),
             ),
             PickPoint(width="8em"),
@@ -42,10 +42,10 @@ def app_layout():
                         "dry_days",
                         "mean_Tmax",
                         "mean_Tmin",
-                        "Tmax_90th-ile",
-                        "Tmin_10th-ile",
+                        #"Tmax_90",
+                        #"Tmin_10",
                         # "heatwave_duration",
-                        "frost_season_length",
+                        #"frost_season_length",
                         "frost_days",
                         "wet_days",
                         # "longest_dry_spell",
@@ -61,10 +61,10 @@ def app_layout():
                         "Count of Dry Days",
                         "Mean Max Temperature",
                         "Mean Min Temperature",
-                        "Max Temperature 90th %-ile",
-                        "Min Temperature 10th %-ile",
+                        #"Max Temperature 90th %-ile",
+                        #"Min Temperature 10th %-ile",
                         # "Mean Heatwaves Duration",
-                        "Frost Season Length",
+                        #"Frost Season Length",
                         "Count of Frost Days",
                         "Count of Wet Days",
                         # "Longest Dry Spell",
@@ -74,7 +74,7 @@ def app_layout():
                         # "Mean Dry Spells Length",
                         # "Median Dry Spells Length",
                     ],
-                    init=2,
+                    init=1,
                 )),
                 Block("Definitions",
                     "Frost <=",
@@ -86,8 +86,8 @@ def app_layout():
                         width="5em",
                         debounce=False,
                     ),
-                    "˚C",
-                    "Dry/Wet day <=/>",
+                    "˚C; ",
+                    "Dry/Wet day <= / >",
                     Number(
                         id="wet",
                         default=0,
@@ -97,8 +97,7 @@ def app_layout():
                         debounce=False,
                     ),
                     "mm",
-
-                )
+                ),
                 Block("Season",
                     Number(
                         id="start_day",
@@ -168,7 +167,7 @@ def app_layout():
             This Maproom displays seasonal projected change of key
             weather-within-climate agronomic and climatic variables with respect to
             historical records.
-            """
+            """,
             html.P(
                 """
                 Use the controls in the top banner to choose other variables, models,

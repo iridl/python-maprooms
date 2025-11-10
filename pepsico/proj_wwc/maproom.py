@@ -84,7 +84,7 @@ def register(FLASK, config):
         if variable in [
             "killing_frost",
             "mean_Tmin",
-            "Tmin_10th-ile",
+            "Tmin_10",
             "frost_season_length",
             "frost_days",
         ]:
@@ -92,10 +92,10 @@ def register(FLASK, config):
         if variable in [
             # "warm_nights",
             "mean_Tmax",
-            "Tmax_90th-ile",
+            "Tmax_90",
             # "heatwave_duration",
         ]:
-            data_var = "tasmx"
+            data_var = "tasmax"
         if variable in [
             # "rain_events",
             "dry_days",
@@ -160,7 +160,7 @@ def register(FLASK, config):
                 ac.daily_tobegroupedby_season(
                     data_ds, start_day, start_month, end_day, end_month,
                 ),
-                data_var, variable, frost_threshold, wet_threshold,
+                variable, frost_threshold, wet_threshold,
             )
         return data_ds, error_msg
 
@@ -181,7 +181,7 @@ def register(FLASK, config):
         graph, data, start_year, end_year, fill_color, line_color, annotation
     ):
         return graph.add_vrect(
-            x0=data["seasons_starts"].where(
+            x0=data["T"].where(
                 lambda x : (x.dt.year == int(start_year)), drop=True
             ).dt.strftime(mru.STD_TIME_FORMAT).values[0],
             #it's hard to believe this is how it is done
@@ -235,8 +235,12 @@ def register(FLASK, config):
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
+        start_day = int(start_day)
+        end_day = int(end_day)
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
+        frost_threshold = float(frost_threshold)
+        wet_threshold = float(wet_threshold)
         model = "Multi-Model-Average"
         data_ds, error_msg = local_data(
             lat, lng, region, model, variable,
@@ -284,8 +288,12 @@ def register(FLASK, config):
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
+        start_day = int(start_day)
+        end_day = int(end_day)
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
+        frost_threshold = float(frost_threshold)
+        wet_threshold = float(wet_threshold)
         data_ds, error_msg = local_data(
             lat, lng, region, model, variable,
             start_day, start_month, end_day, end_month,
@@ -331,7 +339,10 @@ def register(FLASK, config):
             local_graph.update_layout(
                 xaxis_title="Time",
                 yaxis_title=(
-                    f'{data_ds["histo"].attrs["long_name"]} '
+                    # Compared to the monthly case, I presume that groupby dropped
+                    # the long_name, which is fine since it's indeed transformed. Can
+                    # consider resetting it at some point in the calculation
+                    #f'{data_ds["histo"].attrs["long_name"]} '
                     f'({data_ds["histo"].attrs["units"]})'
                 ),
                 title={
@@ -364,18 +375,9 @@ def register(FLASK, config):
         State("end_year_ref", "value"),
     )
     def write_map_description(
-        n_clicks,
-        scenario,
-        model,
-        variable,
-        start_day,
-        end_day,
-        start_month,
-        end_month,
-        start_year,
-        end_year,
-        start_year_ref,
-        end_year_ref,
+        n_clicks, scenario, model, variable,
+        start_day, end_day, start_month, end_month,
+        start_year, end_year, start_year_ref, end_year_ref,
     ):
         return (
             f'The Map displays the change in '
@@ -402,18 +404,9 @@ def register(FLASK, config):
         State("end_year_ref", "value"),
     )
     def write_map_title(
-        n_clicks,
-        scenario,
-        model,
-        variable,
-        start_day,
-        end_day,
-        start_month,
-        end_month,
-        start_year,
-        end_year,
-        start_year_ref,
-        end_year_ref,
+        n_clicks, scenario, model, variable,
+        start_day, end_day, start_month, end_month,
+        start_year, end_year, start_year_ref, end_year_ref,
     ):
         return (
             f'({start_day} {start_month} - {end_day} {end_month}) '
@@ -473,29 +466,33 @@ def register(FLASK, config):
         data_var = select_var(variable)
         ref = xr.concat([
             ac.seasonal_wwc(
-                ac.daily_tobegrouped_by(
+                ac.daily_tobegroupedby_season(
                     ac.read_data(
-                        "historical", m, variable, region,
+                        "historical", m, data_var, region,
                         time_res="daily", unit_convert=True
-                    ).sel(T=slice(start_year_ref, end_year_ref)),
+                    ).sel(
+                        T=slice(str(start_year_ref), str(end_year_ref))
+                    ).to_dataset(),
                     start_day, start_month, end_day, end_month,
                 ),
-                data_var, variable, frost_threshold, wet_threshold,
+                variable, frost_threshold, wet_threshold,
             ).mean(dim="T", keep_attrs=True) for m in model
         ], "M").mean("M", keep_attrs=True)
         data = xr.concat([
             ac.seasonal_wwc(
-                ac.daily_tobegrouped_by(
+                ac.daily_tobegroupedby_season(
                     ac.read_data(
-                        scenario, m, variable, region,
+                        scenario, m, data_var, region,
                         time_res="daily", unit_convert=True
-                    ).sel(T=slice(start_year, end_year)),
+                    ).sel(
+                        T=slice(str(start_year), str(end_year))
+                    ).to_dataset(),
                     start_day, start_month, end_day, end_month,
                 ),
-                data_var, variable, frost_threshold, wet_threshold,
+                variable, frost_threshold, wet_threshold,
             ).mean(dim="T", keep_attrs=True) for m in model
         ], "M").mean("M", keep_attrs=True)
-        #Tedious way to make a subtraction only to keep attributes
+        #Tedious way to make a subtraction only to keep attributes (units)
         return xr.apply_ufunc(
             np.subtract, data, ref, dask="allowed", keep_attrs="drop_conflicts",
         ).rename({"X": "lon", "Y": "lat"})
@@ -535,14 +532,23 @@ def register(FLASK, config):
         start_year, end_year, start_year_ref, end_year_ref,
         frost_threshold, wet_threshold,
     ):
+        start_day = int(start_day)
+        end_day = int(end_day)
+        start_month = ac.strftimeb2int(start_month)
+        end_month = ac.strftimeb2int(end_month)
+        frost_threshold = float(frost_threshold)
+        wet_threshold = float(wet_threshold)
         data = seasonal_change(
             scenario, model, variable, region,
             start_day, end_day, start_month, end_month,
             start_year, end_year, start_year_ref, end_year_ref,
             frost_threshold, wet_threshold,
         )
-        colorbar, min, max = map_attributes(data)
-        return colorbar.to_dash_leaflet(), min, max, data.attrs["units"]
+        colorbar, min, max = map_attributes(data[select_var(variable)])
+        return (
+            colorbar.to_dash_leaflet(), min, max,
+            data[select_var(variable)].attrs["units"]
+        )
 
 
     @APP.callback(
@@ -573,8 +579,8 @@ def register(FLASK, config):
         try:
             send_alarm = False
             url_str = (
-                f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{region}/{scenario}/{model}/{variable}/"
-                f"{start_day}/{end_day}/{start_month}/{end_month}/"
+                f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{region}/{scenario}/{model}/"
+                f"{variable}/{start_day}/{end_day}/{start_month}/{end_month}/"
                 f"{start_year}/{end_year}/{start_year_ref}/{end_year_ref}/"
                 f"{frost_threshold}/{wet_threshold}"
             )
@@ -590,9 +596,10 @@ def register(FLASK, config):
 
     @FLASK.route(
         (
-            f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<region>/<scenario>/<model>/<variable>/"
-            f"<start_month>/<end_month>/<start_year>/<end_year>/<start_year_ref>/"
-            f"<end_year_ref>"
+            f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<region>/<scenario>/<model>/"
+            f"<variable>/<start_day>/<end_day>/<start_month>/<end_month>/"
+            f"<start_year>/<end_year>/<start_year_ref>/<end_year_ref>/"
+            f"<frost_threshold>/<wet_threshold>/"
         ),
         endpoint=f"{config['core_path']}"
     )
@@ -602,6 +609,12 @@ def register(FLASK, config):
         start_year, end_year, start_year_ref, end_year_ref,
         frost_threshold, wet_threshold,
     ):
+        start_day = int(start_day)
+        end_day = int(end_day)
+        start_month = ac.strftimeb2int(start_month)
+        end_month = ac.strftimeb2int(end_month)
+        frost_threshold = float(frost_threshold)
+        wet_threshold = float(wet_threshold)
         data = seasonal_change(
             scenario, model, variable, region,
             start_day, end_day, start_month, end_month,
@@ -609,9 +622,9 @@ def register(FLASK, config):
             frost_threshold, wet_threshold,
         )
         (
-            data.attrs["colormap"],
-            data.attrs["scale_min"],
-            data.attrs["scale_max"],
-        ) = map_attributes(data)
-        resp = pingrid.tile(data, tx, ty, tz)
+            data[select_var(variable)].attrs["colormap"],
+            data[select_var(variable)].attrs["scale_min"],
+            data[select_var(variable)].attrs["scale_max"],
+        ) = map_attributes(data[select_var(variable)])
+        resp = pingrid.tile(data[select_var(variable)], tx, ty, tz)
         return resp
