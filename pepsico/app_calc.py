@@ -41,6 +41,10 @@ def read_data(
     )[variable].sel(X=xslice, Y=yslice)
     if unit_convert :
         data = unit_conversion(data)
+    #Turns out that some models are centered on noon
+    if time_res == "daily" :
+        if data["T"][0].dt.hour == 12 :
+            data = data.assign_coords({"T" : data["T"] - np.timedelta64(12, "h")})
     return data
 
 
@@ -96,30 +100,42 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
 
 def seasonal_wwc(
-    labelled_season_data, data_var, variable, frost_threshold, wet_threshold
+    labelled_season_data, variable, frost_threshold, wet_threshold
 ):
+    # For some rason the summed groups return 0s where all NaNs (begining/end of
+    # projections/histo). A where ~np.isnan didn't help, neither a skipNa True. To be
+    # explored later
     if variable == "frost_days":
-        data_ds = (labelled_season_data[data_var] <= frost_threshold).groupby(
+        data_ds = (labelled_season_data <= frost_threshold).groupby(
             labelled_season_data["seasons_starts"]
         ).sum()
+        wwc_units = "days"
     if variable == "dry_days":
-        data_ds = (labelled_season_data[data_var] <= wet_threshold).groupby(
+        data_ds = (labelled_season_data <= wet_threshold).groupby(
             labelled_season_data["seasons_starts"]
         ).sum()
+        wwc_units = "days"
     if variable in ["mean_Tmax", "mean_Tmin"]:
-        data_ds = labelled_season_data[data_var].groupby(
+        data_ds = labelled_season_data.groupby(
             labelled_season_data["seasons_starts"]
         ).mean()
-    if variable == "Tmax_90th-ile":
-        data_ds = labelled_season_data[data_var].groupby(
+        wwc_units = "˚C"
+    # Percentiles options have been commented out in the layout at the calculations
+    # seem to have thrown off the app (got a time series once but after that... just
+    # spinning around)
+    if variable == "Tmax_90":
+        data_ds = labelled_season_data.groupby(
             labelled_season_data["seasons_starts"]
         ).quantile(0.9)
-    if variable == "Tmin_10th-ile":
-        data_ds = labelled_season_data[data_var].groupby(
+        wwc_units = "˚C"
+    if variable == "Tmin_10":
+        data_ds = labelled_season_data.groupby(
             labelled_season_data["seasons_starts"]
         ).quantile(0.1)
+    # This option is also commented out as it didn't work in its present form. Didn't
+    # really expect that it would though.
     if variable == "frost_season_length":
-        data_ds = (labelled_season_data[data_var] <= frost_threshold).groupby(
+        data_ds = (labelled_season_data <= frost_threshold).groupby(
             labelled_season_data["seasons_starts"]
         )
         data_ds = (
@@ -127,10 +143,21 @@ def seasonal_wwc(
             - data_ds.idxmax()
             + np.timedelta64(1, "D")
         )
+        wwc_units = "days"
     if variable == "wet_days":
-        data_ds = (labelled_season_data[data_var] > wet_threshold).groupby(
+        data_ds = ((labelled_season_data > wet_threshold)+0).groupby(
             labelled_season_data["seasons_starts"]
         ).sum()
+        wwc_units = "days"
+    # This is all a bit tedious but I didn't figure out another way to keep
+    # seasons_ends and renaming time dim T
+    # Can revisit later if this code has a future
+    data_ds = data_ds.rename({"seasons_starts" : "T"})
+    seasons_ends = labelled_season_data["seasons_ends"].rename({"group": "T"})
+    data_ds = data_ds.drop_vars(["seasons_ends", "group"]).assign_coords({"seasons_ends" : seasons_ends})
+    #
+    for var in data_ds.data_vars:
+        data_ds[var].attrs["units"] = wwc_units
     return data_ds
 
 
@@ -233,8 +260,13 @@ def daily_tobegroupedby_season(
         .rename("seasons_starts")
     )
     seasons_ends = end_edges.rename({time_dim: "group"}).rename("seasons_ends")
-    # Dataset output
-    daily_tobegroupedby_season = xr.merge([daily_data, seasons_starts, seasons_ends])
+    # I actually changed this from enacts by making both seasons_starts/ends cords
+    # rather than vars. This seems better following a comment Aaron made on xcdat and
+    # because we local data case provides an xr.Dataset of vars to groupby and we
+    # don't want seasons_starts/ends to be groupedby
+    daily_tobegroupedby_season = daily_data.assign_coords(
+        {"seasons_starts" : seasons_starts, "seasons_ends" : seasons_ends}
+    )
     return daily_tobegroupedby_season
 
 
