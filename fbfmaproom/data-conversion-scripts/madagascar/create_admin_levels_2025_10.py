@@ -27,10 +27,10 @@ Usage:
     python create_admin_levels.py
 
 Input:
-    SHP_ADM2_UPDATE_dante.zip - Original admin 2 shapefile in projected CRS (EPSG:3395)
+    SHP_ADM2_UPDATE.zip - Original admin 2 shapefile in projected CRS (EPSG:3395)
 
 Output:
-    SHP_ADM2_UPDATE.zip - New zip file containing all four admin level shapefiles
+    SHP_MERGED.zip - New zip file containing all three admin level shapefiles
     in geographic coordinate system (EPSG:4326) for Python maproom integration
 """
 
@@ -59,8 +59,8 @@ def main():
     9. Package everything into a new zip file with geographic coordinates
     """
     # Input and output paths
-    input_zip = "SHP_ADM2_UPDATE_dante.zip"
-    output_zip = "SHP_ADM2_UPDATE.zip"
+    input_zip = "SHP_ADM2_UPDATE.zip"
+    output_zip = "SHP_MERGED.zip"
     
     # Create temporary directory for processing
     with tempfile.TemporaryDirectory() as temp_dir:
