@@ -41,6 +41,7 @@ import tempfile
 import os
 import shutil
 from pathlib import Path
+import shapely
 
 def main():
     """
@@ -92,7 +93,7 @@ def main():
         # Create admin 0 (National) - dissolve by ADM0_PCODE
         # This merges all 120 district polygons into 1 national boundary
         print("\nCreating Admin 0 (National) shapefile...")
-        adm0 = gdf.dissolve(by='ADM0_PCODE', aggfunc='first')
+        adm0 = merge(gdf, 'ADM0_PCODE')
         # Reset index to make ADM0_PCODE a column again, then select fields
         adm0 = adm0.reset_index()
         adm0 = adm0[['ADM0_PCODE', 'ADM0_EN', 'geometry']]
@@ -102,7 +103,7 @@ def main():
         # This merges district polygons that share the same region code
         # Include hierarchical fields (Admin 0 + Admin 1 fields)
         print("\nCreating Admin 1 (Regional) shapefile...")
-        adm1 = gdf.dissolve(by='ADM1_PCODE', aggfunc='first')
+        adm1 = merge(gdf, 'ADM1_PCODE')
         # Reset index to make ADM1_PCODE a column again, then select fields
         adm1 = adm1.reset_index()
         adm1 = adm1[['ADM0_PCODE', 'ADM0_EN', 'ADM1_PCODE', 'ADM1_EN', 'ADM1_TYPE', 'geometry']]
@@ -170,6 +171,27 @@ def main():
         print("- ALL levels: mdg_adm_ALL")
         print(f"\nAll shapefiles are in EPSG:4326 (WGS 84 - geographic coordinate system)")
         print("Coordinates are in degrees (longitude, latitude) for web mapping compatibility")
+
+
+def merge(gdf, by):
+    merged_df = gdf.dissolve(by=by)
+    merged_df['geometry'] = [
+        remove_holes(geom) for geom in merged_df['geometry']
+    ]
+    return merged_df
+
+
+def remove_holes(geom):
+    if isinstance(geom, shapely.Polygon):
+        result = shapely.Polygon(geom.exterior)
+    elif isinstance(geom, shapely.MultiPolygon):
+        result = shapely.MultiPolygon([
+            shapely.Polygon(poly.exterior) for poly in geom.geoms
+        ])
+    else:
+        raise Exception(f"Bad argument type for remove_holes: {type(geom)}")
+    return result
+
 
 if __name__ == "__main__":
     main()
