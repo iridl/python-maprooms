@@ -116,47 +116,25 @@ def main():
         adm2 = gdf[['ADM0_PCODE', 'ADM0_EN', 'ADM1_PCODE', 'ADM1_EN', 'ADM1_TYPE', 'ADM2_PCODE', 'ADM2_EN', 'ADM2_TYPE', 'geometry']].copy()
         print(f"Admin 2 has {len(adm2)} feature(s)")
         
-        # Create ALL levels shapefile - combine all admin levels with admLevel field
-        # This creates a single shapefile containing all administrative levels,
-        # distinguished by the admLevel field (0=National, 1=Regional, 2=District)
-        # This format matches the structure used in reference datasets (e.g., Djibouti)
-        print("\nCreating ALL levels shapefile...")
-        # Add admLevel field to each dataframe to distinguish admin levels
-        adm0_all = adm0.copy()
-        adm0_all['admLevel'] = 0  # National level
-        
-        adm1_all = adm1.copy()
-        adm1_all['admLevel'] = 1  # Regional level
-        
-        adm2_all = adm2.copy()
-        adm2_all['admLevel'] = 2  # District level
-        
-        # Combine all levels into a single GeoDataFrame
-        all_levels = gpd.GeoDataFrame(pd.concat([adm0_all, adm1_all, adm2_all], ignore_index=True))
-        print(f"ALL levels has {len(all_levels)} feature(s) (1 National + {len(adm1_all)} Regional + {len(adm2_all)} District)")
-        
         # Save shapefiles to temporary directory
         print("\nSaving shapefiles...")
         adm0_path = temp_path / "mdg_adm0.shp"
         adm1_path = temp_path / "mdg_adm1.shp"
         adm2_path = temp_path / "mdg_adm2.shp"
-        all_path = temp_path / "mdg_adm_ALL.shp"
         
         adm0.to_file(adm0_path)
         adm1.to_file(adm1_path)
         adm2.to_file(adm2_path)
-        all_levels.to_file(all_path)
         
         print(f"Saved Admin 0: {adm0_path}")
         print(f"Saved Admin 1: {adm1_path}")
         print(f"Saved Admin 2: {adm2_path}")
-        print(f"Saved ALL levels: {all_path}")
         
-        # Create new zip file with all four shapefiles
+        # Create new zip file with all three shapefiles
         print(f"\nCreating new zip file: {output_zip}")
         with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zip_ref:
             # Add all shapefile components for each admin level
-            for admin_level in ['mdg_adm0', 'mdg_adm1', 'mdg_adm2', 'mdg_adm_ALL']:
+            for admin_level in ['mdg_adm0', 'mdg_adm1', 'mdg_adm2']:
                 for ext in ['.shp', '.shx', '.dbf', '.prj', '.cpg', '.sbn', '.sbx', '.shp.xml']:
                     file_path = temp_path / f"{admin_level}{ext}"
                     if file_path.exists():
@@ -168,7 +146,6 @@ def main():
         print("- Admin 0 (National): mdg_adm0")
         print("- Admin 1 (Regional): mdg_adm1") 
         print("- Admin 2 (District): mdg_adm2")
-        print("- ALL levels: mdg_adm_ALL")
         print(f"\nAll shapefiles are in EPSG:4326 (WGS 84 - geographic coordinate system)")
         print("Coordinates are in degrees (longitude, latitude) for web mapping compatibility")
 
