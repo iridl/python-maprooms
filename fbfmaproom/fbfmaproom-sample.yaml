@@ -137,7 +137,6 @@ countries:
         zoom: 7
         rotation: 0
         marker: [45.5, -24]
-        clip: no
         shapes:
             - name: National
               file: madagascar/shapes/2025-10/SHP_MERGED.zip
@@ -379,7 +378,6 @@ countries:
         zoom: 7
         rotation: 0
         marker: [45.5, -24]
-        clip: no
         shapes:
             - name: National
               file: madagascar/shapes/2025-10/SHP_MERGED.zip
@@ -574,7 +572,6 @@ countries:
         zoom: 7
         rotation: 0
         marker: [45.5, -24]
-        clip: no
         shapes:
             - name: National
               file: madagascar/shapes/2025-10/SHP_MERGED.zip
