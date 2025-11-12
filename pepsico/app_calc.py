@@ -1,7 +1,6 @@
 import xarray as xr
 import numpy as np
 from scipy.stats import norm
-import operator as op
 
 
 #This is what we should need for the app
@@ -660,7 +659,7 @@ def number_extreme_events_within_days(
     number_extreme_events_within_days(rain_daily_data_in_mm, "gt", 80, 2)    
     """
     count = 0
-    dd = daily_data
+    dd = daily_data.copy()
     #Start with shortest events
     for w in range(1, window+1):
         for t in range(len(dd[dim])-(w-1)):
