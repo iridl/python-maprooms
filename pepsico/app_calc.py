@@ -552,3 +552,27 @@ def median_length_of_spells(flagged_data, dim, min_spell_length=1):
     return _cumsum_flagged_diff(flagged_data, dim).where(
         lambda x : x >= min_spell_length
     ).median(dim=dim)
+
+
+def _accumulate_spells(flagged_data, axis=0, dtype=None, out=None):
+    return xr.apply_ufunc(
+        np.frompyfunc(lambda x, y: 0 if y == 0 else x + y, 2, 1).accumulate,
+        flagged_data, axis, dtype, out
+    )
+
+
+def spells_length(flagged_data, dim):
+    # cumuls 1s and resets counts when 0
+    # then rolls data by 1 to position total cumuls on 0s of the flagged data
+    # except for the last point that becomes first
+    spells = _accumulate_spells(
+        flagged_data, axis=flagged_data.get_axis_num(dim)
+    ).roll(**{dim: 1})
+    # masks out where data falg to rid of accumulating values but last of each spell
+    spells_only = spells.where(flagged_data == 0)
+    # resets first value to what it was as it could have been erased in previous step
+    spells_only[dict(**{dim : 0})] = spells.isel({dim : 0})
+    # rolls back to get spells length values on last day of spell
+    spells = spells_only.roll(**{dim: -1})
+    # Turns remaining 0s to NaN
+    return spells.where(spells > 0)
