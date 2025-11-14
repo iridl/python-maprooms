@@ -39,15 +39,15 @@ def app_layout():
                     options=[
                         # "warm_nights",
                         # "rain_events",
-                        "dry_days",
                         "mean_Tmax",
                         "mean_Tmin",
+                        "dry_days",
+                        "wet_days",
                         #"Tmax_90",
                         #"Tmin_10",
                         # "heatwave_duration",
                         #"frost_season_length",
                         "frost_days",
-                        "wet_days",
                         # "longest_dry_spell",
                         # "longest_wet_spell",
                         # "wet_day_persistence",
@@ -58,15 +58,15 @@ def app_layout():
                     labels=[
                         # "Warm Nights",
                         # "Count of Rain Events",
-                        "Count of Dry Days",
                         "Mean Max Temperature",
                         "Mean Min Temperature",
+                        "Count of Dry Days",
+                        "Count of Wet Days",
                         #"Max Temperature 90th %-ile",
                         #"Min Temperature 10th %-ile",
                         # "Mean Heatwaves Duration",
                         #"Frost Season Length",
                         "Count of Frost Days",
-                        "Count of Wet Days",
                         # "Longest Dry Spell",
                         # "Longest Wet Spell",
                         # "Mean Wet Day Persistence",
@@ -74,7 +74,7 @@ def app_layout():
                         # "Mean Dry Spells Length",
                         # "Median Dry Spells Length",
                     ],
-                    init=3,
+                    init=0,
                 )),
                 Block("Definitions",
                     "Frost <=",
@@ -188,6 +188,18 @@ def app_layout():
                 units).
                 """
             ),
+            html.H4(["Definitions"]),
+            html.P([html.B("Mean Max/Min Temperature (mean_Tmax/min):"), """
+                Average maximum/minimum temperature in season
+            """]),
+            html.P([html.B("Count of Dry/Wet Days (dry/wet_days):"), """
+                Number of dry/wet days in the season. A dry/wet day is defined as 
+                lesser or equal / greather than a user-defined threshold.
+            """]),
+            html.P([html.B("Count of Frost Days (frost_days):"), """
+                Number of frost days in the season. A frost day is defined as 
+                lesser or equal than a user-defined threshold.
+            """]),
         ),
         
         lou.map(GLOBAL_CONFIG["zoom"]),
