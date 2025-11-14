@@ -128,18 +128,18 @@ def seasonal_wwc(
             labelled_season_data["seasons_starts"]
         ).mean()
         wwc_units = "˚C"
-    # Percentiles options have been commented out in the layout at the calculations
-    # seem to have thrown off the app (got a time series once but after that... just
-    # spinning around)
+    # It takes several 10s of minutes to get the quantiles maps so the options are 
+    # commented out in the list of options until a solution is found
     if variable == "Tmax_90":
         data_ds = labelled_season_data.groupby(
             labelled_season_data["seasons_starts"]
-        ).quantile(0.9)
+        ).quantile(0.9, method="closest_observation")
         wwc_units = "˚C"
     if variable == "Tmin_10":
         data_ds = labelled_season_data.groupby(
             labelled_season_data["seasons_starts"]
         ).quantile(0.1)
+        wwc_units = "˚C"
     # This option is also commented out as it didn't work in its present form. Didn't
     # really expect that it would though.
     if variable == "frost_season_length":
