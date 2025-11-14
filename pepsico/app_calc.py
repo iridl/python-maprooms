@@ -102,18 +102,26 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 def seasonal_wwc(
     labelled_season_data, variable, frost_threshold, wet_threshold
 ):
-    # For some rason the summed groups return 0s where all NaNs (begining/end of
-    # projections/histo). A where ~np.isnan didn't help, neither a skipNa True. To be
-    # explored later
+    # Boolean variables need the additional where to return NaNs from False/0 to Nans
+    # and the sum parameters for entirely NaNs seasons to remain NaNs and not turn to
+    # 0. This is necessary because histo and projections scenarios don't cover the
+    # full time period and it's not creating fake results as there are no missing
+    # data
     if variable == "frost_days":
-        data_ds = (labelled_season_data <= frost_threshold).groupby(
-            labelled_season_data["seasons_starts"]
-        ).sum()
+        data_ds = (
+            (labelled_season_data <= frost_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .sum(skipna=True, min_count=1)
+        )
         wwc_units = "days"
     if variable == "dry_days":
-        data_ds = (labelled_season_data <= wet_threshold).groupby(
-            labelled_season_data["seasons_starts"]
-        ).sum()
+        data_ds = (
+            (labelled_season_data <= wet_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .sum(skipna=True, min_count=1)
+        )
         wwc_units = "days"
     if variable in ["mean_Tmax", "mean_Tmin"]:
         data_ds = labelled_season_data.groupby(
@@ -145,9 +153,12 @@ def seasonal_wwc(
         )
         wwc_units = "days"
     if variable == "wet_days":
-        data_ds = ((labelled_season_data > wet_threshold)+0).groupby(
-            labelled_season_data["seasons_starts"]
-        ).sum()
+        data_ds = (
+            (labelled_season_data > wet_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .sum(skipna=True, min_count=1)
+        )
         wwc_units = "days"
     # This is all a bit tedious but I didn't figure out another way to keep
     # seasons_ends and renaming time dim T
