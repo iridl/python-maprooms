@@ -169,7 +169,7 @@ def register(FLASK, config):
         return pgo.Scatter(
             x=ts["T"].dt.strftime(mru.STD_TIME_FORMAT),
             y=ts.values,
-            customdata=ts["seasons_ends"].dt.strftime("%B %Y"),
+            customdata=ts["seasons_ends"].dt.strftime("%d %B %Y"),
             hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f} " + units),
             name=name,
             line=pgo.scatter.Line(color=color),
