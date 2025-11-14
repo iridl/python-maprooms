@@ -498,9 +498,15 @@ def register(FLASK, config):
         ).rename({"X": "lon", "Y": "lat"})
 
 
-    def map_attributes(data):
+    def map_attributes(data, variable):
+        data = data[select_var(variable)]
+        if data.name == "pr":
+            colorscale = CMAPS["prcp_anomaly"]
+        if data.name in ["tasmin", "tasmax"]:
+            colorscale = CMAPS["temp_anomaly"]
+        if variable in ["frost_days", "dry_days"]:
+            colorscale = colorscale.reversed()
         map_amp = np.max(np.abs(data)).values
-        colorscale = CMAPS["correlation"]
         colorscale = colorscale.rescaled(-1*map_amp, map_amp)
         return colorscale, colorscale.scale[0], colorscale.scale[-1]
 
@@ -544,7 +550,7 @@ def register(FLASK, config):
             start_year, end_year, start_year_ref, end_year_ref,
             frost_threshold, wet_threshold,
         )
-        colorbar, min, max = map_attributes(data[select_var(variable)])
+        colorbar, min, max = map_attributes(data, variable)
         return (
             colorbar.to_dash_leaflet(), min, max,
             data[select_var(variable)].attrs["units"]
@@ -625,6 +631,6 @@ def register(FLASK, config):
             data[select_var(variable)].attrs["colormap"],
             data[select_var(variable)].attrs["scale_min"],
             data[select_var(variable)].attrs["scale_max"],
-        ) = map_attributes(data[select_var(variable)])
+        ) = map_attributes(data, variable)
         resp = pingrid.tile(data[select_var(variable)], tx, ty, tz)
         return resp
