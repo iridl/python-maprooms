@@ -1,5 +1,6 @@
 import xarray as xr
 import numpy as np
+from scipy.stats import norm
 
 
 #This is what we should need for the app
@@ -128,17 +129,18 @@ def seasonal_wwc(
             labelled_season_data["seasons_starts"]
         ).mean()
         wwc_units = "˚C"
-    # It takes several 10s of minutes to get the quantiles maps so the options are 
-    # commented out in the list of options until a solution is found
-    if variable == "Tmax_90":
+    # It takes several 10s of minutes to get empirical quantiles maps
+    if variable in ["Tmax_90", "Tmin_10"]:
+        quantile = 0.1 if variable == "Tmin_10" else 0.9
         data_ds = labelled_season_data.groupby(
             labelled_season_data["seasons_starts"]
-        ).quantile(0.9, method="closest_observation")
-        wwc_units = "˚C"
-    if variable == "Tmin_10":
-        data_ds = labelled_season_data.groupby(
-            labelled_season_data["seasons_starts"]
-        ).quantile(0.1)
+        )
+        data_std = data_ds.std()
+        data_ds = data_ds.mean()
+        for var in data_ds.data_vars:
+            data_ds[var].data = xr.apply_ufunc(
+                norm.ppf, quantile, kwargs={"loc": data_ds[var], "scale": data_std[var]},
+            )
         wwc_units = "˚C"
     # This option is also commented out as it didn't work in its present form. Didn't
     # really expect that it would though.

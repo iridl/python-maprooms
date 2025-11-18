@@ -43,11 +43,11 @@ def app_layout():
                         "mean_Tmin",
                         "dry_days",
                         "wet_days",
-                        #"Tmax_90",
-                        #"Tmin_10",
                         # "heatwave_duration",
                         #"frost_season_length",
                         "frost_days",
+                        "Tmax_90",
+                        "Tmin_10",
                         # "longest_dry_spell",
                         # "longest_wet_spell",
                         # "wet_day_persistence",
@@ -62,11 +62,11 @@ def app_layout():
                         "Mean Min Temperature",
                         "Count of Dry Days",
                         "Count of Wet Days",
-                        #"Max Temperature 90th %-ile",
-                        #"Min Temperature 10th %-ile",
                         # "Mean Heatwaves Duration",
                         #"Frost Season Length",
                         "Count of Frost Days",
+                        "Max Temperature 90th %-ile",
+                        "Min Temperature 10th %-ile",
                         # "Longest Dry Spell",
                         # "Longest Wet Spell",
                         # "Mean Wet Day Persistence",
@@ -200,6 +200,12 @@ def app_layout():
                 Number of frost days in the season. A frost day is defined as 
                 lesser or equal than a user-defined threshold.
             """]),
+            html.P([
+                html.B("Max/Min Temperature 90/10th %-ile (Tmax/min_90/10):"),"""
+                    Maximum/Minimum temperature 90/10th percentile in the season. 
+                    Obtained through parametric Normal distributions.
+                """
+            ]),
         ),
         
         lou.map(GLOBAL_CONFIG["zoom"]),
