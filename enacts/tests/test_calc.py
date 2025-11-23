@@ -1,9 +1,88 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+import xcdat as xc
 import calc
 import data_test_calc
+from functools import partial
+from pathlib import Path
 
+
+def test_xcdat():
+    netcdf = list(sorted(Path(
+        "/data/remic/mydatafiles/Malawi/test/ALL_20200917/MERGED_precip_daily/"
+    ).glob("*.nc")))
+    data = xr.open_mfdataset(
+        netcdf,
+        preprocess=partial(calc.set_up_dims),
+        parallel=False,
+    )["precip"].to_dataset()
+    # Need this attribute
+    data["T"].attrs["axis"] = "T"
+    # Creates T_bnds
+    data = data.bounds.add_time_bounds("freq")
+    #print(data["T_bnds"])
+    # Need a calendar
+    data["T"].encoding["calendar"] = "standard"
+    # xcdat doesn't keep T_bnds
+    monthly_data = (
+        data.temporal.group_average("precip", "month")
+        .bounds.add_time_bounds("freq")
+    )
+    #print(monthly_data)
+    # temporal.average even removes T altogether
+    T_bnds_original = data.bounds.get_bounds("T")
+    seasonal_data = data.temporal.average("precip")
+    T_bnds = T_bnds_original[0, :]
+    T_bnds[-1] = T_bnds_original[-1, -1].values
+    seasonal_data = seasonal_data.merge(T_bnds).expand_dims(dim="T")
+    #print(seasonal_data)
+    # Applying a function of ours on the season of one year
+    # so assuming we can apply to multiple years by grouping or splitting
+    longest_spell = (
+        calc.longest_run_length(data["precip"] < 5, dim="T")
+        .to_dataset().merge(T_bnds).expand_dims(dim="T")
+    )
+    #print(longest_spell)
+    netcdf_dekad = list(sorted(Path(
+        "/data/remic/mydatafiles/Guyana/Updated_ENACTS_Nov_2023/Dekadal_rr_Jan_1981_to_Nov_2023_CLM/"
+    ).glob("*2015*.nc")))
+    data_dkd = xr.open_mfdataset(
+        netcdf_dekad,
+        preprocess=partial(calc.set_up_dims, time_res="dekadal"),
+        parallel=False,
+    )["precip"].to_dataset()
+    # Need this attribute
+    data_dkd["T"].attrs["axis"] = "T"
+    # Creates T_bnds
+    # calc.set_up_dims sets T at the beginning of the dekad
+    # However, add_time_bounds' freq understands only yearly, monthly, daily, hourly
+    # So here I trick it by using midpoint
+    # of which ending edge of T_bnds are the centers of the dekads
+    # which I re assign as T and then can apply add_time_bounds again
+    # to get dekadal data as we would present it
+    data_dkd = data_dkd.bounds.add_time_bounds("midpoint")
+    data_dkd = data_dkd.assign_coords(
+        {"T" : data_dkd["T_bnds"][:, -1]}
+    ).drop_vars("T_bnds")
+    data_dkd["T"].attrs["axis"] = "T"
+    data_dkd = data_dkd.bounds.add_time_bounds("midpoint")
+    #print(data_dkd["T_bnds"])
+    data_dkd["T"].encoding["calendar"] = "standard"
+    # Going from dekads to monthly totals
+    dekad_to_month_data = (
+        data_dkd.temporal.group_average("precip", "month", weighted=False)
+        .bounds.add_time_bounds("freq")
+    )
+    dekad_to_month_data["precip"] = 3 * dekad_to_month_data["precip"]
+    #print(dekad_to_month_data)
+    np.testing.assert_array_equal(
+        dekad_to_month_data["precip"],
+        data_dkd.resample(T="M").sum(skipna=False)["precip"],
+    )
+    
+    assert True
+    
 
 def test_groupby_dekads_perfect_partition():
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
