@@ -35,8 +35,8 @@ def pycptv2_targets_dict(fcst_ds, start_date=None):
         targets = [
             {
                 "label": predictions.target_range_formatting(
-                    fcst_ds['Ti'].squeeze().sel(Li=lead).values,
-                    fcst_ds['Tf'].squeeze().sel(Li=lead).values,
+                    fcst_ds['Ti'].sel(Li=lead).squeeze().values,
+                    fcst_ds['Tf'].sel(Li=lead).squeeze().values,
                     "months",
                 ),
                 "value": lead,
