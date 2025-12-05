@@ -1,4 +1,4 @@
-FROM centos:7.9.2009 as common
+FROM centos:7.9.2009 AS common
 
 COPY docker/CentOS-Vault.repo /etc/yum.repos.d/
 RUN rm /etc/yum.repos.d/CentOS-Base.repo
@@ -13,25 +13,24 @@ RUN yum install -y httpd mesa-libGL
 RUN rm -r /etc/httpd/conf.d /etc/httpd/conf.modules.d
 
 
-FROM common as build
+FROM common AS build
 
 # httpd-devel and gcc are to support building mod_wsgi from source.
 RUN yum install -y httpd-devel gcc
 
 # miniconda
-RUN curl -L \
+RUN curl --location --silent \
     https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh \
-    -o /miniconda-installer.sh && \
-    bash /miniconda-installer.sh -b -p /conda
+    -o /miniconda-installer.sh
+RUN bash /miniconda-installer.sh -b -p /conda
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
-    conda config --set auto_update_conda False && \
-    conda install -c conda-forge conda==22.9.0 conda-lock==1.2.1
+    conda config --set auto_update_conda False
 
 
 # build conda environment
-COPY conda-lock.yml /build/conda-lock.yml
+COPY conda-linux-64.lock /build/conda-linux-64.lock
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
-    conda-lock install --no-dev -n app /build/conda-lock.yml && \
+    conda create -n app --file /build/conda-linux-64.lock && \
     conda clean -afy
 
 # mod_wsgi: use pip to compile mod_wsgi from source for the particular versions
