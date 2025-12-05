@@ -1,4 +1,4 @@
-FROM centos:7.9.2009 as common
+FROM centos:7.9.2009 AS common
 
 COPY docker/CentOS-Vault.repo /etc/yum.repos.d/
 RUN rm /etc/yum.repos.d/CentOS-Base.repo
@@ -13,7 +13,7 @@ RUN yum install -y httpd mesa-libGL
 RUN rm -r /etc/httpd/conf.d /etc/httpd/conf.modules.d
 
 
-FROM common as build
+FROM common AS build
 
 # httpd-devel and gcc are to support building mod_wsgi from source.
 RUN yum install -y httpd-devel gcc
