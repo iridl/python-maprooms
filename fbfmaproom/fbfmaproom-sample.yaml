@@ -2777,6 +2777,514 @@ countries:
                 issue_months: [0, 1, 2, 3, 4, 5]
                 start_year: 1991
 
+    niger_demo:
+        logo: Niger_IRI_120x48.png
+        resolution: [0.25, 0.25]
+        origin: [0.125, 0.125]
+        center: [8.1, 17]
+        zoom: 6
+        rotation: 0
+        marker: [8.025, 17.025]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Niger'
+
+
+            - name: Regional
+              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
+                  where adm0_name = 'Niger'
+
+            - name: Department
+              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
+                  where adm0_name = 'Niger'
+
+            - name: Commune
+              sql: select rowcacode3 as key, adm_03 as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.ner_adm03_feb2018
+
+        datasets:
+            defaults:
+              predictors:
+                - prcp-jas-preapproved-dec2025
+                - enacts-mon-spi-jj
+              predictand: bad-years-v3
+            observations:
+                subseas-dry-tercile-sjul-l15:
+                    label: Jul biweekly forecast, 2wk lead
+                    description: Biweekly rainfall forecast issued in early July for the following two weeks. Probability of the driest tercile.
+                    url: "{url}"
+                    url_args:
+                      - url: "http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Hindcast/.Subx_biweekly_Precipitation/.MME_v21_Precipitation_ELR/.prob/L/15/VALUE/L/removeGRID/S/(0000%203%20Jul%201999)/(0000%201%20Jul%202000)/(0000%207%20Jul%202001)/(0000%206%20Jul%202002)/(0000%205%20Jul%202003)/(0000%203%20Jul%202004)/(0000%202%20Jul%202005)/(0000%201%20Jul%202006)/(0000%207%20Jul%202007)/(0000%205%20Jul%202008)/(0000%204%20Jul%202009)/(0000%203%20Jul%202010)/(0000%202%20Jul%202011)/(0000%207%20Jul%202012)/(0000%206%20Jul%202013)/(0000%205%20Jul%202014)/(0000%204%20Jul%202015)/(0000%202%20Jul%202016)/VALUES/C/(Below_Normal)/VALUE/C/removeGRID/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/1.5/shiftGRID/S//T/renameGRID/"
+                      - url: "http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Tercile_Forecast/.Subx_biweekly_Precipitation/.MMEv21_Precipitation_ELR/.prob/L/15/VALUE/L/removeGRID/C/(Below_Normal)/VALUE/C/removeGRID/S/(Jul)/VALUES/S/(1%20Jul)/VALUES/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/1.5/shiftGRID/S//T/renameGRID/"
+                    path: niger/subseas-dry-tercile-sjul-l15.zarr
+                    var_names:
+                        value: prob
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                obs-subseas-rainfall:
+                    label: Observed subseasonal rainfall
+                    description: Observed rainfall during subseasonal forecast target period (mm)
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/T/14/runningAverage/c%3A/14.0//units//days/def/%3Ac/mul/T/(1200%2010%20Jul%201999%20-%201200%2024%20Jul%201999)/(1200%20%208%20Jul%202000%20-%201200%2022%20Jul%202000)/(1200%2014%20Jul%202001%20-%201200%2028%20Jul%202001)/(1200%2013%20Jul%202002%20-%201200%2027%20Jul%202002)/(1200%2012%20Jul%202003%20-%201200%2026%20Jul%202003)/(1200%2010%20Jul%202004%20-%201200%2024%20Jul%202004)/(1200%20%209%20Jul%202005%20-%201200%2023%20Jul%202005)/(1200%20%208%20Jul%202006%20-%201200%2022%20Jul%202006)/(1200%2014%20Jul%202007%20-%201200%2028%20Jul%202007)/(1200%2012%20Jul%202008%20-%201200%2026%20Jul%202008)/(1200%2011%20Jul%202009%20-%201200%2025%20Jul%202009)/(1200%2010%20Jul%202010%20-%201200%2024%20Jul%202010)/(1200%20%209%20Jul%202011%20-%201200%2023%20Jul%202011)/(1200%2014%20Jul%202012%20-%201200%2028%20Jul%202012)/(1200%2013%20Jul%202013%20-%201200%2027%20Jul%202013)/(1200%2012%20Jul%202014%20-%201200%2026%20Jul%202014)/(1200%2011%20Jul%202015%20-%201200%2025%20Jul%202015)/(1200%20%209%20Jul%202016%20-%201200%2023%20Jul%202016)/(1200%20%208%20Jul%202017%20-%201200%2022%20Jul%202017)/(1200%2014%20Jul%202018%20-%201200%2028%20Jul%202018)/(1200%2013%20Jul%202019%20-%201200%2027%20Jul%202019)/(1200%2011%20Jul%202020%20-%201200%2025%20Jul%202020)/(1200%2010%20Jul%202021%20-%201200%2024%20Jul%202021)/(1200%20%209%20Jul%202022%20-%201200%2023%20Jul%202022)/VALUES/T//pointwidth/0/def/pop/T/(months%20since%201960-01-01)/streamgridunitconvert/T/toi4/use_as_grid/T/1.5/shiftGRID/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/"
+                    path: niger/obs-subseas-rainfall.zarr
+                    var_names:
+                        value: aprod
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                enacts-precip-jas:
+                    label: ENACTS Precip JAS
+                    description: ENACTS total precipitation for Jul-Sep
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.ENACTS/.monthly/.rainfall/.CHIRPS/.rfe_merged/T/(1991)/last/RANGE/T/(Jul-Sep)/seasonalAverage/3/mul///name//obs/def/Y/first/17/RANGE/"
+                    path: niger/enacts-precip-jas.zarr
+                    var_names:
+                        value: obs
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jun:
+                    label: CHIRPS Precip Jun
+                    description: CHIRPS total precipitation for Jun
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(Jun)/seasonalAverage/T//pointwidth/0/def/2/shiftGRID/c%3A/1//units//months/def/%3Ac/mul//name//precipitation/def/"
+                    path: niger/chirps-precip-jun.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jjaso:
+                    label: CHIRPS Precip Jun-Oct
+                    description: CHIRPS total precipitation for Jun-Oct
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(Jun-Oct)/seasonalAverage/c%3A/5//units//months/def/%3Ac/mul/T//pointwidth/0/def/pop//name//precipitation/def/"
+                    path: niger/chirps-precip-jjaso.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps-precip-jas:
+                    label: CHIRPS Precip JAS
+                    description: CHIRPS total precipitation for Jul-Sep
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(Jul-Sep)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/"
+                    path: niger/chirps-precip-jas.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                enacts-spi-jas:
+                    label: ENACTS SPI JAS
+                    description: Average SPI over the season, calculated from ENACTS
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.ENACTS/.seasonal/.rainfall/.CHIRPS/.SPI-3-month/.spi/T/(Jul-Sep)/VALUES/Y/first/17/RANGE/"
+                    path: niger/enacts-spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                enacts-spi-jj:
+                    label: ENACTS SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from ENACTS
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.ENACTS/.seasonal/.rainfall/.CHIRPS/.SPI-2-month/.spi/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/Y/first/17/RANGE/"
+                    path: niger/enacts-spi-jj.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                enacts-mon-spi-jj:
+                    label: ENACTS MON SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from ENACTS monitoring product
+                    url: 'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.seasonal/.rainfall/.CHIRP/.SPI-2-month/.spi/T/%28Jun-Jul%29VALUES/T/1.5/shiftGRID/Y/first/17/RANGE/'
+                    path: niger/enacts-mon-spi-jj.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                enacts-mon-spi-jas:
+                    label: ENACTS MON SPI JAS
+                    description: Average SPI in July-September, calculated from ENACTS monitoring product
+                    url: 'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.seasonal/.rainfall/.CHIRP/.SPI-3-month/.spi/T/%28Jul-Sep%29VALUES/Y/first/17/RANGE/'
+                    path: niger/enacts-mon-spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                enacts-mon-spi-jas-excess:
+                    label: ENACTS MON SPI JAS Excess
+                    description: Average SPI in July-September, calculated from ENACTS monitoring product, highlighting wettest years
+                    # same file as enacts-mon-spi-jas, but with lower_is_worse: no
+                    path: niger/enacts-mon-spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number3
+                enacts-mon-rainfall-sep:
+                    label: ENACTS MON Sep
+                    description: Total rainfall in September according to ENACTS MON
+                    url: 'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.monthly/.rainfall/.CHIRP/.rfe_merged/T/(Sep)/VALUES/Y/first/17/RANGE/T/-1/shiftGRID/'
+                    path: niger/enacts-mon-rainfall-sep.zarr
+                    var_names:
+                        value: rfe_merged
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-spi-jj:
+                    label: CHIRP SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3./mul/2/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/2/gammaprobs/2/gammastandardize/T//pointwidth/2/def//defaultvalue/%7Blast%7Ddef/-0.5/shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/T/(Jun-Jul)/VALUES/T//pointwidth/0/def/1.5/shiftGRID/'
+                    path: niger/chirp-spi-jj.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-spi-jas:
+                    label: CHIRP SPI JAS
+                    description: Average SPI in July-September, calculated from CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7Ddef/(Jul-Sep)/VALUES//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/'
+                    path: niger/chirp-spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirp-rainfall-sep:
+                    label: CHIRP Rain Sep
+                    description: Total rainfall in September according to CHIRP
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/'
+                    path: niger/chirp-rainfall-sep.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                chirps-dryspell:
+                    label: Dry Spell
+                    description: Longest dry spell, calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/"
+                    path: niger/chirps-dryspell.zarr
+                    var_names:
+                        value: lls
+                        lat: Y
+                        lon: X
+                        time: T
+                    units: days
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number2
+                chirps-onset:
+                    label: Onset
+                    description: Onset of rain, calculated from CHIRPS
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/({start})/({end})/RANGE/T/(1%20May)/122/0.1/3/20/1/15/30/onsetDate/T/sub/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/3.5/shiftGRID/"
+                    url_args:
+                      - {start: 1991, end: 2000}
+                      - {start: 2001, end: 2010}
+                      - {start: 2011, end: 2020}
+                      - {start: 2021, end: 2022}
+                    path: niger/chirps-onset.zarr
+                    var_names:
+                        value: adif
+                        lat: Y
+                        lon: X
+                        time: T
+                    units: days after May 1
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number2
+                enso_state: *enso_3mo
+                bad-years:
+                    label: Reported bad years v1
+                    path: niger/bad-years.zarr
+                    var_names:
+                        value: bad
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
+                bad-years-v2:
+                    label: Reported bad years v2
+                    path: niger/bad-years-v2.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                bad-years-v3:
+                    label: Reported bad years v3
+                    path: niger/bad-years-v3.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                station-spi-jj:
+                    label: Station SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from DMN weather station data.
+                    path: niger/station-spi-jj.zarr
+                    var_names:
+                        value: Average
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                millet:
+                    label: Crop production - millet
+                    path: niger/millet.zarr
+                    var_names:
+                        value: yield
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number1
+                insecure-national:
+                    label: Food insecurity (national)
+                    description: Proportion of the population projected to be food insecure for Jun-Aug nationwide
+                    path: niger/insecure-national.zarr
+                    var_names:
+                        value: fraction_insecure
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number3
+                wrsi-jas:
+                    label: WRSI
+                    url: "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.WAF/.Millet/.do/X/0.125/15.875/RANGE/Y/11.125/16.875/RANGE/T/(Jul-Sep)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/"
+                    path: niger/wrsi-jas.zarr
+                    var_names:
+                        value: do
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                end-of-season-enacts:
+                    label: End of season from ENACTS
+                    description: |
+                      First dekad with less than 10 mm of rainfall that was followed by two consecutive
+                      dekads with a combined total of rainfall less than 10 mm according to ENACTS
+                    units: dekad
+                    path: niger/end-of-season-enacts.zarr
+                    var_names:
+                        value: cos
+                        lat: latitude
+                        lon: longitude
+                        time: time
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+                end-of-season-chirp:
+                    label: End of season from CHIRP
+                    description: |
+                      The first dekad after September 1 with no
+                      rainfall that is followed by another dekad with
+                      no rainfall according to CHIRP
+                    units: dekad
+                    path: niger/end-of-season-chirp.zarr
+                    var_names:
+                        value: cos
+                        lat: latitude
+                        lon: longitude
+                        time: time
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+            forecasts:
+                pnep:
+                    label: JAS fcst
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season
+                    url: "https://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JAS_v3/.NextGen/.FbF/.pne/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
+                    path: niger/pnep-jas-v3.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: P
+                    colormap: pne_25
+                    is_poe: no
+                prcp-v4:
+                    label: JAS fcst v4
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected June 2024
+                    path: niger/prcp-jas-v4.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                prcp-v5:
+                    label: JAS fcst v5
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
+                    path: niger/prcp-jas-v5.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                prcp-jas-preapproved-dec2025:
+                    label: JAS fcst Preapproved Dec 2025
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, pre approved configuration selected Dec 2025
+                    path: niger/prcp-jas-preapproved-dec2025.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+
+                pnep-jj:
+                    label: JJ fcst
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JJ/.NextGen/.FbF/.pne/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
+                    path: niger/pnep-jj.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: P
+                    colormap: pne_25
+                    is_poe: no
+                pnep-jja:
+                    label: JJA fcst
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-August
+                    path: niger/pnep-jja.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-jjaso:
+                    label: JJASO fcst
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July-August-September-October
+                    url: "http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JJASO/.NextGen/.FbF/.pne/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
+                    path: niger/pnep-jjaso.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: P
+                    colormap: pne_25
+                    is_poe: no
+                pnep-aso:
+                    label: ASO fcst
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for August-October
+                    path: niger/pnep-aso.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                poe-onset:
+                    label: Onset fcst
+                    description: NextGen onset date forecast probability of exceedance of the selected percentile
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPonset_CCAFCST_{part}/.NextGen/.FbF/.pne/100/exch/sub//name//poe/def//long_name/(Probability%2520of%2520exceedance)/def/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
+                    url_args:
+                      - part: "N"
+                      - part: "S"
+                    path: niger/poe-onset.zarr
+                    var_names:
+                        value: poe
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null
+                        pct: P
+                    colormap: pne_25
+                    is_poe: yes
+                poe-dryspell:
+                    label: Dry spell fcst
+                    description: NextGen max dry spell length forecast probability of exceedance of the selected percentile
+                    url: "http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPmaxDS_CCAFCST_JA/.NextGen/.FbF/.pne/100/exch/sub//name//poe/def//long_name/(Probability%20of%20exceedance)/def/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/"
+                    path: niger/poe-dryspell.zarr
+                    var_names:
+                        value: poe
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null
+                        pct: P
+                    colormap: pne_25
+                    is_poe: yes
+
+        seasons:
+            season1:
+                label: JAS
+                target_month: 7.5
+                length: 3.0
+                issue_months: [0, 1, 2, 3, 4, 5]
+                start_year: 1998
+
     mali:
         logo: Mali_IRI_120x48.png
         resolution: [0.05, 0.05]
