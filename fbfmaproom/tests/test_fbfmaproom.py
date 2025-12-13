@@ -440,21 +440,7 @@ def test_format_timedelta_number():
 def test_format_timedelta_nan():
     assert fbfmaproom.format_timedelta_days(pd.NaT) == ""
 
-def test_export_endpoint():
-    with fbfmaproom.SERVER.test_client() as client:
-        resp = client.get(
-            '/fbfmaproom/ethiopia/export'
-            '?mode=0'
-            '&season=season1'
-            '&issue_month0=0'
-            '&freq=30'
-            '&region=ET05'
-            '&predictor=pnep'
-            '&predictand=bad-years'
-        )
-    assert resp.status_code == 200
-    d = resp.json
-
+def verify_export(d):
     s = d['skill']
     assert s['act_in_vain'] == 3
     assert s['fail_to_act'] == 6
@@ -475,6 +461,83 @@ def test_export_endpoint():
     assert h[-39]['worst_bad-years'] == 1
     assert h[-38]['bad-years'] == 0
     assert h[-38]['worst_bad-years'] == 0
+
+
+def test_export_endpoint():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get(
+            '/fbfmaproom/ethiopia/export'
+            '?mode=0'
+            '&season=season1'
+            '&issue_month0=0'
+            '&freq=30'
+            '&region=ET05'
+            '&predictor=pnep'
+            '&predictand=bad-years'
+        )
+    assert resp.status_code == 200
+    verify_export(resp.json)
+
+
+def test_export_month_abbrev():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get(
+            '/fbfmaproom/ethiopia/export'
+            '?mode=0'
+            '&season=season1'
+            '&issue_month=jan'
+            '&freq=30'
+            '&region=ET05'
+            '&predictor=pnep'
+            '&predictand=bad-years'
+        )
+    assert resp.status_code == 200
+    verify_export(resp.json)
+
+
+def test_export_bad_abbrev():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get(
+            '/fbfmaproom/ethiopia/export'
+            '?mode=0'
+            '&season=season1'
+            '&issue_month=jlm'
+            '&freq=30'
+            '&region=ET05'
+            '&predictor=pnep'
+            '&predictand=bad-years'
+        )
+    assert resp.status_code == 400
+
+
+def test_export_no_issue():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get(
+            '/fbfmaproom/ethiopia/export'
+            '?mode=0'
+            '&season=season1'
+            '&freq=30'
+            '&region=ET05'
+            '&predictor=pnep'
+            '&predictand=bad-years'
+        )
+        assert resp.status_code == 400
+
+
+def test_export_redundant_issue():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get(
+            '/fbfmaproom/ethiopia/export'
+            '?mode=0'
+            '&season=season1'
+            '&issue_month=jan'
+            '&issue_month0=0'
+            '&freq=30'
+            '&region=ET05'
+            '&predictor=pnep'
+            '&predictand=bad-years'
+        )
+        assert resp.status_code == 400
 
 
 def test_regions_endpoint():

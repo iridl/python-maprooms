@@ -50,7 +50,15 @@ SERVER = flask.Flask(__name__)
 SERVER.register_error_handler(ClientSideError, pingrid.client_side_error)
 
 month_abbrev = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-abbrev_to_month0 = dict((abbrev, month0) for month0, abbrev in enumerate(month_abbrev))
+_abbrev_to_month0 = dict(
+    (abbrev, month0)
+    for month0, abbrev in enumerate(month_abbrev)
+)
+def abbrev_to_month0(abbrev):
+    month0 = _abbrev_to_month0.get(abbrev)
+    if month0 is None:
+        raise InvalidRequestError(f"{abbrev} is not a valid issue month. Valid values are jan, feb, ...")
+    return month0
 
 
 class FbfDash(dash.Dash):
@@ -1113,7 +1121,7 @@ def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predi
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     season_config = config["seasons"][season_id]
-    issue_month0 = abbrev_to_month0[issue_month_abbrev]
+    issue_month0 = abbrev_to_month0(issue_month_abbrev)
 
     final_season = None
     if not include_upcoming:
@@ -1206,7 +1214,7 @@ def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_k
             ds_config = ds_configs["observations"][map_col_key]
         else:
             map_is_forecast = True
-        issue_month0 = abbrev_to_month0[issue_month_abbrev]
+        issue_month0 = abbrev_to_month0(issue_month_abbrev)
         colorscale = ds_config.colormap.to_dash_leaflet()
 
         if map_is_forecast:
@@ -1552,7 +1560,8 @@ def trigger_check():
 def export_endpoint(country_key):
     mode = parse_arg("mode", int) # not supporting pixel mode for now
     season_id = parse_arg("season")
-    issue_month0 = parse_arg("issue_month0", int)
+    issue_month = parse_arg("issue_month", default=None)
+    issue_month0 = parse_arg("issue_month0", int, default=None)
     freq = parse_arg("freq", float)
     geom_key = parse_arg("region")
     predictor_key = parse_arg("predictor")
@@ -1561,6 +1570,20 @@ def export_endpoint(country_key):
         "include_upcoming", pingrid.boolean, default=False
     )
 
+    if issue_month is None:
+        if issue_month0 is None:
+            raise InvalidRequestError(
+                "issue_month is required. Possible values are jan, feb, ..."
+            )
+        else:
+            pass # just use issue_month0
+    else: # issue_month is not None
+        if issue_month0 is None:
+            issue_month0 = abbrev_to_month0(issue_month)
+        else:
+            raise InvalidRequestError(
+                "Provide either issue_month or issue_month0, not both.")
+    
     config = CONFIG["countries"][country_key]
 
     ds_config = config["datasets"]
