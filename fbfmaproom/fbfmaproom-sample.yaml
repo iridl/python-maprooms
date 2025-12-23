@@ -784,7 +784,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v5
+                    - pnep-v6
                     - rain
                 predictand: bad-years
             observations:
@@ -1018,6 +1018,20 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
+                pnep-v6:
+                    label: Forecast prob non-exc v6
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 6 (configuration selected Dec 2025)
+                    path: ethiopia/prcp-mam-v6.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+
 
         seasons:
             season1:
@@ -1291,7 +1305,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v5
+                    - pnep-v6
                     - rain
                 predictand: bad-years
             observations:
@@ -1527,6 +1541,19 @@ countries:
                     label: Forecast prob non-exc v5
                     description: NextGen forecast probability of non-exceedance of selected percentile, version 5 (configuration selected Feb 2025)
                     path: ethiopia/prcp-mam-v5.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v6:
+                    label: Forecast prob non-exc v6
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 6 (configuration selected Dec 2025)
+                    path: ethiopia/prcp-mam-v6.zarr
                     var_names:
                         value: pne
                         lat: Y
@@ -1835,7 +1862,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v5
+                    - pnep-v6
                     - rain
                 predictand: bad-years
             observations:
@@ -2046,6 +2073,19 @@ countries:
                     label: Forecast prob non-exc v5
                     description: NextGen forecast probability of non-exceedance of selected percentile, version 5 (configuration selected Feb 2025)
                     path: ethiopia/prcp-mam-v5.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v6:
+                    label: Forecast prob non-exc v6
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 6 (configuration selected Dec 2025)
+                    path: ethiopia/prcp-mam-v6.zarr
                     var_names:
                         value: pne
                         lat: Y
