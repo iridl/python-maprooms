@@ -1519,9 +1519,9 @@ def trigger_check():
             raise InvalidRequestError("If mode is pixel then region must not be provided")
     else:
         if bounds is not None:
-            raise InvalidRequestError("If mode is {mode} then bounds must not be provided")
+            raise InvalidRequestError(f"If mode is {mode} then bounds must not be provided")
         if region is None:
-            raise InvalidRequestError("If mode is {mode} then region must be provided")
+            raise InvalidRequestError(f"If mode is {mode} then region must be provided")
 
     target_month0 = config["seasons"][season]["target_month"]
 
