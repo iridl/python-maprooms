@@ -1291,7 +1291,7 @@ countries:
             - name: Zonal
               sql: select admin2pcod as key, admin2name as label,
                   ST_AsBinary(the_geom) as the_geom
-                  from iridb.eth_zones_2024 
+                  from iridb.eth_zones_2024
                   where admin2pcod in ('ET0410','ET0411', 'ET0412','ET0414','ET0415','ET0421','ET0422')
 
 
@@ -1299,7 +1299,7 @@ countries:
             - name: Woreda
               sql: select admin3pcod as key, admin3name as label,
                   ST_AsBinary(the_geom) as the_geom
-                  from iridb.eth_woredas_2024 
+                  from iridb.eth_woredas_2024
                   where admin2pcod in ('ET0410','ET0411', 'ET0412','ET0414','ET0415','ET0421','ET0422')
 
         datasets:
@@ -3499,7 +3499,7 @@ countries:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
                   from iridb.g2015_2012_0 where adm0_name = 'Chad'
-  
+
 
             - name: Regional
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
@@ -4446,7 +4446,7 @@ countries:
             JJA: guatemala-jja
             ASO: guatemala-aso
 
-    
+
 
     djibouti:
         logo: Djibouti_IRI_96x48.svg
@@ -4594,6 +4594,19 @@ countries:
                     label: Forecast prob non-exc v3
                     description: NextGen forecast probability of non-exceedance of selected percentile, version 3 (configuration selected April 2025)
                     path: djibouti/prcp-jas-v3.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v4:
+                    label: Forecast prob non-exc v4
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 4 (configuration selected Dec 2025 to test inclusion of ECMWF model)
+                    path: djibouti/prcp-jas-v4.zarr
                     var_names:
                         value: pne
                         lat: Y
