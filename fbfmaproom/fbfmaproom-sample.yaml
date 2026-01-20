@@ -2723,6 +2723,19 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
+                prcp-v6:
+                    label: JAS fcst v6
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Jan 2026
+                    path: niger/prcp-jas-v6.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
                 pnep-jj:
                     label: JJ fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July
