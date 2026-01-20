@@ -960,6 +960,8 @@ def custom_static(relpath):
 )
 def forecast_selectors(season, col_name, pathname, qstring):
     try:
+        if season is None or col_name is None:
+            raise ValueError("Season or column name is None")
         country_key = country(pathname)
         country_conf = CONFIG["countries"][country_key]
         season_conf = country_conf["seasons"][season]
@@ -1245,7 +1247,7 @@ def update_severity_color(value):
 )
 def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_key, season_id):
     colorscale = None  # default value in case an exception is raised
-    if season_id is None:
+    if season_id is None or issue_month_abbrev is None:
         raise PreventUpdate
     try:
         country_key = country(pathname)
