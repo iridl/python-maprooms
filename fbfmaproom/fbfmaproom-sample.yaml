@@ -2354,7 +2354,7 @@ countries:
         datasets:
             defaults:
               predictors:
-                - prcp-v5
+                - prcp-v6
                 - enacts-mon-spi-jj
               predictand: bad-years-v3
             observations:
