@@ -960,8 +960,6 @@ def custom_static(relpath):
 )
 def forecast_selectors(season, col_name, pathname, qstring):
     try:
-        if season is None or col_name is None:
-            raise ValueError("Season or column name is None")
         country_key = country(pathname)
         country_conf = CONFIG["countries"][country_key]
         season_conf = country_conf["seasons"][season]
@@ -1029,8 +1027,6 @@ def forecast_selectors(season, col_name, pathname, qstring):
 )
 def start_year_selector(season, pathname, qstring):
     try:
-        if season is None:
-            raise ValueError("Season is None")
         country_key = country(pathname)
         country_conf = CONFIG["countries"][country_key]
         season_conf = country_conf["seasons"][season]
@@ -1247,7 +1243,7 @@ def update_severity_color(value):
 )
 def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_key, season_id):
     colorscale = None  # default value in case an exception is raised
-    if season_id is None or issue_month_abbrev is None:
+    if season_id is None:
         raise PreventUpdate
     try:
         country_key = country(pathname)
@@ -1304,10 +1300,12 @@ APP.clientside_callback(
     """
     function (
         mode, map_column, season, predictors, predictand, year, issue_month,
+        start_year,
         freq, severity, include_upcoming, position, show_modal
     ) {
         args = {
             mode, map_column, season, predictors, predictand, year, issue_month,
+            start_year,
             freq, severity, include_upcoming, position, show_modal
         }
         // Don't include undefined values in the querystring, otherwise
@@ -1332,6 +1330,7 @@ APP.clientside_callback(
     Input("predictand", "value"),
     Input("year", "value"),
     Input("issue_month", "value"),
+    Input("start_year", "value"),
     Input("freq", "value"),
     Input("severity", "value"),
     Input("include_upcoming", "value"),
