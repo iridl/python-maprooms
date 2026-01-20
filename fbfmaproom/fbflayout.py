@@ -345,6 +345,14 @@ def table_layout():
                     ),
                     width='100px',
                 ),
+                control(
+                    "Start year",
+                    "The starting year for the table data. Only years from this year onwards will be displayed.",
+                    dcc.Dropdown(
+                        id="start_year",
+                        clearable=False,
+                    ),
+                ),
             ],
             id="table_controls",
             style={"font-family": "Arial, Helvetica, sans-serif"},
