@@ -5007,7 +5007,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v2
+                    - prcp-v4
                     - rain
                 predictand: bad-years-rank-v2
             observations:
@@ -5121,6 +5121,19 @@ countries:
                     label: Forecast prob non-exc v2
                     description: NextGen forecast probability of non-exceedance of selected percentile, version 2 (configuration selected March 2024)
                     path: djibouti/prcp-ond-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                prcp-v4:
+                    label: Forecast prob non-exc v4
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 4 (configuration selected Jan 2026)
+                    path: djibouti/prcp-ond-v4.zarr
                     var_names:
                         value: pne
                         lat: Y
