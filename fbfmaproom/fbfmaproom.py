@@ -383,11 +383,12 @@ def generate_tables(
     mode,
     geom_key,
     final_season,
+    start_year,
 ):
 
     basic_ds = fundamental_table_data(
         country_key, table_columns, season_config, issue_month0,
-        freq, mode, geom_key
+        freq, mode, geom_key, start_year
     )
     if "pct" in basic_ds.coords:
         basic_ds = basic_ds.drop_vars("pct")
@@ -507,8 +508,8 @@ def select_obs(country_key, obs_keys, target_month0, target_year=None):
 
 def fundamental_table_data(country_key, table_columns,
                            season_config, issue_month0, freq, mode,
-                           geom_key):
-    year_min = season_config["start_year"]
+                           geom_key, start_year):
+    year_min = start_year
     season_length = season_config["length"]
     target_month0 = season_config["target_month"]
 
@@ -1018,6 +1019,45 @@ def forecast_selectors(season, col_name, pathname, qstring):
 
 
 @APP.callback(
+    Output("start_year", "options"),
+    Output("start_year", "value"),
+    Input("season", "value"),
+    Input("location", "pathname"),
+    State("location", "search"),
+)
+def start_year_selector(season, pathname, qstring):
+    try:
+        country_key = country(pathname)
+        country_conf = CONFIG["countries"][country_key]
+        season_conf = country_conf["seasons"][season]
+
+        year_min = season_conf["start_year"]
+        year_max = datetime.datetime.now().year
+        year_range = range(year_min, year_max + 1)
+        
+        start_year_options = [
+            dict(label=str(year), value=year)
+            for year in year_range
+        ]
+
+        start_year_value = parse_arg(
+            "start_year",
+            conversion=int,
+            default=year_min,
+            qstring=qstring
+        )
+    except Exception:
+        traceback.print_exc()
+        start_year_options = dash.no_update
+        start_year_value = dash.no_update
+
+    return (
+        start_year_options,
+        start_year_value,
+    )
+
+
+@APP.callback(
     Output("marker", "position"),
     Input("location", "pathname"),
     Input("map", "click_lat_lng"),
@@ -1115,9 +1155,10 @@ def update_popup(pathname, position, mode):
     Input("predictand", "value"),
     Input("predictors", "value"),
     Input("include_upcoming", "value"),
+    Input("start_year", "value"),
     State("season", "value"),
 )
-def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predictand_key, predictor_keys, include_upcoming, season_id):
+def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predictand_key, predictor_keys, include_upcoming, start_year, season_id):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     season_config = config["seasons"][season_id]
@@ -1158,6 +1199,7 @@ def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predi
             mode,
             geom_key,
             final_season,
+            start_year,
         )
         summary_presentation_df = format_summary_table(
             summary_df, tcs, thresholds,
@@ -1258,10 +1300,12 @@ APP.clientside_callback(
     """
     function (
         mode, map_column, season, predictors, predictand, year, issue_month,
+        start_year,
         freq, severity, include_upcoming, position, show_modal
     ) {
         args = {
             mode, map_column, season, predictors, predictand, year, issue_month,
+            start_year,
             freq, severity, include_upcoming, position, show_modal
         }
         // Don't include undefined values in the querystring, otherwise
@@ -1286,6 +1330,7 @@ APP.clientside_callback(
     Input("predictand", "value"),
     Input("year", "value"),
     Input("issue_month", "value"),
+    Input("start_year", "value"),
     Input("freq", "value"),
     Input("severity", "value"),
     Input("include_upcoming", "value"),
@@ -1569,6 +1614,7 @@ def export_endpoint(country_key):
     include_upcoming = parse_arg(
         "include_upcoming", pingrid.boolean, default=False
     )
+    start_year = parse_arg("start_year", int, default=None)
 
     if issue_month is None:
         if issue_month0 is None:
@@ -1601,6 +1647,9 @@ def export_endpoint(country_key):
     if season_config is None:
         seasons = ' '.join(config["seasons"].keys())
         raise InvalidRequestError(f"Unknown season {season_id}. Valid values are: {seasons}")
+
+    if start_year is None:
+        start_year = season_config["start_year"]
 
     target_month0 = season_config["target_month"]
 
@@ -1635,6 +1684,7 @@ def export_endpoint(country_key):
         mode,
         geom_key,
         final_season,
+        start_year,
     )
 
     main_df['year'] = main_df['time'].apply(lambda x: x.year)
