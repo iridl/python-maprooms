@@ -883,8 +883,10 @@ _TEMP_CS = ColorScale(
 
 _TEMP_ANOMALY_CS = ColorScale(
     "temp_anomaly",
-    [PURPLE, CYAN, WHITE, WHITE, YELLOW, RED, FIREBRICK],
-    [-10, -1, -1, 1, 1, 10, 10],
+    # The duplicate first anchor makes the scale symmetric and thus allows to use the
+    # reversed method
+    [PURPLE, PURPLE, CYAN, WHITE, WHITE, YELLOW, RED, FIREBRICK],
+    [-10, -10, -1, -1, 1, 1, 10, 10],
 )
 
 _RAIN_PNE_CS = _RAIN_POE_CS.reversed(name="rain_pne")
