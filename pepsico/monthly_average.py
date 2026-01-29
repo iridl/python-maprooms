@@ -2,8 +2,10 @@ import xarray as xr
 from pathlib import Path
 
 
-TOP_PATH = Path("/Data/data24")
-COMMON_PATH = f'ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global'
+#TOP_PATH = Path("/Data/data24")
+#COMMON_PATH = f'ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global'
+TOP_PATH = Path("/Users/xandre/ACTIVIDADES-PROYECTOS-IRI/Pepsico/python-maproom/Pepsico-DL-Maproom-GIT")
+COMMON_PATH = f'data'
 INPUT_PATH = TOP_PATH / COMMON_PATH / "daily"
 OUTPUT_PATH = TOP_PATH / COMMON_PATH / "monthly"
 

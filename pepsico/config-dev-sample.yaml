@@ -2,11 +2,13 @@
 
 mode: debug  # debug, devel or prod
 dev_server_interface: 127.0.0.1
-dev_server_port: 8050
+dev_server_port: 9999
 dev_processes: 4
 db:
     host: localhost  # at IRI, set this to dlcomputemon1.iri.columbia.edu
     password: null   # at IRI, get the password from another developer
+    #host: dlcomputemon1.iri.columbia.edu
+    #password: 6808900
 
 maprooms:
 
@@ -15,8 +17,9 @@ maprooms:
         # App set up
         - title: Projections
           core_path: projections
-
-    proj_wwc:
-        - title: WWC Projections
-          core_path: proj_wwc
+    
+    agriculture:
+        # App set up
+        - title: Agriculture
+          core_path: agriculture
           
