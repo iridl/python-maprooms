@@ -3,10 +3,13 @@ url_path_prefix: /python_maproom
 
 # DB configuration for the production docker environment. Override in
 # development environment.
+
 db:
     host: postgres
+    #host: dlcomputemon1.iri.columbia.edu
     port: 5432
     user: ingrid
+    #password: 6808900
     dbname: iridb
 
 datasets:
@@ -93,6 +96,7 @@ maprooms:
         - title: Projections
           core_path: projections
 
-    proj_wwc:
-        - title: WWC Projections
-          core_path: proj_wwc
+    agriculture:
+        # App set up
+        - title: Agriculture
+          core_path: agriculture
