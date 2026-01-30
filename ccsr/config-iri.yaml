@@ -1,0 +1,37 @@
+zoom: 2
+
+datasets:
+    
+    shapes_adm:
+        - name: Countries
+          color: black
+          sql: select adm0_code as key, adm0_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.01)) as the_geom
+            from g2015_2012_0
+          is_checked: True
+        - name: 1st_order
+          color: grey
+          sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.01)) as the_geom
+            from g2015_2014_1
+          is_checked: False
+        - name: 2nd_order
+          color: grey
+          sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+            ST_AsBinary(ST_SimplifyPreserveTopology(coarse_geom, 0.01)) as the_geom
+            from g2015_2014_2
+          is_checked: False
+
+maprooms:
+
+    flex_fcst:
+
+        # App set up
+        - title: flex_cst_precip
+          core_path: flex_fcst_precip
+          forecast_path: /Data/data21/iri/FD.3
+          variable: Precipitation
+          y_transform: False
+          method: elr # or pycpt
+          var: precip
+          issue_format: "%b %Y"
