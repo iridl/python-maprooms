@@ -214,7 +214,7 @@ def daily_tobegroupedby_season(
 
     Parameters
     -----------
-    daily_data : DataArray
+    daily_data : xr.DataArray
         Daily data to be grouped.
     start_day : int
         Day of the start date  of the season.
@@ -293,7 +293,7 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
 
     Parameters
     ----------
-    daily_dim : DataArray[datetime64[ns]]
+    daily_dim : xr.DataArray[datetime64[ns]]
         A daily time dimension.
     day : int
         day of the `month`.
@@ -305,7 +305,7 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
 
     Returns
     -------
-    DataArray[datetime64[ns]]
+    xr.DataArray[datetime64[ns]]
         a subset of `daily_dim` with all and only `day`-`month` points, offset by `offset` days.
     
     See Also
@@ -375,3 +375,251 @@ def strftimeb2int(strftimeb):
     }
     strftimebint = strftimeb_all[strftimeb]
     return strftimebint
+
+
+def _cumsum_flagged_diff(flagged_data, dim):
+    """ Discrete difference of cumulative flags keeping only the unflagged data
+    
+    Last 0s before a 1 return the count of consecutive 1s after that 0, except for
+    the first value that will return 0 if 0, and the number of consecutive 1s if 1,
+    and the last value that is dropped.
+    The result is expressed in the units of `dim`, that is assumed evenly spaced.
+    
+    Parameters
+    ----------
+    flagged_data : xr.DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to search for runs
+        
+    Returns
+    -------
+    xr.DataArray
+        Array of lengths of spells of flags along `dim`
+        
+    See Also
+    --------
+    count_days_in_spell, length_of_longest_spell, mean_length_of_spell,
+    median_length_of_spell
+    
+    Notes
+    -----
+    Because diff needs at least 2 points,
+    we need to keep (where) the unflagged and first and last
+    with the cumulative value for last and 0 for first.
+    Cumulative flags, where kept, need be propagated by bfill
+    so that diff returns 0 or the length of runs.
+    
+    I believe that it works for unevenly spaced `dim`,
+    only we then don't know what the units of the result are.
+
+    Is meant to be further reduced to for instance find the longest spell, or the
+    numbers of days in spells, etc.
+    
+    Examples
+    --------
+    >>> t = pd.date_range(start="2000-05-01", end="2000-05-29", freq="1D")
+    >>> values = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+    ... 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0]
+    >>> flags = xr.DataArray(values, dims=["T"], coords={"T": t})
+    >>> _cumsum_flagged_diff(flags, "T")
+    <xarray.DataArray ()>
+    array(0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0,
+    ... 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 2, 0, 0, 0)    
+    """
+    
+    # Special case coord.size = 1
+    cfd = flagged_data
+    if cfd[dim].size != 1:
+        # Points to apply diff to
+        unflagged_and_ends = (flagged_data == 0) * 1
+        unflagged_and_ends[{dim: [0, -1]}] = 1
+    
+        cfd = cfd.cumsum(dim=dim).where(unflagged_and_ends, other = np.nan).where(
+            # first cumul point must be set to 0
+            lambda x: x[dim] != cfd[dim][0], other=0
+        ).bfill(dim).diff(dim)
+    return cfd
+
+def count_days_in_spells(flagged_data, dim, min_spell_length=1):
+    """ Counts number of days in spells.
+    
+    Parameters
+    ----------
+    flagged_data : xr.DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+    min_spell_length: int, optional
+        minimum length of for a spell to be accounted for
+        
+    Returns
+    -------
+    xr.DataArray
+        Array of number of days found in spells along `dim`
+        
+    See Also
+    --------
+    _cumsum_flagged_diff
+    
+    Examples
+    --------   
+    """
+
+    return _cumsum_flagged_diff(flagged_data, dim).where(
+        lambda x : x >= min_spell_length
+    ).sum(dim=dim)
+
+def length_of_longest_spell(flagged_data, dim):
+    """ Length of longest spells.
+    
+    Parameters
+    ----------
+    flagged_data : xr.DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+        
+    Returns
+    -------
+    xr.DataArray
+        Array of lengths of longest spells along `dim`
+        
+    See Also
+    --------
+    _cumsum_flagged_diff
+    
+    Examples
+    --------   
+    """
+
+    return _cumsum_flagged_diff(flagged_data, dim).max(dim=dim)
+
+def mean_length_of_spells(flagged_data, dim, min_spell_length=1):
+    """ Mean length of spells.
+    
+    Parameters
+    ----------
+    flagged_data : xr.DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+    min_spell_length: int, optional
+        minimum length of for a spell to be accounted for
+        
+    Returns
+    -------
+    xr.DataArray
+        Array of mean length of spells along `dim`
+        
+    See Also
+    --------
+    _cumsum_flagged_diff
+    
+    Examples
+    --------   
+    """
+
+    return _cumsum_flagged_diff(flagged_data, dim).where(
+        lambda x : x >= min_spell_length
+    ).mean(dim=dim)
+
+def median_length_of_spells(flagged_data, dim, min_spell_length=1):
+    """ Median length of spells.
+    
+    Parameters
+    ----------
+    flagged_data : xr.DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+    min_spell_length: int, optional
+        minimum length of for a spell to be accounted for
+        
+    Returns
+    -------
+    xr.DataArray
+        Array of median length of spells along `dim`
+        
+    See Also
+    --------
+    _cumsum_flagged_diff
+    
+    Examples
+    --------   
+    """
+
+    return _cumsum_flagged_diff(flagged_data, dim).where(
+        lambda x : x >= min_spell_length
+    ).median(dim=dim)
+
+
+def _accumulate_spells(flagged_data, axis=0, dtype=None, out=None):
+    """Accumulates continuous flags. Count reset to 0 when new data is unflagged
+
+    Parameters
+    ----------
+    flagged_data : xr.DataArray
+        Array of flagged data (0s or 1s)
+    axis : int, optional
+        The axis along which to apply the accumulation; default is zero.
+    dtype : data-type code, optional
+        The data-type used to represent the intermediate results. Defaults to the 
+        data-type of the output array if such is provided, or the data-type of the 
+        input array if no output array is provided.
+    out : ndarray, None, or tuple of ndarray and None, optional
+        Location into which the result is stored. If not provided or None, a 
+        freshly-allocated array is returned. For consistency with ufunc.__call__, if 
+        passed as a keyword argument, can be Ellipses (out=..., which has the same 
+        effect as None as an array is always returned), or a 1-element tuple.
+    
+    Returns
+    -------
+    xr.DataArray
+        Accumulated continuous flags. Count reset to 0 when new data is unflagged.
+    
+    See Also
+    --------
+    numpy.ufunc.accumulate, spells_length
+    """
+    return xr.apply_ufunc(
+        np.frompyfunc(lambda x, y: 0 if y == 0 else x + y, 2, 1).accumulate,
+        flagged_data, axis, dtype, out
+    )
+
+
+def spells_length(flagged_data, dim):
+    """Returns length of spell of flagged data at the last point of the spell, nan 
+    everywhere else
+
+    Parameters
+    ----------
+    flagged_data : xr.DataArray
+        Array of flagged data (0s or 1s)
+    dim : str
+        dimension of `flagged_data` along which to count
+    
+    Returns
+    -------
+    xr.DataArray
+        Length of spell of flagged data at the last point of the spell, nan 
+        everywhere else
+
+    See Also
+    --------
+    _accumulate_spells
+    """
+    # cumuls 1s and resets counts when 0
+    # then rolls data by 1 to position total cumuls on 0s of the flagged data
+    # except for the last point that becomes first
+    spells = _accumulate_spells(
+        flagged_data, axis=flagged_data.get_axis_num(dim)
+    ).roll(**{dim: 1})
+    # masks out where data flag to rid of accumulating values but last of each spell
+    spells_only = spells.where(flagged_data == 0)
+    # resets first value to what it was as it could have been erased in previous step
+    spells_only[dict(**{dim : 0})] = spells.isel({dim : 0})
+    # rolls back to get spells length values on last day of spell
+    spells = spells_only.roll(**{dim: -1})
+    # Turns remaining 0s to NaN
+    return spells.where(spells > 0)
