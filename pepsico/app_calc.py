@@ -623,3 +623,50 @@ def spells_length(flagged_data, dim):
     spells = spells_only.roll(**{dim: -1})
     # Turns remaining 0s to NaN
     return spells.where(spells > 0)
+
+
+def number_extreme_events_within_days(
+    daily_data, threshold, window, dim="T"
+):
+    """Count extreme events
+    
+    Extreme events constitute cumulative `daily_data` over `window` -day
+    (or shorther) greater than `threshold`
+    
+    Parameters
+    ----------
+    daily_data : DataArray
+        Array of daily data
+    threshold : float
+        threshold to meet in `daily_data` units
+    window : int
+        maximum length of days to cumulate over to constitute an event
+    dim : str, optional
+        name of `daily_data` time dimension
+        
+    Returns
+    -------
+    DataArray
+        Array of count of extreme events
+    
+    Notes
+    -----
+    Is meant to be used to produce yearly seasonal time series
+    
+    Examples
+    --------
+    Number of rain events of >80mm in 2 days or less:
+    number_extreme_events_within_days(rain_daily_data_in_mm, "gt", 80, 2)    
+    """
+    count = 0
+    dd = daily_data.copy()
+    #Start with shortest events
+    for w in range(1, window+1):
+        for t in range(len(dd[dim])-(w-1)):
+            #Assert new event
+            new_event = dd.isel({dim: slice(t, t+w)}).sum(dim) > threshold
+            #Mask days having formed a new event so that they won't account again
+            #for following events (t loop) or longer events (w loop)
+            dd[{dim: slice(t, t+w)}] = dd[{dim: slice(t, t+w)}].where(~new_event)
+            count = count + new_event
+    return count
