@@ -1,0 +1,9 @@
+# Configuration overrides for development. Copy this file to config-dev.yaml and edit as needed.
+
+mode: debug  # debug, devel or prod
+dev_server_interface: 127.0.0.1
+dev_server_port: 8050
+dev_processes: 4
+db:
+    host: localhost  # at IRI, set this to dlcomputemon1.iri.columbia.edu
+    password: null   # at IRI, get the password from another developer
