@@ -2736,7 +2736,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-                Prcp-certify:
+                prcp-certify:
                     label: JAS fcst OCHA Certification
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2026 for OCHA Certification 
                     path: niger/prcp-jas-certify.zarr
