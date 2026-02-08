@@ -1,0 +1,1 @@
+from .maproom import register
