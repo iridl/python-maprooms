@@ -352,9 +352,13 @@ def retrieve_shapes(
             df = pd.read_sql(query, conn, params={"key": key})
         if "the_geom" in fields:
             df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-    elif 'file' in sc:
-        filepath = Path(CONFIG["data_root"]) / sc["file"]
-        with fiona.open(f"zip://{filepath}", layer=sc["layer"]) as collection:
+    elif "file" in sc:
+        if sc["file"].endswith(".zip"):
+            prefix = "zip://"
+        else:
+            prefix = ""
+        file_arg = f"{prefix}{CONFIG['data_root']}/{sc['file']}"
+        with fiona.open(file_arg, layer=sc["layer"]) as collection:
             tuples = [
                 (
                     feature['properties'][sc["key_field"]],
@@ -1187,7 +1191,7 @@ def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predi
 
     try:
         if geom_key is None:
-            raise NotFoundError("No region found")
+            raise Exception("No region found")
 
         main_df, summary_df, thresholds = generate_tables(
             country_key,
