@@ -4015,7 +4015,19 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
-
+                prcp-certify:
+                    label: JAS fcst certify
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2026 for OCHA Certification
+                    path: mauritania/prcp-jas-certify.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
         seasons:
             season1:
                 label: JAS
@@ -4180,6 +4192,7 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
+
 
         seasons:
             season1:
