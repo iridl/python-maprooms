@@ -349,7 +349,7 @@ def register(FLASK, config):
                     "text": (
                         f'{data_ds["histo"]["T"].dt.strftime("%d %b")[0].values}-'
                         f'{data_ds["histo"]["seasons_ends"].dt.strftime("%d %b")[0].values}'
-                        f' {variable} seasonal average from model {model} '
+                        f' {variable} from model {model} '
                         f'at ({abs(lat)}{lat_units}, {abs(lng)}{lng_units})'
                     ),
                     "font": dict(size=14),
