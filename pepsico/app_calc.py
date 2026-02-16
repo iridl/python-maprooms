@@ -101,7 +101,8 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
 
 def seasonal_wwc(
-    labelled_season_data, variable, frost_threshold, wet_threshold
+    labelled_season_data, variable, frost_threshold, wet_threshold, hot_threshold,
+    warm_nights_spell,
 ):
     # Boolean variables need the additional where to return NaNs from False/0 to Nans
     # and the sum parameters for entirely NaNs seasons to remain NaNs and not turn to
@@ -128,7 +129,7 @@ def seasonal_wwc(
         data_ds = labelled_season_data.groupby(
             labelled_season_data["seasons_starts"]
         ).mean()
-        wwc_units = "˚C"
+        wwc_units = "˚C"        
     # It takes several 10s of minutes to get empirical quantiles maps
     if variable in ["Tmax_90", "Tmin_10"]:
         quantile = 0.1 if variable == "Tmin_10" else 0.9
@@ -160,6 +161,14 @@ def seasonal_wwc(
             .where(~np.isnan(labelled_season_data))
             .groupby(labelled_season_data["seasons_starts"])
             .sum(skipna=True, min_count=1)
+        )
+        wwc_units = "days"
+    if variable == "warm_nights":
+        data_ds = (
+            (labelled_season_data > hot_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(count_days_in_spells, "T", min_spell_length=warm_nights_spell)
         )
         wwc_units = "days"
     # This is all a bit tedious but I didn't figure out another way to keep
