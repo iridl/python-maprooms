@@ -168,7 +168,10 @@ def seasonal_wwc(
             (labelled_season_data > hot_threshold)
             .where(~np.isnan(labelled_season_data))
             .groupby(labelled_season_data["seasons_starts"])
-            .map(count_days_in_spells, "T", min_spell_length=warm_nights_spell)
+            .map(
+                count_days_in_spells, "T", min_spell_length=warm_nights_spell, 
+                skipna=True, min_count=1,
+            )
         )
         wwc_units = "days"
     # This is all a bit tedious but I didn't figure out another way to keep
@@ -450,7 +453,9 @@ def _cumsum_flagged_diff(flagged_data, dim):
         ).bfill(dim).diff(dim)
     return cfd
 
-def count_days_in_spells(flagged_data, dim, min_spell_length=1):
+def count_days_in_spells(
+    flagged_data, dim, min_spell_length=1, skipna=None, min_count=None,
+):
     """ Counts number of days in spells.
     
     Parameters
@@ -475,9 +480,15 @@ def count_days_in_spells(flagged_data, dim, min_spell_length=1):
     --------   
     """
 
-    return _cumsum_flagged_diff(flagged_data, dim).where(
-        lambda x : x >= min_spell_length
-    ).sum(dim=dim)
+    return (
+        _cumsum_flagged_diff(flagged_data, dim)
+        # Nullify the spells that are too short to be counted
+        .where(lambda x : x >= min_spell_length, 0)
+        # Return NaNs to NaNs
+        .where(~np.isnan(flagged_data))
+        # Include sum's skipna and min_count to properly deal with 0s vs NaNs
+        .sum(dim=dim, skipna=skipna, min_count=min_count)
+    )
 
 def length_of_longest_spell(flagged_data, dim):
     """ Length of longest spells.
