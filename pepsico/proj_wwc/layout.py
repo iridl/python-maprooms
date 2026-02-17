@@ -43,8 +43,8 @@ def app_layout():
                         "mean_Tmin",
                         "dry_days",
                         "wet_days",
-                        # "heatwave_duration",
-                        #"frost_season_length",
+                        # "heatwave_duration", # needs a daily clim
+                        "frost_season_length",
                         "frost_days",
                         "Tmax_90",
                         "Tmin_10",
@@ -63,7 +63,7 @@ def app_layout():
                         "Count of Dry Days",
                         "Count of Wet Days",
                         # "Mean Heatwaves Duration",
-                        #"Frost Season Length",
+                        "Frost Season Length",
                         "Count of Frost Days",
                         "Max Temperature 90th %-ile",
                         "Min Temperature 10th %-ile",
@@ -74,7 +74,7 @@ def app_layout():
                         # "Mean Dry Spells Length",
                         # "Median Dry Spells Length",
                     ],
-                    init=0,
+                    init=4,
                 )),
                 Block("Definitions",
                     "Frost <=",
@@ -204,6 +204,12 @@ def app_layout():
                 html.B("Max/Min Temperature 90/10th %-ile (Tmax/min_90/10):"),"""
                     Maximum/Minimum temperature 90/10th percentile in the season. 
                     Obtained through parametric Normal distributions.
+                """
+            ]),
+            html.P([
+                html.B("Frost Season Length (frost_season_length):"),"""
+                    Number of days between the first and last days where minimm 
+                    temperature is lesser or equal than a user-defined threshold.
                 """
             ]),
         ),
