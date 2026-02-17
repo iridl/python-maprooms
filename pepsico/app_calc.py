@@ -101,7 +101,8 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
 
 def seasonal_wwc(
-    labelled_season_data, variable, frost_threshold, wet_threshold
+    labelled_season_data, variable, frost_threshold, wet_threshold,
+    rain_event_amount, rain_event_window,
 ):
     # Boolean variables need the additional where to return NaNs from False/0 to Nans
     # and the sum parameters for entirely NaNs seasons to remain NaNs and not turn to
@@ -162,6 +163,17 @@ def seasonal_wwc(
             .sum(skipna=True, min_count=1)
         )
         wwc_units = "days"
+    if variable == "rain_events":
+        data_ds = (
+            labelled_season_data
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(
+                number_extreme_events_within_days, threshold=rain_event_amount,
+                window=rain_event_window,
+                #skipna=True, min_count=1,
+            )
+        )
+        wwc_units = ""
     # This is all a bit tedious but I didn't figure out another way to keep
     # seasons_ends and renaming time dim T
     # Can revisit later if this code has a future
@@ -656,7 +668,7 @@ def number_extreme_events_within_days(
     Examples
     --------
     Number of rain events of >80mm in 2 days or less:
-    number_extreme_events_within_days(rain_daily_data_in_mm, "gt", 80, 2)    
+    number_extreme_events_within_days(rain_daily_data_in_mm, 80, 2)    
     """
     count = 0
     dd = daily_data.copy()
