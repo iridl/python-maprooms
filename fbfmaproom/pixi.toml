@@ -1,4 +1,4 @@
-[project]
+[workspace]
 authors = ["IRI <pycpt-help@iri.columbia.edu>"]
 channels = ["conda-forge", "iridl", "iri-nextgen"]
 name = "fbfmaproom2"
