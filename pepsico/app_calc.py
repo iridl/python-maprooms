@@ -101,7 +101,8 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
 
 def seasonal_wwc(
-    labelled_season_data, variable, frost_threshold, wet_threshold
+    labelled_season_data, variable, frost_threshold, wet_threshold, hot_threshold,
+    warm_nights_spell,
 ):
     # Boolean variables need the additional where to return NaNs from False/0 to Nans
     # and the sum parameters for entirely NaNs seasons to remain NaNs and not turn to
@@ -128,7 +129,7 @@ def seasonal_wwc(
         data_ds = labelled_season_data.groupby(
             labelled_season_data["seasons_starts"]
         ).mean()
-        wwc_units = "˚C"
+        wwc_units = "˚C"        
     # It takes several 10s of minutes to get empirical quantiles maps
     if variable in ["Tmax_90", "Tmin_10"]:
         quantile = 0.1 if variable == "Tmin_10" else 0.9
@@ -160,6 +161,17 @@ def seasonal_wwc(
             .where(~np.isnan(labelled_season_data))
             .groupby(labelled_season_data["seasons_starts"])
             .sum(skipna=True, min_count=1)
+        )
+        wwc_units = "days"
+    if variable == "warm_nights":
+        data_ds = (
+            (labelled_season_data > hot_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(
+                count_days_in_spells, "T", min_spell_length=warm_nights_spell, 
+                skipna=True, min_count=1,
+            )
         )
         wwc_units = "days"
     # This is all a bit tedious but I didn't figure out another way to keep
@@ -441,7 +453,9 @@ def _cumsum_flagged_diff(flagged_data, dim):
         ).bfill(dim).diff(dim)
     return cfd
 
-def count_days_in_spells(flagged_data, dim, min_spell_length=1):
+def count_days_in_spells(
+    flagged_data, dim, min_spell_length=1, skipna=None, min_count=None,
+):
     """ Counts number of days in spells.
     
     Parameters
@@ -466,9 +480,15 @@ def count_days_in_spells(flagged_data, dim, min_spell_length=1):
     --------   
     """
 
-    return _cumsum_flagged_diff(flagged_data, dim).where(
-        lambda x : x >= min_spell_length
-    ).sum(dim=dim)
+    return (
+        _cumsum_flagged_diff(flagged_data, dim)
+        # Nullify the spells that are too short to be counted
+        .where(lambda x : x >= min_spell_length, 0)
+        # Return NaNs to NaNs
+        .where(~np.isnan(flagged_data))
+        # Include sum's skipna and min_count to properly deal with 0s vs NaNs
+        .sum(dim=dim, skipna=skipna, min_count=min_count)
+    )
 
 def length_of_longest_spell(flagged_data, dim):
     """ Length of longest spells.

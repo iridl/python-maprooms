@@ -37,7 +37,7 @@ def app_layout():
                 Block("WWC statistics", Select(
                     id="variable",
                     options=[
-                        # "warm_nights",
+                        "warm_nights",
                         # "rain_events",
                         "mean_Tmax",
                         "mean_Tmin",
@@ -56,7 +56,7 @@ def app_layout():
                         # "dry_spells_median_length",
                     ],
                     labels=[
-                        # "Warm Nights",
+                        "Warm Nights",
                         # "Count of Rain Events",
                         "Mean Max Temperature",
                         "Mean Min Temperature",
@@ -96,7 +96,27 @@ def app_layout():
                         width="5em",
                         debounce=False,
                     ),
-                    "mm",
+                    "mm; ",
+                    "Hot/Cold day > / <=",
+                    Number(
+                        id="hot",
+                        default=25,
+                        min=-99,
+                        max=999,
+                        width="5em",
+                        debounce=False,
+                    ),
+                    "˚C; ",
+                    "Warm Nights Spell >=",
+                    Number(
+                        id="wms",
+                        default=5,
+                        min=0,
+                        max=99,
+                        width="5em",
+                        debounce=False,
+                    ),
+                    "days",
                 ),
                 Block("Season",
                     Number(
@@ -204,6 +224,14 @@ def app_layout():
                 html.B("Max/Min Temperature 90/10th %-ile (Tmax/min_90/10):"),"""
                     Maximum/Minimum temperature 90/10th percentile in the season. 
                     Obtained through parametric Normal distributions.
+                """
+            ]),
+            html.P([
+                html.B("Warm Nights (warm_nights):"),"""
+                    Number of days in a season in a warm night spell. A warm night 
+                    spell is defined as a user-defined minimum consecutive number of 
+                    warm nights. A warm night is defined as days where minimum 
+                    temperature is greater than a user-defined thredhold.
                 """
             ]),
         ),
