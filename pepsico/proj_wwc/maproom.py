@@ -515,7 +515,9 @@ def register(FLASK, config):
             colorscale = CMAPS["prcp_anomaly"]
         if data.name in ["tasmin", "tasmax"]:
             colorscale = CMAPS["temp_anomaly"]
-        if variable in ["frost_days", "dry_days", "longest_dry_spell"]:
+        if variable in [
+            "frost_days", "dry_days", "longest_dry_spell", "dry_day_persistence"
+        ]:
             colorscale = colorscale.reversed()
         map_amp = np.max(np.abs(data)).values
         colorscale = colorscale.rescaled(-1*map_amp, map_amp)

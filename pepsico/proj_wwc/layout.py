@@ -52,6 +52,10 @@ def app_layout():
                         "longest_wet_spell",
                         # "wet_day_persistence",
                         # "dry_day_persistence",
+                        # "longest_dry_spell",
+                        # "longest_wet_spell",
+                        "wet_day_persistence",
+                        "dry_day_persistence",
                         # "dry_spells_mean_length",
                         # "dry_spells_median_length",
                     ],
@@ -69,8 +73,8 @@ def app_layout():
                         "Min Temperature 10th %-ile",
                         "Longest Dry Spell",
                         "Longest Wet Spell",
-                        # "Mean Wet Day Persistence",
-                        # "Mean Dry Day Persistence",
+                        "Wet Day Persistence",
+                        "Dry Day Persistence",
                         # "Mean Dry Spells Length",
                         # "Median Dry Spells Length",
                     ],
@@ -239,6 +243,13 @@ def app_layout():
                     Length of longest dry/wet spell in the season. A dry/wet spell 
                     is defined as consecutive dry/wet days. A dry/wet day is defined 
                     as lesser or equal / greather than a user-defined threshold.
+                """
+            ]),
+            html.P([
+                html.B("Dry/Wet Day Persistence (dry/wet_day_persistence):"),"""
+                    Ratio of cumulative (at least 2) dry/wet days against total 
+                    dry/wet days in the season. A dry/wet day is defined as lesser 
+                    or equal / greather than a user-defined threshold.
                 """
             ]),
         ),

@@ -190,6 +190,18 @@ def seasonal_wwc(
             .map(length_of_longest_spell, "T")
         )
         wwc_units = "days"
+    if variable == "dry_day_persistence":
+        data_ds = 100 * data_ds.map(
+            count_days_in_spells, "T", min_spell_length=2, skipna=True,
+            min_count=1,
+        ) / data_ds.sum(skipna=True, min_count=1)
+        wwc_units = "%"
+    if variable == "wet_day_persistence":
+        data_ds = 100 * data_ds.map(
+            count_days_in_spells, "T", min_spell_length=2, skipna=True,
+            min_count=1,
+        ) / data_ds.sum(skipna=True, min_count=1)
+        wwc_units = "%"
     # This is all a bit tedious but I didn't figure out another way to keep
     # seasons_ends and renaming time dim T
     # Can revisit later if this code has a future
