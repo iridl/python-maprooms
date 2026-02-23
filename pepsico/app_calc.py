@@ -102,7 +102,7 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
 def seasonal_wwc(
     labelled_season_data, variable, frost_threshold, wet_threshold, hot_threshold,
-    warm_nights_spell,
+    warm_nights_spell, dry_spell,
 ):
     # Boolean variables need the additional where to return NaNs from False/0 to Nans
     # and the sum parameters for entirely NaNs seasons to remain NaNs and not turn to
@@ -202,6 +202,22 @@ def seasonal_wwc(
             min_count=1,
         ) / data_ds.sum(skipna=True, min_count=1)
         wwc_units = "%"
+    if variable == "dry_spells_mean_length":
+        data_ds = (
+            (labelled_season_data <= wet_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(mean_length_of_spells, "T", min_spell_length=dry_spell)
+        )
+        wwc_units = "days"
+    if variable == "dry_spells_median_length":
+        data_ds = (
+            (labelled_season_data <= wet_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(median_length_of_spells, "T", min_spell_length=dry_spell)
+        )
+        wwc_units = "days"
     # This is all a bit tedious but I didn't figure out another way to keep
     # seasons_ends and renaming time dim T
     # Can revisit later if this code has a future
