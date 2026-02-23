@@ -48,8 +48,8 @@ def app_layout():
                         "frost_days",
                         "Tmax_90",
                         "Tmin_10",
-                        # "longest_dry_spell",
-                        # "longest_wet_spell",
+                        "longest_dry_spell",
+                        "longest_wet_spell",
                         # "wet_day_persistence",
                         # "dry_day_persistence",
                         # "dry_spells_mean_length",
@@ -67,14 +67,14 @@ def app_layout():
                         "Count of Frost Days",
                         "Max Temperature 90th %-ile",
                         "Min Temperature 10th %-ile",
-                        # "Longest Dry Spell",
-                        # "Longest Wet Spell",
+                        "Longest Dry Spell",
+                        "Longest Wet Spell",
                         # "Mean Wet Day Persistence",
                         # "Mean Dry Day Persistence",
                         # "Mean Dry Spells Length",
                         # "Median Dry Spells Length",
                     ],
-                    init=0,
+                    init=1,
                 )),
                 Block("Definitions",
                     "Frost <=",
@@ -232,6 +232,13 @@ def app_layout():
                     spell is defined as a user-defined minimum consecutive number of 
                     warm nights. A warm night is defined as days where minimum 
                     temperature is greater than a user-defined thredhold.
+                """
+            ]),
+            html.P([
+                html.B("Longest Dry/Wet Spell (longest_dry/wet_spell):"),"""
+                    Length of longest dry/wet spell in the season. A dry/wet spell 
+                    is defined as consecutive dry/wet days. A dry/wet day is defined 
+                    as lesser or equal / greather than a user-defined threshold.
                 """
             ]),
         ),

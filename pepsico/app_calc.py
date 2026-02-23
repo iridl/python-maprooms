@@ -174,6 +174,22 @@ def seasonal_wwc(
             )
         )
         wwc_units = "days"
+    if variable == "longest_dry_spell":
+        data_ds = (
+            (labelled_season_data <= wet_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(length_of_longest_spell, "T")
+        )
+        wwc_units = "days"
+    if variable == "longest_wet_spell":
+        data_ds = (
+            (labelled_season_data > wet_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(length_of_longest_spell, "T")
+        )
+        wwc_units = "days"
     # This is all a bit tedious but I didn't figure out another way to keep
     # seasons_ends and renaming time dim T
     # Can revisit later if this code has a future
@@ -443,14 +459,17 @@ def _cumsum_flagged_diff(flagged_data, dim):
     # Special case coord.size = 1
     cfd = flagged_data
     if cfd[dim].size != 1:
+        # it's ok to treat individual NaNs as 0s,
+        # but if all NaN then must return NaN
+        cfd_mask = ~(np.isnan(cfd).all(dim=dim))
         # Points to apply diff to
         unflagged_and_ends = (flagged_data == 0) * 1
         unflagged_and_ends[{dim: [0, -1]}] = 1
     
-        cfd = cfd.cumsum(dim=dim).where(unflagged_and_ends, other = np.nan).where(
+        cfd = cfd.cumsum(dim=dim).where(unflagged_and_ends, other=np.nan).where(
             # first cumul point must be set to 0
             lambda x: x[dim] != cfd[dim][0], other=0
-        ).bfill(dim).diff(dim)
+        ).bfill(dim).diff(dim).where(cfd_mask)
     return cfd
 
 def count_days_in_spells(
@@ -514,6 +533,7 @@ def length_of_longest_spell(flagged_data, dim):
     """
 
     return _cumsum_flagged_diff(flagged_data, dim).max(dim=dim)
+
 
 def mean_length_of_spells(flagged_data, dim, min_spell_length=1):
     """ Mean length of spells.

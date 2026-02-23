@@ -58,6 +58,19 @@ def test__cumsum_flagged_diff_coord_size_1():
     assert spells0 == 0
 
 
+def test__cumsum_flagged_diff_allnan():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
+    values = np.array([
+        np.nan, np.nan, np.nan, np.nan, np.nan,
+        np.nan, np.nan, np.nan, np.nan, np.nan,
+    ])
+    precip = xr.DataArray(values, coords={"T": t})
+    spells = app_calc._cumsum_flagged_diff(precip, "T")
+
+    assert np.isnan(spells).all()
+
+
 def test_spells_length():
 
     t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
@@ -90,6 +103,18 @@ def test_length_of_longest_spell():
     longest_spell = app_calc.length_of_longest_spell(precip, "T")
 
     assert longest_spell == 3
+
+def test_length_of_longest_spell_allnan():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
+    values = np.array([
+        np.nan, np.nan, np.nan, np.nan, np.nan,
+        np.nan, np.nan, np.nan, np.nan, np.nan,
+    ])
+    precip = xr.DataArray(values, coords={"T": t})
+    longest_spell = app_calc.length_of_longest_spell(precip, "T")
+
+    assert np.isnan(longest_spell)
 
 def test_mean_length_of_spells():
 
