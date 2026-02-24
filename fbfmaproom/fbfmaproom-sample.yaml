@@ -3389,7 +3389,7 @@ countries:
         datasets:
             defaults:
               predictors:
-                - prcp-v1
+                - prcp-v4
                 - chirps-precip-jas
               predictand: bad-years-humanitarian
             observations:
@@ -3509,6 +3509,19 @@ countries:
                     label: JAS fcst v1
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
                     path: mali/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                prcp-v4:
+                    label: JAS fcst v4
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2026
+                    path: mali/prcp-jas-v4.zarr
                     var_names:
                         value: pne
                         lat: Y
@@ -3886,7 +3899,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - prcp-v1
+                    - prcp-v8
                     - chirps-precip-jas
                 predictand: bad-years-humanitarian
             observations:
@@ -4006,6 +4019,19 @@ countries:
                     label: JAS fcst v1
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
                     path: mauritania/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                prcp-v8:
+                    label: JAS fcst v8
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2026
+                    path: mauritania/prcp-jas-v8.zarr
                     var_names:
                         value: pne
                         lat: Y
