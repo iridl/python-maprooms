@@ -50,14 +50,10 @@ def app_layout():
                         "Tmin_10",
                         "longest_dry_spell",
                         "longest_wet_spell",
-                        # "wet_day_persistence",
-                        # "dry_day_persistence",
-                        # "longest_dry_spell",
-                        # "longest_wet_spell",
                         "wet_day_persistence",
                         "dry_day_persistence",
-                        # "dry_spells_mean_length",
-                        # "dry_spells_median_length",
+                        "dry_spells_mean_length",
+                        "dry_spells_median_length",
                     ],
                     labels=[
                         "Warm Nights",
@@ -75,8 +71,8 @@ def app_layout():
                         "Longest Wet Spell",
                         "Wet Day Persistence",
                         "Dry Day Persistence",
-                        # "Mean Dry Spells Length",
-                        # "Median Dry Spells Length",
+                        "Mean Dry Spells Length",
+                        "Median Dry Spells Length",
                     ],
                     init=1,
                 )),
@@ -114,6 +110,16 @@ def app_layout():
                     "Warm Nights Spell >=",
                     Number(
                         id="wms",
+                        default=5,
+                        min=0,
+                        max=99,
+                        width="5em",
+                        debounce=False,
+                    ),
+                    "days ;",
+                    "Dry Spell >=",
+                    Number(
+                        id="dryspell",
                         default=5,
                         min=0,
                         max=99,
@@ -250,6 +256,16 @@ def app_layout():
                     Ratio of cumulative (at least 2) dry/wet days against total 
                     dry/wet days in the season. A dry/wet day is defined as lesser 
                     or equal / greather than a user-defined threshold.
+                """
+            ]),
+            html.P([
+                html.B(
+                    "Mean/Median Dry Spells Length (dry_spells_mean/median_length):"
+                ),"""
+                    Mean/Median of dry spells length in the season. A dry spell is 
+                    defined as a user-defined minimum consecutive number of dry 
+                    days. A dray day is defined as days where precipitation is 
+                    lesser or equal than a user-defined thredhold.
                 """
             ]),
         ),
