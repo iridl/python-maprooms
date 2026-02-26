@@ -692,7 +692,8 @@ def _accumulate_spells(flagged_data, dim, dtype=None, out=None):
     return xr.apply_ufunc(
         np.frompyfunc(lambda x, y: 0 if y == 0 else (x + y), 2, 1).accumulate,
         flagged_data, input_core_dims=[[dim]], output_core_dims=[[dim]],
-        dask="parallelized", kwargs={"axis": -1, "dtype": dtype, "out": out},
+        #dask="parallelized",
+        kwargs={"axis": -1, "dtype": dtype, "out": out},
     )
 
 
@@ -719,12 +720,11 @@ def spells_length(flagged_data, dim):
     """
     # cumuls 1s and resets counts when 0
     spells = _accumulate_spells(flagged_data, dim)
-    # then rolls flagged_data by -1 to position total cumuls on 0s of the flagged 
-    # data except for the last point that becomes first
-    # masks out where data flag to rid of accumulating values but last of each spell
-    spells_only = spells.where(flagged_data.roll(**{dim: -1}) == 0)
-    # resets last value to what it was as it could have been erased in previous step
-    spells_only[{dim : -1}] = spells.isel({dim : -1})
+    # shift flagged_data by -1 to position total cumuls on 0s of the flagged data
+    # 0 where data flag to rid of accumulating values
+    # last point is matched with fill_value=0 so is preserved and is by design 
+    # either 0 or the end thus total cumul of a spell
+    spells_only = spells.where(flagged_data.shift({dim: -1}, fill_value=0) == 0)
     # Turns remaining 0s to NaN
     return spells_only.where(spells_only > 0)
 
