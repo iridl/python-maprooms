@@ -4,6 +4,7 @@ from scipy.stats import norm
 import pingrid
 
 
+
 #This is what we should need for the app
 #For the map:
 #-- read_data for histo and 1 model
@@ -690,7 +691,7 @@ def _accumulate_spells(flagged_data, axis=0, dtype=None, out=None):
     numpy.ufunc.accumulate, spells_length
     """
     return xr.apply_ufunc(
-        np.frompyfunc(lambda x, y: 0 if y == 0 else x + y, 2, 1).accumulate,
+        np.frompyfunc(lambda x, y: 0 if y == 0 else (x + y), 2, 1).accumulate,
         flagged_data, axis, dtype, out
     )
 
@@ -717,19 +718,36 @@ def spells_length(flagged_data, dim):
     _accumulate_spells
     """
     # cumuls 1s and resets counts when 0
-    # then rolls data by 1 to position total cumuls on 0s of the flagged data
-    # except for the last point that becomes first
-    spells = _accumulate_spells(
-        flagged_data, axis=flagged_data.get_axis_num(dim)
-    ).roll(**{dim: 1})
+    spells = _accumulate_spells(flagged_data, axis=flagged_data.get_axis_num(dim))
+    # then rolls flagged_data by -1 to position total cumuls on 0s of the flagged 
+    # data except for the last point that becomes first
     # masks out where data flag to rid of accumulating values but last of each spell
-    spells_only = spells.where(flagged_data == 0)
-    # resets first value to what it was as it could have been erased in previous step
-    spells_only[dict(**{dim : 0})] = spells.isel({dim : 0})
-    # rolls back to get spells length values on last day of spell
-    spells = spells_only.roll(**{dim: -1})
+    spells_only = spells.where(flagged_data.roll(**{dim: -1}) == 0)
+    # resets last value to what it was as it could have been erased in previous step
+    spells_only[{dim : -1}] = spells.isel({dim : -1})
     # Turns remaining 0s to NaN
-    return spells.where(spells > 0)
+    return spells_only.where(spells_only > 0)
+
+
+def sl(flagged_data, dim):
+    # This takes 3 times longer tan spell_lengths
+    acc_spells = _accumulate_spells(
+        flagged_data, axis=flagged_data.get_axis_num(dim)
+    )
+    # spells length are by design local maxima
+    spells = acc_spells.rolling({dim: 3}, center=True).construct("w")
+    spells = spells.isel(w=1, drop=True).where(
+        (spells.isel(w=0, drop=True) < spells.isel(w=1, drop=True))
+        * (spells.isel(w=1, drop=True) > spells.isel(w=2, drop=True)),
+        np.nan,
+    )
+    spells[{dim: -1}] = acc_spells.isel({dim: -1}).where(lambda x : x != 0, np.nan)
+    spells[{dim: 0}] = xr.where(
+        (acc_spells.isel({dim: 0}, drop=True) == 1)
+        and (acc_spells.isel({dim: 1}, drop=True) == 0),
+        1, np.nan
+    )
+    return spells
 
 
 def number_extreme_events_within_days(
