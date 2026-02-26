@@ -3568,7 +3568,7 @@ countries:
         datasets:
             defaults:
               predictors:
-                - prcp-v1
+                - prcp-v7
                 - chirps-precip-jas
               predictand: bad-years-humanitarian
             observations:
@@ -3688,6 +3688,19 @@ countries:
                     label: JAS fcst v1
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
                     path: chad/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                prcp-v7:
+                    label: JAS fcst v7
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2026
+                    path: chad/prcp-jas-v7.zarr
                     var_names:
                         value: pne
                         lat: Y
