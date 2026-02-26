@@ -115,13 +115,25 @@ def test_sl():
         np.where(np.isnan(expected), 0, expected)
     )
 
-
 def test_count_days_in_spells():
 
     t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
     values = np.array([1, 0, 1, 1, 0, 0, 1, 1, 1, 0])
     precip = xr.DataArray(values, coords={"T": t})
+    start = time.time()
     days_in_spells = app_calc.count_days_in_spells(precip, "T", min_spell_length=2)
+    print(time.time() - start)
+
+    assert days_in_spells == 5
+
+def test_spells_length_count():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
+    values = np.array([1, 0, 1, 1, 0, 0, 1, 1, 1, 0])
+    precip = xr.DataArray(values, coords={"T": t})
+    start = time.time()
+    days_in_spells = app_calc.spells_length(precip, "T").where(lambda x : x >= 2).sum()
+    print(time.time() - start)
 
     assert days_in_spells == 5
 
