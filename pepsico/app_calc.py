@@ -561,14 +561,14 @@ def count_days_in_spells(
         
     See Also
     --------
-    _cumsum_flagged_diff
+    spells_length
     
     Examples
     --------   
     """
 
     return (
-        _cumsum_flagged_diff(flagged_data, dim)
+        spells_length(flagged_data, dim)
         # Nullify the spells that are too short to be counted
         .where(lambda x : x >= min_spell_length, 0)
         # Return NaNs to NaNs
@@ -594,13 +594,12 @@ def length_of_longest_spell(flagged_data, dim):
         
     See Also
     --------
-    _cumsum_flagged_diff
+    spells_length
     
     Examples
     --------   
     """
-
-    return _cumsum_flagged_diff(flagged_data, dim).max(dim=dim)
+    return spells_length(flagged_data, dim).max(dim=dim)
 
 
 def mean_length_of_spells(flagged_data, dim, min_spell_length=1):
@@ -622,13 +621,13 @@ def mean_length_of_spells(flagged_data, dim, min_spell_length=1):
         
     See Also
     --------
-    _cumsum_flagged_diff
+    spells_length
     
     Examples
     --------   
     """
 
-    return _cumsum_flagged_diff(flagged_data, dim).where(
+    return spells_length(flagged_data, dim).where(
         lambda x : x >= min_spell_length
     ).mean(dim=dim)
 
@@ -651,18 +650,18 @@ def median_length_of_spells(flagged_data, dim, min_spell_length=1):
         
     See Also
     --------
-    _cumsum_flagged_diff
+    spells_length
     
     Examples
     --------   
     """
 
-    return _cumsum_flagged_diff(flagged_data, dim).where(
+    return spells_length(flagged_data, dim).where(
         lambda x : x >= min_spell_length
     ).median(dim=dim)
 
 
-def _accumulate_spells(flagged_data, axis=0, dtype=None, out=None):
+def _accumulate_spells(flagged_data, dim, dtype=None, out=None):
     """Accumulates continuous flags. Count reset to 0 when new data is unflagged
 
     Parameters
@@ -692,7 +691,8 @@ def _accumulate_spells(flagged_data, axis=0, dtype=None, out=None):
     """
     return xr.apply_ufunc(
         np.frompyfunc(lambda x, y: 0 if y == 0 else (x + y), 2, 1).accumulate,
-        flagged_data, axis, dtype, out
+        flagged_data, input_core_dims=[[dim]], output_core_dims=[[dim]],
+        dask="parallelized", kwargs={"axis": -1, "dtype": dtype, "out": out},
     )
 
 
@@ -718,7 +718,7 @@ def spells_length(flagged_data, dim):
     _accumulate_spells
     """
     # cumuls 1s and resets counts when 0
-    spells = _accumulate_spells(flagged_data, axis=flagged_data.get_axis_num(dim))
+    spells = _accumulate_spells(flagged_data, dim)
     # then rolls flagged_data by -1 to position total cumuls on 0s of the flagged 
     # data except for the last point that becomes first
     # masks out where data flag to rid of accumulating values but last of each spell

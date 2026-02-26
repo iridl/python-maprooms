@@ -74,7 +74,7 @@ def app_layout():
                         "Mean Dry Spells Length",
                         "Median Dry Spells Length",
                     ],
-                    init=1,
+                    init=8,
                 )),
                 Block("Definitions",
                     "Frost <=",
