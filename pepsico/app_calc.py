@@ -143,17 +143,31 @@ def seasonal_wwc(
                 norm.ppf, quantile, kwargs={"loc": data_ds[var], "scale": data_std[var]},
             )
         wwc_units = "˚C"
-    # This option is also commented out as it didn't work in its present form. Didn't
-    # really expect that it would though.
     if variable == "frost_season_length":
-        data_ds = (labelled_season_data <= frost_threshold).groupby(
-            labelled_season_data["seasons_starts"]
+        # This is the duration from first to last frost days
+        # Maybe I should make a function out of this?
+        data_ds = (
+            (labelled_season_data <= frost_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
         )
         data_ds = (
-            data_ds[-1:0].idxmax()
-            - data_ds.idxmax()
+            # cumsum is just to make the last days with max value
+            data_ds.cumsum()
+            # groupby methods drop grouped coordinates so need to reassign T
+            .assign_coords(T=labelled_season_data["T"])
+            # grouping again
+            .groupby(labelled_season_data["seasons_starts"])
+            # idxmax returns label of coord where max is, so last frosting day
+            .apply(lambda x : x.idxmax(dim="T"))
+            # idxmax returns the label of first coord when multiple maxima so more 
+            # straightforward
+            - data_ds.apply(lambda x : x.idxmax(dim="T"))
             + np.timedelta64(1, "D")
         )
+        for var in data_ds.data_vars :
+            # we want to plot timedelta as days
+            data_ds[var] = data_ds[var].dt.days
         wwc_units = "days"
     if variable == "wet_days":
         data_ds = (
@@ -233,7 +247,11 @@ def seasonal_wwc(
     # Can revisit later if this code has a future
     data_ds = data_ds.rename({"seasons_starts" : "T"})
     seasons_ends = labelled_season_data["seasons_ends"].rename({"group": "T"})
-    data_ds = data_ds.drop_vars(["seasons_ends", "group"]).assign_coords({"seasons_ends" : seasons_ends})
+    data_ds = (
+        data_ds
+        .drop_vars(["seasons_ends", "group"], errors="ignore")
+        .assign_coords({"seasons_ends" : seasons_ends})
+    )
     #
     for var in data_ds.data_vars:
         data_ds[var].attrs["units"] = wwc_units

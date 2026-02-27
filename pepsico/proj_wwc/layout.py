@@ -43,8 +43,8 @@ def app_layout():
                         "mean_Tmin",
                         "dry_days",
                         "wet_days",
-                        # "heatwave_duration",
-                        #"frost_season_length",
+                        # "heatwave_duration", # needs a daily clim
+                        "frost_season_length",
                         "frost_days",
                         "Tmax_90",
                         "Tmin_10",
@@ -63,7 +63,7 @@ def app_layout():
                         "Count of Dry Days",
                         "Count of Wet Days",
                         # "Mean Heatwaves Duration",
-                        #"Frost Season Length",
+                        "Frost Season Length",
                         "Count of Frost Days",
                         "Max Temperature 90th %-ile",
                         "Min Temperature 10th %-ile",
@@ -266,6 +266,12 @@ def app_layout():
                     defined as a user-defined minimum consecutive number of dry 
                     days. A dray day is defined as days where precipitation is 
                     lesser or equal than a user-defined thredhold.
+                """
+            ]),
+            html.P([
+                html.B("Frost Season Length (frost_season_length):"),"""
+                    Number of days between the first and last days where minimm 
+                    temperature is lesser or equal than a user-defined threshold.
                 """
             ]),
         ),

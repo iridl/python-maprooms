@@ -524,6 +524,7 @@ def register(FLASK, config):
         if variable in [
             "frost_days", "dry_days", "longest_dry_spell", "dry_day_persistence",
             "dry_spells_mean_length", "dry_spells_median_length",
+            "frost_season_length",
         ]:
             colorscale = colorscale.reversed()
         map_amp = np.max(np.abs(data)).values
