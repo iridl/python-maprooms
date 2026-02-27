@@ -766,3 +766,18 @@ def number_extreme_events_within_days(
             dd[{dim: slice(t, t+w)}] = dd[{dim: slice(t, t+w)}].where(~new_event)
             count = count + new_event
     return count
+
+
+def neewd(daily_data, threshold, window, dim="T"):
+    acc = daily_data.isel({dim: 0}, drop=True)
+    count = (acc > threshold) * 1
+    w = xr.ones_like(acc, dtype=int)
+    for i in range(1, daily_data[dim].size):
+        data_i = daily_data.isel({dim: i}, drop=True)
+        acc_new = (acc + data_i).where(
+            ((acc <= threshold) & (w < window)), other=data_i
+        )
+        count = count + (acc_new > threshold)
+        w = (w + 1).where(((acc <= threshold) & (w < window)), other=1)
+        acc = acc_new
+    return count
