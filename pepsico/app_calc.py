@@ -191,16 +191,26 @@ def seasonal_wwc(
         )
         wwc_units = "days"
     if variable == "dry_day_persistence":
+        data_ds = (
+            (labelled_season_data <= wet_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+        )
         data_ds = 100 * data_ds.map(
             count_days_in_spells, "T", min_spell_length=2, skipna=True,
             min_count=1,
-        ) / data_ds.sum(skipna=True, min_count=1)
+        ) / data_ds.sum(skipna=True, min_count=1).where(lambda x : x!=0)
         wwc_units = "%"
     if variable == "wet_day_persistence":
+        data_ds = (
+            (labelled_season_data > wet_threshold)
+            .where(~np.isnan(labelled_season_data))
+            .groupby(labelled_season_data["seasons_starts"])
+        )
         data_ds = 100 * data_ds.map(
             count_days_in_spells, "T", min_spell_length=2, skipna=True,
             min_count=1,
-        ) / data_ds.sum(skipna=True, min_count=1)
+        ) / data_ds.sum(skipna=True, min_count=1).where(lambda x : x!=0)
         wwc_units = "%"
     if variable == "dry_spells_mean_length":
         data_ds = (
