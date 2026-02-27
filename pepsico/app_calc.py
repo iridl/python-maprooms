@@ -738,3 +738,111 @@ def number_extreme_events_within_days(
             dd[{dim: slice(t, t+w)}] = dd[{dim: slice(t, t+w)}].where(~new_event)
             count = count + new_event
     return count
+
+
+def number_extreme_events_within_days_numpy(daily_data, threshold, window, dim="T"):
+
+    # move time grid (S , T) to axis 0
+    if daily_data.dims[0] != dim:
+        daily_data = daily_data.transpose(dim, ...)
+
+    data = daily_data.values.astype(float).copy()
+    T = data.shape[0]
+
+    # count by cell (by each spatial cell) 
+    count = np.zeros(data.shape[1:], dtype=int)
+
+    for w in range(1, window + 1):
+        for t in range(T - (w - 1)):
+
+            window_vals = data[t:t+w, ...]
+            s = np.nansum(window_vals, axis=0)
+
+            new_event = s > threshold
+            if not np.any(new_event):
+                continue
+
+            count[new_event] += 1
+
+            # IMPORTANT : copy mask to time (S, T) axis 
+            mask = np.broadcast_to(new_event, (w,) + new_event.shape)
+
+            data[t:t+w, ...][mask] = np.nan
+
+    return xr.DataArray(
+        count,
+        coords={k: v for k, v in daily_data.coords.items() if k != dim},
+        dims=[d for d in daily_data.dims if d != dim],
+        name="extreme_event_count"
+    )
+
+
+def number_extreme_events_numpy_2(daily_data, threshold, window, dim="T"):
+    """
+        Count extreme events exactly like the original xarray function,
+        supporting 1D, 2D, or 3D series.
+
+        Each spatial cell is treated as an independent vector,
+        ensuring that the greedy (.where option) masking propagates correctly.
+
+        Parameters
+        ----------
+        daily_data : xarray.DataArray
+            Daily data array.
+        threshold : float
+            Threshold that the window sum must exceed to be counted as an event.
+        window : int
+            Maximum number of days to accumulate to form an event.
+        dim : str
+            Name of the temporal dimension (default is "T").
+
+        Returns
+        -------
+        xarray.DataArray
+            Count of extreme events, preserving the same spatial structure as daily_data.
+    """
+    data = daily_data.values.astype(float).copy()
+    T = data.shape[0]
+    spatial_shape = data.shape[1:]
+    
+    # ---- Case 1D: one vector ----
+    if len(spatial_shape) == 0:
+        ts = data.copy()
+        count = 0
+        for w in range(1, window + 1):
+            for t in range(T - (w - 1)):
+                window_vals = ts[t:t+w]
+                if np.isnan(window_vals).any():
+                    continue
+                if window_vals.sum() > threshold:
+                    count += 1
+                    ts[t:t+w] = np.nan  # Masking
+        return xr.DataArray(count, name="extreme_event_count")
+    
+    # ---- Case 2D oor 3D: each independent spatial cell ----
+    count = np.zeros(spatial_shape, dtype=int)
+    
+    # Iterate over all spatial cells
+    it = np.nditer(count, flags=['multi_index'], op_flags=['readwrite'])
+    while not it.finished:
+        idx = it.multi_index
+        # Dynamic slicing: slice over time + spatial indices
+        slicer = (slice(None),) + idx
+        ts_copy = data[slicer].copy()
+        c = 0
+        for w in range(1, window + 1):
+            for t in range(T - (w - 1)):
+                window_vals = ts_copy[t:t+w]
+                if np.isnan(window_vals).any():
+                    continue
+                if window_vals.sum() > threshold:
+                    c += 1
+                    ts_copy[t:t+w] = np.nan  # replicate the masking greedy (.where option)
+        count[idx] = c
+        it.iternext()
+    
+    # build the  DataArray with the same espatial coordinates
+    coords = {k: v for k, v in daily_data.coords.items() if k != dim}
+    dims = [d for d in daily_data.dims if d != dim]
+    
+    return xr.DataArray(count, coords=coords, dims=dims, name="extreme_event_count")
