@@ -747,9 +747,9 @@ def neewd(daily_data, threshold, window, dim="T"):
     for i in range(1, daily_data[dim].size):
         data_i = daily_data.isel({dim: i}, drop=True)
         acc_new = (acc + data_i).where(
-            ((acc <= threshold) and (w < window)), other=data_i
+            ((acc <= threshold) & (w < window)), other=data_i
         )
         count = count + (acc_new > threshold)
-        w = (w + 1).where(((acc <= threshold) and (w < window)), other=1)
+        w = (w + 1).where(((acc <= threshold) & (w < window)), other=1)
         acc = acc_new
     return count
