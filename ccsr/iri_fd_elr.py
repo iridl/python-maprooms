@@ -124,7 +124,7 @@ def targets_dict(fcst_ds, S=None):
 
 
 def ELR_poe(ELR_params, quantity, param_coords, ELR_mean=None):
-    """ELR probability of exceedance
+    """ELR probabilities
 
     Parameters
     ----------
@@ -139,22 +139,27 @@ def ELR_poe(ELR_params, quantity, param_coords, ELR_mean=None):
 
     Returns
     -------
-    xr.DataArray probability of exceedance as a function of quantity's coords
+    Tuple of xr.DataArray as the cumulative and probability distribution functions
 
     Notes
     -----
     Given the ELR_params Bi for i={0, 1, 2}
     Consider F = B0 + B1 * ELR_mean + B2 * quantity
     (where ELR_mean = 0 if clim and B1 doesn't exist)
-    Then poe = exp(F) / (1 + exp(F))
+    Then cdf = exp(F) / (1 + exp(F))
+    pdf is the derivative of cdf thus
+    pdf = B2 * exp(F) / (1 + exp(F))**2
     """
     B1 = 0 if ELR_mean is None else ELR_params.isel({param_coords: 1}) * ELR_mean
+    B2 = ELR_params.isel({param_coords: -1})
     F = (
         ELR_params.isel({param_coords: 0})
         + B1
         + ELR_params.isel({param_coords: -1}) * quantity
     )
-    return np.exp(F) / (1 + np.exp(F))
+    cdf = np.exp(F) / (1 + np.exp(F))
+    pdf = B2 * np.exp(F) / np.square((1 + np.exp(F)))
+    return cdf, pdf
 
 
 def ELR_quantity(ELR_clim_params, p):
@@ -176,9 +181,8 @@ def ELR_quantity(ELR_clim_params, p):
     This is basically the inverse of ELR_poe for the clim case.
     """
     return (
-        np.log(p / ((1 - p) * np.exp(ELR_clim_params.sel(coeff=1))))
-        / ELR_clim_params.sel(coeff=2)
-    )
+        np.log(p / (1 - p)) - ELR_clim_params.sel(coeff=1)
+    ) / ELR_clim_params.sel(coeff=2)
 
 
 def ELR_pdf(cdf, quantity, dim="percentile"):
@@ -201,7 +205,8 @@ def ELR_pdf(cdf, quantity, dim="percentile"):
     -----
     PDF is the derivative of CDF as a function of quantity
     """
-    return cdf.differentiate(dim) * cdf[dim].diff(dim) / quantity.diff(dim)
+    return (cdf.differentiate(dim) / quantity.differentiate(dim))
+    #return (cdf.differentiate(dim) * cdf[dim].diff(dim) / quantity.diff(dim))
 
 
 def ELR_distribution(quantiles, clim, fcst_ds):
@@ -227,15 +232,12 @@ def ELR_distribution(quantiles, clim, fcst_ds):
 
     """
     obs_ppf = ELR_quantity(clim, quantiles)
-    fcst_cdf = ELR_poe(
+    fcst_cdf, fcst_pdf = ELR_poe(
         fcst_ds["coeff"], obs_ppf, "coff", ELR_mean=fcst_ds["fcst_mean"]
     )
-    obs_cdf = ELR_poe(clim, obs_ppf, "coeff")
-    # Unfortuntely while the clim ELR params return mm/month,
-    # the fcst ones expect total mm
+    obs_cdf, obs_pdf = ELR_poe(clim, obs_ppf, "coeff")
+    # ELR parameters operate in mm/month
     obs_ppf = 3 * obs_ppf
-    fcst_pdf = ELR_pdf(fcst_cdf, obs_ppf)
-    obs_pdf = ELR_pdf(obs_cdf, obs_ppf)
     # In the IRI Maprooms, the probabilities are computed for all the models
     # and then averaged
     return fcst_cdf.mean("mod"), obs_cdf, obs_ppf, fcst_pdf.mean("mod"), obs_pdf
@@ -267,7 +269,7 @@ def proba(fcst_ds, clim, percentile=None, threshold=None, clipv=None):
         threshold = ELR_quantity(clim, percentile)
         if clipv is not None:
             threshold = threshold.clip(min=clipv)
-    fcst_cdf = ELR_poe(
+    fcst_cdf, _ = ELR_poe(
         fcst_ds["coeff"], threshold, "coff", ELR_mean=fcst_ds["fcst_mean"]
     )
     return fcst_cdf.mean("mod")
