@@ -6,9 +6,11 @@ import numpy as np
 
 #path="data/cvs_files"
 
-def prepare_data(variety, model, scenario, target_value, data_type, anom_period, path="data/cvs_files"):
 
-    print("params:", variety, target_value, data_type, anom_period)
+
+def prepare_data(variety, model, planting, scenario, target_value, data_type, path="data/cvs_files"):
+
+    print("params:", variety, target_value, data_type)
     # anom_period[0] = historical data
     # anom_period[1] = forecast data
     if data_type in ["mean_change",
@@ -17,7 +19,10 @@ def prepare_data(variety, model, scenario, target_value, data_type, anom_period,
                      "yield_change_index",
                      "stress_simple"
                      ]:
-        csv_file = f"{path}/HARWT_ID_{model}_{scenario}_PDhist_{variety}_{anom_period[0]}_US_CA.csv"
+        if model[0]=='historical':
+            csv_file =f"{path}/HARWT_ID_HistBL_PDhist_{variety[0]}_{target_value[0]}_US_CA.csv"
+        else:
+            csv_file = f"{path}/HARWT_ID_{model[0]}_{scenario[0]}_{planting[0]}_{variety[0]}_{target_value[0]}_US_CA.csv"
         df = pd.read_csv(csv_file,dtype={"ID": str})
         df = df.rename(columns={"ID": "id"})
         # if "CCSUID" in df.columns:
@@ -26,9 +31,11 @@ def prepare_data(variety, model, scenario, target_value, data_type, anom_period,
         #     df["id"] = df["FIPS"].astype(str)
         df["HARWT"] = pd.to_numeric(df["HARWT"], errors="coerce")
 
-        
-        csv_file_fcst = f"{path}/HARWT_ID_{model}_{scenario}_PDhist_{variety}_{anom_period[1]}_US_CA.csv"
-        df_fcst = pd.read_csv(csv_file_fcst,dtype={"ID": str})
+        if model[1]=='historical':
+            csv_file_data_aux =f"{path}/HARWT_ID_HistBL_PDhist_{variety[1]}_{target_value[1]}_US_CA.csv"
+        else:
+            csv_file_data_aux = f"{path}/HARWT_ID_{model[1]}_{scenario[1]}_{planting[1]}_{variety[1]}_{target_value[1]}_US_CA.csv"
+        df_fcst = pd.read_csv(csv_file_data_aux,dtype={"ID": str})
         df_fcst = df_fcst.rename(columns={"ID": "id"})
 
         # if "CCSUID" in df_fcst.columns:
@@ -71,7 +78,7 @@ def prepare_data(variety, model, scenario, target_value, data_type, anom_period,
                 )
     else:
         if data_type in ["projected"]:
-            csv_file = f"{path}/HARWT_ID_{model}_{scenario}_PDhist_{variety}_{target_value}_US_CA.csv"
+            csv_file = f"{path}/HARWT_ID_{model}_{scenario}_{planting}_{variety}_{target_value}_US_CA.csv"
         else:
             csv_file = f"{path}/HARWT_ID_HistBL_PDhist_{variety}_{target_value}_US_CA.csv"
         print(csv_file)

@@ -9,6 +9,33 @@ from globals_ import GLOBAL_CONFIG
 import json 
 import math
 
+MODELS = [
+    {"value": "CanESM2.CanRCM4", "label": "CanESM2 + CanRCM4"},
+    {"value": "CanESM2.CRCM5-UQAM", "label": "CanESM2 + CRCM5-UQAM"},
+    {"value": "MPI-ESM-LR.CRCM5-UQAM", "label": "MPI-ESM-LR + CRCM5-UQAM"},
+]
+
+HISTORICAL_YEARS = [
+    {"label": "2006-2010", "value": "2006-2010"},
+]
+PROJECTED_YEARS = [
+    {"label": "2021-2025", "value": "2021-2025"},
+    {"label": "2026-2030", "value": "2026-2030"},
+    {"label": "2031-2035", "value": "2031-2035"},
+    {"label": "2036-2040", "value": "2036-2040"},
+    {"label": "2041-2045", "value": "2041-2045"},
+    {"label": "2046-2050", "value": "2046-2050"}      
+]
+
+PLANTING = [
+    {"label": "No adaptation", "value": "PDhist"},
+    {"label": "With adaptation", "value": "PDy0n30"},
+]
+SCENARIOS= [
+    {"label": "RCP 4.5", "value": "rcp45"},
+    {"label": "RCP 8.5", "value": "rcp85"},     
+]
+
 # Colores de la interfaz
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
@@ -271,7 +298,8 @@ def navbar_layout():
                             
                         ),
                     ],
-                    align="center", 
+                    align="center",
+                    id='navbar-brand' ,
                     style={
                         "padding-top": "1rem",       # margen superior
                         "padding-bottom": "1rem",    # margen inferior
@@ -382,22 +410,19 @@ def navbar_layout():
                 html.Div(
                     [ 
                         Block("Model", Select(id="model", 
-                            options=[
-                                "CanESM2.CanRCM4",
-                                "CanESM2.CRCM5-UQAM", 
-                                "MPI-ESM-LR.CRCM5-UQAM"
-                            ]
+                            options=[m["value"] for m in MODELS],
+                            labels=[m["label"] for m in MODELS]
                         )),
+                        Block("Planting", Select(
+                            id="planting",
+                            options=[m["value"] for m in PLANTING],
+                            labels=[m["label"] for m in PLANTING],
+                            init=0,
+                        )),                        
                         Block("Scenario", Select(
                             id="scenario",
-                            options=[
-                                "rcp45",
-                                "rcp85"
-                            ],
-                             labels=[
-                                 "RCP 4.5",
-                                 "RCP 8.5"
-                             ],
+                            options=[m["value"] for m in SCENARIOS],
+                            labels=[m["label"] for m in SCENARIOS],
                             init=0,
                         )),
                     ],
@@ -422,24 +447,84 @@ def navbar_layout():
                     style={"display": "inline-block", "margin-left": "20px", "vertical-align": "top"}   
                 ),
                 html.Div( 
-                    Block("Period", 
-                        Select(id="hist_years",
-                                options=[
-                                    "2006-2010",
+                    Block("", 
+                        "  ",
+                        Block("Dataset 1", 
+                        #PROJECTED_YEARS
+                            html.Div(
+                                children=[
+                                    Select(id="dataset1",
+                                        options=[m["value"] for m in MODELS],
+                                        labels=[m["label"] for m in MODELS]
+                                        ),
+                                    " ",
+                                    Select(
+                                        id="dataset1_planting",
+                                        options=[m["value"] for m in PLANTING],
+                                        labels=[m["label"] for m in PLANTING],
+                                        init=0,
+                                        ),
+                                    " ",
+                                    Select(
+                                        id="dataset1_scenario",
+                                        options=[m["value"] for m in SCENARIOS],
+                                        labels=[m["label"] for m in SCENARIOS],
+                                        init=0,
+                                        ),
+                                    " ",
+                                    Select(id="dataset1_years",
+                                        options=[m["value"] for m in PROJECTED_YEARS],
+                                        labels=[m["label"] for m in PROJECTED_YEARS]
+                                            ),
                                 ],
-                                labels=[
-                                    "2006-2010"
+                                id="dataset1_container",
+                                #style={"display": "flex", "flex-direction": "column"} 
+                            ),
+                        ),
+                        " ",
+                        Block("Dataset 2", 
+                            
+                            " ",
+                            html.Div(
+                                children=[
+                                    Select(id="dataset2",
+                                        #placeholder="Dataset used for anomaly calculation",
+                                        options=['historical']+[m["value"] for m in MODELS],
+                                        labels=['Historical']+[m["label"] for m in MODELS]
+                                    ),
+                                    html.Div(
+                                        children=[
+                                        Select(
+                                            id="dataset2_planting",
+                                            options=[m["value"] for m in PLANTING],
+                                            labels=[m["label"] for m in PLANTING],
+                                            init=0,
+                                            ),
+                                        " ",
+                                        Select(
+                                            id="dataset2_scenario",
+                                            options=[m["value"] for m in SCENARIOS],
+                                            labels=[m["label"] for m in SCENARIOS],
+                                            init=0,
+                                            ),
+                                        ],
+                                        id="dataset2_plant-scen_container"
+                                    ),
+                                    " ",
+                                    Select(id="dataset2_years",
+                                    options=[m["value"] for m in HISTORICAL_YEARS],
+                                    labels=[m["label"] for m in HISTORICAL_YEARS]
+                                        ),
                                 ],
-                                ),
-                                "-",
-                        Select(id="fcst_years",
-                                options=[
-                                    "2046-2050",
-                                ],
-                                labels=[
-                                    "2046-2050"
-                                ],
-                                ),
+                                id="dataset2_container",
+                                #style={"margin-left": "5px", "vertical-align": "top"}  
+                            ),
+                            # " ",
+                            # html.Div(
+                                
+                            #     #id="dataset2_container"
+                            # ),
+                        ),
                     ),
                     id="anomaly_period_container",
                     style={"display": "inline-block", "margin-left": "20px", "vertical-align": "top"}   
@@ -596,8 +681,9 @@ info = html.Div(
     children=get_info(),
     id="info",
     style={
+        #"position":"fixed",
         "position": "absolute",
-        "top": "200px",
+        "top": "200px", #Y 350
         "right": "15px",
         "zIndex": 1000,
         "background": "white",

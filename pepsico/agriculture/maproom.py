@@ -49,6 +49,7 @@ def register(FLASK, config):
 
     APP.enable_dev_tools(debug=True)
     APP.title = "Forecast"  # Título de la pestaña del navegador
+    
 
     # Definición del layout de la app
     APP.layout = layout.app_layout()
@@ -284,49 +285,84 @@ def register(FLASK, config):
     #         # Retorna None si hay error en los datos
     #         return None
 
+
     # -------------------------------------------------
     # Callback para controlar panel de control
     # -------------------------------------------------
     @APP.callback(
+    Output("dataset2_container", "style"),
+    Output("dataset1_container", "style"),
+    Output("dataset2_plant-scen_container", "style"),
+    Output("dataset2_years", "options"),
+    Output("dataset2_years", "value"),
+    Output("dataset1", "options"),
+    Output("dataset1_years", "options"),
+    Input("dataset2", "value"),
+     )
+    def toggle_multidataset(dataset2):
+        dataset2_years_options =[]
+        dataset1_years_options =[]
+        dataset2_planting_style={"display": "none"} 
+        dataset2_scenario_style=dataset2_planting_style
+        if  dataset2 == "historical" : #and data_type not in  ["historical", "projected"]) 
+            dataset2_years_options = layout.HISTORICAL_YEARS
+            dataset1 = layout.MODELS
+            dataset1_years_options = layout.PROJECTED_YEARS
+            dataset2_style= {"display": "flex", "flex-direction": "column"}
+            dataset1_style=dataset2_style
+            dataset2_planting_style={"display": "none"} 
+            dataset2_scenario_style=dataset2_planting_style
+            dataset2_value = layout.HISTORICAL_YEARS[0]['value'] 
+        else: 
+            dataset2_years_options = layout.PROJECTED_YEARS
+            dataset1 = [{"label":"Historical","value":"historical"}]+layout.MODELS
+            dataset1_years_options = layout.HISTORICAL_YEARS+layout.PROJECTED_YEARS
+            dataset2_style={"display": "flex", "flex-direction": "column"}
+            dataset1_style=dataset2_style
+            dataset2_planting_style={"display": "flex", "flex-direction": "column"}
+            dataset2_scenario_style=dataset2_style
+            dataset2_value = layout.PROJECTED_YEARS[0]['value'] 
+
+        return dataset2_style,dataset1_style,dataset2_scenario_style, dataset2_years_options,dataset2_value,dataset1,dataset1_years_options
+
+
+    @APP.callback(
     Output("period_container", "style"),
     Output("anomaly_period_container", "style"),
     Output("model_container", "style"),
+    Output("info", "style"),
     Output("period_years", "options"),           
     Output("period_years", "value"), 
-    Input("data_type", "value")
+    Input("data_type", "value"),
+    Input("info", "style"),
     )
-    def toggle_period_years(data_type):
-        if data_type == "historical":
+    def toggle_period_years(data_type,info_style):
+        options=[]
+        info_style['top'] = '200px'
+        #info_style = {"top": "200px"}
+        #print(f"info style es: {info_style}")
+        if data_type == "historical" :
             period_style = {"display": "inline-block", "margin-left": "5px", "vertical-align": "top"}
             anomaly_period_style = {"display": "none"}
-            model_style=anomaly_period_style 
-            options = [
-                {"label": "2006-2010", "value": "2006-2010"},
-            ]
-            value = "2006-2010"  # valor inicial por defecto
+            model_style=anomaly_period_style
+            options = layout.HISTORICAL_YEARS
+            value = layout.HISTORICAL_YEARS[0]['value']  # valor inicial por defecto
+            #"top": "200px"
         elif data_type == "projected":
             period_style = {"display": "inline-block", "margin-left": "5px", "vertical-align": "top"}
             anomaly_period_style = {"display": "none"}
             model_style={"display": "inline-flex", "gap": "5px", "margin-left": "10px", "vertical-align": "top", "align-items": "flex-start"} 
-            options = [
-                
-                    {"label": "2021-2025", "value": "2021-2025"},
-                    {"label": "2026-2030", "value": "2026-2030"},
-                    {"label": "2031-2035", "value": "2031-2035"},
-                    {"label": "2036-2040", "value": "2036-2040"},
-                    {"label": "2041-2045", "value": "2041-2045"},
-                    {"label": "2046-2050", "value": "2046-2050"}
-                 
-            ]
-            value = "2021-2025"
+            options = layout.PROJECTED_YEARS
+            value = layout.PROJECTED_YEARS[0]['value']
         else:  # anomaly, direction_change
             period_style = {"display": "none"}
             anomaly_period_style = {"display": "inline-block", "margin-left": "20px", "vertical-align": "top"}
-            model_style=anomaly_period_style 
-            options = []
+            model_style=period_style
             value = None
+            info_style['top'] = '310px'
 
-        return period_style, anomaly_period_style, model_style,options, value
+        return period_style, anomaly_period_style, model_style,info_style,options, value, 
+    
     # -------------------------------------------------
     # Callback para generar el gráfico local de serie de tiempo
     # -------------------------------------------------
@@ -338,18 +374,18 @@ def register(FLASK, config):
         #Input("edit-control", "geojson"),
         Input("graph_type", "value"),
         Input("variety", "options"),
-        Input("hist_years", "options"),
-        Input("fcst_years", "options"),        
+        Input("dataset1_years", "options"),
+        Input("dataset2_years", "options"),        
         )
-    def local_plots( click,dblclick,mouseover,type,variety,hist_years,fcst_years) :
+    def local_plots( click,dblclick,mouseover,type,variety,dataset1_years,dataset2_years) :
         local_graph = None
         fig=None
         ctx = dash.callback_context
         print(mouseover)
         event = ctx.triggered[0]["prop_id"]
         variety_values = [opt["value"] for opt in variety]
-        hist_years_values = [opt["value"] for opt in hist_years]
-        fcst_years_values = [opt["value"] for opt in fcst_years]
+        dataset1_years_values = [opt["value"] for opt in dataset1_years]
+        dataset2_years_values = [opt["value"] for opt in dataset2_years]
         #print(click["properties"]["id"])
         #pepe=extraf.cargar_valores_id("data/pepsi", click["properties"]["id"])
         #print(data)
@@ -359,8 +395,8 @@ def register(FLASK, config):
                                                    click["properties"]["id"],
                                                    "HARWT",
                                                    variety_values,
-                                                   hist_years_values,
-                                                   fcst_years_values 
+                                                   dataset1_years_values,
+                                                   dataset2_years_values 
                                                    )
                                                    ]
             #print(data)
@@ -694,16 +730,29 @@ def register(FLASK, config):
         # -------------------------------------------------
     # Callback para generar el título del mapa
     # -------------------------------------------------
+    multi_datasets = { 'model':[ Input("dataset1", "value"), Input("dataset2", "value")], 
+                     'variety':[ Input("variety", "value"), Input("variety", "value")],
+                    'planting':[ Input("dataset1_planting", "value"), Input("dataset2_planting", "value")] ,
+                    'scenario':[ Input("dataset1_scenario", "value"), Input("dataset2_scenario", "value")] ,
+                'period_years':[ Input("dataset1_years", "value"), Input("dataset2_years", "value")] 
+                      
+                      }
+    single_dataset = {
+                      'model':Input("model", "value"),
+                    'variety':Input("variety", "value"),
+                   'planting':Input("planting", "value"),
+                   'scenario':Input("scenario", "value"),
+               'period_years':Input("period_years", "value"),
+                        }
     @APP.callback(
         Output("map_title", "children"),  # Actualiza el texto del título del mapa
         #Input("submit_controls","n_clicks"),  # Evento al hacer click en el botón de actualizar
         #State("scenario", "value"),  # Escenario seleccionado
-        Input("model", "value"),  # Modelo seleccionado
-        Input("variable", "value"),  # Variable seleccionada
-        Input("variety", "value"),
-        Input("period_years", "value"),
-        Input("data_type", "value"),
-        Input("anomaly_period_values", "data")
+        single_dataset, # args[0]
+        Input("data_type", "value"), # args[1]
+        #Input("anomaly_period_values", "data"), # args[2]
+        multi_datasets, # args[2]
+        Input("variable","value") # arg[3]
         #State("start_month", "value"),  # Mes de inicio del periodo proyectado
         #State("end_month", "value"),  # Mes de fin del periodo proyectado
         #State("start_year", "value"),  # Año de inicio del periodo proyectado
@@ -711,15 +760,15 @@ def register(FLASK, config):
         #State("start_year_ref", "value"),  # Año de inicio del periodo de referencia
         #State("end_year_ref", "value"),  # Año de fin del periodo de referencia
     )
-    def write_map_title(
+    def write_map_title(*args
         #n_clicks,
         #scenario,
-        model,
-        variable,
-        variety,
-        period_years,
-        data_type,
-        anom_period
+        #model,
+        #variable,
+        #variety,
+        #period_years,
+        #data_type,
+        #anom_period
         #start_month,
         #end_month,
         #start_year,
@@ -727,10 +776,33 @@ def register(FLASK, config):
         #start_year_ref,
         #end_year_ref,
     ):
-        if data_type not in ['historical','projected']:
-            top_title=f"{model} {variable} {data_type.replace('_', ' ').capitalize()} {variety} for {'/'.join(anom_period)}"
+        single_dataset=args[0]
+        data_type=args[1]
+        multi_datasets = args[2]
+        variable=args[3]
+
+        if data_type in ['historical','projected']:
+            variety=single_dataset['variety']
+            model=single_dataset['model']
+            planting=single_dataset['planting']
+            scenario=single_dataset['scenario']
+            target_value=single_dataset['period_years']
         else:
-            top_title=f"{model} {variable} change from {variety} for {period_years}"
+            variety=multi_datasets['variety']
+            model=multi_datasets['model']
+            planting=multi_datasets['planting']
+            scenario=multi_datasets['scenario']
+            target_value=multi_datasets['period_years']
+
+        if data_type not in ['historical','projected']:
+            top_title= (
+                    f"HARWT {data_type.replace('_', ' ').capitalize()} variety={variety[0]}",
+                    html.Br(),
+                    f"{model[0]}_{planting[0]}_{scenario[0]}_{target_value[0]} - "
+                    f"{model[1]}_{planting[1]}_{scenario[1]}_{target_value[1]}"
+                )
+        else:
+            top_title=f"{model} {variable} change from {variety} for {target_value}"
         # Construye un título resumido del mapa mostrando periodo, escenario, modelo, variable y referencia
         return (top_title)
 
@@ -740,24 +812,57 @@ def register(FLASK, config):
     # Callback para combinar valores
     @APP.callback(
         Output("anomaly_period_values", "data"),
-        [Input("hist_years", "value"), Input("fcst_years", "value")]
+        [Input("dataset1_years", "value"), Input("dataset2_years", "value")]
     )
     def combine_inputs(hist, fcst):
         return [hist, fcst]
     
+    multi_datasets = { 'model':[ Input("dataset1", "value"), Input("dataset2", "value")], 
+                     'variety':[ Input("variety", "value"), Input("variety", "value")],
+                    'planting':[ Input("dataset1_planting", "value"), Input("dataset2_planting", "value")] ,
+                    'scenario':[ Input("dataset1_scenario", "value"), Input("dataset2_scenario", "value")] ,
+                'period_years':[ Input("dataset1_years", "value"), Input("dataset2_years", "value")] 
+                      
+                      }
+    single_dataset = {
+                      'model':Input("model", "value"),
+                    'variety':Input("variety", "value"),
+                   'planting':Input("planting", "value"),
+                   'scenario':Input("scenario", "value"),
+               'period_years':Input("period_years", "value"),
+                        }
     @APP.callback(
         Output("geojson", "data"),
         Output("geojson", "hideout"),
         Output("colorbar", "children"),
-        Input("variety", "value"),
-        Input("model", "value"),
-        Input("scenario", "value"),
-        Input("period_years", "value"),
-        Input("data_type", "value"),
-        Input("anomaly_period_values", "data")
-        #[Input("hist_years", "value"), Input("fcst_years", "value")]
+        single_dataset, # args[0]
+        Input("data_type", "value"), # args[1]
+        #Input("anomaly_period_values", "data"), # args[2]
+        multi_datasets # args[2]
+        #[Input("dataset1_years", "value"), Input("dataset2_years", "value")]
     )
-    def load_csv_and_update(variety,model,scenario,target_value,data_type,anom_period):
+    def load_csv_and_update(*args):
+        single_dataset=args[0]
+        data_type=args[1]
+        #anom_period = args[2]
+        multi_datasets = args[2]
+        #multi_datasets = multi_datasets[0]
+        #single_dataset=single_dataset[0]
+        #print(f"pepe es {multi_datasets['model']}")
+
+        if data_type in ['historical','projected']:
+            variety=single_dataset['variety']
+            model=single_dataset['model']
+            planting=single_dataset['planting']
+            scenario=single_dataset['scenario']
+            target_value=single_dataset['period_years']
+        else:
+            variety=multi_datasets['variety']
+            model=multi_datasets['model']
+            planting=multi_datasets['planting']
+            scenario=multi_datasets['scenario']
+            target_value=multi_datasets['period_years']
+        #variety=[variety]
         # #print("Pepe")
         
         #print(data_type)
@@ -796,7 +901,7 @@ def register(FLASK, config):
         # min_val = df["HARWT"].min()
         # max_val = df["HARWT"].max()
 
-        data_filtered,new_classes,colorscale=extrafunctions.prepare_data(variety,model,scenario,target_value,data_type,anom_period)
+        data_filtered,new_classes,colorscale=extrafunctions.prepare_data(variety,model,planting,scenario,target_value,data_type)
         #base = layout.calcular_base(min_val, max_val)
         #new_classes = layout.generar_clases(min_val, max_val, base=base)
         #print(new_classes)
@@ -805,7 +910,11 @@ def register(FLASK, config):
         # Colorbar
         
         if data_type not in ['historical','projected']:
-            title=f"HARWT {data_type.replace('_', ' ').capitalize()} variety={variety} {'/'.join(anom_period)}"
+            title= (
+                    f"HARWT {data_type.replace('_', ' ').capitalize()} variety={variety}\n"
+                    f"{model[0]}_{planting[0]}_{scenario[0]}_{target_value[0]} vs "
+                    f"{model[1]}_{planting[1]}_{scenario[1]}_{target_value[1]}"
+                )
         else:
             title=f"HARWT variety={variety} target={target_value}"
 
