@@ -1711,6 +1711,45 @@ def export_endpoint(country_key):
     return response
 
 
+@SERVER.route(f"{PFX}/regions/geojson")
+def regions_geojson_endpoint():
+    """
+    Return admin-level polygons as GeoJSON FeatureCollection.
+
+    Query params: country (required), level (required, 0=National, 1=Regional, etc.),
+    region (optional, filter to single region key).
+    Example: /regions/geojson?country=djibouti&level=1
+    """
+    country_key = parse_arg("country")
+    level = parse_arg("level", int)
+    region = parse_arg("region", default=None)
+
+    # Validate country exists and level is in range
+    if country_key not in CONFIG["countries"]:
+        raise InvalidRequestError(f"Unknown country: {country_key}")
+    config = CONFIG["countries"][country_key]
+    nlevels = len(config["shapes"])
+    if level < 0 or level >= nlevels:
+        raise InvalidRequestError(
+            f"level must be 0..{nlevels - 1} for {country_key}"
+        )
+
+    # Fetch shapes from PostGIS or shapefile (via retrieve_shapes)
+    df = retrieve_shapes(
+        country_key, level, fields=("key", "label", "the_geom"), key=region
+    )
+    # Build GeoJSON FeatureCollection; str(key) ensures JSON-serializable output
+    features = [
+        {
+            "type": "Feature",
+            "properties": {"key": str(row["key"]), "label": row["label"]},
+            "geometry": shapely.geometry.mapping(row["the_geom"]),
+        }
+        for _, row in df.iterrows()
+    ]
+    return flask.jsonify({"type": "FeatureCollection", "features": features})
+
+
 @SERVER.route(f"{PFX}/regions")
 def regions_endpoint():
     country_key = parse_arg("country")
