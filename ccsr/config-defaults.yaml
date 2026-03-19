@@ -14,7 +14,7 @@ maprooms:
     flex_fcst:
 
         # App set up
-        - title: flex_cst_precip
+        - title: flex_fcst_precip
           core_path: flex_fcst_precip
           forecast_path: /Data/data21/iri/FD.3
           variable: Precipitation
@@ -22,3 +22,12 @@ maprooms:
           method: elr # or pycpt
           var: precip
           issue_format: "%b %Y"
+
+    terc_fcst:
+        - title: terc_fcst_precip
+          core_path: terc_fcst_precip
+          forecast_path: /Data/data21/iri/FD/NMME_Seasonal_Forecast/Precipitation_ELR
+          variable: Precipitation
+          var: precip
+          issue_format: "%b %Y"
+          

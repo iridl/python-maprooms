@@ -1,8 +1,5 @@
-from dash import dcc
 from dash import html
-import dash_bootstrap_components as dbc
-import dash_leaflet as dlf
-from fieldsets import Block, Select, PickPoint, Month, Number
+from fieldsets import Block, Select, PickPoint, Number
 import layout_utilities as lou
 
 from globals_ import GLOBAL_CONFIG

@@ -4,6 +4,7 @@ from pathlib import Path
 import pingrid
 import numpy as np
 import datetime
+import predictions
 
 
 def get_targets_dict(fcst_conf, fcst_ds, start_date):
@@ -11,7 +12,7 @@ def get_targets_dict(fcst_conf, fcst_ds, start_date):
         return pycpt.pycptv2_targets_dict(fcst_ds, start_date=start_date)
     else:
         S = datetime.datetime(
-            int(start_date[4:8]), ife.strftimeb2int(start_date[0:3]), 1
+            int(start_date[4:8]), predictions.strftimeb2int(start_date[0:3]), 1
         )
         return ife.targets_dict(fcst_ds, S)
 
