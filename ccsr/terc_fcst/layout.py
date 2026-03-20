@@ -39,7 +39,18 @@ def app_layout():
             ),
         ),
         
-        lou.map(GLOBAL_CONFIG["zoom"]),
+        lou.map(GLOBAL_CONFIG["zoom"], scale_control_position="bottomleft", colorbars={
+            "below_cb" : {
+                "nTicks": 6, "min": 37.5, "max": 100, "tickDecimals": 1, "unit": "%",
+                "opacity": 1, "tooltip": True, "position": "bottomright",
+                "width": 10, "height": 140,
+            },
+            "above_cb" : {
+                "nTicks": 6, "min": 37.5, "max": 100, "tickDecimals": 1, "unit": "%",
+                "opacity": 1, "tooltip": True, "position": "topright",
+                "width": 10, "height": 140,
+            },
+        }),
         
         lou.local_single_tabbed("Tercile Probabilities"),
     )

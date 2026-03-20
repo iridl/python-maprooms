@@ -103,8 +103,10 @@ def description(title, subtitle, *elems):
 def map(
     default_zoom,
     layers_control_position="topleft", scale_control_position="bottomright",
-    cb_nTicks=9, cb_opacity=1, cb_tooltip=True,
-    cb_position="topright", cb_width=10, cb_height=300,
+    colorbars={"colorbar" : {
+        "nTicks": 9, "opacity": 1, "tooltip": True, "position": "topright",
+        "width": 10, "height": 300
+    }},
 ):
     """
     A dlf map topped with and H5 title,
@@ -134,21 +136,18 @@ def map(
                     dlf.ScaleControl(
                         imperial=False, position=scale_control_position
                     ),
+                ] + [
                     dlf.Colorbar(
-                        id="colorbar",
-                        nTicks=cb_nTicks,
-                        opacity=cb_opacity,
-                        tooltip=cb_tooltip,
-                        position=cb_position,
-                        width=cb_width,
-                        height=cb_height,
+                        id=cb,
                         className="p-1",
                         style={
                             "background": "white", "border-style": "inset",
                             "-moz-border-radius": "4px", "border-radius": "4px",
                             "border-color": "LightGrey",
                         },
-                    ),
+                        **cbd,
+                    )
+                    for cb, cbd in colorbars.items()
                 ],
                 id="map",
                 center=None,

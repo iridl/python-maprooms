@@ -853,7 +853,31 @@ _PRCP_TERCILES_CS = ColorScale(
         Color(0, 51, 255), Color(0, 51, 255),
     ],
     [0, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5.5,
-     5.5, 6.5, 6.5, 7.5, 7.5, 8.5, 8.5, 9.5, 9.5, 10.5, 10.5, 11]
+     5.5, 6.5, 6.5, 7.5, 7.5, 8.5, 8.5, 9.5, 9.5, 10.5, 10.5, 11],
+)
+
+_PRCP_TERCILES_BELOW_CS = ColorScale(
+    "prcp_terciles_below",
+    [
+        Color(250, 250, 0), Color(250, 250, 0),
+        Color(232, 184, 51), Color(232, 184, 51),
+        Color(208, 128, 51), Color(208, 128, 51),
+        Color(170, 70, 30), Color(170, 70, 30),
+        Color(120, 50, 0), Color(120, 50, 0),
+    ],
+    [37.5, 42.5, 42.5, 47.5, 47.7, 57.5, 57.5, 67.5, 67.5, 100],
+)
+
+_PRCP_TERCILES_ABOVE_CS = ColorScale(
+    "prcp_terciles_above",
+    [
+        Color(200, 250, 200), Color(200, 250, 200),
+        Color(150, 250, 150), Color(150, 250, 150),
+        Color(90, 190, 100), Color(90, 190, 100),
+        Color(0, 150, 210), Color(0, 150, 210),
+        Color(0, 51, 255), Color(0, 51, 255),
+    ],
+    [37.5, 42.5, 42.5, 47.5, 47.7, 57.5, 57.5, 67.5, 67.5, 100],
 )
 
 _RAIN_POE_CS = ColorScale(
@@ -1002,6 +1026,8 @@ CMAPS = {CS.name : CS for CS in [
     _PRCP_ANOMALY_CS,
     _PRCP_ANOMALY_BLUE_CS,
     _PRCP_TERCILES_CS,
+    _PRCP_TERCILES_ABOVE_CS,
+    _PRCP_TERCILES_BELOW_CS,
     _RAIN_PNE_CS,
     _RAIN_POE_CS,
     _RAINBOW_CS,

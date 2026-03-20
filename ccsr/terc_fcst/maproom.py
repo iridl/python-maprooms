@@ -41,7 +41,8 @@ def register(FLASK, config):
     @APP.callback(
             Output("start_div", "children"),
             Output("lead_div", "children"),
-            Output("colorbar", "colorscale"),
+            Output("below_cb", "colorscale"),
+            Output("above_cb", "colorscale"),
             Output("lat_input", "min"),
             Output("lat_input", "max"),
             Output("lat_input_tooltip", "children"),
@@ -61,7 +62,9 @@ def register(FLASK, config):
             labels=[ld["label"] for ld in target_dict],
         )
         return (
-            issue_select, lead_select, CMAPS["prcp_terciles"].to_dash_leaflet()
+            issue_select, lead_select,
+            CMAPS["prcp_terciles_below"].to_dash_leaflet(),
+            CMAPS["prcp_terciles_above"].to_dash_leaflet(),
         ) + mru.initialize_map(fcst_ds)
 
 
@@ -99,6 +102,7 @@ def register(FLASK, config):
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
+        print(click_lat_lng)
         return mru.picked_location(
             tfc.get_fcst(config), [""], click_lat_lng, latitude, longitude
         )
@@ -130,13 +134,33 @@ def register(FLASK, config):
         if error_msg is not None:
             local_graph = pingrid.error_fig(error_msg)
         else:
+            for option in targets :
+                if option["value"] == int(lead_time) :
+                    target = option["label"]
+            lng_units = "˚E" if (fcst_ds['X'] >= 0) else "˚W"
+            lat_units = "˚N" if (fcst_ds['Y'] >= 0) else "˚S"
             local_graph = px.bar(
                 (
                     fcst_ds["prob"]
                     .assign_coords(Terciles=("cat", ["Below", "Normal", "Above"]))
                     .to_dataframe()
                 ),
-                x="Terciles", y="prob",
+                x="Terciles", y="prob", range_y=[0, 100], color="Terciles",
+                ccolor_discrete_sequence=["yellow", "grey", "green"],
+                title=(
+                    f"{target} Forecast issued {start_date} at"
+                    f" ({abs(fcst_ds['Y'].values)}{lat_units}"
+                    f", {abs(fcst_ds['X'].values)}{lng_units})"
+                )
+            ).add_hline(
+                y=100/3, line_dash="dash", line_color="black",
+                annotation_text="climatology", annotation_position="bottom right",
+            )
+            y_ticks = [0, 37.5, 42.5, 47.5, 57.5, 67.5, 100]
+            local_graph.update_layout(
+                yaxis={
+                    "tickmode":"array", "tickvals": y_ticks,
+                    "ticktext": [f"{yt} %" for yt in y_ticks]}
             )
         return local_graph
 
