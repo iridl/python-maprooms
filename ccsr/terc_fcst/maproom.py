@@ -63,6 +63,9 @@ def register(FLASK, config):
         )
         return (
             issue_select, lead_select,
+            # while the data is classified and mapped according to classification 
+            # colormap, I draw the colorscale from 2 colormaps (for below and above) 
+            # corresponding to those classifications and with the probability values
             CMAPS["prcp_terciles_below"].to_dash_leaflet(),
             CMAPS["prcp_terciles_above"].to_dash_leaflet(),
         ) + mru.initialize_map(fcst_ds)
@@ -102,7 +105,6 @@ def register(FLASK, config):
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
-        print(click_lat_lng)
         return mru.picked_location(
             tfc.get_fcst(config), [""], click_lat_lng, latitude, longitude
         )
@@ -139,6 +141,37 @@ def register(FLASK, config):
                     target = option["label"]
             lng_units = "˚E" if (fcst_ds['X'] >= 0) else "˚W"
             lat_units = "˚N" if (fcst_ds['Y'] >= 0) else "˚S"
+            #Get colors from the colormap to assign each bar
+            if fcst_ds["prob"].isel(cat=0) >= 37.5:
+                below_color = CMAPS["prcp_terciles_below"].to_rgba_array()[
+                    int(
+                        0.5 
+                        + 255 
+                        * (fcst_ds["prob"].isel(cat=0).values - 37.5)
+                        / (100 - 37.5)
+                    ),
+                    0:3,
+                ]
+                below_color = (
+                    f"rgb({below_color[0]}, {below_color[1]}, {below_color[2]})"
+                )
+            else:
+                below_color = "lightyellow"
+            if fcst_ds["prob"].isel(cat=2) >= 37.5:
+                above_color = CMAPS["prcp_terciles_above"].to_rgba_array()[
+                    int(
+                        0.5 
+                        + 255 
+                        * (fcst_ds["prob"].isel(cat=2).values - 37.5)
+                        / (100 - 37.5)
+                    ),
+                    0:3,
+                ]
+                above_color = (
+                    f"rgb({above_color[0]}, {above_color[1]}, {above_color[2]})"
+                )
+            else:
+                above_color = "rgb(220, 255, 220)"
             local_graph = px.bar(
                 (
                     fcst_ds["prob"]
@@ -146,7 +179,7 @@ def register(FLASK, config):
                     .to_dataframe()
                 ),
                 x="Terciles", y="prob", range_y=[0, 100], color="Terciles",
-                ccolor_discrete_sequence=["yellow", "grey", "green"],
+                color_discrete_sequence=[below_color, "grey", above_color],
                 title=(
                     f"{target} Forecast issued {start_date} at"
                     f" ({abs(fcst_ds['Y'].values)}{lat_units}"
@@ -185,6 +218,7 @@ def register(FLASK, config):
         # Reading
         fcst_ds = tfc.get_fcst(config, start_date=start_date, lead_time=lead_time)
         dominant_cat = fcst_ds["prob"].idxmax(dim="cat")
+        # Classifying each tercile forecast from 0 to 5
         fcst_class = (
             (fcst_ds["prob"] > 37.5) * 1.
             + (fcst_ds["prob"] > 42.5) * 1.
@@ -193,7 +227,7 @@ def register(FLASK, config):
             + (fcst_ds["prob"] > 67.5) * 1.
         )
         # Can I do this without for? 
-        # I am afraid not because where would not know how to broadcast...?
+        # I am afraid not because xr.where would not know how to broadcast...?
         dominant_fcst_class = sum([
             xr.where(
                 # Where class is dominant
