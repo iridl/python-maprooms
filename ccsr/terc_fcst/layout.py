@@ -1,5 +1,5 @@
 from dash import html
-from fieldsets import Block, PickPoint, Select
+from fieldsets import Block, PickPoint
 import layout_utilities as lou
 
 from globals_ import GLOBAL_CONFIG

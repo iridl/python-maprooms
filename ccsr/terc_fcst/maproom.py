@@ -4,7 +4,6 @@ from dash.dependencies import Output, Input, State
 import pingrid
 from pingrid import CMAPS
 from . import layout
-import plotly.graph_objects as pgo
 import plotly.express as px
 import numpy as np
 import xarray as xr

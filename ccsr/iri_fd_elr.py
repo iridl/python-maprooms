@@ -1,4 +1,3 @@
-from pathlib import Path
 import xarray as xr
 import datetime
 import predictions
@@ -22,7 +21,7 @@ def get_elr_S(data_path, var):
     files_list = data_path.glob(f"forecast_mean_{var}_*.nc")
     return sorted([datetime.datetime(
         int(f.name[-7:-3]),
-        ccs_util.strftimeb2int(f.name[-10:-7]),
+        predictions.strftimeb2int(f.name[-10:-7]),
         1,
     ) for f in files_list], reverse=True)
 
