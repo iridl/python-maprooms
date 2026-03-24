@@ -113,7 +113,7 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
 def seasonal_wwc(
     labelled_season_data, variable, frost_threshold, wet_threshold, hot_threshold,
-    warm_nights_spell, dry_spell,
+    warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
 ):
     # Boolean variables need the additional where to return NaNs from False/0 to Nans
     # and the sum parameters for entirely NaNs seasons to remain NaNs and not turn to
@@ -253,6 +253,17 @@ def seasonal_wwc(
             .map(median_length_of_spells, "T", min_spell_length=dry_spell)
         )
         wwc_units = "days"
+    if variable == "rain_events":
+        data_ds = (
+            labelled_season_data
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(
+                number_extreme_events_within_days, threshold=rain_event_amount,
+                window=rain_event_window,
+                #skipna=True, min_count=1,
+            )
+        )
+        wwc_units = ""
     # This is all a bit tedious but I didn't figure out another way to keep
     # seasons_ends and renaming time dim T
     # Can revisit later if this code has a future
@@ -763,8 +774,28 @@ def number_extreme_events_within_days(
     Examples
     --------
     Number of rain events of >80mm in 2 days or less:
-    number_extreme_events_within_days(rain_daily_data_in_mm, "gt", 80, 2)    
+    number_extreme_events_within_days(rain_daily_data_in_mm, 80, 2)    
     """
+    events = xr.where(daily_data > threshold, 1, 0).sum(dim)
+    if window > 1 :
+        days_to_keep = daily_data.where(lambda x : x <= threshold)
+        for w in range(2, window+1):
+            # Find all possible events
+            cumul = xr.where(days_to_keep.rolling(min_periods = 1, **{dim: w}).sum() > threshold, 1, 0)
+            new_events = xr.apply_ufunc(
+                # Counts succesive events up to w else reset count
+                np.frompyfunc(lambda x, y : (x + y) if (x < w) else y, 2, 1).accumulate,
+                cumul, cumul.get_axis_num(dim),
+            # Reset events of which days already in previous events
+            ).where(lambda x : x <= 1, other=0)
+            # Increment
+            events = events + new_events.sum(dim)
+            # Disable days in events for next round
+            days_to_keep = days_to_keep + xr.where(new_events == 1, np.nan, 0)
+    return events
+
+
+def _number_extreme_events_within_days_old(daily_data, threshold, window, dim="T"):
     count = 0
     dd = daily_data.copy()
     #Start with shortest events

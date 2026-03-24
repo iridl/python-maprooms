@@ -157,7 +157,20 @@ def test_neewd():
     print(time.time() - start)
 
     np.testing.assert_array_equal(count, [3])
-    assert False
+    #assert False
+
+
+def test__number_extreme_events_within_days_old():
+    t = pd.date_range(start="2000-05-01", end="2000-05-10", freq="1D")
+    values = 1 + 0 * np.arange(t.size)
+    precip = xr.DataArray(values, coords={"T": t})
+    start = time.time()
+    count = app_calc._number_extreme_events_within_days_old(precip, 2, 3)
+    count.load()
+    print(time.time() - start)
+
+    np.testing.assert_array_equal(count, [3])
+    #assert False
 
 
 def test_number_extreme_events_numpy_2():
@@ -170,4 +183,4 @@ def test_number_extreme_events_numpy_2():
     print(time.time() - start)
 
     np.testing.assert_array_equal(count, [3])
-    assert False
+    #assert False
