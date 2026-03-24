@@ -3879,7 +3879,7 @@ countries:
 
                 prcp-v4:
                     label: JAS fcst v4
-                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Mar 2026
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, with lead time from Feb to Mars, configuration selected Mar 2026
                     path: burkinafaso/prcp-jas-v4.zarr
                     var_names:
                         value: pne
@@ -3893,7 +3893,7 @@ countries:
 
                 prcp-v5:
                     label: JAS fcst v5
-                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Mar 2026
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, with lead time from Feb to Mars, configuration selected Mar 2026
                     path: burkinafaso/prcp-jas-v5.zarr
                     var_names:
                         value: pne
