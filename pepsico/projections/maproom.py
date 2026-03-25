@@ -237,6 +237,7 @@ def register(FLASK, config):
         data_ds, error_msg = local_data(
             lat, lng, region, model, variable, start_month, end_month
         )
+        print(data_ds)
         if error_msg != None :
             local_graph = pingrid.error_fig(error_msg)
         else :
@@ -428,7 +429,7 @@ def register(FLASK, config):
         ], "M").mean("M", keep_attrs=True)
         #Tedious way to make a subtraction only to keep attributes
         data = xr.apply_ufunc(
-            np.subtract, data, ref, dask="allowed", keep_attrs="drop_conflicts",
+            np.subtract, data, ref, keep_attrs="drop_conflicts",
         )
         if variable in ["hurs", "huss", "pr"]:
             data = 100. * data / ref
