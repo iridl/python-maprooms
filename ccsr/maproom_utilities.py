@@ -280,9 +280,9 @@ def initialize_map(data):
         ((data["Y"][int(data["Y"].size/2)].values)),
         ((data["X"][int(data["X"].size/2)].values)),
     ]
-    lat_res = (data["Y"][0 ]- data["Y"][1]).values
-    lat_min = str((data["Y"][-1] - lat_res/2).values)
-    lat_max = str((data["Y"][0] + lat_res/2).values)
+    lat_res = (data["Y"][1] - data["Y"][0]).values
+    lat_min = str((data["Y"][0] - lat_res/2).values)
+    lat_max = str((data["Y"][-1] + lat_res/2).values)
     lon_res = (data["X"][1] - data["X"][0]).values
     lon_min = str((data["X"][0] - lon_res/2).values)
     lon_max = str((data["X"][-1] + lon_res/2).values)

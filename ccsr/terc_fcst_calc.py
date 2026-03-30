@@ -27,7 +27,7 @@ def get_fcst(fcst_conf, start_date=None, lead_time=None):
         fcst_ds
         .assign_coords({"cat" : fcst_ds["category"]})
         .assign_coords(longitude=(((fcst_ds.longitude + 180) % 360) - 180))
-        .sortby("longitude")
+        .sortby("longitude").sortby("latitude")
         .rename({"longitude": "X", "latitude": "Y"})
     )
     if lead_time is not None:

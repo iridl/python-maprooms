@@ -49,8 +49,12 @@ def get_fcst(fcst_conf, start_date=None, lead_time=None):
         obs = fcst_clim_coeff_ds.rename({"longitude": "X", "latitude": "Y"})
         # This is needed because we don't want the map centered in the Pacific
         # and because anyway leaflet (or pingrid?) is confused with X from 0 to 360
-        fcst_ds = fcst_ds.assign_coords(X=(((fcst_ds.X + 180) % 360) - 180)).sortby("X")
-        obs = obs.assign_coords(X=(((obs.X + 180) % 360) - 180)).sortby("X")
+        fcst_ds = fcst_ds.assign_coords(
+            X=(((fcst_ds.X + 180) % 360) - 180)
+        ).sortby("X").sortby("Y")
+        obs = obs.assign_coords(
+            X=(((obs.X + 180) % 360) - 180)
+        ).sortby("X").sortby("Y")
         start_dates = [
             sd.strftime(fcst_conf["issue_format"])
             for sd in ife.get_elr_S(
