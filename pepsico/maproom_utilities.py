@@ -317,8 +317,8 @@ def picked_location(data, initialization_cases, click_lat_lng, latitude, longitu
         dash_ctx_triggered["value"] == None
         or dash_ctx_triggered["prop_id"] in initialization_cases
     ):
-        lat = data["Y"][int(data["Y"].size/2)].values
-        lng = data["X"][int(data["X"].size/2)].values
+        lat = data["Y"].isel(Y=int(data["Y"].size/2), drop=True).values.item()
+        lng = data["X"].isel(X=int(data["X"].size/2), drop=True).values.item()
     else:
         if dash_ctx_triggered["prop_id"] == "map.click_lat_lng":
             lat = click_lat_lng[0]

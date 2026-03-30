@@ -237,7 +237,6 @@ def register(FLASK, config):
         data_ds, error_msg = local_data(
             lat, lng, region, model, variable, start_month, end_month
         )
-        print(data_ds)
         if error_msg != None :
             local_graph = pingrid.error_fig(error_msg)
         else :
