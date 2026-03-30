@@ -1,3 +1,4 @@
+
 mode: debug  # debug, devel or prod
 
 # use 0.0.0.0 if you want to connect from another machine. Only
@@ -2333,23 +2334,23 @@ countries:
         marker: [8.025, 17.025]
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from iridb.g2015_2012_0 where adm0_name = 'Niger'
-
+              file: niger/shapes/2026-03/ner_admin_boundaries.shp.zip
+              layer: ner_admin0
+              key_field: adm0_pcode
+              label_field: adm0_name
 
             - name: Regional
-              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
-                  where adm0_name = 'Niger'
+              file: niger/shapes/2026-03/ner_admin_boundaries.shp.zip
+              layer: ner_admin1
+              key_field: adm1_pcode
+              label_field: adm1_name
 
             - name: Department
-              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
-                  where adm0_name = 'Niger'
+              file: niger/shapes/2026-03/ner_admin_boundaries.shp.zip
+              layer: ner_admin2
+              key_field: adm2_pcode
+              label_field: adm2_name
 
-            - name: Commune
-              sql: select rowcacode3 as key, adm_03 as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.ner_adm03_feb2018
 
         datasets:
             defaults:
@@ -3373,18 +3374,23 @@ countries:
         marker: [-4.025, 17.025]
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from iridb.g2015_2012_0 where adm0_name = 'Mali'
+              file: mali/shapes/2026-03/mli_admin_boundaries.shp.zip
+              layer: mli_admin0
+              key_field: adm0_pcode
+              label_field: adm0_name
 
             - name: Regional
-              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
-                  where adm0_name = 'Mali'
+              file: mali/shapes/2026-03/mli_admin_boundaries.shp.zip
+              layer: mli_admin1
+              key_field: adm1_pcode
+              label_field: adm1_name
 
             - name: Department
-              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
-                  where adm0_name = 'Mali'
+              file: mali/shapes/2026-03/mli_admin_boundaries.shp.zip
+              layer: mli_admin2
+              key_field: adm2_pcode
+              
+
 
         datasets:
             defaults:
@@ -3549,20 +3555,22 @@ countries:
         marker: [17.125, 19.165]
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from iridb.g2015_2012_0 where adm0_name = 'Chad'
-
+              file: chad/shapes/2026-03/tcd_admin_boundaries.shp.zip
+              layer: tcd_admin0
+              key_field: adm0_pcode
+              label_field: adm0_name
 
             - name: Regional
-              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
-                  where adm0_name = 'Chad'
-
+              file: chad/shapes/2026-03/tcd_admin_boundaries.shp.zip
+              layer: tcd_admin1
+              key_field: adm1_pcode
+              label_field: adm1_name
 
             - name: Department
-              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
-                  where adm0_name = 'Chad'
+              file: chad/shapes/2026-03/tcd_admin_boundaries.shp.zip
+              layer: tcd_admin2
+              key_field: adm2_pcode
+              label_field: adm2_name
 
 
         datasets:
@@ -3728,20 +3736,22 @@ countries:
         marker: [-1.60, 12.90]
         shapes:
             - name: National
-              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
-                  from iridb.g2015_2012_0 where adm0_name = 'Burkina Faso'
-
+              file: burkinafaso/shapes/2026-03/bfa_admin_boundaries.shp.zip
+              layer: bfa_admin0
+              key_field: adm0_pcode
+              label_field: adm0_name
 
             - name: Regional
-              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
-                  where adm0_name = 'Burkina Faso'
-
+              file: burkinafaso/shapes/2026-03/bfa_admin_boundaries.shp.zip
+              layer: bfa_admin1
+              key_field: adm1_pcode
+              label_field: adm1_name
 
             - name: Department
-              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
-                  where adm0_name = 'Burkina Faso'
+              file: burkinafaso/shapes/2026-03/bfa_admin_boundaries.shp.zip
+              layer: bfa_admin2
+              key_field: adm2_pcode
+              label_field: adm2_name
 
 
         datasets:
