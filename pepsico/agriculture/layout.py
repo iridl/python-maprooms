@@ -27,6 +27,14 @@ PROJECTED_YEARS = [
     {"label": "2046-2050", "value": "2046-2050"}      
 ]
 
+VARIETY = [
+    {"label": "Atlantic", "value": "Atlantic"},
+    {"label": "RH-02", "value": "1867"},
+    {"label": "RH-03", "value": "2053"},
+    {"label": "RH-05", "value": "2137"},
+    {"label": "RH-06", "value": "2215"},
+    {"label": "RH-13", "value": "2312"},
+] 
 PLANTING = [
     {"label": "No adaptation", "value": "PDhist"},
     {"label": "With adaptation", "value": "PDy0n30"},
@@ -360,27 +368,13 @@ def navbar_layout():
                     # ),
                     # Selección de referncias
                     Block("Variety", Select(id="variety", 
-                        options=[
-                            "Atlantic",
-                            "1867",
-                            "2053",
-                            "2137",
-                            "2215",
-                            "2312",   
-                        ],
-                        labels=[
-                            "Atlantic",
-                            "RH-02",
-                            "RH-03",
-                            "RH-05",
-                            "RH-06",
-                            "RH-13",
-                        ],
+                        options=[m["value"] for m in VARIETY],
+                            labels=[m["label"] for m in VARIETY],
                         init=0
                     )),
                 
                 # Data type
-                Block("Data type", 
+                Block("Data View", 
                     Select(id="data_type", 
                         options=[
                             "historical",
@@ -853,15 +847,36 @@ def results_layout():
                         dbc.Col(
                             html.Div(
                                 [
-                                    html.Span("Graph type", style={"margin-left": "5px","margin-right": "10px"}),
-
+                                    html.Span("Graph type", style={"margin-left": "5px","margin-right": "5px"}),
                                     Select(
                                         id="graph_type",
-                                        options=["bars", "lines","markers","markers-scale","lines+markers"],
-                                        labels= ["bars", "lines","dots","dots-scale","lines+dots"],
+                                        #options=["bars", "lines","markers","markers-scale","lines+markers"],
+                                        #labels= ["bars", "lines","dots","dots-scale","lines+dots"],
+                                        options=["bars_group","bars_stack", "lines","lines+markers","markers"],
+                                        labels= ["bars group","bars stack","lines","lines+dots","dots"],
                                         init=0,
                                         #style={"width": "150px"},   # mismo ancho que botón
                                     ),
+                                    html.Span("Planting", style={"margin-left": "10px","margin-right": "5px"}),
+                                    Select(
+                                        id="graph_planting",
+                                        options=[m["value"] for m in PLANTING],
+                                        labels=[m["label"] for m in PLANTING],
+                                        ),
+                                    html.Div(
+                                        [
+                                            html.Span("Scenario", style={"margin-left": "10px","margin-right": "5px"}, id="graph_sce_text"),
+                                            Select(
+                                                id="graph_scenario",
+                                                options=[m["value"] for m in SCENARIOS],
+                                                labels=[m["label"] for m in SCENARIOS],
+                                                init=0,
+                                            ),
+                                        ],
+                                        id="graph_scenario_container",  # <-- este es el que controlas
+                                        style={"display": "flex", "align-items": "center"}
+                                    ),
+
                                 ],
                                 style={"display": "flex", "align-items": "center"}
                             ),

@@ -24,6 +24,8 @@ import dash_leaflet.express as dlx
 from dash import dcc
 
 import dash_leaflet as dlf
+import dash_auth
+
 
 
 def register(FLASK, config):
@@ -46,6 +48,17 @@ def register(FLASK, config):
             {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
         ],
     )
+    
+    VALID_USERS = extrafunctions.load_valid_users_hash()
+    print(f"Usuarios son {VALID_USERS}")
+    #auth = dash_auth.BasicAuth(APP, VALID_USERS)
+    def bcrypt_auth(username, password):
+        #print(f'Lo que recibo es {username} , {password}')
+        if username not in VALID_USERS:
+            return False
+        return extrafunctions.verify_password(password, VALID_USERS[username])
+    dash_auth.BasicAuth(APP, auth_func=bcrypt_auth,secret_key="aXJpZGw=")
+
 
     APP.enable_dev_tools(debug=True)
     APP.title = "Forecast"  # Título de la pestaña del navegador
@@ -53,6 +66,7 @@ def register(FLASK, config):
 
     # Definición del layout de la app
     APP.layout = layout.app_layout()
+
 
     # -------------------------------------------------
     # Callback para inicializar los inputs de lat/lng y el mapa según región
@@ -363,40 +377,125 @@ def register(FLASK, config):
 
         return period_style, anomaly_period_style, model_style,info_style,options, value, 
     
+    # @APP.callback(
+    #     Output("local-graph", "figure"),
+    #     Input("local-graph", "restyleData"),
+    #     State("local-graph", "figure"),
+    #     prevent_initial_call=True
+    # )
+    # def toggle_historical_shape(restyle_data, figure):
+    #     if restyle_data is None:
+    #         return dash.no_update
+
+    #     # restyle_data es [{"visible": [value]}, [trace_index]]
+    #     changed_traces = restyle_data[1]
+    #     visibility = restyle_data[0].get("visible", [None])[0]
+
+    #     # Buscar si el trace que cambió es el Historical
+    #     for idx in changed_traces:
+    #         if figure["data"][idx].get("name") == "Historical":
+    #             # Mostrar u ocultar la shape
+    #             for shape in figure["layout"].get("shapes", []):
+    #                 if shape.get("name") == "historical_line":
+    #                     shape["visible"] = (visibility != "legendonly")
+
+    #     return figure
     # -------------------------------------------------
     # Callback para generar el gráfico local de serie de tiempo
     # -------------------------------------------------
+    #Aqui XC la serie 
+    #  multi_datasets = { 'model':[ Input("dataset1", "value"), Input("dataset2", "value")], 
+    #                  'variety':[ Input("variety", "value"), Input("variety", "value")],
+    #                 'planting':[ Input("dataset1_planting", "value"), Input("dataset2_planting", "value")] ,
+    #                 'scenario':[ Input("dataset1_scenario", "value"), Input("dataset2_scenario", "value")] ,
+    #             'period_years':[ Input("dataset1_years", "value"), Input("dataset2_years", "value")] 
+                      
+    #                   }
+    @APP.callback(
+        Output("graph_scenario_container", "style"),
+        Input("graph_type","value")
+    )
+    def local_plots(graph_type):
+        if graph_type.split("_")[0] == "bars":
+            return {"display": "flex", "align-items": "center"}
+        else:
+            return {"display": "none"}
+
+    options = { 'variety':Input("variety", "value"), #args[0]
+                 'variable':Input("variable", "options"), #args[0]
+                 #'planting':Input("planting", "value"), #args[0]
+                 'planting':Input("graph_planting", "value"),
+                 'graph_type':Input("graph_type", "value"),
+                 'graph_scenario':Input("graph_scenario", "value"),
+                      }
     @APP.callback(
         Output("local_graph", "figure"),
         Input("geojson", "clickData"),
         Input("geojson", "dblclickData"),
         Input("geojson", "click_feature"),
         #Input("edit-control", "geojson"),
-        Input("graph_type", "value"),
+        #Input("graph_type", "value"),
         Input("variety", "options"),
         Input("dataset1_years", "options"),
-        Input("dataset2_years", "options"),        
+        Input("dataset2_years", "options"),
+        options        
         )
-    def local_plots( click,dblclick,mouseover,type,variety,dataset1_years,dataset2_years) :
+    def local_plots( click,dblclick,mouseover,variety,dataset1_years,dataset2_years,*args) :
+
+        def duplicate_points(x_axis, values):
+            """Duplica cada punto con un pequeño offset en x para forzar una línea corta."""
+            x_dup = []
+            y_dup = []
+            for i, (x, y) in enumerate(zip(x_axis, values)):
+                x_dup.extend([i - 0.1, i + 0.1])  # offset de ±0.1 alrededor del índice
+                y_dup.extend([y, y])
+            return x_dup, y_dup
+
         local_graph = None
         fig=None
         ctx = dash.callback_context
         print(mouseover)
         event = ctx.triggered[0]["prop_id"]
-        variety_values = [opt["value"] for opt in variety]
+        variety_values = args[0]['variety'] #[opt["value"] for opt in args[0]['variety']]
+        planting_values = args[0]['planting'] 
+        type=args[0]['graph_type'] 
         dataset1_years_values = [opt["value"] for opt in dataset1_years]
         dataset2_years_values = [opt["value"] for opt in dataset2_years]
         #print(click["properties"]["id"])
         #pepe=extraf.cargar_valores_id("data/pepsi", click["properties"]["id"])
         #print(data)
         print(event)
+        
+        if type.split("_")[0] == "bars":
+            scenario=args[0]['graph_scenario'] 
+        else:
+            scenario=None
         if click is not None and click.get("properties") is not None:
-            data=[extrafunctions.cargar_valores_id("data/cvs_files", 
+            if type.split("_")[0] =='bars':
+                data=[extrafunctions.cargar_valores_id_bar("data/cvs_files", 
                                                    click["properties"]["id"],
                                                    "HARWT",
                                                    variety_values,
-                                                   dataset1_years_values,
-                                                   dataset2_years_values 
+                                                   [m["value"] for m in layout.HISTORICAL_YEARS] ,
+                                                   [m["value"] for m in layout.PROJECTED_YEARS],
+                                                   planting_values,
+                                                   scenario,
+                                                   type.split("_")[0]
+
+                                                   )
+                                                   ]
+            else:
+                #data=[extrafunctions.cargar_valores_id("data/cvs_files", 
+                data=[extrafunctions.cargar_valores_id_bar("data/cvs_files", 
+                                                   click["properties"]["id"],
+                                                   "HARWT",
+                                                   variety_values,
+                                                   [m["value"] for m in layout.HISTORICAL_YEARS] ,
+                                                   [m["value"] for m in layout.PROJECTED_YEARS],
+                                                   planting_values,
+                                                   scenario,
+                                                   type
+
                                                    )
                                                    ]
             #print(data)
@@ -412,10 +511,221 @@ def register(FLASK, config):
             #sizes = min_size + (y_array - y_array.min()) / (y_array.max() - y_array.min()) * (max_size - min_size)
 
             for trace in data:
-                if type == "bars":
-                    fig.add_trace(pgo.Bar(x=trace["x"], y=trace["y"], name=click["properties"]["NAME"]))
+                periods = trace["x_axis"]
+                hist_val = None
+                # Fondo azul claro para el período histórico
+                fig.add_vrect(
+                    x0=-0.5, x1=0.5,          # cubre solo la primera barra (2006-2010)
+                    fillcolor="rgba(173, 216, 230, 0.5)",
+                    layer="below",
+                    line_width=0,
+                )
+                # Fondo rojo claro para los períodos proyectados
+                fig.add_vrect(
+                    x0=0.5, x1=len(periods) - 0.5,   # desde la segunda barra hasta el final
+                    fillcolor="rgba(255, 182, 193, 0.5)",
+                    layer="below",
+                    line_width=0,
+                )
+                if type.split("_")[0] == "bars":
+                    print(f"El trace es {trace}")
+                    
+                    colorbar=extrafunctions.color_scale("tab20")
+                    
+                    
+                    for i, (model, y_values) in enumerate(trace["models"].items()):
+                        if model == "Historical":
+                            # guardamos para la línea punteada
+                            hist_val = y_values[0] if y_values else None
+                        else:
+                            fig.add_trace(pgo.Bar(
+                                x=periods,
+                                y=y_values,
+                                name=model,
+                                marker_color=colorbar[i % len(colorbar)] 
+                            ))
+
+                    # Línea histórica encima de todo
+                    if hist_val is not None:
+                        # Barra negra solo en el primer periodo (el histórico)
+                        fig.add_trace(pgo.Bar(
+                            x=[periods[0]],
+                            y=[hist_val],
+                            name="Historical",
+                            marker_color="black",
+                            legendgroup="historical",       # 👈 agrupa con el scatter
+                            showlegend=True,
+                        ))
+                        # fig.add_trace(pgo.Scatter(
+                        #     #x=periods,
+                        #     x=[periods[0], periods[1]],
+                        #     #x=[-0.5, len(periods) - 0.5],
+                        #     #x=[periods[0], periods[-1]],
+                        #     #x=[periods[0]] + periods + [periods[-1]],
+                        #     #y=[hist_val] * len(periods),
+                        #     y=[hist_val, hist_val],
+                        #     mode="lines",
+                        #     line=dict(dash="solid", color="black", width=3), #['solid', 'dot', 'dash', 'longdash', 'dashdot', 'longdashdot']
+                        #     name="Historical",
+                        #     showlegend=True,
+                        # ))
+                        fig.add_trace(pgo.Scatter(
+                            x=[periods[1], periods[-1]],
+                            #x=periods,
+                            #x=[-0.5, len(periods) - 0.5],
+                            #x=[periods[0], periods[-1]],
+                            #x=[periods[0]] + periods + [periods[-1]],
+                            #y=[hist_val] * len(periods),
+                            y=[hist_val, hist_val],
+                            mode="lines",
+                            line=dict(dash="dash", color="black", width=3), #['solid', 'dot', 'dash', 'longdash', 'dashdot', 'longdashdot']
+                            name="Historical",
+                            legendgroup="historical", 
+                            showlegend=False,  
+                            hovertemplate=f"Historical : {hist_val:,.0f}<extra></extra>",
+                            #showlegend=True,
+                        ))
+                        # fig.add_shape(
+                        #     name="historical_shape", 
+                        #     type="line",
+                        #     #x0=0,
+                        #     #x1=1,
+                        #     x0=0, x1=(1/len(periods)),
+                        #     xref="paper",   # usa el ancho completo del gráfico
+                        #     y0=hist_val,
+                        #     y1=hist_val,
+                        #     yref="y",
+                            
+                        #     line=dict(
+                        #         color="black",
+                        #         width=3,
+                        #         dash="solid",
+                        #     ),
+                        # )
+                        # fig.add_trace(pgo.Scatter(
+                        #     x=[None],
+                        #     y=[None],
+                        #     mode="lines",
+                        #     line=dict(color="black", dash="dash", width=3),
+                        #     name="Historical"
+                        # ))
+
+                    fig.update_layout(barmode=type.split("_")[1], #"group",
+                                      legend=dict(
+                                                orientation="h",        # horizontal
+                                                yanchor="bottom",
+                                                y=-0.25,                 # encima del gráfico
+                                                xanchor="left",
+                                                x=0
+                                            ),
+
+                                      )
                 elif type in ["lines","markers","lines+markers"]:
-                    fig.add_trace(pgo.Scatter(x=trace["x"], y=trace["y"],mode=type, name=click["properties"]["NAME"]))
+                    print(f"Data de lines es {data}")
+                    models = trace['models']
+                    #fig.add_trace(pgo.Scatter(x=trace["x"], y=trace["y"],mode=type, name=click["properties"]["NAME"]))
+                    for name, values in models.items():
+                        is_historical = name == 'Historical'
+                        x_dup, y_dup = duplicate_points(periods, values)
+
+                        if is_historical:
+                            # Valor histórico (primer periodo)
+                            hist_val = next((v for v in values if v is not None), None)
+
+                            if hist_val is not None:
+                                # MARCAR en el primer periodo (donde está el dato real)
+                                marker_y = values  # [hist_val, None, None, ...]
+                                fig.add_trace(pgo.Scatter(
+                                    x=periods,
+                                    y=marker_y,
+                                    mode="markers",
+                                    name="Historical",
+                                    legendgroup="historical",
+                                    showlegend=True,
+                                    connectgaps=False,
+                                    marker=dict(
+                                        color="black",
+                                        size=8,
+                                        symbol="diamond",
+                                    ),
+                                ))
+
+                                # LÍNEA DASH con el valor invertido:
+                                # None donde había dato, hist_val donde había None
+                                dash_y = [None if v is not None else hist_val for v in values]
+                                fig.add_trace(pgo.Scatter(
+                                    x=periods,
+                                    y=dash_y,
+                                    mode="lines",
+                                    name="Historical",
+                                    legendgroup="historical",       # mismo grupo
+                                    showlegend=False,               # solo quiero una leyenda
+                                    connectgaps=False,
+                                    line=dict(
+                                        dash="dash",
+                                        color="black",
+                                        width=2,
+                                    ),
+                                    hovertemplate=f"Historical : {hist_val:,.0f}<extra></extra>",
+                                ))
+
+                        else:
+
+                        # Etiqueta original duplicada para cada par de puntos
+                        # labels_dup = []
+                        # #for label, y in zip(periods, values):
+                        # for label in zip(values):
+                        #     labels_dup.extend([label, label])
+
+                            fig.add_trace(pgo.Scatter(
+                            x=periods,
+                            y=values,
+                            #x=x_dup,
+                            #y=y_dup,
+                            mode=type,
+                            name=name,
+                            connectgaps=False,
+                            #hovertemplate="%{name} %{y}<extra></extra>"
+                            #customdata=labels_dup,
+                            #hovertemplate='<b>%{customdata}</b><br>%{y:,.0f}', #<extra>%{fullData.name}</extra>
+        
+                            # line=dict(
+                            #     color=palette[name]['color'],
+                            #     dash=palette[name]['dash'],
+                            #     width=2.5 if is_historical else 1.8,
+                            # ),
+                            # marker=dict(
+                            #     color=palette[name]['color'],
+                            #     size=10 if is_historical else 6,
+                            #     symbol='diamond' if is_historical else 'circle',
+                            # ),
+                        ))
+
+                    # fig.update_layout(
+                    #     xaxis=dict(title='Period', tickangle=-30),
+                    #     yaxis=dict(title='Value', tickformat=',.0f'),
+                    #     hovermode='x unified',
+                    #     legend=dict(orientation='h', y=-0.3),
+                    # )
+                    fig.update_layout(
+                        #hovermode='x unified',
+                        xaxis=dict(
+                            title='Period',
+                            tickvals=list(range(len(periods))),  # posiciones 0..6
+                            ticktext=periods,                    # etiquetas originales
+                            tickangle=-30,
+                            showspikes=False,  
+                        ),
+                        yaxis=dict(title='Value', tickformat=',.0f'),
+                        hovermode='x unified',
+                        #hovermode='x',
+                        legend=dict(orientation='h', y=-0.3),
+                        #hoverformat=''
+                    )
+                    # Esto sobreescribe el título del tooltip unificado
+                    #fig.update_traces(xhoverformat='')
+                    #fig.update_layout(hovermode="y")
+                    fig.update_xaxes(type="category")
                 elif type in ["markers-scale"]:
                     #y_array = np.append(trace["y"])
                     #print(trace["y"])
@@ -433,12 +743,14 @@ def register(FLASK, config):
                                                     showscale=True
                                                 ) 
                                               ))
-                
+
             fig.update_layout(
-                title=f"{click['properties']['NAME']} , {click['properties']['STATE_NAME']}",
-                xaxis_title="Variety",
+                title=f"{click['properties']['NAME']} , {click['properties']['STATE_NAME']}:  {next((m['label'] for m in layout.VARIETY if m['value'] == variety_values), variety_values)} variety",
+                xaxis_title="",
                 yaxis_title="HARWT",
             )
+            #fig.update_xaxes(showspikes=False)
+            #fig.update_yaxes(showspikes=False)
             # USAR PARA AGRUPAR VARIOS Tipos de graficos
             #fig.update_layout(barmode="group")
 
