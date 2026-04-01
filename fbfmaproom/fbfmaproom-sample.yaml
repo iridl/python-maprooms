@@ -3389,6 +3389,7 @@ countries:
               file: mali/shapes/2026-03/mli_admin_boundaries.shp.zip
               layer: mli_admin2
               key_field: adm2_pcode
+              label_field: adm2_name
               
 
 
