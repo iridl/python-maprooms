@@ -2351,6 +2351,12 @@ countries:
               key_field: adm2_pcode
               label_field: adm2_name
 
+            - name: Commune
+              file: niger/shapes/2026-03/ner_admin_boundaries.shp.zip
+              layer: ner_admin3
+              key_field: adm3_pcode
+              label_field: adm3_name
+
 
         datasets:
             defaults:
