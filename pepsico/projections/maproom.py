@@ -428,7 +428,7 @@ def register(FLASK, config):
         ], "M").mean("M", keep_attrs=True)
         #Tedious way to make a subtraction only to keep attributes
         data = xr.apply_ufunc(
-            np.subtract, data, ref, dask="allowed", keep_attrs="drop_conflicts",
+            np.subtract, data, ref, keep_attrs="drop_conflicts",
         )
         if variable in ["hurs", "huss", "pr"]:
             data = 100. * data / ref

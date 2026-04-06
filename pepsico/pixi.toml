@@ -1,0 +1,49 @@
+[workspace]
+authors = ["IRI <pycpt-help@iri.columbia.edu>"]
+channels = ["conda-forge"] #, "iridl"]
+name = "pepsicomaprooms"
+platforms = ["linux-64"]
+
+[tasks]
+
+[system-requirements]
+linux = "3.10.0"
+libc = {family = "glibc", version = "2.17"}
+
+[dependencies]
+# rasterio build fails with python 3.10
+# https://github.com/rasterio/rasterio/issues/2333
+python = "3.9.*"
+
+# some later version removes the __wrapped__ attribute on callbacks,
+# which is used by some tests
+dash = "2.3.1.*"
+#dash = "2.7.0.*"
+#dash = "*"
+
+dash-leaflet = "0.1.23.*"
+#dash-leaflet = "*"
+#dash-bootstrap-components = "*"
+dash-bootstrap-components = "1.2.1.*"
+numpy = "==1.24.2" # pinned to suppress warning caused by pinned pandas
+scipy = "*"
+opencv = "*"
+
+# Newer versions of Pandas emit warnings when passed a psycopg2
+# connection. To upgrade, use psycopg2 via SQLAlchemy.
+pandas = "1.3.*"
+
+psycopg2 = "*"
+pyyaml = "*"
+rasterio = "*"
+shapely = "*"
+werkzeug = "<2.1" # werkzeug 2.1 spews warnings at dev server startup
+xarray = "*"
+zarr = "*"
+
+[feature.dev.dependencies]
+pytest = "*"
+
+[environments]
+default = {features = ["dev"], solve-group = "prod"}
+prod = {features = [], solve-group = "prod"}
