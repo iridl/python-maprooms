@@ -166,7 +166,7 @@ countries:
                 enacts-precip-mon:
                     label: ENACTS MON precip
                     description: ENACTS monitoring average precipitation over the season
-                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
+                    url: "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
                     path: madagascar/enacts-precip-mon-djf.zarr
                     var_names:
                         value: rfe
@@ -178,7 +178,7 @@ countries:
                 enacts-precip-all:
                     label: ENACTS All precip
                     description: ENACTS average precipitation over the season
-                    url:  "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
+                    url:  "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
                     path: madagascar/enacts-precip-djf.zarr
                     var_names:
                         value: rfe
@@ -239,7 +239,7 @@ countries:
                 spi:
                     label: ENACTS MON SPI
                     description: SPI calculated from ENACTS monitoring product
-                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Dec-Feb)/VALUES/"
+                    url: "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Dec-Feb)/VALUES/"
                     path: madagascar/enacts-mon-spi-djf.zarr
                     var_names:
                         value: spi
@@ -407,7 +407,7 @@ countries:
                 enacts-precip-mon:
                     label: ENACTS MON precip
                     description: ENACTS monitoring average precipitation over the season
-                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Nov-Jan)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
+                    url: "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Nov-Jan)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
                     path: madagascar/enacts-precip-mon-ndj.zarr
                     var_names:
                         value: rfe
@@ -419,7 +419,7 @@ countries:
                 enacts-precip-all:
                     label: ENACTS All precip
                     description: ENACTS average precipitation over the season
-                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Nov-Jan)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
+                    url: "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Nov-Jan)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
                     path: madagascar/enacts-precip-ndj.zarr
                     var_names:
                         value: rfe
@@ -480,7 +480,7 @@ countries:
                 spi:
                     label: ENACTS MON SPI
                     description: SPI calculated from ENACTS monitoring product
-                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Nov-Jan)/VALUES/"
+                    url: "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Nov-Jan)/VALUES/"
                     path: madagascar/enacts-mon-spi-ndj.zarr
                     var_names:
                         value: spi
@@ -601,7 +601,7 @@ countries:
                 enacts-precip-mon:
                     label: ENACTS MON precip
                     description: ENACTS monitoring average precipitation over the season
-                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
+                    url: "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
                     path: madagascar/enacts-precip-mon-ond.zarr
                     var_names:
                         value: rfe
@@ -613,7 +613,7 @@ countries:
                 enacts-precip:
                     label: ENACTS ALL precip
                     description: ENACTS all stations average precipitation over the season
-                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
+                    url: "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage//units/(mm/month)/def/X/42.5/51/RANGE/Y/-26/-11.3/RANGE/"
                     path: madagascar/enacts-precip-ond.zarr
                     var_names:
                         value: rfe
@@ -674,7 +674,7 @@ countries:
                 spi:
                     label: ENACTS MON SPI
                     description: SPI calculated from ENACTS monitoring product
-                    url: "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Oct-Dec)/VALUES/"
+                    url: "https://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Oct-Dec)/VALUES/"
                     path: madagascar/enacts-mon-spi-ond.zarr
                     var_names:
                         value: spi
