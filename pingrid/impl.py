@@ -880,6 +880,51 @@ _PRCP_TERCILES_ABOVE_CS = ColorScale(
     [37.5, 42.5, 42.5, 47.5, 47.7, 57.5, 57.5, 67.5, 67.5, 100],
 )
 
+
+_TEMP_TERCILES_CS = ColorScale(
+    "temp_terciles",
+    [
+        WHITE, WHITE,
+        Color(200, 240, 250), Color(200, 240, 250),
+        Color(177, 202, 250), Color(177, 202, 250),
+        Color(153, 163, 250), Color(153, 163, 250),
+        Color(129, 124, 250), Color(129, 124, 250),
+        Color(85, 85, 200), Color(85, 85, 200),
+        GRAY, GRAY,
+        Color(255, 210, 210), Color(255, 210, 210),
+        Color(242, 170, 170), Color(242, 170, 170),
+        Color(250, 120, 120), Color(250, 120, 120),
+        Color(255, 40, 40), Color(255, 40, 40),
+        Color(150, 19, 19), Color(150, 19, 18),
+    ],
+    [0, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5.5,
+     5.5, 6.5, 6.5, 7.5, 7.5, 8.5, 8.5, 9.5, 9.5, 10.5, 10.5, 11],
+)
+
+_TEMP_TERCILES_BELOW_CS = ColorScale(
+    "temp_terciles_below",
+    [
+        Color(200, 240, 250), Color(200, 240, 250),
+        Color(177, 202, 250), Color(177, 202, 250),
+        Color(153, 163, 250), Color(153, 163, 250),
+        Color(129, 124, 250), Color(129, 124, 250),
+        Color(85, 85, 200), Color(85, 85, 200),
+    ],
+    [37.5, 42.5, 42.5, 47.5, 47.7, 57.5, 57.5, 67.5, 67.5, 100],
+)
+
+_TEMP_TERCILES_ABOVE_CS = ColorScale(
+    "temp_terciles_above",
+    [
+        Color(255, 210, 210), Color(255, 210, 210),
+        Color(242, 170, 170), Color(242, 170, 170),
+        Color(250, 120, 120), Color(250, 120, 120),
+        Color(255, 40, 40), Color(255, 40, 40),
+        Color(150, 19, 19), Color(150, 19, 18),
+    ],
+    [37.5, 42.5, 42.5, 47.5, 47.7, 57.5, 57.5, 67.5, 67.5, 100],
+)
+
 _RAIN_POE_CS = ColorScale(
     "rain_poe",
     [BLACK, BROWN, ORANGE, YELLOW, MOCCASIN, MOCCASIN, LIMEGREEN, TURQUOISE, BLUE, PURPLE],
@@ -1034,6 +1079,9 @@ CMAPS = {CS.name : CS for CS in [
     _STD_ANOMALY_CS,
     _TEMP_CS,
     _TEMP_ANOMALY_CS,
+    _TEMP_TERCILES_CS,
+    _TEMP_TERCILES_ABOVE_CS,
+    _TEMP_TERCILES_BELOW_CS,
     _VULN_CS,
 ]}
 
