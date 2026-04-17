@@ -151,7 +151,7 @@ def map(
                     ),
                 ],
                 id="map",
-                center=None,
+                center=(0,0),
                 zoom=default_zoom,
                 style={"width": "100%", "height": "50vh"},
             ), type="dot"),
