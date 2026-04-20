@@ -30,4 +30,10 @@ maprooms:
           variable: Precipitation
           var: precip
           issue_format: "%b %Y"
+        - title: terc_fcst_temp
+          core_path: terc_fcst_temp
+          forecast_path: /Data/data21/iri/FD/NMME_Seasonal_Forecast/Temperature_ELR
+          variable: Temperature
+          var: tref
+          issue_format: "%b %Y"
           

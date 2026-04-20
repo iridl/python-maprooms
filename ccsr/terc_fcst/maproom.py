@@ -35,7 +35,7 @@ def register(FLASK, config):
     )
     APP.title = "Tercile Forecast"
 
-    APP.layout = layout.app_layout()
+    APP.layout = layout.app_layout(config)
 
     @APP.callback(
             Output("start_div", "children"),
@@ -60,13 +60,18 @@ def register(FLASK, config):
             options=[ld["value"] for ld in target_dict],
             labels=[ld["label"] for ld in target_dict],
         )
+        if config["variable"] == "Precipitation":
+            cs_below = "prcp_terciles_below"
+            cs_above = "prcp_terciles_above"
+        else:
+            cs_below = "temp_terciles_below"
+            cs_above = "temp_terciles_above"
         return (
             issue_select, lead_select,
             # while the data is classified and mapped according to classification 
             # colormap, I draw the colorscale from 2 colormaps (for below and above) 
             # corresponding to those classifications and with the probability values
-            CMAPS["prcp_terciles_below"].to_dash_leaflet(),
-            CMAPS["prcp_terciles_above"].to_dash_leaflet(),
+            CMAPS[cs_below].to_dash_leaflet(), CMAPS[cs_above].to_dash_leaflet(),
         ) + mru.initialize_map(fcst_ds)
 
 
@@ -141,8 +146,18 @@ def register(FLASK, config):
             lng_units = "˚E" if (fcst_ds['X'] >= 0) else "˚W"
             lat_units = "˚N" if (fcst_ds['Y'] >= 0) else "˚S"
             #Get colors from the colormap to assign each bar
+            if config["variable"] == "Precipitation":
+                cs_below = "prcp_terciles_below"
+                cs_above = "prcp_terciles_above"
+                low_below = "lightyellow"
+                low_above = "rgb(220, 255, 220)"
+            else:
+                cs_below = "temp_terciles_below"
+                cs_above = "temp_terciles_above"
+                low_below = "azure"
+                low_above = "lightpink"
             if fcst_ds["prob"].isel(cat=0) >= 37.5:
-                below_color = CMAPS["prcp_terciles_below"].to_rgba_array()[
+                below_color = CMAPS[cs_below].to_rgba_array()[
                     int(
                         0.5 
                         + 255 
@@ -155,9 +170,9 @@ def register(FLASK, config):
                     f"rgb({below_color[0]}, {below_color[1]}, {below_color[2]})"
                 )
             else:
-                below_color = "lightyellow"
+                below_color = low_below
             if fcst_ds["prob"].isel(cat=2) >= 37.5:
-                above_color = CMAPS["prcp_terciles_above"].to_rgba_array()[
+                above_color = CMAPS[cs_above].to_rgba_array()[
                     int(
                         0.5 
                         + 255 
@@ -170,7 +185,7 @@ def register(FLASK, config):
                     f"rgb({above_color[0]}, {above_color[1]}, {above_color[2]})"
                 )
             else:
-                above_color = "rgb(220, 255, 220)"
+                above_color = low_above
             local_graph = px.bar(
                 (
                     fcst_ds["prob"]
@@ -254,7 +269,11 @@ def register(FLASK, config):
             ],
             [lambda x : x, lambda x : x - 4, 6],
         )
-        dominant_fcst_class.attrs["colormap"] = CMAPS["prcp_terciles"]
+        if config["variable"] == "Precipitation":
+            cs_terc = "prcp_terciles"
+        else:
+            cs_terc = "temp_terciles"
+        dominant_fcst_class.attrs["colormap"] = CMAPS[cs_terc]
         dominant_fcst_class.attrs["scale_min"] = 0
         dominant_fcst_class.attrs["scale_max"] = 11
         return pingrid.tile(
