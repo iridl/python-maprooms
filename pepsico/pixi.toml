@@ -1,5 +1,5 @@
 [workspace]
-authors = ["Aaron Kaplan <aaron@iri.columbia.edu>"]
+authors = ["IRI <help@iri.columbia.edu>"]
 channels = ["conda-forge"]
 name = "pepsico"
 platforms = ["linux-64"]
