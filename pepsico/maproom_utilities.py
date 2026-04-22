@@ -246,7 +246,7 @@ def make_adm_overlay(
         dlf.GeoJSON(
             id=border_id,
             data=adm_geojson,
-            options={
+            style={
                 "fill": True,
                 "color": adm_color,
                 "weight": adm_weight,
