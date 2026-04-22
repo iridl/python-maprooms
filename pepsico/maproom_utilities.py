@@ -303,7 +303,7 @@ def picked_location(data, initialization_cases, click_lat_lng, latitude, longitu
         spatial data of which longitude and latitude coordinates are X and Y
     initialization_cases: list[str]
         list of Input of which changes reinitialize the map
-    click_lat_lng: list[str]
+    click_lat_lng: dict
         dlf Input from clicking map (lat and lon)
     latitude: str
         Input from latitude pick a point control
@@ -318,8 +318,8 @@ def picked_location(data, initialization_cases, click_lat_lng, latitude, longitu
         lng = data["X"][int(data["X"].size/2)].values
     else:
         if dash.ctx.triggered_id == "map":
-            lat = click_lat_lng[0]
-            lng = click_lat_lng[1]
+            lat = click_lat_lng["lat"]
+            lng = click_lat_lng["lng"]
         else:
             lat = latitude
             lng = longitude

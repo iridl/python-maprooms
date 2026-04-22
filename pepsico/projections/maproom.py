@@ -63,13 +63,16 @@ def register(FLASK, config):
         Output("lat_input", "value"),
         Output("lng_input", "value"),
         Input("submit_lat_lng","n_clicks"),
-        Input("map", "click_lat_lng"),
+        Input("map", "clickData"),
         Input("region", "value"),
         State("lat_input", "value"),
         State("lng_input", "value"),
     )
     def pick_location(n_clicks, click_lat_lng, region, latitude, longitude):
         # Reading
+        click_lat_lng = (
+            click_lat_lng["latlng"] if click_lat_lng is not None else None
+        )
         scenario = "ssp126"
         model = "GFDL-ESM4"
         variable = "pr"
