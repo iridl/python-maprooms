@@ -6007,3 +6007,82 @@ countries:
                 length: 3.0
                 issue_months: [3, 4, 5]
                 start_year: 1991
+
+    yemen:
+        logo: Yemen_IRI_96x48.png
+        resolution: [ .25, .25 ]
+        center: [ 47.5, 15.5 ]
+        zoom: 6
+        rotation: 0
+        marker: [ 47.875, 15.625 ]
+        origin: [ .125, .125 ]
+        shapes:
+            - name: National
+              file: yemen/shapes/2026-04/yem_admin_boundaries.shp.zip
+              layer: yem_admin0
+              key_field: adm0_pcode
+              label_field: adm0_name
+
+            - name: Governorate
+              file: yemen/shapes/2026-04/yem_admin_boundaries.shp.zip
+              layer: yem_admin1
+              key_field: adm1_pcode
+              label_field: adm1_name
+
+            - name: District
+              file: yemen/shapes/2026-04/yem_admin_boundaries.shp.zip
+              layer: yem_admin2
+              key_field: adm2_pcode
+              label_field: adm2_name
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep-v1
+                    - rain
+                predictand: rain
+            observations:
+                rain:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.875/54.625/RANGE/Y/12.125/19.125/RANGE/T/(Jul-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/'
+                    path: yemen/rain-jas.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                enso_state: *enso_3mo
+#                bad-years:
+#                    label: Reported bad years
+#                    path: yemen/bad-years-jas.zarr
+#                    var_names:
+#                        value: rank
+#                        time: T
+#                    colormap: precip
+#                    lower_is_worse: yes
+#                    format: number0
+#                    units: rank
+            forecasts:
+                pnep-v1:
+                    label: Forecast prob non-exc v1
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 1
+                    path: yemen/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+        seasons:
+            season1:
+                label: JAS
+                target_month: 7.5
+                length: 3.0
+                issue_months: [ 3, 4, 5 ]
+                start_year: 1991
