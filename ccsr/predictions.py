@@ -1,4 +1,28 @@
 import pandas as pd
+import datetime
+
+
+def start_to_S(start_date):
+    dmy = start_date.split()
+    if len(dmy) == 2 :
+        start_d = 1
+        start_m = strftimeb2int(dmy[0])
+        start_y = int(dmy[1])
+    else:
+        start_d = int(dmy[0])
+        start_m = strftimeb2int(dmy[1])
+        start_y = int(dmy[2])
+    return datetime.datetime(start_y, start_m, start_d)
+
+
+def start_to_file_start(start_date):
+    dmy = start_date.split()
+    if len(dmy) == 2 :
+        file_start = dmy[0] + dmy[1]
+    else:
+        file_start = f"{dmy[0]:2}_{dmy[1]}_{dmy[2]}"
+    return file_start
+
 
 
 def target_range_format(leads_value, start_date, period_length, time_units):

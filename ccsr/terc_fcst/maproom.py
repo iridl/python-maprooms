@@ -53,9 +53,12 @@ def register(FLASK, config):
     )
     def initialize(path):
         S_dates = tfc.get_issues(config)
-        issue_select = Select("start_date", options=[d.strftime("%b %Y") for d in S_dates])
+        issue_select = Select(
+            "start_date",
+            options=[d.strftime(config['issue_format']) for d in S_dates]
+        )
         fcst_ds = tfc.get_fcst(config)
-        target_dict = tfc.get_targets_dict(fcst_ds, S_dates[0])
+        target_dict = tfc.get_targets_dict(config, S_dates[0])
         lead_select = Select("lead_time",
             options=[ld["value"] for ld in target_dict],
             labels=[ld["label"] for ld in target_dict],
@@ -80,10 +83,7 @@ def register(FLASK, config):
         Input("start_date","value"),
     )
     def target_range_options(start_date):
-        S = datetime.datetime(
-            int(start_date[4:8]), predictions.strftimeb2int(start_date[0:3]), 1
-        )
-        return tfc.get_targets_dict(tfc.get_fcst(config, start_date), S)
+        return tfc.get_targets_dict(config, predictions.start_to_S(start_date))
 
 
     @APP.callback(

@@ -29,11 +29,23 @@ maprooms:
           forecast_path: /Data/data21/iri/FD/NMME_Seasonal_Forecast/Precipitation_ELR
           variable: Precipitation
           var: precip
+          forecast: Seasonal
+          clim: 1982-2010 before September 2021; when it becomes 1991-2020.
           issue_format: "%b %Y"
         - title: terc_fcst_temp
           core_path: terc_fcst_temp
           forecast_path: /Data/data21/iri/FD/NMME_Seasonal_Forecast/Temperature_ELR
           variable: Temperature
           var: tref
+          forecast: Seasonal
+          clim: 1982-2010 before September 2021; when it becomes 1991-2020.
           issue_format: "%b %Y"
+        - title: terc_fcst_w_precip
+          core_path: terc_fcst_w_precip
+          forecast_path: /data/jingyuan/Subx_forecast/mat_weekly/MME_Subx_forecast_precip
+          variable: Precipitation
+          var: pr
+          forecast: Weekly Seasonal
+          clim: 1999-2014 before May 1, 2021; when it becomes 1999-2016.
+          issue_format: "%d %b %Y"
           

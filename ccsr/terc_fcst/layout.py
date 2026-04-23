@@ -19,21 +19,18 @@ def app_layout(config):
         ),
 
         lou.description(
-            f"{config['variable']} Terciles Seasonal Forecast",
+            f"{config['variable']} Terciles {config['forecast']} Forecast",
             f"""
-            The seasonal forecast for above-, below- and near-normal {config['variable']} 
-            from the IRI.
+            The {config['forecast']} forecast for above-, below- and near-normal 
+            {config['variable']} from the IRI.
             """,
             html.P(
                 f"""
-                The default map shows globally the seasonal {config['variable']} 
-                forecast tercile probability. The historical climatology used is 
-                1982-2010 up to the forecast issued in August 2021, and is 1991-2020 
-                from the forecast issued in September 2021. The forecast shown is 
-                the latest forecast made (e.g. Dec 2017) for the next season to come 
-                (e.g. Jan-Mar 2018). Four different seasons are forecasted and it is 
-                also possible to consult forecasts made previously. The forecasts 
-                are directly computed from the extended logistic regression model as 
+                The default map shows globally the {config['forecast']} 
+                {config['variable']} forecast tercile probability. The historical 
+                climatology used is {config['clim']}. The forecast shown is the 
+                latest forecast made for the next season to come. The forecasts are 
+                directly computed from the extended logistic regression model as 
                 tercile probabilities. 
                 """
             ),
