@@ -259,7 +259,7 @@ def make_adm_overlay(
     )
 
 
-def initialize_map(data):
+def initialize_map(data, zoom):
     """
     Map initialization based on `data` spatial domain
 
@@ -267,6 +267,8 @@ def initialize_map(data):
     ----------
     data: xr.DataArray
         spatial data of which longitude and latitude coordinates are X and Y
+    zoom: int
+        dash-leaglet zoom value
 
     Returns
     -------
@@ -275,8 +277,8 @@ def initialize_map(data):
         control, center of the map coordinates values as a list
     """
     center_of_the_map = [
-        ((data["Y"][int(data["Y"].size/2)].values)),
-        ((data["X"][int(data["X"].size/2)].values)),
+        data["Y"][int(data["Y"].size/2)].values.item(),
+        data["X"][int(data["X"].size/2)].values.item(),
     ]
     lat_res = (data["Y"][0 ]- data["Y"][1]).values
     lat_min = str((data["Y"][-1] - lat_res/2).values)
@@ -289,7 +291,7 @@ def initialize_map(data):
     return (
         lat_min, lat_max, lat_label,
         lon_min, lon_max, lon_label,
-        center_of_the_map
+        {"center": center_of_the_map, "zoom": zoom, "transition": "flyTo"},
     )
 
 

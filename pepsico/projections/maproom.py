@@ -44,8 +44,7 @@ def register(FLASK, config):
         Output("lng_input", "min"),
         Output("lng_input", "max"),
         Output("lng_input_tooltip", "children"),
-        Output("map", "center"),
-        Output("map", "zoom"),
+        Output("map", "viewport"),
         Input("region", "value"),
         Input("location", "pathname"),
     )
@@ -55,7 +54,7 @@ def register(FLASK, config):
         variable = "pr"
         data = ac.read_data(scenario, model, variable, region)
         zoom = {"SAMER": 3, "US-CA": 4, "SASIA": 4, "Thailand": 5}
-        return mru.initialize_map(data) + (zoom[region],)
+        return mru.initialize_map(data, zoom[region])
     
 
     @APP.callback(
