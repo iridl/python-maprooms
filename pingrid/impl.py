@@ -94,14 +94,12 @@ def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
 
 def error_fig(error_msg="error"):
     return pgo.Figure().add_annotation(
-        x=2,
-        y=2,
+        xref="paper",
+        yref="paper",
         text=error_msg,
         font=dict(family="sans serif", size=30, color="crimson"),
         showarrow=False,
-        yshift=10,
-        xshift=60,
-    )
+    ).update_xaxes(visible=False).update_yaxes(visible=False)
 
 
 FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
