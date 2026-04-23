@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 from scipy.stats import norm
+import pingrid
 
 
 #This is what we should need for the app
@@ -22,30 +23,40 @@ from scipy.stats import norm
 
 
 def read_data(
-    scenario, model, variable, region, time_res="monthly", unit_convert=False
+    scenario, model, variable, region, time_res="monthly", unit_convert=False, 
+    time_dim=True, years=None,
 ):
-    if region == "US-CA":
-        xslice = slice(-154, -45)
-        yslice = slice(60, 15)
-    elif region == "SAMER":
-        xslice = slice(-86, -34)
-        yslice = slice(16, -60)
-    elif region == "SASIA":
-        xslice = slice(59, 94)
-        yslice = slice(42, 7)
-    elif region == "Thailand":
-        xslice = slice(85, 115)
-        yslice = slice(28, 2)
     data = xr.open_zarr(
         f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global'
         f'/{time_res}/{scenario}/{model}/zarr/{variable}'
-    )[variable].sel(X=xslice, Y=yslice)
+    )[variable]
+    if isinstance(region, tuple):
+        data = pingrid.sel_snap(data, region[0], region[1])
+    else:
+        if region == "US-CA":
+            xslice = slice(-154, -45)
+            yslice = slice(60, 15)
+        elif region == "SAMER":
+            xslice = slice(-86, -34)
+            yslice = slice(16, -60)
+        elif region == "SASIA":
+            xslice = slice(59, 94)
+            yslice = slice(42, 7)
+        elif region == "Thailand":
+            xslice = slice(85, 115)
+            yslice = slice(28, 2)
+        data = data.sel(X=xslice, Y=yslice)
+    #Turns out that some models are centered on noon
+    if time_dim:
+        if years is not None :
+            data = data.sel(T=years)
+        if time_res == "daily" :
+            if data["T"][0].dt.hour == 12 :
+                data = data.assign_coords({"T" : data["T"] - np.timedelta64(12, "h")})
+    else:
+        data = data.isel(T=0)
     if unit_convert :
         data = unit_conversion(data)
-    #Turns out that some models are centered on noon
-    if time_res == "daily" :
-        if data["T"][0].dt.hour == 12 :
-            data = data.assign_coords({"T" : data["T"] - np.timedelta64(12, "h")})
     return data
 
 
