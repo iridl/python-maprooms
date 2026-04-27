@@ -10,6 +10,9 @@ db:
     #host: dlcomputemon1.iri.columbia.edu
     #password: 6808900
 
+ssl_cert: /etc/pki/tls/certs/wildcard.iri.columbia.edu.pem   
+ssl_key: /etc/pki/tls/private/wildcard.iri.columbia.edu.key
+
 maprooms:
 
     projections:

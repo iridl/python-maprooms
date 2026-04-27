@@ -27,6 +27,13 @@ if __name__ == "__main__":
     else:
         debug = False
 
+    ssl_context = None
+    if "agriculture" in GLOBAL_CONFIG.get("maprooms", {}):
+        ssl_cert = GLOBAL_CONFIG.get("ssl_cert")
+        ssl_key = GLOBAL_CONFIG.get("ssl_key")
+        if ssl_cert and ssl_key:
+            ssl_context = (ssl_cert, ssl_key)
+    ssl_context = None
     FLASK.run(
         GLOBAL_CONFIG["dev_server_interface"],
         GLOBAL_CONFIG["dev_server_port"],
@@ -34,4 +41,6 @@ if __name__ == "__main__":
         extra_files=os.environ["CONFIG"].split(":"),
         processes=GLOBAL_CONFIG["dev_processes"],
         threaded=False,
+        ssl_context=ssl_context,
+        
     )
