@@ -44,8 +44,7 @@ def register(FLASK, config):
         Output("lng_input", "min"),
         Output("lng_input", "max"),
         Output("lng_input_tooltip", "children"),
-        Output("map", "center"),
-        Output("map", "zoom"),
+        Output("map", "viewport"),
         Input("region", "value"),
         Input("location", "pathname"),
     )
@@ -53,9 +52,11 @@ def register(FLASK, config):
         scenario = "ssp126"
         model = "GFDL-ESM4"
         variable = "pr"
-        data = ac.read_data(scenario, model, variable, region, time_res="daily")
+        data = ac.read_data(
+            scenario, model, variable, region, time_res="daily", time_dim=False
+        )
         zoom = {"US-CA": 4, "Thailand": 5}
-        return mru.initialize_map(data) + (zoom[region],)
+        return mru.initialize_map(data, zoom[region])
     
 
     @APP.callback(
@@ -63,17 +64,22 @@ def register(FLASK, config):
         Output("lat_input", "value"),
         Output("lng_input", "value"),
         Input("submit_lat_lng","n_clicks"),
-        Input("map", "click_lat_lng"),
+        Input("map", "clickData"),
         Input("region", "value"),
         State("lat_input", "value"),
         State("lng_input", "value"),
     )
     def pick_location(n_clicks, click_lat_lng, region, latitude, longitude):
         # Reading
+        click_lat_lng = (
+            click_lat_lng["latlng"] if click_lat_lng is not None else None
+        )
         scenario = "ssp126"
         model = "GFDL-ESM4"
         variable = "pr"
-        data = ac.read_data(scenario, model, variable, region, time_res="daily")
+        data = ac.read_data(
+            scenario, model, variable, region, time_res="daily", time_dim=False
+        )
         initialization_cases = ["region"]
         return mru.picked_location(
             data, initialization_cases, click_lat_lng, latitude, longitude
@@ -112,7 +118,7 @@ def register(FLASK, config):
 
 
     def local_data(
-        lat, lng, region,
+        lat, lng,
         model, variable,
         start_day, start_month, end_day, end_month,
         frost_threshold, wet_threshold, hot_threshold, warm_nights_spell, dry_spell,
@@ -121,6 +127,7 @@ def register(FLASK, config):
             "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
         ]
         data_var = select_var(variable)
+        region = (lat, lng)
         data_ds = xr.concat([xr.Dataset({
             "histo" : ac.read_data(
                 "historical", m, data_var, region,
@@ -150,11 +157,6 @@ def register(FLASK, config):
             #would mean something happened to that data
             data_ds = missing_ds
             error_msg="Data missing for this model or variable"
-        try:
-            data_ds = pingrid.sel_snap(data_ds, lat, lng)
-        except KeyError:
-            data_ds = missing_ds
-            error_msg="Grid box out of data domain"
         if error_msg == None :
             data_ds = ac.seasonal_wwc(
                 ac.daily_tobegroupedby_season(
@@ -250,7 +252,7 @@ def register(FLASK, config):
         dry_spell = int(dry_spell)
         model = "Multi-Model-Average"
         data_ds, error_msg = local_data(
-            lat, lng, region, model, variable,
+            lat, lng, model, variable,
             start_day, start_month, end_day, end_month,
             frost_threshold, wet_threshold, hot_threshold,
             warm_nights_spell, dry_spell,
@@ -299,78 +301,93 @@ def register(FLASK, config):
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
-        start_day = int(start_day)
-        end_day = int(end_day)
-        start_month = ac.strftimeb2int(start_month)
-        end_month = ac.strftimeb2int(end_month)
-        frost_threshold = float(frost_threshold)
-        wet_threshold = float(wet_threshold)
-        hot_threshold = float(hot_threshold)
-        warm_nights_spell = int(warm_nights_spell)
-        dry_spell = int(dry_spell)
-        data_ds, error_msg = local_data(
-            lat, lng, region, model, variable,
-            start_day, start_month, end_day, end_month,
-            frost_threshold, wet_threshold, hot_threshold,
-            warm_nights_spell, dry_spell,
-        )
-        if error_msg != None :
-            local_graph = pingrid.error_fig(error_msg)
-        else :
-            if (end_month < start_month) :
-                start_format = "%d %b %Y - "
+        if region == "US-CA":
+            xslice = (-154, -45)
+            yslice = (60, 15)
+        elif region == "SAMER":
+            xslice = (-86, -34)
+            yslice = (16, -60)
+        elif region == "SASIA":
+            xslice = (59, 94)
+            yslice = (42, 7)
+        elif region == "Thailand":
+            xslice = (85, 115)
+            yslice = (28, 2)
+        if lat > yslice[0] or lat < yslice[1] or lng < xslice[0] or lng > xslice[1] :
+            local_graph = pingrid.error_fig(error_msg="Grid box out of data domain")
+        else:
+            start_day = int(start_day)
+            end_day = int(end_day)
+            start_month = ac.strftimeb2int(start_month)
+            end_month = ac.strftimeb2int(end_month)
+            frost_threshold = float(frost_threshold)
+            wet_threshold = float(wet_threshold)
+            hot_threshold = float(hot_threshold)
+            warm_nights_spell = int(warm_nights_spell)
+            dry_spell = int(dry_spell)
+            data_ds, error_msg = local_data(
+                lat, lng, model, variable,
+                start_day, start_month, end_day, end_month,
+                frost_threshold, wet_threshold, hot_threshold,
+                warm_nights_spell, dry_spell,
+            )
+            if error_msg != None :
+                local_graph = pingrid.error_fig(error_msg)
             else:
-                start_format = "%d %b-"
-            local_graph = pgo.Figure()
-            data_color = {
-                "histo": "blue", "picontrol": "green",
-                "ssp126": "yellow", "ssp370": "orange", "ssp585": "red",
-            }
-            lng_units = "˚E" if (lng >= 0) else "˚W"
-            lat_units = "˚N" if (lat >= 0) else "˚S"
-            for var in data_ds.data_vars:
-                local_graph.add_trace(plot_ts(
-                    data_ds[var].mean("M", keep_attrs=True), var, data_color[var],
-                    start_format, data_ds[var].attrs["units"]
-                ))
-            add_period_shape(
-                local_graph,
-                data_ds,
-                start_year_ref,
-                end_year_ref,
-                "blue",
-                "RoyalBlue",
-                "reference period",
-            )
-            add_period_shape(
-                local_graph,
-                data_ds,
-                start_year,
-                end_year,
-                "LightPink",
-                "Crimson",
-                "projected period",
-            )
-            local_graph.update_layout(
-                xaxis_title="Time",
-                yaxis_title=(
-                    # Compared to the monthly case, I presume that groupby dropped
-                    # the long_name, which is fine since it's indeed transformed. Can
-                    # consider resetting it at some point in the calculation
-                    #f'{data_ds["histo"].attrs["long_name"]} '
-                    f'({data_ds["histo"].attrs["units"]})'
-                ),
-                title={
-                    "text": (
-                        f'{data_ds["histo"]["T"].dt.strftime("%d %b")[0].values}-'
-                        f'{data_ds["histo"]["seasons_ends"].dt.strftime("%d %b")[0].values}'
-                        f' {variable} from model {model} '
-                        f'at ({abs(lat)}{lat_units}, {abs(lng)}{lng_units})'
+                if (end_month < start_month) :
+                    start_format = "%d %b %Y - "
+                else:
+                    start_format = "%d %b-"
+                local_graph = pgo.Figure()
+                data_color = {
+                    "histo": "blue", "picontrol": "green",
+                    "ssp126": "yellow", "ssp370": "orange", "ssp585": "red",
+                }
+                lng_units = "˚E" if (lng >= 0) else "˚W"
+                lat_units = "˚N" if (lat >= 0) else "˚S"
+                for var in data_ds.data_vars:
+                    local_graph.add_trace(plot_ts(
+                        data_ds[var].mean("M", keep_attrs=True), var, data_color[var],
+                        start_format, data_ds[var].attrs["units"]
+                    ))
+                add_period_shape(
+                    local_graph,
+                    data_ds,
+                    start_year_ref,
+                    end_year_ref,
+                    "blue",
+                    "RoyalBlue",
+                    "reference period",
+                )
+                add_period_shape(
+                    local_graph,
+                    data_ds,
+                    start_year,
+                    end_year,
+                    "LightPink",
+                    "Crimson",
+                    "projected period",
+                )
+                local_graph.update_layout(
+                    xaxis_title="Time",
+                    yaxis_title=(
+                        # Compared to the monthly case, I presume that groupby dropped
+                        # the long_name, which is fine since it's indeed transformed. Can
+                        # consider resetting it at some point in the calculation
+                        #f'{data_ds["histo"].attrs["long_name"]} '
+                        f'({data_ds["histo"].attrs["units"]})'
                     ),
-                    "font": dict(size=14),
-                },
-                margin=dict(l=30, r=30, t=30, b=30),
-            )
+                    title={
+                        "text": (
+                            f'{data_ds["histo"]["T"].dt.strftime("%d %b")[0].values}-'
+                            f'{data_ds["histo"]["seasons_ends"].dt.strftime("%d %b")[0].values}'
+                            f' {variable} from model {model} '
+                            f'at ({abs(lat)}{lat_units}, {abs(lng)}{lng_units})'
+                        ),
+                        "font": dict(size=14),
+                    },
+                    margin=dict(l=30, r=30, t=30, b=30),
+                )
         return local_graph
 
 
@@ -484,9 +501,8 @@ def register(FLASK, config):
                 ac.daily_tobegroupedby_season(
                     ac.read_data(
                         "historical", m, data_var, region,
-                        time_res="daily", unit_convert=True
-                    ).sel(
-                        T=slice(str(start_year_ref), str(end_year_ref))
+                        time_res="daily", unit_convert=True,
+                        years=slice(str(start_year_ref), str(end_year_ref)),
                     ).to_dataset(),
                     start_day, start_month, end_day, end_month,
                 ),
@@ -499,9 +515,8 @@ def register(FLASK, config):
                 ac.daily_tobegroupedby_season(
                     ac.read_data(
                         scenario, m, data_var, region,
-                        time_res="daily", unit_convert=True
-                    ).sel(
-                        T=slice(str(start_year), str(end_year))
+                        time_res="daily", unit_convert=True,
+                        years=slice(str(start_year), str(end_year)),
                     ).to_dataset(),
                     start_day, start_month, end_day, end_month,
                 ),

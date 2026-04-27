@@ -44,8 +44,7 @@ def register(FLASK, config):
         Output("lng_input", "min"),
         Output("lng_input", "max"),
         Output("lng_input_tooltip", "children"),
-        Output("map", "center"),
-        Output("map", "zoom"),
+        Output("map", "viewport"),
         Input("region", "value"),
         Input("location", "pathname"),
     )
@@ -55,7 +54,7 @@ def register(FLASK, config):
         variable = "pr"
         data = ac.read_data(scenario, model, variable, region)
         zoom = {"SAMER": 3, "US-CA": 4, "SASIA": 4, "Thailand": 5}
-        return mru.initialize_map(data) + (zoom[region],)
+        return mru.initialize_map(data, zoom[region])
     
 
     @APP.callback(
@@ -63,13 +62,16 @@ def register(FLASK, config):
         Output("lat_input", "value"),
         Output("lng_input", "value"),
         Input("submit_lat_lng","n_clicks"),
-        Input("map", "click_lat_lng"),
+        Input("map", "clickData"),
         Input("region", "value"),
         State("lat_input", "value"),
         State("lng_input", "value"),
     )
     def pick_location(n_clicks, click_lat_lng, region, latitude, longitude):
         # Reading
+        click_lat_lng = (
+            click_lat_lng["latlng"] if click_lat_lng is not None else None
+        )
         scenario = "ssp126"
         model = "GFDL-ESM4"
         variable = "pr"
