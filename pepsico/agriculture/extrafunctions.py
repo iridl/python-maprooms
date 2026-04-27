@@ -55,18 +55,20 @@ def load_valid_users() -> dict:
 def prepare_data(variety, model, planting, scenario, target_value, data_type, path="data/cvs_files"):
 
     print("params:", variety, target_value, data_type)
+    print(f'maodels: 0={model[0]} 1={model[1]}')
     # anom_period[0] = historical data
     # anom_period[1] = forecast data
+    #by default forescast is on the first ([0]) position and historical is on second ([1]) position 
     if data_type in ["mean_change",
                      "percentage_change",
                      "direction_change",
                      "yield_change_index",
                      "stress_simple"
                      ]:
-        if model[0]=='historical':
-            csv_file =f"{path}/HARWT_ID_HistBL_PDhist_{variety[0]}_{target_value[0]}_US_CA.csv"
+        if model[1]=='historical':
+            csv_file =f"{path}/HARWT_ID_HistBL_PDhist_{variety[1]}_{target_value[1]}_US_CA.csv"
         else:
-            csv_file = f"{path}/HARWT_ID_{model[0]}_{scenario[0]}_{planting[0]}_{variety[0]}_{target_value[0]}_US_CA.csv"
+            csv_file = f"{path}/HARWT_ID_{model[1]}_{scenario[1]}_{planting[1]}_{variety[1]}_{target_value[1]}_US_CA.csv"
         df = pd.read_csv(csv_file,dtype={"ID": str})
         df = df.rename(columns={"ID": "id"})
         # if "CCSUID" in df.columns:
@@ -75,10 +77,10 @@ def prepare_data(variety, model, planting, scenario, target_value, data_type, pa
         #     df["id"] = df["FIPS"].astype(str)
         df["HARWT"] = pd.to_numeric(df["HARWT"], errors="coerce")
 
-        if model[1]=='historical':
-            csv_file_data_aux =f"{path}/HARWT_ID_HistBL_PDhist_{variety[1]}_{target_value[1]}_US_CA.csv"
+        if model[0]=='historical':
+            csv_file_data_aux =f"{path}/HARWT_ID_HistBL_PDhist_{variety[0]}_{target_value[0]}_US_CA.csv"
         else:
-            csv_file_data_aux = f"{path}/HARWT_ID_{model[1]}_{scenario[1]}_{planting[1]}_{variety[1]}_{target_value[1]}_US_CA.csv"
+            csv_file_data_aux = f"{path}/HARWT_ID_{model[0]}_{scenario[0]}_{planting[0]}_{variety[0]}_{target_value[0]}_US_CA.csv"
         df_fcst = pd.read_csv(csv_file_data_aux,dtype={"ID": str})
         df_fcst = df_fcst.rename(columns={"ID": "id"})
 
@@ -89,26 +91,26 @@ def prepare_data(variety, model, planting, scenario, target_value, data_type, pa
         df_fcst["HARWT"] = pd.to_numeric(df_fcst["HARWT"], errors="coerce")
         #var_map = df.set_index("id")["HARWT"].to_dict()
         # ---- This waranty the sub by id even if the csv is desogarnized 
-        if data_type == "mean_change": # (mean_fcst - mean_hist) 
+        if data_type == "mean_change": # (mean_dataset1 - mean_dataset2) 
             df = (
                 df.merge(df_fcst[["id", "HARWT"]], on="id", how="left", suffixes=("", "_aux"))
                 .assign(HARWT=lambda x: round(x["HARWT_aux"] - x["HARWT"]))
                 .drop(columns="HARWT_aux")          
                 )
-        elif data_type == "percentage_change": # (mean_fcst - mean_hist) / mean_hist * 100
+        elif data_type == "percentage_change": # (mean_dataset1 - mean_dataset2) / mean_dataset2 * 100
             df = (
                 df.merge(df_fcst[["id", "HARWT"]], on="id", how="left", suffixes=("", "_aux"))
                 .assign(HARWT=lambda x: round((x["HARWT_aux"] - x["HARWT"])/x["HARWT"]*100))
                 .drop(columns="HARWT_aux")          
                 )
-        elif data_type == "yield_change_index": #YCI = mean_fcst / mean_hist ; 
-                                                #YCI_% = (mean_fcst / mean_hist − 1) × 100
+        elif data_type == "yield_change_index": #YCI = mean_dataset1 / mean_dataset2 ; 
+                                                #YCI_% = (mean_dataset1 / mean_dataset2 − 1) × 100
             df = (
                 df.merge(df_fcst[["id", "HARWT"]], on="id", how="left", suffixes=("", "_aux"))
                 .assign(HARWT=lambda x: round((x["HARWT_aux"] / x["HARWT"] -1) * 100))
                 .drop(columns="HARWT_aux")          
                 )
-        elif data_type == "stress_simple": #1 − (mean_fcst / mean_hist) ; -1.0  estrés extremo , 0 neutro , 1.0  beneficio extremo
+        elif data_type == "stress_simple": #1 − (mean_dataset1 / mean_dataset2) ; -1.0  estrés extremo , 0 neutro , 1.0  beneficio extremo
             df = (
                 df.merge(df_fcst[["id", "HARWT"]], on="id", how="left", suffixes=("", "_aux"))
                 .assign(HARWT=lambda x: round(1-(x["HARWT_aux"] / x["HARWT"])))

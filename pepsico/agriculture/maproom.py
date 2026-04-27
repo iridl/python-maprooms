@@ -61,6 +61,7 @@ def register(FLASK, config):
 
 
     APP.enable_dev_tools(debug=True)
+    
     APP.title = "Forecast"  # Título de la pestaña del navegador
     
 
@@ -940,16 +941,16 @@ def register(FLASK, config):
         if variable == "mean_change":
             description.extend(
                 [
-                html.Small("Mean change shows how the future average differs from the historical average. Positive " \
+                html.Small("Mean change shows how the future average differs from the dataset2 average. Positive " \
                             "values indicate an increase; negative values indicate a decrease relative " \
-                            "to the historical period."),
+                            "to the dataset2 period."),
                 html.Br(),
                 html.B("Equation used: "),
                 html.Small([
                     "mean",
-                    html.Sub("fcst"),
+                    html.Sub("dataset1"),
                     " − mean",
-                    html.Sub("hist"),
+                    html.Sub("dataset2"),
                 ])
                 ]
             )
@@ -957,21 +958,21 @@ def register(FLASK, config):
             description.extend(
                 [
                 html.Small(
-                    "Percentage change shows the relative difference between the projected and historical averages. "\
-                    "Positive values indicate an increase; negative values indicate a decrease relative to the historical period."
+                    "Percentage change shows the relative difference between the dataset1 and dataset2 averages. "\
+                    "Positive values indicate an increase; negative values indicate a decrease relative to the dataset2 period."
                 ),
                 html.Br(),
                 html.B("Equation used: "),
                 html.Small([
                         "(",
                         "mean",
-                        html.Sub("fcst"),
+                        html.Sub("dataset1"),
                         " − ",
                         "mean",
-                        html.Sub("hist"),
+                        html.Sub("dataset2"),
                         ") / ",
                         "mean",
-                        html.Sub("hist"),
+                        html.Sub("dataset2"),
                         " × 100",
                     ])
                 ]
@@ -981,17 +982,17 @@ def register(FLASK, config):
                 [
                 html.Small(
                     "Direction change indicates whether the variable increases, decreases, or stays the same. "\
-                    "A value of +1 indicates an increase, 0 indicates no change, and -1 indicates a decrease relative to the historical period."
+                    "A value of +1 indicates an increase, 0 indicates no change, and -1 indicates a decrease relative to the dataset2 period."
                 ),
                 html.Br(),
                 html.B("Equation used: "),
                 html.Small([
                         "sign(",
                         "mean",
-                        html.Sub("fcst"),
+                        html.Sub("dataset1"),
                         " − ",
                         "mean",
-                        html.Sub("hist"),
+                        html.Sub("dataset2"),
                         ")"
                     ])
                 ]
@@ -1000,19 +1001,19 @@ def register(FLASK, config):
             description.extend(
                 [
                 html.Small(
-                    "Stress index shows how much the future deviates from historical conditions. "\
+                    "Stress index shows how much the future deviates from dataset2 conditions. "\
                     "Values near -1 indicate extreme stress, 0 indicates neutral conditions, "\
-                    "and values near 1 indicate extreme benefit relative to the historical period."
+                    "and values near 1 indicate extreme benefit relative to the dataset2 period."
                 ),
                 html.Br(),
                 html.B("Equation used: "),
                 html.Small([
                         "1 − (",
                         "mean",
-                        html.Sub("fcst"),
+                        html.Sub("dataset1"),
                         " / ",
                         "mean",
-                        html.Sub("hist"),
+                        html.Sub("dataset2"),
                         ")"
                     ])
                 ]
@@ -1021,18 +1022,18 @@ def register(FLASK, config):
             description.extend(
                 [
                 html.Small(
-                    "Yield Change Index (YCI%) shows the relative change in yield compared to historical conditions. "\
-                    "Positive values indicate increased yield, negative values indicate decreased yield relative to the historical period."
+                    "Yield Change Index (YCI%) shows the relative change in yield compared to dataset2 conditions. "\
+                    "Positive values indicate increased yield, negative values indicate decreased yield relative to the dataset2 period."
                 ),
                 html.Br(),
                 html.B("Equation used: "),
                 html.Small([
                     "(",
                     "mean",
-                    html.Sub("fcst"),
+                    html.Sub("dataset1"),
                     " / ",
                     "mean",
-                    html.Sub("hist"),
+                    html.Sub("dataset2"),
                     " − 1) × 100"
                 ])
                 ]
@@ -1126,8 +1127,8 @@ def register(FLASK, config):
         Output("anomaly_period_values", "data"),
         [Input("dataset1_years", "value"), Input("dataset2_years", "value")]
     )
-    def combine_inputs(hist, fcst):
-        return [hist, fcst]
+    def combine_inputs(dataset1, dataset2):
+        return [dataset1, dataset2]
     
     multi_datasets = { 'model':[ Input("dataset1", "value"), Input("dataset2", "value")], 
                      'variety':[ Input("variety", "value"), Input("variety", "value")],
