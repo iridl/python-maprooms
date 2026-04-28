@@ -46,7 +46,7 @@ def register(FLASK, config):
             Output("lng_input", "min"),
             Output("lng_input", "max"),
             Output("lng_input_tooltip", "children"),
-            Output("map", "center"),
+            Output("map", "viewport"),
             Input("location", "pathname"),
     )
     def initialize(path):
@@ -63,7 +63,7 @@ def register(FLASK, config):
         lead_style = {"display": "block"} if target_display else {"display": "none"}
         return (
             phys_units, issue_select, lead_select, lead_style,
-        ) + mru.initialize_map(fcst_ds)
+        ) + mru.initialize_map(fcst_ds, GLOBAL_CONFIG['zoom'])
 
     @APP.callback(
         Output("perc_block", "style"),
@@ -107,12 +107,15 @@ def register(FLASK, config):
         Output("lat_input", "value"),
         Output("lng_input", "value"),
         Input("submit_lat_lng","n_clicks"),
-        Input("map", "click_lat_lng"),
+        Input("map", "clickData"),
         State("lat_input", "value"),
         State("lng_input", "value")
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Reading
+        click_lat_lng = (
+            click_lat_lng["latlng"] if click_lat_lng is not None else None
+        )
         fcst_ds, _, _, _ = ffc.get_fcst(config)
         return mru.picked_location(
             fcst_ds, [""], click_lat_lng, latitude, longitude
