@@ -124,7 +124,7 @@ def map(
                     "margin-top":"3px", "margin-bottom":"3px",
                 },
             ), type="dot"),
-            dcc.Loading(dlf.Map(
+            dcc.Loading(dlf.MapContainer(
                 [
                     dlf.LayersControl(
                         id="layers_control", position=layers_control_position
