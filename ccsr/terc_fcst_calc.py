@@ -41,6 +41,7 @@ def get_fcst(fcst_conf, start_date=None, lead_time=None):
             f"MME_Subx_global_{fcst_conf['var']}_Fri_{S}_wk3_week1234_forecast.nc"
         )
     fcst_ds = xr.open_dataset(data_path / fcst_file)
+    #print(fcst_ds["prob"].data)
     fcst_ds = (
         fcst_ds
         .assign_coords({"cat" : fcst_ds["category"]})
