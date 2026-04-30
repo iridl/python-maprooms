@@ -113,7 +113,7 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
 def seasonal_wwc(
     labelled_season_data, variable, frost_threshold, wet_threshold, hot_threshold,
-    warm_nights_spell, dry_spell,
+    warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
 ):
     # Boolean variables need the additional where to return NaNs from False/0 to Nans
     # and the sum parameters for entirely NaNs seasons to remain NaNs and not turn to
@@ -253,6 +253,16 @@ def seasonal_wwc(
             .map(median_length_of_spells, "T", min_spell_length=dry_spell)
         )
         wwc_units = "days"
+    if variable == "rain_events":
+        data_ds = (
+            labelled_season_data
+            .groupby(labelled_season_data["seasons_starts"])
+            .map(
+                number_extreme_events_within_days, threshold=rain_event_amount,
+                window=rain_event_window,
+            )
+        )
+        wwc_units = ""
     # This is all a bit tedious but I didn't figure out another way to keep
     # seasons_ends and renaming time dim T
     # Can revisit later if this code has a future
@@ -763,17 +773,21 @@ def number_extreme_events_within_days(
     Examples
     --------
     Number of rain events of >80mm in 2 days or less:
-    number_extreme_events_within_days(rain_daily_data_in_mm, "gt", 80, 2)    
+    number_extreme_events_within_days(rain_daily_data_in_mm, 80, 2)    
     """
-    count = 0
-    dd = daily_data.copy()
-    #Start with shortest events
-    for w in range(1, window+1):
-        for t in range(len(dd[dim])-(w-1)):
-            #Assert new event
-            new_event = dd.isel({dim: slice(t, t+w)}).sum(dim) > threshold
-            #Mask days having formed a new event so that they won't account again
-            #for following events (t loop) or longer events (w loop)
-            dd[{dim: slice(t, t+w)}] = dd[{dim: slice(t, t+w)}].where(~new_event)
-            count = count + new_event
+
+    # Initiatlize accumulated rain, event window and even count
+    acc = daily_data.isel({dim: 0}, drop=True)
+    w = xr.ones_like(acc, dtype=int)
+    count = ((acc > threshold) * 1).where(~np.isnan(acc))
+    for i in range(1, daily_data[dim].size):
+        data_i = daily_data.isel({dim: i}, drop=True)
+        # Increment if accumulated not met yet to form an event 
+        # AND max size of window not met yet
+        increment_condition = (acc <= threshold).where(~np.isnan(acc)) and (w < window)
+        # If not incrementing, restart accumulating rain and event window length
+        acc = (acc + data_i).where(increment_condition, other=data_i)
+        w = (w + 1).where(increment_condition, other=1)
+        # Update event count of accumulated rain exceeded threshold
+        count = count + (acc > threshold).where(~np.isnan(acc))
     return count

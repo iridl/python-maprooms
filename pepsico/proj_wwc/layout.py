@@ -38,7 +38,7 @@ def app_layout():
                     id="variable",
                     options=[
                         "warm_nights",
-                        # "rain_events",
+                        "rain_events",
                         "mean_Tmax",
                         "mean_Tmin",
                         "dry_days",
@@ -57,7 +57,7 @@ def app_layout():
                     ],
                     labels=[
                         "Warm Nights",
-                        # "Count of Rain Events",
+                        "Count of Rain Events",
                         "Mean Max Temperature",
                         "Mean Min Temperature",
                         "Count of Dry Days",
@@ -77,6 +77,26 @@ def app_layout():
                     init=1,
                 )),
                 Block("Definitions",
+                    "Rain event: ",
+                    Number(
+                        id="ret",
+                        default=80,
+                        min=0,
+                        max=999,
+                        width="5em",
+                        debounce=False,
+                    ),
+                    "mm or more; ",
+                    "within: ",
+                    Number(
+                        id="rew",
+                        default=2,
+                        min=1,
+                        max=99,
+                        width="5em",
+                        debounce=False,
+                    ),
+                    "days or less ",
                     "Frost <=",
                     Number(
                         id="frost",
@@ -272,6 +292,13 @@ def app_layout():
                 html.B("Frost Season Length (frost_season_length):"),"""
                     Number of days between the first and last days where minimm 
                     temperature is lesser or equal than a user-defined threshold.
+                """
+            ]),
+            html.P([
+                html.B("Count of Rain Events (rain_events):"),"""
+                    Number of rain events in the season. A rain event accumulates 
+                    a user-defined threshold in mm or more in a user-defined number 
+                    of days or less.
                 """
             ]),
         ),
