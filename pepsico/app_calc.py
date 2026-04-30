@@ -260,7 +260,6 @@ def seasonal_wwc(
             .map(
                 number_extreme_events_within_days, threshold=rain_event_amount,
                 window=rain_event_window,
-                #skipna=True, min_count=1,
             )
         )
         wwc_units = ""
@@ -776,118 +775,19 @@ def number_extreme_events_within_days(
     Number of rain events of >80mm in 2 days or less:
     number_extreme_events_within_days(rain_daily_data_in_mm, 80, 2)    
     """
-    events = xr.where(daily_data > threshold, 1, 0).sum(dim)
-    if window > 1 :
-        days_to_keep = daily_data.where(lambda x : x <= threshold)
-        for w in range(2, window+1):
-            # Find all possible events
-            cumul = xr.where(days_to_keep.rolling(min_periods = 1, **{dim: w}).sum() > threshold, 1, 0)
-            new_events = xr.apply_ufunc(
-                # Counts succesive events up to w else reset count
-                np.frompyfunc(lambda x, y : (x + y) if (x < w) else y, 2, 1).accumulate,
-                cumul, cumul.get_axis_num(dim),
-            # Reset events of which days already in previous events
-            ).where(lambda x : x <= 1, other=0)
-            # Increment
-            events = events + new_events.sum(dim)
-            # Disable days in events for next round
-            days_to_keep = days_to_keep + xr.where(new_events == 1, np.nan, 0)
-    return events
 
-
-def _number_extreme_events_within_days_old(daily_data, threshold, window, dim="T"):
-    count = 0
-    dd = daily_data.copy()
-    #Start with shortest events
-    for w in range(1, window+1):
-        for t in range(len(dd[dim])-(w-1)):
-            #Assert new event
-            new_event = dd.isel({dim: slice(t, t+w)}).sum(dim) > threshold
-            #Mask days having formed a new event so that they won't account again
-            #for following events (t loop) or longer events (w loop)
-            dd[{dim: slice(t, t+w)}] = dd[{dim: slice(t, t+w)}].where(~new_event)
-            count = count + new_event
-    return count
-
-
-def neewd(daily_data, threshold, window, dim="T"):
+    # Initiatlize accumulated rain, event window and even count
     acc = daily_data.isel({dim: 0}, drop=True)
-    count = (acc > threshold) * 1
     w = xr.ones_like(acc, dtype=int)
+    count = ((acc > threshold) * 1).where(~np.isnan(acc))
     for i in range(1, daily_data[dim].size):
         data_i = daily_data.isel({dim: i}, drop=True)
-        acc_new = (acc + data_i).where(
-            ((acc <= threshold) & (w < window)), other=data_i
-        )
-        count = count + (acc_new > threshold)
-        w = (w + 1).where(((acc <= threshold) & (w < window)), other=1)
-        acc = acc_new
+        # Increment if accumulated not met yet to form an event 
+        # AND max size of window not met yet
+        increment_condition = (acc <= threshold).where(~np.isnan(acc)) and (w < window)
+        # If not incrementing, restart accumulating rain and event window length
+        acc = (acc + data_i).where(increment_condition, other=data_i)
+        w = (w + 1).where(increment_condition, other=1)
+        # Update event count of accumulated rain exceeded threshold
+        count = count + (acc > threshold).where(~np.isnan(acc))
     return count
-
-
-def number_extreme_events_numpy_2(daily_data, threshold, window, dim="T"):
-    """
-        Count extreme events exactly like the original xarray function,
-        supporting 1D, 2D, or 3D series.
-        Each spatial cell is treated as an independent vector,
-        ensuring that the greedy (.where option) masking propagates correctly.
-        Parameters
-        ----------
-        daily_data : xarray.DataArray
-            Daily data array.
-        threshold : float
-            Threshold that the window sum must exceed to be counted as an event.
-        window : int
-            Maximum number of days to accumulate to form an event.
-        dim : str
-            Name of the temporal dimension (default is "T").
-        Returns
-        -------
-        xarray.DataArray
-            Count of extreme events, preserving the same spatial structure as daily_data.
-    """
-    data = daily_data.values.astype(float).copy()
-    T = data.shape[0]
-    spatial_shape = data.shape[1:]
-
-    # ---- Case 1D: one vector ----
-    if len(spatial_shape) == 0:
-        ts = data.copy()
-        count = 0
-        for w in range(1, window + 1):
-            for t in range(T - (w - 1)):
-                window_vals = ts[t:t+w]
-                if np.isnan(window_vals).any():
-                    continue
-                if window_vals.sum() > threshold:
-                    count += 1
-                    ts[t:t+w] = np.nan  # Masking
-        return xr.DataArray(count, name="extreme_event_count")
-
-    # ---- Case 2D oor 3D: each independent spatial cell ----
-    count = np.zeros(spatial_shape, dtype=int)
-
-    # Iterate over all spatial cells
-    it = np.nditer(count, flags=['multi_index'], op_flags=['readwrite'])
-    while not it.finished:
-        idx = it.multi_index
-        # Dynamic slicing: slice over time + spatial indices
-        slicer = (slice(None),) + idx
-        ts_copy = data[slicer].copy()
-        c = 0
-        for w in range(1, window + 1):
-            for t in range(T - (w - 1)):
-                window_vals = ts_copy[t:t+w]
-                if np.isnan(window_vals).any():
-                    continue
-                if window_vals.sum() > threshold:
-                    c += 1
-                    ts_copy[t:t+w] = np.nan  # replicate the masking greedy (.where option)
-        count[idx] = c
-        it.iternext()
-
-    # build the  DataArray with the same espatial coordinates
-    coords = {k: v for k, v in daily_data.coords.items() if k != dim}
-    dims = [d for d in daily_data.dims if d != dim]
-
-    return xr.DataArray(count, coords=coords, dims=dims, name="extreme_event_count")
