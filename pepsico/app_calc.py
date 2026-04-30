@@ -730,7 +730,7 @@ def spells_length(flagged_data, dim):
 
 
 def sl(flagged_data, dim):
-    # This takes 3 times longer tan spell_lengths
+    # This takes 3 times longer than spell_lengths
     acc_spells = _accumulate_spells(
         flagged_data, axis=flagged_data.get_axis_num(dim)
     )

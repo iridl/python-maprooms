@@ -496,37 +496,43 @@ def register(FLASK, config):
             "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
         ]
         data_var = select_var(variable)
-        ref = xr.concat([
-            ac.seasonal_wwc(
-                ac.daily_tobegroupedby_season(
-                    ac.read_data(
-                        "historical", m, data_var, region,
-                        time_res="daily", unit_convert=True,
-                        years=slice(str(start_year_ref), str(end_year_ref)),
-                    ).to_dataset(),
-                    start_day, start_month, end_day, end_month,
+        ref = xr.apply_ufunc(np.mean, xr.concat([
+            xr.apply_ufunc(
+                np.mean, ac.seasonal_wwc(
+                    ac.daily_tobegroupedby_season(
+                        ac.read_data(
+                            "historical", m, data_var, region,
+                            time_res="daily", unit_convert=True,
+                            years=slice(str(start_year_ref), str(end_year_ref)),
+                        ).to_dataset(),
+                        start_day, start_month, end_day, end_month,
+                    ),
+                    variable, frost_threshold, wet_threshold, hot_threshold,
+                    warm_nights_spell, dry_spell,
                 ),
-                variable, frost_threshold, wet_threshold, hot_threshold,
-                warm_nights_spell, dry_spell,
-            ).mean(dim="T", keep_attrs=True) for m in model
-        ], "M").mean("M", keep_attrs=True)
-        data = xr.concat([
-            ac.seasonal_wwc(
-                ac.daily_tobegroupedby_season(
-                    ac.read_data(
-                        scenario, m, data_var, region,
-                        time_res="daily", unit_convert=True,
-                        years=slice(str(start_year), str(end_year)),
-                    ).to_dataset(),
-                    start_day, start_month, end_day, end_month,
+                input_core_dims=[["T"]], keep_attrs=True, kwargs={"axis": -1})
+                for m in model
+        ], "M"), input_core_dims=[["M"]], keep_attrs=True, kwargs={"axis": -1})
+        data = xr.apply_ufunc(np.mean, xr.concat([
+            xr.apply_ufunc(
+                np.mean, ac.seasonal_wwc(
+                    ac.daily_tobegroupedby_season(
+                        ac.read_data(
+                            scenario, m, data_var, region,
+                            time_res="daily", unit_convert=True,
+                            years=slice(str(start_year), str(end_year)),
+                        ).to_dataset(),
+                        start_day, start_month, end_day, end_month,
+                    ),
+                    variable, frost_threshold, wet_threshold, hot_threshold,
+                    warm_nights_spell, dry_spell,
                 ),
-                variable, frost_threshold, wet_threshold, hot_threshold,
-                warm_nights_spell, dry_spell,
-            ).mean(dim="T", keep_attrs=True) for m in model
-        ], "M").mean("M", keep_attrs=True)
+                input_core_dims=[["T"]], keep_attrs=True, kwargs={"axis": -1})
+                for m in model
+        ], "M"), input_core_dims=[["M"]], keep_attrs=True, kwargs={"axis": -1})
         #Tedious way to make a subtraction only to keep attributes (units)
         return xr.apply_ufunc(
-            np.subtract, data, ref, dask="allowed", keep_attrs="drop_conflicts",
+            np.subtract, data, ref, keep_attrs="drop_conflicts",
         ).rename({"X": "lon", "Y": "lat"})
 
 
@@ -684,5 +690,7 @@ def register(FLASK, config):
             data[select_var(variable)].attrs["scale_min"],
             data[select_var(variable)].attrs["scale_max"],
         ) = map_attributes(data, variable)
-        resp = pingrid.tile(data[select_var(variable)], tx, ty, tz)
+        resp = pingrid.tile(
+            data[select_var(variable)].astype(np.float64), tx, ty, tz
+        )
         return resp
