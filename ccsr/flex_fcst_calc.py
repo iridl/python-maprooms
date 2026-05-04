@@ -52,7 +52,7 @@ def get_fcst(fcst_conf, start_date=None, lead_time=None):
             obs = obs.sel(lead=int(lead_time))
         # This is needed because we don't want the map centered in the Pacific
         # and because anyway leaflet (or pingrid?) is confused with X from 0 to 360
-        fcst_ds = fcst_ds.load().assign_coords(
+        fcst_ds = fcst_ds.assign_coords(
             X=(((fcst_ds.X + 180) % 360) - 180)
         ).sortby(["X", "Y"])
         obs = obs.assign_coords(
