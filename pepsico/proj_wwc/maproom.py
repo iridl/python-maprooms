@@ -103,7 +103,7 @@ def register(FLASK, config):
         ]:
             data_var = "tasmax"
         if variable in [
-            # "rain_events",
+            "rain_events",
             "dry_days",
             "wet_days",
             "longest_dry_spell",
@@ -122,6 +122,7 @@ def register(FLASK, config):
         model, variable,
         start_day, start_month, end_day, end_month,
         frost_threshold, wet_threshold, hot_threshold, warm_nights_spell, dry_spell,
+        rain_event_amount, rain_event_window,
     ):
         model = [model] if model != "Multi-Model-Average" else [
             "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
@@ -163,7 +164,7 @@ def register(FLASK, config):
                     data_ds, start_day, start_month, end_day, end_month,
                 ),
                 variable, frost_threshold, wet_threshold, hot_threshold,
-                warm_nights_spell, dry_spell,
+                warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
             )
         return data_ds, error_msg
 
@@ -232,12 +233,15 @@ def register(FLASK, config):
         State("hot", "value"),
         State("wms", "value"),
         State("dryspell", "value"),
+        State("ret", "value"),
+        State("rew", "value"),
         prevent_initial_call=True,
     )
     def send_data_as_csv(
         n_clicks, marker_pos, region, variable,
         start_day, start_month, end_day, end_month,
         frost_threshold, wet_threshold, hot_threshold, warm_nights_spell, dry_spell,
+        rain_event_amount, rain_event_window,
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
@@ -250,12 +254,14 @@ def register(FLASK, config):
         hot_threshold = float(hot_threshold)
         warm_nights_spell = int(warm_nights_spell)
         dry_spell = int(dry_spell)
+        rain_event_amount = float(rain_event_amount)
+        rain_event_window = int(rain_event_window)
         model = "Multi-Model-Average"
         data_ds, error_msg = local_data(
             lat, lng, model, variable,
             start_day, start_month, end_day, end_month,
             frost_threshold, wet_threshold, hot_threshold,
-            warm_nights_spell, dry_spell,
+            warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
         )
         if error_msg == None :
             lng_units = "E" if (lng >= 0) else "W"
@@ -292,12 +298,15 @@ def register(FLASK, config):
         State("hot", "value"),
         State("wms", "value"),
         State("dryspell", "value"),
+        State("ret", "value"),
+        State("rew", "value"),
     )
     def local_plots(
         marker_pos, region, n_clicks, model, variable,
         start_day, end_day, start_month, end_month,
         start_year, end_year, start_year_ref, end_year_ref,
         frost_threshold, wet_threshold, hot_threshold, warm_nights_spell, dry_spell,
+        rain_event_amount, rain_event_window,
     ):
         lat = marker_pos[0]
         lng = marker_pos[1]
@@ -325,11 +334,13 @@ def register(FLASK, config):
             hot_threshold = float(hot_threshold)
             warm_nights_spell = int(warm_nights_spell)
             dry_spell = int(dry_spell)
+            rain_event_amount = float(rain_event_amount)
+            rain_event_window = int(rain_event_window)
             data_ds, error_msg = local_data(
                 lat, lng, model, variable,
                 start_day, start_month, end_day, end_month,
                 frost_threshold, wet_threshold, hot_threshold,
-                warm_nights_spell, dry_spell,
+                warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
             )
             if error_msg != None :
                 local_graph = pingrid.error_fig(error_msg)
@@ -491,6 +502,7 @@ def register(FLASK, config):
         start_day, end_day, start_month, end_month,
         start_year, end_year, start_year_ref, end_year_ref,
         frost_threshold, wet_threshold, hot_threshold, warm_nights_spell, dry_spell,
+        rain_event_amount, rain_event_window,
     ):
         model = [model] if model != "Multi-Model-Average" else [
             "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
@@ -507,7 +519,7 @@ def register(FLASK, config):
                     start_day, start_month, end_day, end_month,
                 ),
                 variable, frost_threshold, wet_threshold, hot_threshold,
-                warm_nights_spell, dry_spell,
+                warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
             ).mean(dim="T", keep_attrs=True) for m in model
         ], "M").mean("M", keep_attrs=True)
         data = xr.concat([
@@ -521,7 +533,7 @@ def register(FLASK, config):
                     start_day, start_month, end_day, end_month,
                 ),
                 variable, frost_threshold, wet_threshold, hot_threshold,
-                warm_nights_spell, dry_spell,
+                warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
             ).mean(dim="T", keep_attrs=True) for m in model
         ], "M").mean("M", keep_attrs=True)
         #Tedious way to make a subtraction only to keep attributes (units)
@@ -570,12 +582,15 @@ def register(FLASK, config):
         State("hot", "value"),
         State("wms", "value"),
         State("dryspell", "value"),
+        State("ret", "value"),
+        State("rew", "value"),
     )
     def draw_colorbar(
         region, n_clicks, scenario, model, variable,
         start_day, end_day, start_month, end_month,
         start_year, end_year, start_year_ref, end_year_ref,
         frost_threshold, wet_threshold, hot_threshold, warm_nights_spell, dry_spell,
+        rain_event_amount, rain_event_window,
     ):
         start_day = int(start_day)
         end_day = int(end_day)
@@ -585,13 +600,15 @@ def register(FLASK, config):
         wet_threshold = float(wet_threshold)
         hot_threshold = float(hot_threshold)
         warm_nights_spell = int(warm_nights_spell)
+        rain_event_amount = float(rain_event_amount)
+        rain_event_window = int(rain_event_window)
         dry_spell = int(dry_spell)
         data = seasonal_change(
             scenario, model, variable, region,
             start_day, end_day, start_month, end_month,
             start_year, end_year, start_year_ref, end_year_ref,
             frost_threshold, wet_threshold, hot_threshold,
-            warm_nights_spell, dry_spell,
+            warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
         )
         colorbar, min, max = map_attributes(data, variable)
         return (
@@ -621,12 +638,15 @@ def register(FLASK, config):
         State("hot", "value"),
         State("wms", "value"),
         State("dryspell", "value"),
+        State("ret", "value"),
+        State("rew", "value"),
     )
     def make_map(
         region, n_clicks, scenario, model, variable,
         start_day, end_day, start_month, end_month,
         start_year, end_year, start_year_ref, end_year_ref,
         frost_threshold, wet_threshold, hot_threshold, warm_nights_spell, dry_spell,
+        rain_event_amount, rain_event_window,
     ):
         try:
             send_alarm = False
@@ -635,7 +655,8 @@ def register(FLASK, config):
                 f"{variable}/{start_day}/{end_day}/{start_month}/{end_month}/"
                 f"{start_year}/{end_year}/{start_year_ref}/{end_year_ref}/"
                 f"{frost_threshold}/{wet_threshold}/{hot_threshold}/"
-                f"{warm_nights_spell}/{dry_spell}"
+                f"{warm_nights_spell}/{dry_spell}/{rain_event_amount}/"
+                f"{rain_event_window}"
             )
         except:
             url_str= ""
@@ -653,7 +674,7 @@ def register(FLASK, config):
             f"<variable>/<start_day>/<end_day>/<start_month>/<end_month>/"
             f"<start_year>/<end_year>/<start_year_ref>/<end_year_ref>/"
             f"<frost_threshold>/<wet_threshold>/<hot_threshold>/<warm_nights_spell>/"
-            f"<dry_spell>"
+            f"<dry_spell>/<rain_event_amount>/<rain_event_window>"
         ),
         endpoint=f"{config['core_path']}"
     )
@@ -662,6 +683,7 @@ def register(FLASK, config):
         start_day, end_day, start_month, end_month,
         start_year, end_year, start_year_ref, end_year_ref,
         frost_threshold, wet_threshold, hot_threshold, warm_nights_spell, dry_spell,
+        rain_event_amount, rain_event_window,
     ):
         start_day = int(start_day)
         end_day = int(end_day)
@@ -672,12 +694,14 @@ def register(FLASK, config):
         hot_threshold = float(hot_threshold)
         warm_nights_spell = int(warm_nights_spell)
         dry_spell = int(dry_spell)
+        rain_event_amount = float(rain_event_amount)
+        rain_event_window = int(rain_event_window)
         data = seasonal_change(
             scenario, model, variable, region,
             start_day, end_day, start_month, end_month,
             start_year, end_year, start_year_ref, end_year_ref,
             frost_threshold, wet_threshold, hot_threshold,
-            warm_nights_spell, dry_spell,
+            warm_nights_spell, dry_spell, rain_event_amount, rain_event_window,
         )
         (
             data[select_var(variable)].attrs["colormap"],
