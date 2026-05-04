@@ -41,16 +41,15 @@ def get_fcst(fcst_conf, start_date=None, lead_time=None):
             f"MME_Subx_global_{fcst_conf['var']}_Fri_{S}_wk3_week1234_forecast.nc"
         )
     fcst_ds = xr.open_dataset(data_path / fcst_file)
-    #print(fcst_ds["prob"].data)
+    if lead_time is not None:
+        fcst_ds = fcst_ds.sel(lead=int(lead_time))
     fcst_ds = (
-        fcst_ds
+        fcst_ds.load()
         .assign_coords({"cat" : fcst_ds["category"]})
         .assign_coords(longitude=(((fcst_ds.longitude + 180) % 360) - 180))
         .sortby(["longitude", "latitude"])
         .rename({"longitude": "X", "latitude": "Y"})
     )
-    if lead_time is not None:
-        fcst_ds = fcst_ds.sel(lead=int(lead_time))
     return fcst_ds
 
 
