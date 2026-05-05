@@ -496,40 +496,45 @@ def register(FLASK, config):
             "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
         ]
         data_var = select_var(variable)
-        ref = xr.apply_ufunc(np.mean, xr.concat([
-            xr.apply_ufunc(
-                np.mean, ac.seasonal_wwc(
-                    ac.daily_tobegroupedby_season(
-                        ac.read_data(
-                            "historical", m, data_var, region,
-                            time_res="daily", unit_convert=True,
-                            years=slice(str(start_year_ref), str(end_year_ref)),
-                        ).to_dataset(),
-                        start_day, start_month, end_day, end_month,
+        ref = 0
+        for m in model:
+            ref = (
+                ref
+                + xr.apply_ufunc(
+                    np.mean, ac.seasonal_wwc(
+                        ac.daily_tobegroupedby_season(
+                            ac.read_data(
+                                "historical", m, data_var, region,
+                                time_res="daily", unit_convert=True,
+                                years=slice(str(start_year_ref), str(end_year_ref)),
+                            ).to_dataset(),
+                            start_day, start_month, end_day, end_month,
+                        ),
+                        variable, frost_threshold, wet_threshold, hot_threshold,
+                        warm_nights_spell, dry_spell,
                     ),
-                    variable, frost_threshold, wet_threshold, hot_threshold,
-                    warm_nights_spell, dry_spell,
-                ),
-                input_core_dims=[["T"]], keep_attrs=True, kwargs={"axis": -1})
-                for m in model
-        ], "M"), input_core_dims=[["M"]], keep_attrs=True, kwargs={"axis": -1})
-        data = xr.apply_ufunc(np.mean, xr.concat([
-            xr.apply_ufunc(
-                np.mean, ac.seasonal_wwc(
-                    ac.daily_tobegroupedby_season(
-                        ac.read_data(
-                            scenario, m, data_var, region,
-                            time_res="daily", unit_convert=True,
-                            years=slice(str(start_year), str(end_year)),
-                        ).to_dataset(),
-                        start_day, start_month, end_day, end_month,
+                    input_core_dims=[["T"]], keep_attrs=True, kwargs={"axis": -1})
+            )
+        ref = ref / len(model)
+        data = 0
+        for m in model:
+            data = (
+                data
+                + xr.apply_ufunc(
+                    np.mean, ac.seasonal_wwc(
+                        ac.daily_tobegroupedby_season(
+                            ac.read_data(
+                                scenario, m, data_var, region,
+                                time_res="daily", unit_convert=True,
+                                years=slice(str(start_year), str(end_year)),
+                            ).to_dataset(),
+                            start_day, start_month, end_day, end_month,
+                        ),
+                        variable, frost_threshold, wet_threshold, hot_threshold,
+                        warm_nights_spell, dry_spell,
                     ),
-                    variable, frost_threshold, wet_threshold, hot_threshold,
-                    warm_nights_spell, dry_spell,
-                ),
-                input_core_dims=[["T"]], keep_attrs=True, kwargs={"axis": -1})
-                for m in model
-        ], "M"), input_core_dims=[["M"]], keep_attrs=True, kwargs={"axis": -1})
+                    input_core_dims=[["T"]], keep_attrs=True, kwargs={"axis": -1})
+            )
         #Tedious way to make a subtraction only to keep attributes (units)
         return xr.apply_ufunc(
             np.subtract, data, ref, keep_attrs="drop_conflicts",

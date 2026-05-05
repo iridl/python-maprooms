@@ -692,7 +692,6 @@ def _accumulate_spells(flagged_data, dim, dtype=None, out=None):
     return xr.apply_ufunc(
         np.frompyfunc(lambda x, y: 0 if y == 0 else (x + y), 2, 1).accumulate,
         flagged_data, input_core_dims=[[dim]], output_core_dims=[[dim]],
-        #dask="parallelized",
         kwargs={"axis": -1, "dtype": dtype, "out": out},
     )
 
