@@ -499,7 +499,8 @@ def register(FLASK, config):
 
                                                    )
                                                    ]
-            #print(data)
+            print(f'ID de condado es {click["properties"]["id"]}, la variedad es {variety_values} y la opcion usada es {planting_values}')
+            print(data)
             fig = pgo.Figure()
 
             #type = "bar" 
