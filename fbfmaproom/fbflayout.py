@@ -79,16 +79,18 @@ def map_layout():
                 [
                     dlf.BaseLayer(
                         dlf.TileLayer(
-                            url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}",
+                            attribution="Tiles &copy; Esri",
                         ),
-                        name="Street",
+                        name="Terrain",
                         checked=True,
                     ),
                     dlf.BaseLayer(
                         dlf.TileLayer(
-                            url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                            attribution="Tiles &copy; Esri",
                         ),
-                        name="Topo",
+                        name="Satellite",
                         checked=False,
                     ),
                     dlf.Overlay(
