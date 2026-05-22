@@ -83,7 +83,7 @@ def map_layout():
                             attribution="Tiles &copy; Esri",
                         ),
                         name="Terrain",
-                        checked=True,
+                        checked=False,
                     ),
                     dlf.BaseLayer(
                         dlf.TileLayer(
@@ -91,7 +91,7 @@ def map_layout():
                             attribution="Tiles &copy; Esri",
                         ),
                         name="Satellite",
-                        checked=False,
+                        checked=True,
                     ),
                     dlf.Overlay(
                         dlf.GeoJSON(
