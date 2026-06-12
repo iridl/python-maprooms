@@ -79,10 +79,9 @@ def map_layout():
                 [
                     dlf.BaseLayer(
                         dlf.TileLayer(
-                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}",
-                            attribution="Tiles &copy; Esri",
+                            url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
                         ),
-                        name="Terrain",
+                        name="Street",
                         checked=False,
                     ),
                     dlf.BaseLayer(
