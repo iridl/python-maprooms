@@ -124,7 +124,7 @@ def map(
                     "margin-top":"3px", "margin-bottom":"3px",
                 },
             ), type="dot"),
-            dcc.Loading(dlf.Map(
+            dcc.Loading(dlf.MapContainer(
                 [
                     dlf.LayersControl(
                         id="layers_control", position=layers_control_position
@@ -150,7 +150,7 @@ def map(
                     for cb, cbd in colorbars.items()
                 ],
                 id="map",
-                center=None,
+                center=[0, 0],
                 zoom=default_zoom,
                 style={"width": "100%", "height": "50vh"},
             ), type="dot"),

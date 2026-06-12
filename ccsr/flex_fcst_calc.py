@@ -47,6 +47,9 @@ def get_fcst(fcst_conf, start_date=None, lead_time=None):
             .rename({"longitude": "X", "latitude": "Y"})
         )
         obs = fcst_clim_coeff_ds.rename({"longitude": "X", "latitude": "Y"})
+        if lead_time is not None:
+            fcst_ds = fcst_ds.sel(lead=int(lead_time))
+            obs = obs.sel(lead=int(lead_time))
         # This is needed because we don't want the map centered in the Pacific
         # and because anyway leaflet (or pingrid?) is confused with X from 0 to 360
         fcst_ds = fcst_ds.assign_coords(
@@ -62,9 +65,6 @@ def get_fcst(fcst_conf, start_date=None, lead_time=None):
             )
         ]
         target_display = True
-        if lead_time is not None:
-            fcst_ds = fcst_ds.sel(lead=int(lead_time))
-            obs = obs.sel(lead=int(lead_time))
     return fcst_ds, obs, start_dates, target_display
 
 

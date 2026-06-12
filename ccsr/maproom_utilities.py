@@ -2,12 +2,11 @@ import pingrid
 import pandas as pd
 import dash
 import dash_leaflet as dlf
-import psycopg2
-from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry import Polygon
+import sqlalchemy
 
 
 # Mapping Utilities
@@ -121,7 +120,7 @@ def sql2geom(shapes_sql, db_config):
 
     See Also
     --------
-    psycopg2.connect, psycopg2.sql, pandas.read_sql, shapely.wkb,
+    pandas.read_sql, shapely.wkb,
 
     Examples
     --------
@@ -133,22 +132,21 @@ def sql2geom(shapes_sql, db_config):
         user: ingrid
         dbname: iridb
     """
-    with psycopg2.connect(**db_config) as conn:
-        s = sql.Composed(
-            [
-                sql.SQL("with g as ("),
-                sql.SQL(shapes_sql),
-                sql.SQL(
-                    """
-                    )
-                    select
-                        g.label, g.key, g.the_geom
-                    from g
-                    """
-                ),
-            ]
-        )
-        df = pd.read_sql(s, conn)
+    db_url = sqlalchemy.URL.create(
+        'postgresql',
+        username=db_config['user'],
+        password=db_config['password'],
+        host=db_config['host'],
+        database=db_config['dbname'],
+    )
+    engine = sqlalchemy.create_engine(db_url)
+    query = sqlalchemy.text(f"""
+        WITH g AS ({shapes_sql})
+        SELECT g.label, g.key, g.the_geom
+        FROM g
+    """)
+    with engine.connect() as conn:
+        df = pd.read_sql(query, conn)
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     return df
 
@@ -248,7 +246,7 @@ def make_adm_overlay(
         dlf.GeoJSON(
             id=border_id,
             data=adm_geojson,
-            options={
+            style={
                 "fill": True,
                 "color": adm_color,
                 "weight": adm_weight,
@@ -261,7 +259,7 @@ def make_adm_overlay(
     )
 
 
-def initialize_map(data):
+def initialize_map(data, zoom):
     """
     Map initialization based on `data` spatial domain
 
@@ -269,6 +267,8 @@ def initialize_map(data):
     ----------
     data: xr.DataArray
         spatial data of which longitude and latitude coordinates are X and Y
+    zoom: int
+        dash-leaglet zoom value
 
     Returns
     -------
@@ -277,8 +277,8 @@ def initialize_map(data):
         control, center of the map coordinates values as a list
     """
     center_of_the_map = [
-        ((data["Y"][int(data["Y"].size/2)].values)),
-        ((data["X"][int(data["X"].size/2)].values)),
+        data["Y"][int(data["Y"].size/2)].values.item(),
+        data["X"][int(data["X"].size/2)].values.item(),
     ]
     lat_res = (data["Y"][1] - data["Y"][0]).values
     lat_min = str((data["Y"][0] - lat_res/2).values)
@@ -291,7 +291,7 @@ def initialize_map(data):
     return (
         lat_min, lat_max, lat_label,
         lon_min, lon_max, lon_label,
-        center_of_the_map
+        {"center": center_of_the_map, "zoom": zoom, "transition": "flyTo"},
     )
 
 
@@ -307,7 +307,7 @@ def picked_location(
         spatial data of which longitude and latitude coordinates are X and Y
     initialization_cases: list[str]
         list of Input of which changes reinitialize the map
-    click_lat_lng: list[str]
+    click_lat_lng: dict
         dlf Input from clicking map (lat and lon)
     latitude: str
         Input from latitude pick a point control
@@ -322,8 +322,8 @@ def picked_location(
         lng = data["X"][int(data["X"].size/2)].values
     else:
         if dash.ctx.triggered_id == "map":
-            lat = click_lat_lng[0]
-            lng = click_lat_lng[1]
+            lat = click_lat_lng["lat"]
+            lng = click_lat_lng["lng"]
         else:
             lat = latitude
             lng = longitude
