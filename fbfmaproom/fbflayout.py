@@ -79,18 +79,18 @@ def map_layout():
                 [
                     dlf.BaseLayer(
                         dlf.TileLayer(
+                            url="https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg",
+                            attribution="Imagery courtesy NASA EOSDIS GIBS",
+                        ),
+                        name="Satellite",
+                        checked=True,
+                    ),
+                    dlf.BaseLayer(
+                        dlf.TileLayer(
                             url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
                         ),
                         name="Street",
                         checked=False,
-                    ),
-                    dlf.BaseLayer(
-                        dlf.TileLayer(
-                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                            attribution="Tiles &copy; Esri",
-                        ),
-                        name="Satellite",
-                        checked=True,
                     ),
                     dlf.Overlay(
                         dlf.GeoJSON(
