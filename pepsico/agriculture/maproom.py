@@ -50,7 +50,7 @@ def register(FLASK, config):
     )
     
     VALID_USERS = extrafunctions.load_valid_users_hash()
-    print(f"Usuarios son {VALID_USERS}")
+    #print(f"Usuarios son {VALID_USERS}")
     #auth = dash_auth.BasicAuth(APP, VALID_USERS)
     def bcrypt_auth(username, password):
         #print(f'Lo que recibo es {username} , {password}')
@@ -455,7 +455,7 @@ def register(FLASK, config):
         local_graph = None
         fig=None
         ctx = dash.callback_context
-        print(mouseover)
+        #print(mouseover)
         event = ctx.triggered[0]["prop_id"]
         variety_values = args[0]['variety'] #[opt["value"] for opt in args[0]['variety']]
         planting_values = args[0]['planting'] 
@@ -465,7 +465,7 @@ def register(FLASK, config):
         #print(click["properties"]["id"])
         #pepe=extraf.cargar_valores_id("data/pepsi", click["properties"]["id"])
         #print(data)
-        print(event)
+        #print(event)
         
         if type.split("_")[0] == "bars":
             scenario=args[0]['graph_scenario'] 
@@ -499,8 +499,7 @@ def register(FLASK, config):
 
                                                    )
                                                    ]
-            print(f'ID de condado es {click["properties"]["id"]}, la variedad es {variety_values} y la opcion usada es {planting_values}')
-            print(data)
+            #print(data)
             fig = pgo.Figure()
 
             #type = "bar" 
@@ -530,7 +529,7 @@ def register(FLASK, config):
                     line_width=0,
                 )
                 if type.split("_")[0] == "bars":
-                    print(f"El trace es {trace}")
+                    #print(f"El trace es {trace}")
                     
                     colorbar=extrafunctions.color_scale("tab20")
                     
@@ -623,7 +622,7 @@ def register(FLASK, config):
 
                                       )
                 elif type in ["lines","markers","lines+markers"]:
-                    print(f"Data de lines es {data}")
+                    #print(f"Data de lines es {data}")
                     models = trace['models']
                     #fig.add_trace(pgo.Scatter(x=trace["x"], y=trace["y"],mode=type, name=click["properties"]["NAME"]))
                     for name, values in models.items():

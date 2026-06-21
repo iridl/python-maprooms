@@ -96,3 +96,7 @@ maprooms:
     proj_wwc:
         - title: WWC Projections
           core_path: proj_wwc
+
+    agriculture:
+        - title: Agriculture
+          core_path: agriculture

@@ -10,7 +10,7 @@ import bcrypt
 
 #path="data/cvs_files"
 
-def load_valid_users_hash(filepath="users.txt") -> dict:
+def load_valid_users_hash(filepath=".users") -> dict:
     """Loads users with hashed passwords from a file."""
     users = {}
     with open(filepath, "r") as f:
@@ -54,8 +54,8 @@ def load_valid_users() -> dict:
 
 def prepare_data(variety, model, planting, scenario, target_value, data_type, path="data/cvs_files"):
 
-    print("params:", variety, target_value, data_type)
-    print(f'maodels: 0={model[0]} 1={model[1]}')
+    #print("params:", variety, target_value, data_type)
+    #print(f'maodels: 0={model[0]} 1={model[1]}')
     # anom_period[0] = historical data
     # anom_period[1] = forecast data
     #by default forescast is on the first ([0]) position and historical is on second ([1]) position 
@@ -127,7 +127,7 @@ def prepare_data(variety, model, planting, scenario, target_value, data_type, pa
             csv_file = f"{path}/HARWT_ID_{model}_{scenario}_{planting}_{variety}_{target_value}_US_CA.csv"
         else:
             csv_file = f"{path}/HARWT_ID_HistBL_PDhist_{variety}_{target_value}_US_CA.csv"
-        print(csv_file)
+        #print(csv_file)
 
         df = pd.read_csv(csv_file,dtype={"ID": str})
         df = df.rename(columns={"ID": "id"})
@@ -180,7 +180,7 @@ def prepare_data(variety, model, planting, scenario, target_value, data_type, pa
     else:
         new_classes = gen_clases(min_val, max_val, base=base)
 
-    print(new_classes)
+    #print(new_classes)
 
     colorscale=color_scale(data_type)
 
@@ -401,8 +401,8 @@ def cargar_valores_id_bar(
         data_by_model.setdefault(dataset_name, {})[period] = valor
         x_axis_set.add(period)
 
-        print('Los datos son: ')
-        print(data_by_model)
+        #print('Los datos son: ')
+        #print(data_by_model)
 
     x_axis = sorted(x_axis_set)
 
@@ -474,7 +474,7 @@ def cargar_valores_id(path_folder, id_search,var,variety_values,hist_years_value
             nombre="Hitorical_"+nombre
             dataset_name='Historical'
         elif next((x for x in fcst_years_values if x in file), None): 
-            print(f"archivo entrando {file}")
+            #print(f"archivo entrando {file}")
             data_source=f'Projected {next((x for x in fcst_years_values if x in file), None)}'
             if scenario:
                 nombre = "_".join([file.split("/")[-1].split("_")[i] for i in [2,6]]).replace(".csv","")
