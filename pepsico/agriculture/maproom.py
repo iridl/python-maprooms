@@ -473,7 +473,7 @@ def register(FLASK, config):
             scenario=None
         if click is not None and click.get("properties") is not None:
             if type.split("_")[0] =='bars':
-                data=[extrafunctions.cargar_valores_id_bar("data/cvs_files", 
+                data=[extrafunctions.load_bar_id_values("data/cvs_files", 
                                                    click["properties"]["id"],
                                                    "HARWT",
                                                    variety_values,
@@ -487,7 +487,7 @@ def register(FLASK, config):
                                                    ]
             else:
                 #data=[extrafunctions.cargar_valores_id("data/cvs_files", 
-                data=[extrafunctions.cargar_valores_id_bar("data/cvs_files", 
+                data=[extrafunctions.load_bar_id_values("data/cvs_files", 
                                                    click["properties"]["id"],
                                                    "HARWT",
                                                    variety_values,
