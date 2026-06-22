@@ -6,9 +6,7 @@ import dash_leaflet.express as dlx
 from fieldsets import Block, Select, PickPoint, Month, Number
 from dash_extensions.javascript import arrow_function, assign
 import json 
-
 from globals_ import GLOBAL_CONFIG
-import math
 
 MODELS = [
     {"value": "CanESM2.CanRCM4", "label": "CanESM2 + CanRCM4"},
@@ -51,7 +49,7 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 # -----------------------------
-# Colores y estilo
+# Colores y estilo necesario para la incializacion
 # -----------------------------
 classes = [0, 10, 20, 50, 100, 200, 500, 1000]
 colorscale = ["#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C",
@@ -60,20 +58,13 @@ colorscale = ["#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C",
 style_default = dict(weight=0.8, opacity=1, color="white", dashArray="3", fillOpacity=0.7)
 
 # -----------------------------
-# Colorbar
-# -----------------------------
-ctg = ["{}".format(cls) for cls in classes[:-1]] + ["{}+".format(classes[-1])]
-
-
-# -----------------------------
 # Cargar geojson base
 # -----------------------------
 with open("data/shapes/pepsico.json") as f:
         data = json.load(f)
 
-    # Agregar HARWT y nombre a properties
+# Agregar HARWT y nombre a properties
 for feature in data["features"]:
-        fid = str(feature["properties"].get("id", ""))
         feature["properties"]["NAME"] = feature["properties"].get(
             "CDNAME", feature["properties"].get("NAME", "Unknown")
         )
@@ -84,7 +75,6 @@ for feature in data["features"]:
 # -----------------------------
 # Store para manejar datos dinámicos
 # -----------------------------
-store = dcc.Store(id="geojson-store")
 colorbar = html.Div(id="colorbar")  # vacío al inicio, se llenará por callback
 
 # -----------------------------
@@ -112,29 +102,6 @@ style_handle =  assign(
         }
         """
 )
-
-draw_control = html.Script("""
-    function initDrawControl(map){
-        var drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
-
-        var drawControl = new L.Control.Draw({
-            edit: { featureGroup: drawnItems }
-        });
-        map.addControl(drawControl);
-
-        map.on(L.Draw.Event.CREATED, function (e) {
-            var layer = e.layer;
-            drawnItems.addLayer(layer);
-
-            // Guardar geometría para Dash
-            const geo = layer.toGeoJSON();
-            window.dash_clientside.callback_context.triggered[0].geojson = geo;
-        });
-    }
-""")
-
-style_default = dict(weight=0.8, opacity=1, color="white", dashArray="3", fillOpacity=0.7)
 
 # GeoJSON inicial vacío
 geojson = dlf.GeoJSON(
@@ -229,7 +196,7 @@ def help_layout(buttonname, id_name, message):
 
 
 # -------------------------------------------------
-# Navbar superior con selección de región, escenario, modelo, variable y periodos
+# Navbar superior con selección de región, escenario, modelo, variable periodos, etc
 # -------------------------------------------------
 def navbar_layout():
     return dbc.Nav(
@@ -239,7 +206,7 @@ def navbar_layout():
                 dbc.Row(
                     [
                         dbc.Col(
-                            dbc.NavbarBrand("Agriculture Index App", 
+                            dbc.NavbarBrand(" Agriculture Index App", 
                                             className="ml-2",
                                             style={
                                                     "font-size": "2rem",      # letra más grande
@@ -341,7 +308,7 @@ def navbar_layout():
                                 ],
                                 labels=[
                                     "Historical (2006-2010)",
-                                    "Prohected (2046-2050)"
+                                    "Projected (2046-2050)"
                                 ],
                                 )
                     ),
@@ -589,7 +556,6 @@ def map_layout():
                             children=[
                                     dlf.TileLayer(), 
                                     geojson, 
-                                    #store,
                                     layers_control, 
                                     colorbar,                                     
                                     ],
