@@ -4,9 +4,10 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
 import dash_leaflet.express as dlx
 from fieldsets import Block, Select, PickPoint, Month, Number
+from dash_extensions.javascript import arrow_function, assign
+import json 
 
 from globals_ import GLOBAL_CONFIG
-import json 
 import math
 
 MODELS = [
@@ -50,38 +51,6 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 # -----------------------------
-# Funciones de clases y colores
-# -----------------------------
-def calcular_base(min_val, max_val, n=8):
-    rango = max_val - min_val
-    step_ideal = rango / (n - 1)
-    exp = math.floor(math.log10(step_ideal))
-    base = 10 ** exp
-    multiplo = round(step_ideal / base)
-    base = multiplo * base
-    return max(base, 1)
-
-def generar_clases(min_val, max_val, n=8, base=1000):
-    min_val = int(min_val)
-    max_val = int(max_val)
-    lo = (min_val // base) * base
-    hi = (max_val // base) * base
-    if hi <= lo:
-        return [lo + i * base for i in range(n)]
-    raw_step = (hi - lo) / (n - 1)
-    clases = [int(round(lo + raw_step * i) // base * base) for i in range(n)]
-    for i in range(1, n):
-        if clases[i] <= clases[i-1]:
-            clases[i] = clases[i-1] + base
-    clases[-1] = hi
-    for i in range(n-2, -1, -1):
-        if clases[i] >= clases[i+1]:
-            clases[i] = clases[i+1] - base
-    if clases[0] < lo:
-        return [lo + i * base for i in range(n)]
-    return clases
-
-# -----------------------------
 # Colores y estilo
 # -----------------------------
 classes = [0, 10, 20, 50, 100, 200, 500, 1000]
@@ -118,43 +87,30 @@ for feature in data["features"]:
 store = dcc.Store(id="geojson-store")
 colorbar = html.Div(id="colorbar")  # vacío al inicio, se llenará por callback
 
-from dash_extensions.javascript import arrow_function, assign
 # -----------------------------
 # Estilo JS para geojson
 # -----------------------------
-# style_handle = assign("""
-# function(feature, context){
-#     const {classes, colorscale, style, colorProp} = context.hideout;
-#     const value = feature.properties[colorProp];
-#     let fillColor = colorscale[0];
-#     for (let i = 0; i < classes.length; ++i) {
-#         if (value > classes[i]) fillColor = colorscale[i];
-#     }
-#     return {...style, fillColor: fillColor};
-# }
-# """)
-
 style_handle =  assign(
-"""
-function(feature, context) {
-    const { classes, colorscale, style, colorProp } = context.hideout;
-    const value = feature.properties[colorProp];
-    let fillColor = colorscale[0];
+        """
+        function(feature, context) {
+            const { classes, colorscale, style, colorProp } = context.hideout;
+            const value = feature.properties[colorProp];
+            let fillColor = colorscale[0];
 
-    for (let i = 0; i < classes.length - 1; i++) {
-        if (value >= classes[i] && value < classes[i + 1]) {
-            fillColor = colorscale[i];
-            break;
+            for (let i = 0; i < classes.length - 1; i++) {
+                if (value >= classes[i] && value < classes[i + 1]) {
+                    fillColor = colorscale[i];
+                    break;
+                }
+            }
+
+            if (value >= classes[classes.length - 1]) {
+                fillColor = colorscale[colorscale.length - 1];
+            }
+
+            return { ...style, fillColor };
         }
-    }
-
-    if (value >= classes[classes.length - 1]) {
-        fillColor = colorscale[colorscale.length - 1];
-    }
-
-    return { ...style, fillColor };
-}
-"""
+        """
 )
 
 draw_control = html.Script("""
@@ -177,15 +133,6 @@ draw_control = html.Script("""
         });
     }
 """)
-
-
-
-# -----------------------------
-# Colores y estilo
-# -----------------------------
-#classes = [0, 10, 20, 50, 100, 200, 500, 1000]
-#colorscale = ["#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C",
-#              "#FC4E2A", "#E31A1C", "#BD0026", "#800026"]
 
 style_default = dict(weight=0.8, opacity=1, color="white", dashArray="3", fillOpacity=0.7)
 
@@ -233,7 +180,6 @@ def app_layout():
                                      dbc.Col(
                                          map_layout(),
                                          width=12,
-                                         #style={"background-color": "white"},
                                      ),
                                 ],
                             ),
@@ -314,40 +260,8 @@ def navbar_layout():
                     },
                 ),
             ),
-            # Salto de línea explícito
-            #html.Br(),
-            # Selección de región
-            # dbc.Row(
-            #     dbc.Col(
-            #         Block("Region",
-            #             Select(
-            #                 id="region",
-            #                 #options=["SAMER", "SASIA", "Thailand", "US-CA"],
-            #                 # labels=[
-            #                 #     "South America",
-            #                 #     "South Asia",
-            #                 #     "Thailand",
-            #                 #     "United States and Canada",
-            #                 # ],
-            #                 options=["USA", "CAN"],
-            #                 labels=["United States","Canada"],
-            #                 #init=1,
-            #             ),
-            #             width=12,
-            #         ),
-            #         style={"margin-left": "0.5rem","margin-bottom": "1rem"},
-            #     ),
-            # ),
-            # Herramienta de selección de coordenadas
-            #PickPoint(width="8em"),
             #Bloque de envío con escenarios, modelos, variables, meses y años
             Block("",
-                # Block("Region", Select(
-                #     id="region",
-                #     options=["USA", "CAN"],
-                #     labels=["United States","Canada"],
-                #     init=0,
-                # )),
                 html.Div(
                     [ 
                     Block("Variable", Select(
@@ -360,12 +274,6 @@ def navbar_layout():
                         ],
                         init=0,
                     )),
-                    # Selección de estación (mes inicial y final)
-                    # Block("Season",
-                    #     Month(id="start_month", default="Jan"),
-                    #     "-",
-                    #     Month(id="end_month", default="Mar"),
-                    # ),
                     # Selección de referncias
                     Block("Variety", Select(id="variety", 
                         options=[m["value"] for m in VARIETY],
@@ -472,7 +380,6 @@ def navbar_layout():
                                             ),
                                 ],
                                 id="dataset1_container",
-                                #style={"display": "flex", "flex-direction": "column"} 
                             ),
                         ),
                         " ",
@@ -482,7 +389,6 @@ def navbar_layout():
                             html.Div(
                                 children=[
                                     Select(id="dataset2",
-                                        #placeholder="Dataset used for anomaly calculation",
                                         options=['historical']+[m["value"] for m in MODELS],
                                         labels=['Historical']+[m["label"] for m in MODELS]
                                     ),
@@ -513,11 +419,7 @@ def navbar_layout():
                                 id="dataset2_container",
                                 #style={"margin-left": "5px", "vertical-align": "top"}  
                             ),
-                            # " ",
-                            # html.Div(
-                                
-                            #     #id="dataset2_container"
-                            # ),
+
                         ),
                     ),
                     id="anomaly_period_container",
@@ -525,46 +427,7 @@ def navbar_layout():
                 ),
                 # Esto es solo para mejorar como se trasnfieren los datos entre componentes
                 dcc.Store(id="anomaly_period_values"),
-                # Block("Projected Years",
-                #     Number(
-                #         id="start_year",
-                #         default=2015,
-                #         min=2015,
-                #         max=2099,
-                #         width="5em",
-                #         debounce=False,
-                #     ),
-                #     "-",
-                #     Number(
-                #         id="end_year",
-                #         default=2019,
-                #         min=2015,
-                #         max=2099,
-                #         width="5em",
-                #         debounce=False,
-                #     ),
-                # ),
-                # Selección de años de referencia histórica
-                # Block("Reference Years",
-                #     Number(
-                #         id="start_year_ref",
-                #         default=1981,
-                #         min=1951,
-                #         max=2014,
-                #         width="5em",
-                #         debounce=False,
-                #     ),
-                #     "-",
-                #     Number(
-                #         id="end_year_ref",
-                #         default=2010,
-                #         min=1951,
-                #         max=2014,
-                #         width="5em",
-                #         debounce=False,
-                #     ),
-                # ),
-                #button_id="submit_controls",
+
             ),
             # Alertas para errores en el mapa
             dbc.Alert(
@@ -583,10 +446,6 @@ def navbar_layout():
 # -------------------------------------------------
 # Layout de controles explicativos y texto informativo
 # -------------------------------------------------
-from dash_extensions.javascript import arrow_function, assign
-#import pandas as pd
-#import numpy as np
-import json 
 
 with open("data/shapes/countries_50m.json") as f:
     countries = json.load(f)
@@ -597,7 +456,6 @@ geojson_borders = {
     "features": features
 }
 
-#borders_pane = dl.MapPane(id="borders-pane", style={"zIndex": 300})
 borders_layer = dlf.GeoJSON(
     data=geojson_borders,
     id="country-borders",
@@ -645,21 +503,6 @@ layers_control = dlf.LayersControl(
 )
 
 # -----------------------------
-# Estilo JS para geojson
-# -----------------------------
-style_handle = assign("""
-function(feature, context){
-    const {classes, colorscale, style, colorProp} = context.hideout;
-    const value = feature.properties[colorProp];
-    let fillColor = colorscale[0];
-    for (let i = 0; i < classes.length; ++i) {
-        if (value > classes[i]) fillColor = colorscale[i];
-    }
-    return {...style, fillColor: fillColor};
-}
-""")
-
-# -----------------------------
 # Info box
 # -----------------------------
 def get_info(feature=None):
@@ -675,7 +518,6 @@ info = html.Div(
     children=get_info(),
     id="info",
     style={
-        #"position":"fixed",
         "position": "absolute",
         "top": "200px", #Y 350
         "right": "15px",
@@ -713,20 +555,13 @@ def controls_layout():
             ),
             html.P(
                 """
-                Click the map (or enter coordinates) to show historical seasonal time
+                Click the map (or enter coordinates) to show historical time
                 series for this variable of this model, followed by a plume of
                 possible projected scenarios.
                 """
             ),
             dcc.Loading(html.P(id="map_description_var"), type="dot"),
-            # html.P(
-            #     """
-            #     Change is expressed as the difference between average over projected
-            #     years and average over reference historical years (in the variables
-            #     units), except for precipitation and both humidity variables for
-            #     which it is the relative difference (in %).
-            #     """
-            # ),
+
         ],
         fluid=True, className="scrollable-panel",
         style={"padding-bottom": "1rem", "padding-top": "1rem"},
@@ -737,48 +572,26 @@ def controls_layout():
 # Layout del mapa principal con colorbar y marcador
 # -------------------------------------------------
 def map_layout():
-    #print("Dentro de map layout")
-    #print(store)
-    #print(geojson)
+
     return dbc.Container(
         [
             # Título del mapa con loading
-            #dcc.Loading(
             html.H5(
                 id="map_title",
                 style={
                     "text-align":"center", "border-width":"1px",
-                    #"border-style":"solid", "border-color":"grey",
                     "margin-top":"3px", "margin-bottom":"3px",
                 },
-            ),#,  type="dot"),
+            ),
             # Store para geojson
-            #store,
             dcc.Loading(
                         dlf.Map(
-                            #beforeLoad=add_draw_control,
                             children=[
                                     dlf.TileLayer(), 
                                     geojson, 
                                     #store,
                                     layers_control, 
-                                    colorbar, 
-                                    # dlf.FeatureGroup([
-                                    #     dlf.EditControl(
-                                    #         id="edit-control",
-                                    #         position="bottomright",
-                                    #         draw={
-                                    #             "polyline": False,
-                                    #             "circle": False,
-                                    #             "rectangle": False,
-                                    #             "polygon": False,
-                                    #             "marker": True,
-                                    #             "circlemarker": False,
-                                    #         },
-                                    #         edit={"remove": True}
-                                    #     )
-                                    # ], id="drawn-group")
-                                    
+                                    colorbar,                                     
                                     ],
                             center=[45, -95],
                             zoom=4,
@@ -787,47 +600,13 @@ def map_layout():
                             maxBounds=[[5, -170], [85, -10]],
                             maxBoundsViscosity=1.0,
                             style={"height": "90vh", "width": "100%"},
-                            #preferCanvas=True
             ),
              type="dot", 
-             #id="load",
-             #className="mi-loading",
-             overlay_style={"visibility":"visible", "opacity": .5, "backgroundColor": "white", #"filter": "blur(1px)"
+             overlay_style={"visibility":"visible", "opacity": .5, "backgroundColor": "white", 
                             }, 
              ),
-            #),
              info,
             html.Div(id="dummy-output", style={"display": "none"}), 
-            # Componente principal de mapa con capas y controles
-            # dcc.Loading(dlf.Map(
-            #     [
-            #         dlf.LayersControl(id="layers_control", position="topleft"),
-            #         dlf.LayerGroup(
-            #             [dlf.Marker(id="loc_marker", position=(0, 0))],
-            #             id="layers_group"
-            #         ),
-            #         dlf.ScaleControl(imperial=False, position="bottomright"),
-            #         dlf.Colorbar(
-            #             id="colorbar",
-            #             nTicks=9,
-            #             opacity=1,
-            #             tooltip=True,
-            #             position="topright",
-            #             width=10,
-            #             height=300,
-            #             className="p-1",
-            #             style={
-            #                 "background": "white", "border-style": "inset",
-            #                 "-moz-border-radius": "4px", "border-radius": "4px",
-            #                 "border-color": "LightGrey",
-            #             },
-            #         ),
-            #     ],
-            #     id="map",
-            #     center=None,
-            #     zoom=GLOBAL_CONFIG["zoom"],
-            #     style={"width": "100%", "height": "50vh"},
-            # ), type="dot"),
         ],
         fluid=True,
     )
@@ -850,12 +629,9 @@ def results_layout():
                                     html.Span("Graph type", style={"margin-left": "5px","margin-right": "5px"}),
                                     Select(
                                         id="graph_type",
-                                        #options=["bars", "lines","markers","markers-scale","lines+markers"],
-                                        #labels= ["bars", "lines","dots","dots-scale","lines+dots"],
                                         options=["bars_group","bars_stack", "lines","lines+markers","markers"],
                                         labels= ["bars group","bars stack","lines","lines+dots","dots"],
                                         init=0,
-                                        #style={"width": "150px"},   # mismo ancho que botón
                                     ),
                                     html.Span("Planting", style={"margin-left": "10px","margin-right": "5px"}),
                                     Select(

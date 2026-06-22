@@ -5,9 +5,24 @@ from . import layout
 import numpy as np
 import os
 import bcrypt
-
+from pathlib import Path
 
 def hash_user_password(user: str, password: str) -> str:
+    """Hash a user's password using bcrypt and return a formatted credential string.
+
+    Parameters
+    ----------
+    user : str
+        The username to associate with the hashed password.
+    password : str
+        The plaintext password to be hashed.
+
+    Returns
+    -------
+    str
+        A string in the format ``"username:hashed_password"``, ready to be
+        stored in the ``.users`` credentials file.
+    """
     hashed = bcrypt.hashpw(
         password.encode(),
         bcrypt.gensalt()
@@ -16,7 +31,21 @@ def hash_user_password(user: str, password: str) -> str:
     return f"{user}:{hashed}"
 
 def load_valid_users_hash(filepath=".users") -> dict:
-    """Loads users with hashed passwords from a file."""
+    """Load users and their bcrypt-hashed passwords from a credentials file.
+
+    Each line in the file must follow the format ``username:hashed_password``.
+    Blank lines and lines without a colon are silently ignored.
+
+    Parameters
+    ----------
+    filepath : str, optional
+        Path to the credentials file. Defaults to ``".users"``.
+
+    Returns
+    -------
+    dict
+        A dictionary mapping each username (str) to its bcrypt hash (str).
+    """
     users = {}
     with open(filepath, "r") as f:
         for line in f.readlines():
@@ -27,14 +56,45 @@ def load_valid_users_hash(filepath=".users") -> dict:
     return users
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Verifies a password (plaintext received from the popup) against its bcrypt hash."""
+    """Verify a plaintext password against a stored bcrypt hash.
+
+    Parameters
+    ----------
+    plain : str
+        The plaintext password received from the user (e.g. from a login popup).
+    hashed : str
+        The bcrypt-hashed password retrieved from the credentials store.
+
+    Returns
+    -------
+    bool
+        ``True`` if the plaintext password matches the hash, ``False`` otherwise.
+    """
     return bcrypt.checkpw(plain.encode(), hashed.encode())
 
 def load_valid_users() -> dict:
-    """
-    Reads users from the .users 
-    Expected format in .users:
-        AUTH_USERS=admin:password123,usuario2:otraClave456
+    """Load plaintext user credentials from a ``.users`` env-style file.
+
+    The file must be located in the same directory as this module and contain
+    a line with the format::
+
+        AUTH_USERS=user1:password1,user2:password2
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    dict
+        A dictionary mapping each username (str) to its plaintext password (str).
+
+    Raises
+    ------
+    FileNotFoundError
+        If the ``.users`` file does not exist in the module's directory.
+    ValueError
+        If the ``AUTH_USERS`` key is not found in the file.
     """
     env_path = os.path.join(os.path.dirname(__file__), ".users")
 
@@ -58,7 +118,65 @@ def load_valid_users() -> dict:
     )
 
 def prepare_data(variety, model, planting, scenario, target_value, data_type, path="data/cvs_files"):
+    """Load, process, and merge crop yield CSV data for map visualization.
 
+    Reads one or two CSV files depending on ``data_type``, computes the
+    requested transformation between datasets (e.g. percentage change,
+    direction of change), injects the resulting HARWT values into the shared
+    GeoJSON ``layout.data``, and returns the filtered GeoJSON together with
+    the colour-class breakpoints and colour scale appropriate for the metric.
+
+    When ``data_type`` requires a comparison (``mean_change``,
+    ``percentage_change``, ``direction_change``, ``yield_change_index``,
+    ``stress_simple``), both ``variety``, ``model``, ``planting``,
+    ``scenario``, and ``target_value`` must be 2-element sequences where
+    index 0 corresponds to the *forecast* dataset and index 1 to the
+    *baseline/reference* dataset.  For single-dataset types (``projected``,
+    ``historical``), scalar values are expected.
+
+    Parameters
+    ----------
+    variety : str or list of str
+        Crop variety identifier(s).  Two-element list for comparison types.
+    model : str or list of str
+        Climate model identifier(s) (e.g. ``"CanESM2.CanRCM4"``).  Use
+        ``"historical"`` to select the historical baseline file.
+        Two-element list for comparison types.
+    planting : str or list of str
+        Planting identifier(s) used in the CSV filename.
+        Two-element list for comparison types (eg. No adaptation -> ``"PDhist"`` ).
+    scenario : str or list of str
+        Emissions scenario identifier(s) (e.g. ``"rcp45"``).
+        Two-element list for comparison types.
+    target_value : str or list of str
+        Target identifier(s) embedded in the filename.
+        Two-element list for comparison types.
+    data_type : str
+        Transformation to apply.  One of:
+
+        * ``"mean_change"``        – absolute difference (forecast − baseline)
+        * ``"percentage_change"``  – relative difference as a percentage
+        * ``"yield_change_index"`` – YCI expressed as a percentage: (fcst/base − 1) × 100
+        * ``"stress_simple"``      – stress index: 1 − (fcst / base)
+        * ``"direction_change"``   – sign of the difference (−1, 0, or +1)
+        * ``"projected"``          – raw forecast values (no comparison)
+        * ``"historical"``         – raw historical baseline values
+    path : str, optional
+        Directory containing the CSV files.  Defaults to
+        ``"data/cvs_files"``.
+
+    Returns
+    -------
+    data_filtered : dict
+        A GeoJSON ``FeatureCollection`` (dict) with the computed HARWT value
+        injected into each feature's ``properties``.  Features whose HARWT
+        is ``NaN`` or missing are excluded.
+    new_classes : list of int
+        A list of 9 breakpoint values used to assign colours to the choropleth
+        classes.
+    colorscale : list of str
+        A list of 9 hex colour strings corresponding to the 9 colour classes.
+    """
     #by default forescast is on the first ([dataset 1]) position and historical is on second ([dataset 2]) position 
     if data_type in ["mean_change",
                      "percentage_change",
@@ -164,6 +282,26 @@ def prepare_data(variety, model, planting, scenario, target_value, data_type, pa
     return data_filtered,new_classes,colorscale 
 
 def calc_base(min_val, max_val, n=9):
+    """Compute a round step size for dividing a numeric range into ``n`` classes.
+
+    Calculates an aesthetically clean interval by rounding the ideal step to
+    the nearest power-of-10 multiple, ensuring colour-class breakpoints land
+    on human-readable numbers.
+
+    Parameters
+    ----------
+    min_val : float
+        Minimum value of the data range.
+    max_val : float
+        Maximum value of the data range.
+    n : int, optional
+        Desired number of colour classes.  Defaults to ``9``.
+
+    Returns
+    -------
+    base : int or float
+        A rounded step size guaranteed to be at least ``1``.
+    """
     rango = max_val - min_val
     step_ideal = rango / (n - 1)
     exp = math.floor(math.log10(step_ideal))
@@ -173,6 +311,30 @@ def calc_base(min_val, max_val, n=9):
     return max(base, 1)
 
 def gen_color_class(min_val, max_val, n=9, base=1000):
+    """Generate ``n`` evenly spaced, rounded colour-class breakpoints.
+
+    Breakpoints are snapped to multiples of ``base`` so that legend labels
+    are clean round numbers.  The algorithm guarantees strict monotonicity:
+    each breakpoint is larger than the previous one by at least ``base``.
+
+    Parameters
+    ----------
+    min_val : float
+        Minimum value of the data range.
+    max_val : float
+        Maximum value of the data range.
+    n : int, optional
+        Number of breakpoints to generate.  Defaults to ``9``.
+    base : float, optional
+        Rounding unit.  Breakpoints are multiples of this value.
+        Defaults to ``1000``.
+
+    Returns
+    -------
+    color_class : list of int
+        A strictly increasing list of ``n`` integer breakpoints aligned to
+        multiples of ``base``.
+    """
     min_val = int(min_val)
     max_val = int(max_val)
     lo = (min_val // base) * base
@@ -194,6 +356,32 @@ def gen_color_class(min_val, max_val, n=9, base=1000):
 
 
 def color_scale(input):
+    """Return a 9-colour hex palette suited to the requested data type.
+
+    Each palette is a diverging or sequential scheme chosen to represent the
+    sign and magnitude of the underlying metric intuitively (e.g. red for
+    deficit/stress, green or blue for surplus/benefit).
+
+    Parameters
+    ----------
+    input : str
+        The data-type identifier.  Recognised values:
+
+        * ``"mean_change"``        – brown-to-green diverging scale
+        * ``"direction_change"``   – red / neutral / blue categorical scale
+        * ``"yield_change_index"`` – dark-red to dark-green diverging scale
+        * ``"stress_simple"``      – dark-red to dark-green diverging scale
+        * ``"stress_simple_invert"``– dark-red to teal diverging scale (inverted)
+        * ``"percentage_change"``  – red-to-blue diverging scale
+        * ``"tab20"``              – qualitative 10-colour Matplotlib tab20 subset
+        * any other value          – yellow-to-dark-red sequential scale
+
+    Returns
+    -------
+    colorscale : list of str
+        A list of 9 hex colour strings ordered from the lowest to the
+        highest class value.
+    """
     if input == "mean_change":
         colorscale = [
                         "#8C510A", "#BF812D", "#DFC27D", "#F6E8C3",   # déficit (browns)
@@ -215,16 +403,16 @@ def color_scale(input):
         
     elif input == 'stress_simple_invert': 
         colorscale =  [
-    "#67001F",  # -1.0  extreme stress
-    "#B2182B",  # alto estrés
-    "#D6604D",  # high stress
-    "#F4A582",  # mild stress
-    "#FFFFFF",  #  0.0  neutral
-    "#D9F0D3",  # slight benefit
-    "#7FBF7B",  # moderate benefit
-    "#35978F",  # high profit
-    "#01665E",  #  1.0  extreme high
-]
+                    "#67001F",  # -1.0  extreme stress
+                    "#B2182B",  # alto estrés
+                    "#D6604D",  # high stress
+                    "#F4A582",  # mild stress
+                    "#FFFFFF",  #  0.0  neutral
+                    "#D9F0D3",  # slight benefit
+                    "#7FBF7B",  # moderate benefit
+                    "#35978F",  # high profit
+                    "#01665E",  #  1.0  extreme high
+                ]
     elif input == "percentage_change":
         colorscale = [
                         "#67001F", "#B2182B", "#D6604D", "#F4A582",  # 4 Slight decrease
@@ -252,76 +440,62 @@ def color_scale(input):
                         ]
     return colorscale
 
-from pathlib import Path
-
-# def cargar_valores_id_bar_original(path_folder, id_search, var, variety_values, hist_years_values, fcst_years_values, planting_values, scenario, type):
-#     csv_files = sorted(glob.glob(f"{path_folder}/*.csv"))
-
-#     x_axis = []
-#     # Cambia esto: un dict {model: {period: value}}
-#     data_by_model = {}
-
-#     for file in csv_files:
-#         df = pd.read_csv(file, dtype={"ID": str})
-
-#         if "ID" not in df.columns:
-#             continue
-
-#         df["ID"] = df["ID"].astype(str).str.strip()
-#         id_search = str(id_search).strip()
-#         fila = df[df["ID"] == id_search]
-
-#         if fila.empty:
-#             continue
-#         elif variety_values not in file:
-#             continue
-#         elif planting_values not in file:
-#             continue
-#         elif scenario and scenario not in file and not any(v in file for v in hist_years_values):
-#             continue
-
-#         valor = fila[var].iloc[0]
-
-#         if next((x for x in hist_years_values if x in file), None):
-#             period = file.split("/")[-1].split("_")[5].replace(".csv", "")
-#             dataset_name = 'Historical'
-#         elif next((x for x in fcst_years_values if x in file), None):
-#             period = file.split("/")[-1].split("_")[6].replace(".csv", "")
-#             dataset_name = file.split("/")[-1].split("_")[2].replace(".csv", "")
-
-#         # Acumular en el dict
-#         if dataset_name not in data_by_model:
-#             data_by_model[dataset_name] = {}
-#         data_by_model[dataset_name][period] = valor
-
-#         if period not in x_axis:
-#             x_axis.append(period)
-
-#     x_axis = sorted(x_axis)  # ordenar períodos cronológicamente
-
-#     # Armar trace compatible con el nuevo gráfico stacked
-#     trace = {
-#         "x_axis": x_axis,
-#         "models": {}
-#     }
-
-#     for model, period_vals in data_by_model.items():
-#         # y es una lista ordenada según x_axis, None si falta el período
-#         trace["models"][model] = [period_vals.get(p) for p in x_axis]
-
-#     return trace
-
 #this function was optimezed 
 def load_bar_id_values( 
     path_folder, id_search, var, variety_values,
     hist_years_values, fcst_years_values, planting_values, scenario, type
 ):
+    """Collect time-series values for a single grid-cell ID across all matching CSV files.
+
+        Scans every CSV in ``path_folder``, pre-filters by filename to include
+        only files that match the requested variety, year ranges, planting date,
+        and (for bar charts) scenario, then reads only the two columns needed
+        (``ID`` and ``var``) before extracting the row for ``id_search``.
+        Results are grouped by model/dataset name and sorted by period, ready
+        to be passed directly to a bar or line chart.
+
+        Parameters
+        ----------
+        path_folder : str
+            Directory containing the CSV files to scan.
+        id_search : str or int
+            The grid-cell identifier to look up.  Leading/trailing whitespace is
+            stripped before comparison.
+        var : str
+            Name of the data column to extract from each CSV (e.g. ``"HARWT"``).
+        variety_values : str
+            Crop variety token that must appear in the filename.
+        hist_years_values : list of str
+            Year tokens that identify historical CSV files.
+        fcst_years_values : list of str
+            Year tokens that identify projected CSV files.
+        planting_values : str
+            Planting identifier(s) used in the CSV filename.
+        scenario : str or None
+            Emissions scenario identifier(s) (e.g. ``"rcp45"``).
+        type : str
+            Chart type selector.  Use ``"bars"`` to filter by scenario and label
+            datasets by model only (necessary because of how the data must be formatted to create bars);
+            any other value includes the scenario token in the dataset label.
+
+        Returns
+        -------
+        dict
+            A dictionary with two keys:
+
+            ``"x_axis"`` : list of str
+                Sorted list of period tokens found across all matching files.
+            ``"models"`` : dict of {str: list}
+                Maps each dataset name (model or ``"Historical"``) to a list of
+                values aligned to ``x_axis``.  Missing periods are represented
+                as ``None``.
+        """
     id_search = str(id_search).strip()
     hist_set = set(hist_years_values)
     fcst_set = set(fcst_years_values)
 
     csv_files = sorted(glob.glob(f"{path_folder}/*.csv"))
-
+    
     # Pre-filter by filename before reading anything.
     def file_passes(file):
         if variety_values not in file:
@@ -387,99 +561,4 @@ def load_bar_id_values(
         },
     }
 
-# def cargar_valores_id(path_folder, id_search,var,variety_values,hist_years_values,fcst_years_values,planting_values,scenario,type):
-#     csv_files = sorted(glob.glob(f"{path_folder}/*.csv"))
 
-#     #print(variety_values)
-
-#     nombres_archivos = []
-#     valores = []
-#     names = []
-#     x_axis = []
-#     models = []
-
-
-#     for file in csv_files:
-#         df = pd.read_csv(file,dtype={"ID": str})
-
-#         # verificar que exista la columna ID
-#         if "ID" not in df.columns:
-#             continue
-
-#         df["ID"] = df["ID"].astype(str).str.strip()
-#         id_search = str(id_search).strip()
-
-#         fila = df[df["ID"] == id_search]
-#         #print('FIPS son')
-#         #print(f'filtrando para serie {df["ID"]}')
-
-
-
-#         if fila.empty:
-#             continue
-#         elif variety_values not in file:
-#             continue
-#         elif planting_values not in file:
-#             continue 
-#         elif scenario and scenario not in file and not any(v in file for v in hist_years_values):
-#             continue
-
-
-#         # Asumimos que la columna del valor se llama Var
-#         valor = fila[var].iloc[0]
-#         #name = fila["NAME"].iloc[0]
-
-#         # Nombre corto del archivo (sin ruta)
-#         # HARWT_ID_CanESM2.CRCM5-UQAM_rcp85_PDy0n30_Atlantic_2021-2025_US_CA.csv
-#         #  0    1         2             3      4       5        6       7 8
-#         #
-#         #
-#         # HARWT_ID_HistBL_PDhist_Atlantic_2006-2010_US_CA.csv
-#         #.  0    1   2      3       4         5      6  7  
-#         #nombre = "_".join(file.split("/")[-1].split("_")[-2:]).replace(".csv","")
-        
-#         nombress = next((x for x in variety_values if x in file), None)
-#         #print(f"Nombre de archivo es {file}")
-#         if next((x for x in hist_years_values if x in file), None): 
-#             data_source=f'Historical {next((x for x in hist_years_values if x in file), None)}'
-#             nombre = "_".join([file.split("/")[-1].split("_")[i] for i in [5]]).replace(".csv","")
-#             period=file.split("/")[-1].split("_")[5].replace(".csv","")
-#             nombre="Hitorical_"+nombre
-#             dataset_name='Historical'
-#         elif next((x for x in fcst_years_values if x in file), None): 
-#             #print(f"archivo entrando {file}")
-#             data_source=f'Projected {next((x for x in fcst_years_values if x in file), None)}'
-#             if scenario:
-#                 nombre = "_".join([file.split("/")[-1].split("_")[i] for i in [2,6]]).replace(".csv","")
-#             else:
-#                 nombre = "_".join([file.split("/")[-1].split("_")[i] for i in [2,3,6]]).replace(".csv","")
-#             period=file.split("/")[-1].split("_")[6].replace(".csv","")
-#             dataset_name=file.split("/")[-1].split("_")[2].replace(".csv","")
-
-#         #print(f"Data source es {data_source}")
-
-#         nombres_archivos.append(nombre)
-#         valores.append(valor)
-#         if period not in x_axis:
-#             x_axis.append(period)
-#         if dataset_name not in  models :
-#             models.append(dataset_name)
-#         #names.append(data_source)
-
-#     # Trace compatible con dcc.Graph
-#     #print(f"Valores es {valores}")
-#     if type=='bars':
-#         trace = {
-#             "x":  x_axis,
-#             "y": valores,
-#             "name": models
-#         }
-#     else:
-#         trace = {
-#             "x": nombres_archivos,
-#             "y": valores,
-#         #  "type": type,
-#         #  "name": f"Valores para {id_search}"
-#         }
-
-#     return trace
