@@ -8,6 +8,9 @@ from dash_extensions.javascript import arrow_function, assign
 import json 
 from globals_ import GLOBAL_CONFIG
 
+# -----------------------------
+# Model, year, variety and scenario options
+# -----------------------------
 MODELS = [
     {"value": "CanESM2.CanRCM4", "label": "CanESM2 + CanRCM4"},
     {"value": "CanESM2.CRCM5-UQAM", "label": "CanESM2 + CRCM5-UQAM"},
@@ -43,13 +46,15 @@ SCENARIOS= [
     {"label": "RCP 8.5", "value": "rcp85"},     
 ]
 
-# Colores de la interfaz
+# -----------------------------
+# Interface color palette
+# -----------------------------
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 # -----------------------------
-# Colores y estilo necesario para la incializacion
+# Color classes and styles for map initialization
 # -----------------------------
 classes = [0, 10, 20, 50, 100, 200, 500, 1000]
 colorscale = ["#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C",
@@ -58,12 +63,12 @@ colorscale = ["#FFEDA0", "#FED976", "#FEB24C", "#FD8D3C",
 style_default = dict(weight=0.8, opacity=1, color="white", dashArray="3", fillOpacity=0.7)
 
 # -----------------------------
-# Cargar geojson base
+# Load base GeoJSON
 # -----------------------------
 with open("data/shapes/pepsico.json") as f:
         data = json.load(f)
 
-# Agregar HARWT y nombre a properties
+# Add HARWT and name to feature properties
 for feature in data["features"]:
         feature["properties"]["NAME"] = feature["properties"].get(
             "CDNAME", feature["properties"].get("NAME", "Unknown")
@@ -73,12 +78,12 @@ for feature in data["features"]:
         )
 
 # -----------------------------
-# Store para manejar datos dinámicos
+# Store for dynamic data
 # -----------------------------
-colorbar = html.Div(id="colorbar")  # vacío al inicio, se llenará por callback
+colorbar = html.Div(id="colorbar")  # empty on init, populated by callback
 
 # -----------------------------
-# Estilo JS para geojson
+# JS style handler for GeoJSON - links county shapes to choropleth coloring
 # -----------------------------
 style_handle =  assign(
         """
@@ -103,7 +108,9 @@ style_handle =  assign(
         """
 )
 
-# GeoJSON inicial vacío
+# -----------------------------
+# GeoJSON layer (initially empty, filled by callback)
+# -----------------------------
 geojson = dlf.GeoJSON(
     data={"type": "FeatureCollection", "features": []},
     style=style_handle,
@@ -114,21 +121,21 @@ geojson = dlf.GeoJSON(
 )
 
 # -------------------------------------------------
-# Layout principal de la aplicación
+# Main application layout
 # -------------------------------------------------
 def app_layout():
     return dbc.Container(
         [
-            # Componente para manejo de rutas en Dash
+            # Component for URL routing in Dash
             dcc.Location(id="location", refresh=True),
             
-            # Navbar con controles principales
+            # Top navbar with main controls
             navbar_layout(),
 
-            # Contenedor principal con dos columnas: controles y mapa/resultados
+            # Main container with two columns: controls and map/results
             dbc.Row(
                 [
-                    # Columna de controles
+                    # Controls column
                     dbc.Col(
                         controls_layout(),
                         sm=12, md=4,
@@ -138,10 +145,10 @@ def app_layout():
                             "border-width": "0px 1px 0px 0px",
                         },
                     ),
-                    # Columna de mapa y resultados
+                    # Map and results column
                     dbc.Col(
                         [
-                            # Fila del mapa
+                            # Map row
                             dbc.Row(
                                 [
                                      dbc.Col(
@@ -150,7 +157,7 @@ def app_layout():
                                      ),
                                 ],
                             ),
-                            # Fila de resultados y gráficos
+                            # Results and charts row
                             dbc.Row(
                                 [
                                     dbc.Col(
@@ -180,7 +187,7 @@ def app_layout():
 
 
 # -------------------------------------------------
-# Layout de ayuda para mostrar tooltips en los botones
+# Tooltip helper layout for buttons
 # -------------------------------------------------
 def help_layout(buttonname, id_name, message):
     return html.Div(
@@ -189,19 +196,19 @@ def help_layout(buttonname, id_name, message):
                 f"{buttonname}:", id=id_name,
                 style={"cursor": "pointer","font-size": "100%","padding-left":"3px"},
             ),
-            # Tooltip con mensaje de ayuda
+            # Tooltip with help message
             dbc.Tooltip(f"{message}", target=id_name, className="tooltiptext"),
         ]
     )
 
 
 # -------------------------------------------------
-# Navbar superior con selección de región, escenario, modelo, variable periodos, etc
+# Top navbar: region, scenario, model, variable, period selectors, etc
 # -------------------------------------------------
 def navbar_layout():
     return dbc.Nav(
         [
-            # Logo o marca de la aplicación
+            # App brand / logo
             html.A(
                 dbc.Row(
                     [
@@ -209,9 +216,9 @@ def navbar_layout():
                             dbc.NavbarBrand(" Agriculture Index App", 
                                             className="ml-2",
                                             style={
-                                                    "font-size": "2rem",      # letra más grande
-                                                    "font-weight": "bold",    # opcional: más énfasis
-                                                    "text-align": "center",   # centrado horizontal
+                                                    "font-size": "2rem",
+                                                    "font-weight": "bold",
+                                                    "text-align": "center",
                                                     "color": "white",
                                                 }
                                             ),
@@ -222,12 +229,12 @@ def navbar_layout():
                     align="center",
                     id='navbar-brand' ,
                     style={
-                        "padding-top": "1rem",       # margen superior
-                        "padding-bottom": "1rem",    # margen inferior
+                        "padding-top": "1rem",
+                        "padding-bottom": "1rem",
                     },
                 ),
             ),
-            #Bloque de envío con escenarios, modelos, variables, meses y años
+            # Control block: scenario, model, variable, month, year selectors
             Block("",
                 html.Div(
                     [ 
@@ -241,14 +248,14 @@ def navbar_layout():
                         ],
                         init=0,
                     )),
-                    # Selección de referncias
+                    # Variety selection
                     Block("Variety", Select(id="variety", 
                         options=[m["value"] for m in VARIETY],
                             labels=[m["label"] for m in VARIETY],
                         init=0
                     )),
                 
-                # Data type
+                # Data view type
                 Block("Data View", 
                     Select(id="data_type", 
                         options=[
@@ -298,7 +305,7 @@ def navbar_layout():
                     id="model_container",
                     style={"display": "inline-flex", "gap": "5px", "margin-left": "10px", "vertical-align": "top", "align-items": "flex-start"}   
                 ),
-                # Selección de años proyectados
+                # Projected year selection
                 html.Div( 
                     Block("Period", 
                         Select(id="period_years",
@@ -315,11 +322,11 @@ def navbar_layout():
                     id="period_container",
                     style={"display": "inline-block", "margin-left": "20px", "vertical-align": "top"}   
                 ),
+                # Anomaly / comparison period selectors (Dataset 1 vs Dataset 2)
                 html.Div( 
                     Block("", 
                         "  ",
                         Block("Dataset 1", 
-                        #PROJECTED_YEARS
                             html.Div(
                                 children=[
                                     Select(id="dataset1",
@@ -384,7 +391,6 @@ def navbar_layout():
                                         ),
                                 ],
                                 id="dataset2_container",
-                                #style={"margin-left": "5px", "vertical-align": "top"}  
                             ),
 
                         ),
@@ -392,11 +398,11 @@ def navbar_layout():
                     id="anomaly_period_container",
                     style={"display": "inline-block", "margin-left": "20px", "vertical-align": "top"}   
                 ),
-                # Esto es solo para mejorar como se trasnfieren los datos entre componentes
+                # Store used to pass anomaly period values between components
                 dcc.Store(id="anomaly_period_values"),
 
             ),
-            # Alertas para errores en el mapa
+            # Alert for map errors
             dbc.Alert(
                 "Something went wrong",
                 color="danger",
@@ -411,9 +417,8 @@ def navbar_layout():
 
 
 # -------------------------------------------------
-# Layout de controles explicativos y texto informativo
+# Country border overlay (USA + Canada)
 # -------------------------------------------------
-
 with open("data/shapes/countries_50m.json") as f:
     countries = json.load(f)
 
@@ -433,7 +438,7 @@ borders_layer = dlf.GeoJSON(
 
 
 # -----------------------------
-# Layers control
+# Basemap tile layers
 # -----------------------------
 terrenos = [
     dlf.TileLayer(id="osm", url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -459,18 +464,21 @@ terrenos = [
                  attribution="Tiles © Esri")
 ]
 
+# -----------------------------
+# Layer switcher control
+# -----------------------------
 layers_control = dlf.LayersControl(
     [*[
         dlf.BaseLayer(layer, name=layer.id, checked=(i == 0))
         for i, layer in enumerate(terrenos)
     ],
-    dlf.Overlay(borders_layer, name="Bordes USA/CAN",id="overlay-borders", checked=True)],
+    dlf.Overlay(borders_layer, name="USA/CAN Borders", id="overlay-borders", checked=True)],
     position="topleft",
     id="layers-control"
 )
 
 # -----------------------------
-# Info box
+# Hover / click info box
 # -----------------------------
 def get_info(feature=None):
     if not feature:
@@ -486,7 +494,7 @@ info = html.Div(
     id="info",
     style={
         "position": "absolute",
-        "top": "200px", #Y 350
+        "top": "200px",
         "right": "15px",
         "zIndex": 1000,
         "background": "white",
@@ -494,15 +502,18 @@ info = html.Div(
         "borderRadius": "4px",
         "boxShadow": "0px 0px 3px rgba(0,0,0,0.3)",
         
-        # mejoras para responsividad
-        "fontSize": "0.8rem",     # letra más pequeña
-        "width": "fit-content",   # se ajusta al contenido
-        "maxWidth": "30vw",       # no ocupa demasiado en pantallas pequeñas
-        "overflow": "auto",       # aparece scroll solo si es necesario
+        # Responsive sizing
+        "fontSize": "0.8rem",
+        "width": "fit-content",
+        "maxWidth": "30vw",
+        "overflow": "auto",
     }
 )
 
 
+# -------------------------------------------------
+# Sidebar controls layout: description and instructions
+# -------------------------------------------------
 def controls_layout():
     return dbc.Container(
         [
@@ -512,7 +523,7 @@ def controls_layout():
                 This Maproom displays projected change of key harvested weight index.
                 """
             ),
-            # Componente que muestra la descripción del mapa con un loading spinner
+            # Map description loaded dynamically via callback
             dcc.Loading(html.P(id="map_description"), type="dot"),
             html.P(
                 """
@@ -536,13 +547,13 @@ def controls_layout():
 
 
 # -------------------------------------------------
-# Layout del mapa principal con colorbar y marcador
+# Main map layout: title, colorbar, marker and tile layers
 # -------------------------------------------------
 def map_layout():
 
     return dbc.Container(
         [
-            # Título del mapa con loading
+            # Map title (populated by callback)
             html.H5(
                 id="map_title",
                 style={
@@ -550,7 +561,7 @@ def map_layout():
                     "margin-top":"3px", "margin-bottom":"3px",
                 },
             ),
-            # Store para geojson
+            # Map component with GeoJSON, layer control and colorbar
             dcc.Loading(
                         dlf.Map(
                             children=[
@@ -572,6 +583,7 @@ def map_layout():
                             }, 
              ),
              info,
+            # Hidden div used as dummy callback output
             html.Div(id="dummy-output", style={"display": "none"}), 
         ],
         fluid=True,
@@ -579,16 +591,16 @@ def map_layout():
 
 
 # -------------------------------------------------
-# Layout para resultados, gráficos y descarga de datos
+# Results layout: time series chart and data download
 # -------------------------------------------------
 def results_layout():
     return dbc.Tabs([
         dbc.Tab([
-            # Botón de descarga + select alineados izquierda/derecha
+            # Toolbar row: graph type selector (left) and download button (right)
             html.Div(
                 dbc.Row(
                     [
-                        # Izquierda: Select
+                        # Left side: graph controls
                         dbc.Col(
                             html.Div(
                                 [
@@ -615,7 +627,7 @@ def results_layout():
                                                 init=0,
                                             ),
                                         ],
-                                        id="graph_scenario_container",  # <-- este es el que controlas
+                                        id="graph_scenario_container",
                                         style={"display": "flex", "align-items": "center"}
                                     ),
 
@@ -625,7 +637,7 @@ def results_layout():
                             width="auto"
                         ),
 
-                        # Derecha: Botón y Download
+                        # Right side: download button and component
                         dbc.Col(
                             [
                                 dbc.Button("Download data in graph", id="btn_csv", size="sm"),
@@ -640,7 +652,7 @@ def results_layout():
                 style={"width": "100%"}
             ),
 
-            # Gráfico
+            # Chart area
             html.Div([dbc.Spinner(dcc.Graph(id="local_graph"))]),
         ], label="Local History and Projections")
     ])
