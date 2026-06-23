@@ -1,32 +1,18 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
-import pingrid
-from pingrid import CMAPS
-from . import layout  # Layout de la app definido en otro módulo
+from . import layout  
 from . import extrafunctions  
 import plotly.graph_objects as pgo
-import xarray as xr  # Manejo de datos multidimensionales
-import pandas as pd
-from dateutil.relativedelta import *
 from globals_ import FLASK, GLOBAL_CONFIG  # Configuraciones globales
-import app_calc as ac  # Funciones de lectura y procesamiento de datos
-import maproom_utilities as mru  # Funciones de utilidades para mapas
 import numpy as np
-#from dash_extensions.enrich import html
-
-import math
-import json
 from dash_extensions.enrich import html
 import dash_leaflet.express as dlx
-
-
-from dash import dcc
-
-import dash_leaflet as dlf
 import dash_auth
 
 
+HISTORICAL_VALUES = tuple(m["value"] for m in layout.HISTORICAL_YEARS)
+PROJECTED_VALUES = tuple(m["value"] for m in layout.PROJECTED_YEARS)
 
 def register(FLASK, config):
     # Prefijos de URL para la app y los tiles
@@ -64,6 +50,58 @@ def register(FLASK, config):
     APP.layout = layout.app_layout()
 
     # -------------------------------------------------
+    # Callback para descargar los datos como CSV
+    # -------------------------------------------------
+    # @APP.callback(
+    #     Output("download-dataframe-csv", "data"),
+    #     Input("btn_csv", "n_clicks"),  # Evento de click en el botón
+    #     State("loc_marker", "position"),  # Posición del marcador en el mapa
+    #     State("region", "value"),
+    #     State("variable", "value"),
+    #     State("start_month", "value"),
+    #     State("end_month", "value"),
+    #     prevent_initial_call=True,  # Evita que se ejecute al iniciar la app
+    # )
+    # def send_data_as_csv(
+    #     n_clicks, marker_pos, region, variable, start_month, end_month,
+    # ):
+    #     # Extraer lat/lng del marcador
+    #     lat = marker_pos[0]
+    #     lng = marker_pos[1]
+
+    #     # Convertir meses a enteros usando utilidades
+    #     start_month = ac.strftimeb2int(start_month)
+    #     end_month = ac.strftimeb2int(end_month)
+
+    #     # Usar promedio multi-modelo
+    #     model = "Multi-Model-Average"
+
+    #     # Obtener datos locales filtrados
+    #     data_ds, error_msg = local_data(
+    #         lat, lng, region, model, variable, start_month, end_month
+    #     )
+
+    #     if error_msg == None :
+    #         # Determinar hemisferio para unidades de lat/lng
+    #         lng_units = "E" if (lng >= 0) else "W"
+    #         lat_units = "N" if (lat >= 0) else "S"
+
+    #         # Nombre del archivo CSV con información de fechas, variable y coordenadas
+    #         file_name = (
+    #             f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
+    #             f'{data_ds["histo"]["seasons_ends"].dt.strftime("%b")[0].values}'
+    #             f'_{variable}_{abs(lat)}{lat_units}_{abs(lng)}{lng_units}'
+    #             f'.csv'
+    #         )
+
+    #         # Convertir dataset a DataFrame y enviar como CSV
+    #         df = data_ds.to_dataframe()
+    #         return dash.dcc.send_data_frame(df.to_csv, file_name)
+    #     else :
+    #         # Retorna None si hay error en los datos
+    #         return None
+
+    # -------------------------------------------------
     # Callback para controlar panel de control
     # -------------------------------------------------
     @APP.callback(
@@ -75,8 +113,9 @@ def register(FLASK, config):
     Output("dataset1", "options"),
     Output("dataset1_years", "options"),
     Input("dataset2", "value"),
+    Input("dataset1", "value"),
      )
-    def toggle_multidataset(dataset2):
+    def toggle_multidataset(dataset2, dataset1):
         dataset2_years_options =[]
         dataset1_years_options =[]
         dataset2_planting_style={"display": "none"} 
@@ -92,8 +131,8 @@ def register(FLASK, config):
             dataset2_value = layout.HISTORICAL_YEARS[0]['value'] 
         else: 
             dataset2_years_options = layout.PROJECTED_YEARS
-            dataset1 = [{"label":"Historical","value":"historical"}]+layout.MODELS
-            dataset1_years_options = layout.HISTORICAL_YEARS+layout.PROJECTED_YEARS
+            dataset1 = layout.MODELS
+            dataset1_years_options = layout.PROJECTED_YEARS
             dataset2_style={"display": "flex", "flex-direction": "column"}
             dataset1_style=dataset2_style
             dataset2_planting_style={"display": "flex", "flex-direction": "column"}
@@ -145,7 +184,7 @@ def register(FLASK, config):
         Output("graph_scenario_container", "style"),
         Input("graph_type","value")
     )
-    def local_plots(graph_type):
+    def local_plots_display(graph_type):
         if graph_type.split("_")[0] == "bars":
             return {"display": "flex", "align-items": "center"}
         else:
@@ -153,7 +192,6 @@ def register(FLASK, config):
 
     options = { 'variety':Input("variety", "value"), #args[0]
                  'variable':Input("variable", "options"), #args[0]
-                 #'planting':Input("planting", "value"), #args[0]
                  'planting':Input("graph_planting", "value"),
                  'graph_type':Input("graph_type", "value"),
                  'graph_scenario':Input("graph_scenario", "value"),
@@ -163,8 +201,6 @@ def register(FLASK, config):
         Input("geojson", "clickData"),
         Input("geojson", "dblclickData"),
         Input("geojson", "click_feature"),
-        #Input("edit-control", "geojson"),
-        #Input("graph_type", "value"),
         Input("variety", "options"),
         Input("dataset1_years", "options"),
         Input("dataset2_years", "options"),
@@ -181,20 +217,11 @@ def register(FLASK, config):
                 y_dup.extend([y, y])
             return x_dup, y_dup
 
-        local_graph = None
         fig=None
         ctx = dash.callback_context
-        #print(mouseover)
-        event = ctx.triggered[0]["prop_id"]
         variety_values = args[0]['variety'] #[opt["value"] for opt in args[0]['variety']]
         planting_values = args[0]['planting'] 
         type=args[0]['graph_type'] 
-        dataset1_years_values = [opt["value"] for opt in dataset1_years]
-        dataset2_years_values = [opt["value"] for opt in dataset2_years]
-        #print(click["properties"]["id"])
-        #pepe=extraf.cargar_valores_id("data/pepsi", click["properties"]["id"])
-        #print(data)
-        #print(event)
         
         if type.split("_")[0] == "bars":
             scenario=args[0]['graph_scenario'] 
@@ -206,8 +233,8 @@ def register(FLASK, config):
                                                    click["properties"]["id"],
                                                    "HARWT",
                                                    variety_values,
-                                                   [m["value"] for m in layout.HISTORICAL_YEARS] ,
-                                                   [m["value"] for m in layout.PROJECTED_YEARS],
+                                                   HISTORICAL_VALUES ,
+                                                   PROJECTED_VALUES,
                                                    planting_values,
                                                    scenario,
                                                    type.split("_")[0]
@@ -219,8 +246,8 @@ def register(FLASK, config):
                                                    click["properties"]["id"],
                                                    "HARWT",
                                                    variety_values,
-                                                   [m["value"] for m in layout.HISTORICAL_YEARS] ,
-                                                   [m["value"] for m in layout.PROJECTED_YEARS],
+                                                   HISTORICAL_VALUES ,
+                                                   PROJECTED_VALUES,
                                                    planting_values,
                                                    scenario,
                                                    type
@@ -229,8 +256,8 @@ def register(FLASK, config):
                                                    ]
             fig = pgo.Figure()
 
-            min_size = 10
-            max_size = 50
+            #min_size = 10
+            #max_size = 50
 
             for trace in data:
                 periods = trace["x_axis"]
@@ -250,10 +277,8 @@ def register(FLASK, config):
                     line_width=0,
                 )
                 if type.split("_")[0] == "bars":
-                    #print(f"El trace es {trace}")
                     
                     colorbar=extrafunctions.color_scale("tab20")
-                    
                     
                     for i, (model, y_values) in enumerate(trace["models"].items()):
                         if model == "Historical":
@@ -365,13 +390,10 @@ def register(FLASK, config):
                         ),
                         yaxis=dict(title='Value', tickformat=',.0f'),
                         hovermode='x unified',
-                        #hovermode='x',
                         legend=dict(orientation='h', y=-0.3),
-                        #hoverformat=''
                     )
                     fig.update_xaxes(type="category")
                 elif type in ["markers-scale"]:
-                    y_array = np.array(trace["y"])
                     fig.add_trace(pgo.Scatter(x=trace["x"], y=trace["y"],mode="markers", name=click["properties"]["NAME"],
                                               marker=dict(
                                                     size=trace["y"],         # tamaño variable
