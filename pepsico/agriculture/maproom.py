@@ -9,6 +9,7 @@ import numpy as np
 from dash_extensions.enrich import html
 import dash_leaflet.express as dlx
 import dash_auth
+import pandas as pd
 
 
 HISTORICAL_VALUES = tuple(m["value"] for m in layout.HISTORICAL_YEARS)
@@ -52,54 +53,36 @@ def register(FLASK, config):
     # -------------------------------------------------
     # Callback para descargar los datos como CSV
     # -------------------------------------------------
-    # @APP.callback(
-    #     Output("download-dataframe-csv", "data"),
-    #     Input("btn_csv", "n_clicks"),  # Evento de click en el botón
-    #     State("loc_marker", "position"),  # Posición del marcador en el mapa
-    #     State("region", "value"),
-    #     State("variable", "value"),
-    #     State("start_month", "value"),
-    #     State("end_month", "value"),
-    #     prevent_initial_call=True,  # Evita que se ejecute al iniciar la app
-    # )
-    # def send_data_as_csv(
-    #     n_clicks, marker_pos, region, variable, start_month, end_month,
-    # ):
-    #     # Extraer lat/lng del marcador
-    #     lat = marker_pos[0]
-    #     lng = marker_pos[1]
+    @APP.callback(
+    Output("download-dataframe-csv", "data"),
+    Input("btn_csv", "n_clicks"),
+    State("graph_data_store", "data"),
+    State("graph_county_info", "data"),
+    prevent_initial_call=True,
+    )
+    def download_csv(n_clicks, graph_data,county_info):
+        graph_data=graph_data[0]
+        periods = graph_data["x_axis"]
 
-    #     # Convertir meses a enteros usando utilidades
-    #     start_month = ac.strftimeb2int(start_month)
-    #     end_month = ac.strftimeb2int(end_month)
+        rows = []
 
-    #     # Usar promedio multi-modelo
-    #     model = "Multi-Model-Average"
+        for model, values in graph_data["models"].items():
 
-    #     # Obtener datos locales filtrados
-    #     data_ds, error_msg = local_data(
-    #         lat, lng, region, model, variable, start_month, end_month
-    #     )
+            for period, value in zip(periods, values):
 
-    #     if error_msg == None :
-    #         # Determinar hemisferio para unidades de lat/lng
-    #         lng_units = "E" if (lng >= 0) else "W"
-    #         lat_units = "N" if (lat >= 0) else "S"
+                rows.append({
+                    "Model": model,
+                    "Period": period,
+                    "Value": value
+                })
 
-    #         # Nombre del archivo CSV con información de fechas, variable y coordenadas
-    #         file_name = (
-    #             f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
-    #             f'{data_ds["histo"]["seasons_ends"].dt.strftime("%b")[0].values}'
-    #             f'_{variable}_{abs(lat)}{lat_units}_{abs(lng)}{lng_units}'
-    #             f'.csv'
-    #         )
+        df = pd.DataFrame(rows)
 
-    #         # Convertir dataset a DataFrame y enviar como CSV
-    #         df = data_ds.to_dataframe()
-    #         return dash.dcc.send_data_frame(df.to_csv, file_name)
-    #     else :
-    #         # Retorna None si hay error en los datos
-    #         return None
+        return dash.dcc.send_data_frame(
+            df.to_csv,
+            f"graph_data_{county_info}.csv",
+            index=False,
+        )
 
     # -------------------------------------------------
     # Callback para controlar panel de control
@@ -155,8 +138,6 @@ def register(FLASK, config):
     def toggle_period_years(data_type,info_style):
         options=[]
         info_style['top'] = '200px'
-        #info_style = {"top": "200px"}
-        #print(f"info style es: {info_style}")
         if data_type == "historical" :
             period_style = {"display": "inline-block", "margin-left": "5px", "vertical-align": "top"}
             anomaly_period_style = {"display": "none"}
@@ -198,13 +179,16 @@ def register(FLASK, config):
                       }
     @APP.callback(
         Output("local_graph", "figure"),
+        Output("graph_data_store", "data"),
+        Output("graph_county_info", "data"),
         Input("geojson", "clickData"),
         Input("geojson", "dblclickData"),
         Input("geojson", "click_feature"),
         Input("variety", "options"),
         Input("dataset1_years", "options"),
         Input("dataset2_years", "options"),
-        options        
+        options,
+        prevent_initial_call=True,        
         )
     def local_plots( click,dblclick,mouseover,variety,dataset1_years,dataset2_years,*args) :
 
@@ -218,6 +202,8 @@ def register(FLASK, config):
             return x_dup, y_dup
 
         fig=None
+        data=None
+        county_info=None
         ctx = dash.callback_context
         variety_values = args[0]['variety'] #[opt["value"] for opt in args[0]['variety']]
         planting_values = args[0]['planting'] 
@@ -411,8 +397,15 @@ def register(FLASK, config):
                 xaxis_title="",
                 yaxis_title="HARWT",
             )
+            county_info=(f"{click['properties']['STATE_NAME']}_"
+                         f"{click['properties']['NAME']}({click['properties']['id']})_"
+                         f"{variety_values}_"
+                         f"{planting_values}_"
+                         f"{scenario}"
+                        )
+                    
 
-        return fig
+        return fig, data, county_info
 
     # -------------------------------------------------
     # Callback para generar descripcion 

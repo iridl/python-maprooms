@@ -653,6 +653,10 @@ def results_layout():
             ),
 
             # Chart area
-            html.Div([dbc.Spinner(dcc.Graph(id="local_graph"))]),
+            html.Div([
+                    dbc.Spinner(dcc.Graph(id="local_graph")),
+                    dcc.Store(id="graph_data_store"),
+                    dcc.Store(id="graph_county_info")
+                ]),
         ], label="Local History and Projections")
     ])
