@@ -15,9 +15,16 @@ Inside the `data` folder, extract the `shapes.zip` file.
 - **First-time installation**: extract the `csv_files.zip` file inside the `data` folder.
 - **Adding new data**: if you want to add new data afterward, place the new `.csv` files inside the `csv_files` folder (do not re-extract the zip).
 
-## 4. Create the `assets` folder
+## 4. Configure Users
 
-If it does not already exist, create an `assets` folder inside the `agriculture` folder.
+Rename the `users.txt` file to `.users`.
+
+By default, the application grants access with the following credentials:
+
+- **Username:** `pepe`
+- **Password:** `hola`
+
+To change the password or add additional users, see the **Users** section below.
 
 ## 5. Configure the server (optional)
 
@@ -40,4 +47,38 @@ If you kept the default values, open the following link in your browser:
 ```
 http://localhost:3333/python_maproom/agriculture/
 ```
+# Maproom Users
 
+To add or update a user, follow these steps.
+
+From the directory where `app.py` is located, run:
+
+```bash
+CONFIG=config-dev-agriculture.yaml pixi run --manifest-path agriculture/pixi.toml python
+```
+
+Then execute:
+
+```python
+from agriculture import extrafunctions as ext
+
+ext.hash_user_password('**user**', '**password**')
+```
+
+Replace **user** and **password** with the desired username and password.
+
+For example:
+
+```python
+ext.hash_user_password('pepe', 'pepe123')
+```
+
+This will return a value similar to:
+
+```text
+pepe:$2b$12$fYfe4bfomqHLqOLLm53SiuNp2Z9rEKMcvatc.DXMeDt/uGRaegOs.
+```
+
+Copy the returned value (without the surrounding single quotes, if present) and paste it into your `.users` file.
+
+If the user already exists, this operation is considered a password update. Simply replace the existing line corresponding to that user in the `.users` file with the newly generated value.
