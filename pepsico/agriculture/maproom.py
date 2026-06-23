@@ -50,10 +50,7 @@ def register(FLASK, config):
     )
     
     VALID_USERS = extrafunctions.load_valid_users_hash()
-    #print(f"Usuarios son {VALID_USERS}")
-    #auth = dash_auth.BasicAuth(APP, VALID_USERS)
     def bcrypt_auth(username, password):
-        #print(f'Lo que recibo es {username} , {password}')
         if username not in VALID_USERS:
             return False
         return extrafunctions.verify_password(password, VALID_USERS[username])
@@ -62,244 +59,9 @@ def register(FLASK, config):
 
     APP.enable_dev_tools(debug=True)
     
-    APP.title = "Forecast"  # Título de la pestaña del navegador
-    
-
+    APP.title = "Forecast"  
     # Definición del layout de la app
     APP.layout = layout.app_layout()
-
-
-    # -------------------------------------------------
-    # Callback para inicializar los inputs de lat/lng y el mapa según región
-    # -------------------------------------------------
-    # @APP.callback(
-    #     Output("lat_input", "min"),
-    #     Output("lat_input", "max"),
-    #     Output("lat_input_tooltip", "children"),
-    #     Output("lng_input", "min"),
-    #     Output("lng_input", "max"),
-    #     Output("lng_input_tooltip", "children"),
-    #     Output("map", "center"),
-    #     Output("map", "zoom"),
-    #     Input("region", "value"),
-    #     Input("location", "pathname"),
-    # )
-    # def initialize(region, path):
-    #     # Valores por defecto
-    #     scenario = "ssp126"
-    #     model = "GFDL-ESM4"
-    #     variable = "pr"
-
-    #     # Lectura de datos usando app_calc
-    #     data = ac.read_data(scenario, model, variable, region)
-
-    #     # Diccionario de zoom inicial por región
-    #     zoom = {"SAMER": 3, "US-CA": 4, "SASIA": 4, "Thailand": 5}
-
-    #     # Inicialización de mapa y retorno de todos los valores necesarios para los inputs y el mapa
-    #     return mru.initialize_map(data) + (zoom[region],)
-    
-
-    # -------------------------------------------------
-    # Callback para seleccionar ubicación en el mapa
-    # -------------------------------------------------
- #   @APP.callback(
-    #     Output("loc_marker", "position"),  # Actualiza la posición del marcador
-    #     Output("lat_input", "value"),  # Actualiza el input de latitud
-    #     Output("lng_input", "value"),  # Actualiza el input de longitud
-    #     Input("submit_lat_lng","n_clicks"),  # Evento de submit
-    #     Input("map", "click_lat_lng"),  # Evento de click en el mapa
-    #     Input("region", "value"),  # Región seleccionada
-    #     State("lat_input", "value"),  # Latitud actual
-    #     State("lng_input", "value"),  # Longitud actual
-    # )
-    # def pick_location(n_clicks, click_lat_lng, region, latitude, longitude):
-    #     # Valores por defecto
-    #     scenario = "ssp126"
-    #     model = "GFDL-ESM4"
-    #     variable = "pr"
-
-    #     # Lectura de datos
-    #     data = ac.read_data(scenario, model, variable, region)
-
-    #     # Casos de inicialización para la función de utilidades
-    #     initialization_cases = ["region"]
-
-    #     # Retorna nueva posición y actualiza inputs usando utilidades
-    #     return mru.picked_location(
-    #         data, initialization_cases, click_lat_lng, latitude, longitude
-    #     )
-
-
-    # -------------------------------------------------
-    # Función para extraer datos locales de un modelo y variable
-    # -------------------------------------------------
-    # def local_data(lat, lng, region, model, variable, start_month, end_month):
-    #     # Si se selecciona Multi-Model-Average, se usan todos los modelos disponibles
-    #     model = [model] if model != "Multi-Model-Average" else [
-    #         "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
-    #     ]
-
-    #     # Concatenación de datasets por modelo y escenario
-    #     data_ds = xr.concat([xr.Dataset({
-    #         "histo" : ac.read_data(
-    #             "historical", m, variable, region, unit_convert=True,
-    #         ),
-    #         "picontrol" : ac.read_data(
-    #             "picontrol", m, variable, region, unit_convert=True,
-    #         ),
-    #         "ssp126" : ac.read_data(
-    #             "ssp126", m, variable, region, unit_convert=True,
-    #         ),
-    #         "ssp370" : ac.read_data(
-    #             "ssp370", m, variable, region, unit_convert=True,
-    #         ),
-    #         "ssp585" : ac.read_data(
-    #             "ssp585", m, variable, region, unit_convert=True,
-    #         ),
-    #     }) for m in model], "M").assign_coords({"M": [m for m in model]})
-
-    #     # Manejo de errores
-    #     error_msg = None
-    #     missing_ds = xr.Dataset()
-
-    #     # Verifica si hay datos faltantes
-    #     if any([var is None for var in data_ds.data_vars.values()]):
-    #         data_ds = missing_ds
-    #         error_msg="Data missing for this model or variable"
-
-    #     # Selecciona la grilla más cercana a lat/lng
-    #     try:
-    #         data_ds = pingrid.sel_snap(data_ds, lat, lng)
-    #     except KeyError:
-    #         data_ds = missing_ds
-    #         error_msg="Grid box out of data domain"
-
-    #     # Si no hubo errores, calcula los datos estacionales
-    #     if error_msg == None :
-    #         data_ds = ac.seasonal_data(data_ds, start_month, end_month)
-
-    #     # Retorna dataset filtrado y posible mensaje de error
-    #     return data_ds, error_msg
-    # -------------------------------------------------
-    # Función para generar un gráfico de serie de tiempo con Plotly
-    # -------------------------------------------------
-    def plot_ts(ts, name, color, start_format, units):
-        return pgo.Scatter(
-            # Eje X: fechas formateadas con el formato estándar definido en utilidades
-            x=ts["T"].dt.strftime(mru.STD_TIME_FORMAT),
-            # Eje Y: valores de la serie
-            y=ts.values,
-            # Datos personalizados para el hover: final de cada temporada
-            customdata=ts["seasons_ends"].dt.strftime("%B %Y"),
-            # Plantilla de hover con formato de fecha y unidades
-            hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f} " + units),
-            name=name,
-            # Color de la línea de la serie
-            line=pgo.scatter.Line(color=color),
-            # No conectar gaps
-            connectgaps=False,
-        )
-    
-
-    # -------------------------------------------------
-    # Función para agregar un rectángulo vertical indicando un periodo en el gráfico
-    # -------------------------------------------------
-    def add_period_shape(
-        graph, data, start_year, end_year, fill_color, line_color, annotation
-    ):
-        return graph.add_vrect(
-            # Inicio del rectángulo: primer valor del año de inicio
-            x0=data["seasons_starts"].where(
-                lambda x : (x.dt.year == int(start_year)), drop=True
-            ).dt.strftime(mru.STD_TIME_FORMAT).values[0],
-            # Fin del rectángulo: último valor del año de fin + 1 mes
-            x1=(
-                pd.to_datetime(data["seasons_ends"].where(
-                    lambda x : (x.dt.year == int(end_year)), drop=True
-                ).dt.strftime(mru.STD_TIME_FORMAT).values[0]
-            ) + relativedelta(months=+1)).strftime(mru.STD_TIME_FORMAT),
-            # Estilo del rectángulo
-            fillcolor=fill_color,  opacity=0.2,
-            line_color=line_color, line_width=3,
-            layer="below",  # Se dibuja debajo de las series
-            annotation_text=annotation, annotation_position="top left",
-            #editable=True, # Recordatorio de posible interacción futura
-        )
-
-
-    # -------------------------------------------------
-    # Callback para habilitar o deshabilitar botón CSV según lat/lng válidos
-    # -------------------------------------------------
-    # @APP.callback(
-    #     Output("btn_csv", "disabled"),
-    #     Input("lat_input", "value"),
-    #     Input("lng_input", "value"),
-    #     Input("lat_input", "min"),
-    #     Input("lng_input", "min"),
-    #     Input("lat_input", "max"),
-    #     Input("lng_input", "max"),
-    # )
-    # def invalid_button(lat, lng, lat_min, lng_min, lat_max, lng_max):
-    #     # Devuelve True si la posición está fuera de los límites -> botón deshabilitado
-    #     return (
-    #         lat < float(lat_min) or lat > float(lat_max)
-    #         or lng < float(lng_min) or lng > float(lng_max)
-    #     )
-
-
-    # -------------------------------------------------
-    # Callback para descargar los datos como CSV
-    # -------------------------------------------------
-    # @APP.callback(
-    #     Output("download-dataframe-csv", "data"),
-    #     Input("btn_csv", "n_clicks"),  # Evento de click en el botón
-    #     State("loc_marker", "position"),  # Posición del marcador en el mapa
-    #     State("region", "value"),
-    #     State("variable", "value"),
-    #     State("start_month", "value"),
-    #     State("end_month", "value"),
-    #     prevent_initial_call=True,  # Evita que se ejecute al iniciar la app
-    # )
-    # def send_data_as_csv(
-    #     n_clicks, marker_pos, region, variable, start_month, end_month,
-    # ):
-    #     # Extraer lat/lng del marcador
-    #     lat = marker_pos[0]
-    #     lng = marker_pos[1]
-
-    #     # Convertir meses a enteros usando utilidades
-    #     start_month = ac.strftimeb2int(start_month)
-    #     end_month = ac.strftimeb2int(end_month)
-
-    #     # Usar promedio multi-modelo
-    #     model = "Multi-Model-Average"
-
-    #     # Obtener datos locales filtrados
-    #     data_ds, error_msg = local_data(
-    #         lat, lng, region, model, variable, start_month, end_month
-    #     )
-
-    #     if error_msg == None :
-    #         # Determinar hemisferio para unidades de lat/lng
-    #         lng_units = "E" if (lng >= 0) else "W"
-    #         lat_units = "N" if (lat >= 0) else "S"
-
-    #         # Nombre del archivo CSV con información de fechas, variable y coordenadas
-    #         file_name = (
-    #             f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
-    #             f'{data_ds["histo"]["seasons_ends"].dt.strftime("%b")[0].values}'
-    #             f'_{variable}_{abs(lat)}{lat_units}_{abs(lng)}{lng_units}'
-    #             f'.csv'
-    #         )
-
-    #         # Convertir dataset a DataFrame y enviar como CSV
-    #         df = data_ds.to_dataframe()
-    #         return dash.dcc.send_data_frame(df.to_csv, file_name)
-    #     else :
-    #         # Retorna None si hay error en los datos
-    #         return None
-
 
     # -------------------------------------------------
     # Callback para controlar panel de control
@@ -378,40 +140,7 @@ def register(FLASK, config):
 
         return period_style, anomaly_period_style, model_style,info_style,options, value, 
     
-    # @APP.callback(
-    #     Output("local-graph", "figure"),
-    #     Input("local-graph", "restyleData"),
-    #     State("local-graph", "figure"),
-    #     prevent_initial_call=True
-    # )
-    # def toggle_historical_shape(restyle_data, figure):
-    #     if restyle_data is None:
-    #         return dash.no_update
 
-    #     # restyle_data es [{"visible": [value]}, [trace_index]]
-    #     changed_traces = restyle_data[1]
-    #     visibility = restyle_data[0].get("visible", [None])[0]
-
-    #     # Buscar si el trace que cambió es el Historical
-    #     for idx in changed_traces:
-    #         if figure["data"][idx].get("name") == "Historical":
-    #             # Mostrar u ocultar la shape
-    #             for shape in figure["layout"].get("shapes", []):
-    #                 if shape.get("name") == "historical_line":
-    #                     shape["visible"] = (visibility != "legendonly")
-
-    #     return figure
-    # -------------------------------------------------
-    # Callback para generar el gráfico local de serie de tiempo
-    # -------------------------------------------------
-    #Aqui XC la serie 
-    #  multi_datasets = { 'model':[ Input("dataset1", "value"), Input("dataset2", "value")], 
-    #                  'variety':[ Input("variety", "value"), Input("variety", "value")],
-    #                 'planting':[ Input("dataset1_planting", "value"), Input("dataset2_planting", "value")] ,
-    #                 'scenario':[ Input("dataset1_scenario", "value"), Input("dataset2_scenario", "value")] ,
-    #             'period_years':[ Input("dataset1_years", "value"), Input("dataset2_years", "value")] 
-                      
-    #                   }
     @APP.callback(
         Output("graph_scenario_container", "style"),
         Input("graph_type","value")
@@ -486,7 +215,6 @@ def register(FLASK, config):
                                                    )
                                                    ]
             else:
-                #data=[extrafunctions.cargar_valores_id("data/cvs_files", 
                 data=[extrafunctions.load_bar_id_values("data/cvs_files", 
                                                    click["properties"]["id"],
                                                    "HARWT",
@@ -499,17 +227,10 @@ def register(FLASK, config):
 
                                                    )
                                                    ]
-            #print(data)
             fig = pgo.Figure()
 
-            #type = "bar" 
-            # Agregar cada trace a la figura
-            # Escalar automáticamente los tamaños según Y
             min_size = 10
             max_size = 50
-
-            #y_array = np.array([])
-            #sizes = min_size + (y_array - y_array.min()) / (y_array.max() - y_array.min()) * (max_size - min_size)
 
             for trace in data:
                 periods = trace["x_axis"]
@@ -557,26 +278,8 @@ def register(FLASK, config):
                             legendgroup="historical",       # 👈 agrupa con el scatter
                             showlegend=True,
                         ))
-                        # fig.add_trace(pgo.Scatter(
-                        #     #x=periods,
-                        #     x=[periods[0], periods[1]],
-                        #     #x=[-0.5, len(periods) - 0.5],
-                        #     #x=[periods[0], periods[-1]],
-                        #     #x=[periods[0]] + periods + [periods[-1]],
-                        #     #y=[hist_val] * len(periods),
-                        #     y=[hist_val, hist_val],
-                        #     mode="lines",
-                        #     line=dict(dash="solid", color="black", width=3), #['solid', 'dot', 'dash', 'longdash', 'dashdot', 'longdashdot']
-                        #     name="Historical",
-                        #     showlegend=True,
-                        # ))
                         fig.add_trace(pgo.Scatter(
                             x=[periods[1], periods[-1]],
-                            #x=periods,
-                            #x=[-0.5, len(periods) - 0.5],
-                            #x=[periods[0], periods[-1]],
-                            #x=[periods[0]] + periods + [periods[-1]],
-                            #y=[hist_val] * len(periods),
                             y=[hist_val, hist_val],
                             mode="lines",
                             line=dict(dash="dash", color="black", width=3), #['solid', 'dot', 'dash', 'longdash', 'dashdot', 'longdashdot']
@@ -586,30 +289,6 @@ def register(FLASK, config):
                             hovertemplate=f"Historical : {hist_val:,.0f}<extra></extra>",
                             #showlegend=True,
                         ))
-                        # fig.add_shape(
-                        #     name="historical_shape", 
-                        #     type="line",
-                        #     #x0=0,
-                        #     #x1=1,
-                        #     x0=0, x1=(1/len(periods)),
-                        #     xref="paper",   # usa el ancho completo del gráfico
-                        #     y0=hist_val,
-                        #     y1=hist_val,
-                        #     yref="y",
-                            
-                        #     line=dict(
-                        #         color="black",
-                        #         width=3,
-                        #         dash="solid",
-                        #     ),
-                        # )
-                        # fig.add_trace(pgo.Scatter(
-                        #     x=[None],
-                        #     y=[None],
-                        #     mode="lines",
-                        #     line=dict(color="black", dash="dash", width=3),
-                        #     name="Historical"
-                        # ))
 
                     fig.update_layout(barmode=type.split("_")[1], #"group",
                                       legend=dict(
@@ -622,9 +301,7 @@ def register(FLASK, config):
 
                                       )
                 elif type in ["lines","markers","lines+markers"]:
-                    #print(f"Data de lines es {data}")
                     models = trace['models']
-                    #fig.add_trace(pgo.Scatter(x=trace["x"], y=trace["y"],mode=type, name=click["properties"]["NAME"]))
                     for name, values in models.items():
                         is_historical = name == 'Historical'
                         x_dup, y_dup = duplicate_points(periods, values)
@@ -671,45 +348,14 @@ def register(FLASK, config):
                                 ))
 
                         else:
-
-                        # Etiqueta original duplicada para cada par de puntos
-                        # labels_dup = []
-                        # #for label, y in zip(periods, values):
-                        # for label in zip(values):
-                        #     labels_dup.extend([label, label])
-
                             fig.add_trace(pgo.Scatter(
                             x=periods,
                             y=values,
-                            #x=x_dup,
-                            #y=y_dup,
                             mode=type,
                             name=name,
                             connectgaps=False,
-                            #hovertemplate="%{name} %{y}<extra></extra>"
-                            #customdata=labels_dup,
-                            #hovertemplate='<b>%{customdata}</b><br>%{y:,.0f}', #<extra>%{fullData.name}</extra>
-        
-                            # line=dict(
-                            #     color=palette[name]['color'],
-                            #     dash=palette[name]['dash'],
-                            #     width=2.5 if is_historical else 1.8,
-                            # ),
-                            # marker=dict(
-                            #     color=palette[name]['color'],
-                            #     size=10 if is_historical else 6,
-                            #     symbol='diamond' if is_historical else 'circle',
-                            # ),
                         ))
-
-                    # fig.update_layout(
-                    #     xaxis=dict(title='Period', tickangle=-30),
-                    #     yaxis=dict(title='Value', tickformat=',.0f'),
-                    #     hovermode='x unified',
-                    #     legend=dict(orientation='h', y=-0.3),
-                    # )
                     fig.update_layout(
-                        #hovermode='x unified',
                         xaxis=dict(
                             title='Period',
                             tickvals=list(range(len(periods))),  # posiciones 0..6
@@ -723,21 +369,14 @@ def register(FLASK, config):
                         legend=dict(orientation='h', y=-0.3),
                         #hoverformat=''
                     )
-                    # Esto sobreescribe el título del tooltip unificado
-                    #fig.update_traces(xhoverformat='')
-                    #fig.update_layout(hovermode="y")
                     fig.update_xaxes(type="category")
                 elif type in ["markers-scale"]:
-                    #y_array = np.append(trace["y"])
-                    #print(trace["y"])
                     y_array = np.array(trace["y"])
                     fig.add_trace(pgo.Scatter(x=trace["x"], y=trace["y"],mode="markers", name=click["properties"]["NAME"],
                                               marker=dict(
                                                     size=trace["y"],         # tamaño variable
-                                                    #color="blue",       # color de los círculos
                                                     sizemode="area",    # el tamaño corresponde al área
                                                     sizeref=2.*max(trace["y"])/(40.**2),  # escala del tamaño (opcional)
-                                                    #sizeref=0.1 * 2.*max(trace["y"])/(40.**2),
                                                     sizemin=4,           # tamaño mínimo
                                                     color=trace["y"],   # color según valor
                                                     colorscale=layout.colorscale,
@@ -750,173 +389,8 @@ def register(FLASK, config):
                 xaxis_title="",
                 yaxis_title="HARWT",
             )
-            #fig.update_xaxes(showspikes=False)
-            #fig.update_yaxes(showspikes=False)
-            # USAR PARA AGRUPAR VARIOS Tipos de graficos
-            #fig.update_layout(barmode="group")
 
-            # fig = {
-            # "data": [data],
-            # "layout": {
-            #     "title": f"Valores encontrados para ID {click['properties']['id']}",
-            #     "xaxis": {"title": "Archivo"},
-            #     "yaxis": {"title": "Valor"},
-            #     }
-            # }
         return fig
-        #return local_graph
-    # @APP.callback(
-    #     Output("local_graph", "figure"),  # Actualiza la figura del gráfico
-    #     Input("loc_marker", "position"),  # Posición seleccionada en el mapa
-    #     Input("region", "value"),  # Región seleccionada
-    #     Input("submit_controls","n_clicks"),  # Botón para actualizar el gráfico
-    #     State("model", "value"),  # Modelo seleccionado
-    #     State("variable", "value"),  # Variable seleccionada
-    #     State("start_month", "value"),  # Mes de inicio del periodo
-    #     State("end_month", "value"),  # Mes de fin del periodo
-    #     State("start_year", "value"),  # Año de inicio del periodo proyectado
-    #     State("end_year", "value"),  # Año de fin del periodo proyectado
-    #     State("start_year_ref", "value"),  # Año de inicio del periodo de referencia
-    #     State("end_year_ref", "value"),  # Año de fin del periodo de referencia
-    # )
-    # def local_plots(
-    #     marker_pos,
-    #     region,
-    #     n_clicks,
-    #     model,
-    #     variable,
-    #     start_month,
-    #     end_month,
-    #     start_year,
-    #     end_year,
-    #     start_year_ref,
-    #     end_year_ref,
-    # ):
-    #     # Extraer latitud y longitud del marcador
-    #     lat = marker_pos[0]
-    #     lng = marker_pos[1]
-
-    #     # Convertir meses de string a entero
-    #     start_month = ac.strftimeb2int(start_month)
-    #     end_month = ac.strftimeb2int(end_month)
-
-    #     # Obtener los datos locales filtrados por lat/lng, región, modelo, variable y periodo
-    #     data_ds, error_msg = local_data(
-    #         lat, lng, region, model, variable, start_month, end_month
-    #     )
-
-    #     if error_msg != None :
-    #         # Si hay error, se genera un gráfico de error
-    #         local_graph = pingrid.error_fig(error_msg)
-    #     else :
-    #         # Determinar formato de fecha en el eje X según si el periodo cruza años
-    #         if (end_month < start_month) :
-    #             start_format = "%b %Y - "
-    #         else:
-    #             start_format = "%b-"
-
-    #         # Inicializar figura vacía
-    #         local_graph = pgo.Figure()
-
-    #         # Diccionario de colores por variable/modelo
-    #         data_color = {
-    #             "histo": "blue", "picontrol": "green",
-    #             "ssp126": "yellow", "ssp370": "orange", "ssp585": "red",
-    #         }
-
-    #         # Unidades geográficas para el título
-    #         lng_units = "˚E" if (lng >= 0) else "˚W"
-    #         lat_units = "˚N" if (lat >= 0) else "˚S"
-
-    #         # Agregar una serie de tiempo por cada variable del dataset
-    #         for var in data_ds.data_vars:
-    #             local_graph.add_trace(plot_ts(
-    #                 data_ds[var].mean("M", keep_attrs=True),  # Promedio sobre modelos si es Multi-Model-Average
-    #                 var,
-    #                 data_color[var],
-    #                 start_format,
-    #                 data_ds[var].attrs["units"]  # Unidades de la variable
-    #             ))
-
-    #         # Agregar rectángulo para periodo de referencia
-    #         add_period_shape(
-    #             local_graph,
-    #             data_ds,
-    #             start_year_ref,
-    #             end_year_ref,
-    #             "blue",
-    #             "RoyalBlue",
-    #             "reference period",
-    #         )
-
-    #         # Agregar rectángulo para periodo proyectado
-    #         add_period_shape(
-    #             local_graph,
-    #             data_ds,
-    #             start_year,
-    #             end_year,
-    #             "LightPink",
-    #             "Crimson",
-    #             "projected period",
-    #         )
-
-    #         # Actualizar layout del gráfico: títulos, márgenes y etiquetas de ejes
-    #         local_graph.update_layout(
-    #             xaxis_title="Time",
-    #             yaxis_title=(
-    #                 f'{data_ds["histo"].attrs["long_name"]} '
-    #                 f'({data_ds["histo"].attrs["units"]})'
-    #             ),
-    #             title={
-    #                 "text": (
-    #                     f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
-    #                     f'{data_ds["histo"]["seasons_ends"].dt.strftime("%b")[0].values}'
-    #                     f' {variable} seasonal average from model {model} '
-    #                     f'at ({abs(lat)}{lat_units}, {abs(lng)}{lng_units})'
-    #                 ),
-    #                 "font": dict(size=14),
-    #             },
-    #             margin=dict(l=30, r=30, t=30, b=30),
-    #         )
-
-    #     return local_graph
-
-
-    # -------------------------------------------------
-    # Callback para generar descripción textual del mapa
-    # -------------------------------------------------
-    # @APP.callback(
-    #     Output("map_description", "children"),  # Actualiza el texto descriptivo del mapa
-    #     Input("submit_controls", "n_clicks"),  # Botón para actualizar la descripción
-    #     State("scenario", "value"),  # Escenario seleccionado
-    #     State("model", "value"),  # Modelo seleccionado
-    #     State("variable", "value"),  # Variable seleccionada
-    #     State("start_month", "value"),  # Mes de inicio del periodo proyectado
-    #     State("end_month", "value"),  # Mes de fin del periodo proyectado
-    #     State("start_year", "value"),  # Año de inicio del periodo proyectado
-    #     State("end_year", "value"),  # Año de fin del periodo proyectado
-    #     State("start_year_ref", "value"),  # Año de inicio del periodo de referencia
-    #     State("end_year_ref", "value"),  # Año de fin del periodo de referencia
-    # )
-    # def write_map_description(
-    #     n_clicks,
-    #     scenario,
-    #     model,
-    #     variable,
-    #     start_month,
-    #     end_month,
-    #     start_year,
-    #     end_year,
-    #     start_year_ref,
-    #     end_year_ref,
-    # ):
-    #     # Construye la descripción textual del mapa usando los parámetros seleccionados
-    #     return (
-    #         f'The Map displays the change in {start_month}-{end_month} seasonal average of '
-    #         f'{variable} from {model} model under {scenario} scenario projected for '
-    #         f'{start_year}-{end_year} with respect to historical {start_year_ref}-'
-    #         f'{end_year_ref}'
-    #     )
 
     # -------------------------------------------------
     # Callback para generar descripcion 
@@ -1040,7 +514,7 @@ def register(FLASK, config):
             )
 
         return description
-        # -------------------------------------------------
+    # -------------------------------------------------
     # Callback para generar el título del mapa
     # -------------------------------------------------
     multi_datasets = { 'model':[ Input("dataset1", "value"), Input("dataset2", "value")], 
@@ -1059,36 +533,13 @@ def register(FLASK, config):
                         }
     @APP.callback(
         Output("map_title", "children"),  # Actualiza el texto del título del mapa
-        #Input("submit_controls","n_clicks"),  # Evento al hacer click en el botón de actualizar
-        #State("scenario", "value"),  # Escenario seleccionado
         single_dataset, # args[0]
         Input("data_type", "value"), # args[1]
-        #Input("anomaly_period_values", "data"), # args[2]
         multi_datasets, # args[2]
         Input("variable","value") # arg[3]
-        #State("start_month", "value"),  # Mes de inicio del periodo proyectado
-        #State("end_month", "value"),  # Mes de fin del periodo proyectado
-        #State("start_year", "value"),  # Año de inicio del periodo proyectado
-        #State("end_year", "value"),  # Año de fin del periodo proyectado
-        #State("start_year_ref", "value"),  # Año de inicio del periodo de referencia
-        #State("end_year_ref", "value"),  # Año de fin del periodo de referencia
+
     )
-    def write_map_title(*args
-        #n_clicks,
-        #scenario,
-        #model,
-        #variable,
-        #variety,
-        #period_years,
-        #data_type,
-        #anom_period
-        #start_month,
-        #end_month,
-        #start_year,
-        #end_year,
-        #start_year_ref,
-        #end_year_ref,
-    ):
+    def write_map_title(*args):
         single_dataset=args[0]
         data_type=args[1]
         multi_datasets = args[2]
@@ -1150,18 +601,12 @@ def register(FLASK, config):
         Output("colorbar", "children"),
         single_dataset, # args[0]
         Input("data_type", "value"), # args[1]
-        #Input("anomaly_period_values", "data"), # args[2]
         multi_datasets # args[2]
-        #[Input("dataset1_years", "value"), Input("dataset2_years", "value")]
     )
     def load_csv_and_update(*args):
         single_dataset=args[0]
         data_type=args[1]
-        #anom_period = args[2]
         multi_datasets = args[2]
-        #multi_datasets = multi_datasets[0]
-        #single_dataset=single_dataset[0]
-        #print(f"pepe es {multi_datasets['model']}")
 
         if data_type in ['historical','projected']:
             variety=single_dataset['variety']
@@ -1175,51 +620,10 @@ def register(FLASK, config):
             planting=multi_datasets['planting']
             scenario=multi_datasets['scenario']
             target_value=multi_datasets['period_years']
-        #variety=[variety]
-        # #print("Pepe")
-        
-        #print(data_type)
-        #print(anom_period[0])
-        # #print(f"layout es {layout.data}")
-        # #print("Callback load_csv_and_update disparado:", variety)
-        
-        # # Seleccionar CSV
-        # csv_file = f"data/pepsi/RC4BL_HARWT_ID_PDhist_{variety}_{target_value}.csv"
-        # # if variety == "1867_2021-2025":
-        # #     csv_file = "data/pepsi/RC4BL_HARWT_ID_PDhist_1867_2021-2025.csv"
-        # # else:
-        # #     csv_file = "data/pepsi/RC4BL_HARWT_ID_PDhist_1867_2046-2050.csv"
-
-        # df = pd.read_csv(csv_file)
-        # if "CCSUID" in df.columns:
-        #     df["id"] = df["CCSUID"].astype(str)
-        # elif "FIPS" in df.columns:
-        #     df["id"] = df["FIPS"].astype(str)
-        # df["HARWT"] = pd.to_numeric(df["HARWT"], errors="coerce")
-        # var_map = df.set_index("id")["HARWT"].to_dict()
-
-        # # Actualizar geojson (solo data, no reemplazar GeoJSON completo)
-        # new_features = []
-        # for feature in layout.data["features"]:
-        #     fid = str(feature["properties"].get("id", ""))
-        #     feature["properties"]["HARWT"] = var_map.get(fid, np.nan)
-        #     new_features.append(feature)
-
-        # data_filtered = {
-        #     "type": "FeatureCollection",
-        #     "features": [f for f in new_features if f["properties"].get("HARWT") is not None and not np.isnan(f["properties"].get("HARWT"))]
-        # }
-
-        # # Calcular nuevas clases
-        # min_val = df["HARWT"].min()
-        # max_val = df["HARWT"].max()
 
         data_filtered,new_classes,colorscale=extrafunctions.prepare_data(variety,model,planting,scenario,target_value,data_type)
-        #base = layout.calcular_base(min_val, max_val)
-        #new_classes = layout.generar_clases(min_val, max_val, base=base)
-        #print(new_classes)
         hideout = dict(colorscale=colorscale, classes=new_classes, style=layout.style_default, colorProp="HARWT")
-        #print(hideout)
+
         # Colorbar
         
         if data_type not in ['historical','projected']:
@@ -1253,7 +657,6 @@ def register(FLASK, config):
         )
 
         # IMPORTANTE: no cambiamos 'key', así el GeoJSON no se destruye
-        #print(data_filtered)
         return data_filtered, hideout, new_colorbar
     
     @APP.callback(
@@ -1281,310 +684,16 @@ def register(FLASK, config):
     # -----------------------------
     @APP.callback(
         Output("info", "children"),
-        #[
         Input("geojson", "hoverData"),
-        #Input("geojson", "clickData")
-        #]
     )
-    def update_info(hover):#, click):
-        #print(f"el click es: {click}")
-        #import dash
+    def update_info(hover):
         ctx = dash.callback_context
         if not ctx.triggered:
             return layout.get_info()
         prop_id = ctx.triggered[0]["prop_id"]
-        #print(prop_id)
         if prop_id == "geojson.hoverData":
             feature = hover
-        # elif prop_id == "geojson.click_feature":
-        #     #print("es un clic")
-        #     feature = click
         else:
             feature = None
         return layout.get_info(feature)
     
-
-    # -------------------------------------------------
-    # Validación de años usando clientside callback
-    # -------------------------------------------------
-    # APP.clientside_callback(
-    #     """function(start_year, end_year, start_year_ref, end_year_ref) {
-    #         // Validar periodo proyectado
-    #         if (start_year && end_year) {
-    #             invalid_start_year = (start_year > end_year)
-    #             invalid_end_year = invalid_start_year
-    #         } else {
-    #             invalid_start_year = !start_year
-    #             invalid_end_year = !end_year
-    #         }
-
-    #         // Validar periodo de referencia
-    #         if (start_year_ref && end_year_ref) {
-    #             invalid_start_year_ref = (start_year_ref > end_year_ref)
-    #             invalid_end_year_ref = invalid_start_year_ref
-    #         } else {
-    #             invalid_start_year_ref = !start_year_ref
-    #             invalid_end_year_ref = !end_year_ref
-    #         }
-
-    #         // Retorna los flags de validación para cada input y si el botón debe deshabilitarse
-    #         return [
-    #             invalid_start_year, invalid_end_year,
-    #             invalid_start_year_ref, invalid_end_year_ref,
-    #             (
-    #                 invalid_start_year || invalid_end_year
-    #                 || invalid_start_year_ref || invalid_end_year_ref
-    #             ),
-    #         ]
-    #     }
-    #     """,
-    #     Output("start_year", "invalid"),
-    #     Output("end_year", "invalid"),
-    #     Output("start_year_ref", "invalid"),
-    #     Output("end_year_ref", "invalid"),
-    #     Output("submit_controls", "disabled"),
-    #     Input("start_year", "value"),
-    #     Input("end_year", "value"),
-    #     Input("start_year_ref", "value"),
-    #     Input("end_year_ref", "value"),
-    # )
-
-
-    # # -------------------------------------------------
-    # # Función para calcular el cambio estacional relativo a un periodo de referencia
-    # # -------------------------------------------------
-    # def seasonal_change(
-    #     scenario,
-    #     model,
-    #     variable,
-    #     region,
-    #     start_month,
-    #     end_month,
-    #     start_year,
-    #     end_year,
-    #     start_year_ref,
-    #     end_year_ref,
-    # ):
-    #     # Expandir Multi-Model-Average a lista de modelos individuales
-    #     model = [model] if model != "Multi-Model-Average" else [
-    #         "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
-    #     ]
-
-    #     # Calcular periodo de referencia histórico
-    #     ref = xr.concat([
-    #         ac.seasonal_data(
-    #             ac.read_data("historical", m, variable, region, unit_convert=True),
-    #             start_month, end_month,
-    #             start_year=start_year_ref, end_year=end_year_ref,
-    #         ).mean(dim="T", keep_attrs=True) for m in model
-    #     ], "M").mean("M", keep_attrs=True)
-
-    #     # Calcular periodo proyectado
-    #     data = xr.concat([
-    #         ac.seasonal_data(
-    #             ac.read_data(scenario, m, variable, region, unit_convert=True),
-    #             start_month, end_month,
-    #             start_year=start_year, end_year=end_year,
-    #         ).mean(dim="T", keep_attrs=True) for m in model
-    #     ], "M").mean("M", keep_attrs=True)
-
-    #     # Restar referencia para obtener cambio manteniendo atributos
-    #     data = xr.apply_ufunc(
-    #         np.subtract, data, ref, dask="allowed", keep_attrs="drop_conflicts",
-    #     )
-
-    #     # Convertir a porcentaje si corresponde
-    #     if variable in ["hurs", "huss", "pr"]:
-    #         data = 100. * data / ref
-    #         data.attrs["units"] = "%"
-
-    #     # Renombrar coordenadas para compatibilidad con mapas
-    #     return data.rename({"X": "lon", "Y": "lat"})
-
-
-    # # -------------------------------------------------
-    # # Función para determinar atributos de visualización del mapa (colormap, min, max)
-    # # -------------------------------------------------
-    # def map_attributes(data):
-    #     variable = data.name
-
-    #     if variable in ["tas", "tasmin", "tasmax"]:
-    #         colorscale = CMAPS["temp_anomaly"]
-    #     elif variable in ["hurs", "huss"]:
-    #         colorscale = CMAPS["prcp_anomaly"].rescaled(-30, 30)
-    #     elif variable in ["pr"]:
-    #         colorscale = CMAPS["prcp_anomaly"].rescaled(-100, 100)
-    #     else:
-    #         # Calcular amplitud máxima para normalizar colormap
-    #         map_amp = np.max(np.abs(data)).values
-    #         if variable in ["prsn"]:
-    #             colorscale = CMAPS["prcp_anomaly_blue"]
-    #         elif variable in ["sfcwind"]:
-    #             colorscale = CMAPS["std_anomaly"]
-    #         else:
-    #             colorscale = CMAPS["correlation"]
-    #         colorscale = colorscale.rescaled(-1*map_amp, map_amp)
-
-    #     return colorscale, colorscale.scale[0], colorscale.scale[-1]
-
-    # -------------------------------------------------
-    # Callback para dibujar la barra de colores del mapa
-    # -------------------------------------------------
-    # @APP.callback(
-    #     Output("colorbar", "colorscale"),
-    #     Output("colorbar", "min"),
-    #     Output("colorbar", "max"),
-    #     Output("colorbar", "unit"),
-    #     Input("region", "value"),
-    #     Input("submit_controls","n_clicks"),
-    #     State("scenario", "value"),
-    #     State("model", "value"),
-    #     State("variable", "value"),
-    #     State("start_month", "value"),
-    #     State("end_month", "value"),
-    #     State("start_year", "value"),
-    #     State("end_year", "value"),
-    #     State("start_year_ref", "value"),
-    #     State("end_year_ref", "value"),
-    # )
-    # def draw_colorbar(
-    #     region,
-    #     n_clicks,
-    #     scenario,
-    #     model,
-    #     variable,
-    #     start_month,
-    #     end_month,
-    #     start_year,
-    #     end_year,
-    #     start_year_ref,
-    #     end_year_ref,
-    # ):
-    #     # Expandir Multi-Model-Average a lista de modelos
-    #     model = [model] if model != "Multi-Model-Average" else [
-    #         "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
-    #     ]
-
-    #     # Calcular cambio estacional promedio sobre todos los modelos
-    #     data = xr.concat([seasonal_change(
-    #         scenario,
-    #         m,
-    #         variable,
-    #         region,
-    #         ac.strftimeb2int(start_month),
-    #         ac.strftimeb2int(end_month),
-    #         int(start_year),
-    #         int(end_year),
-    #         int(start_year_ref),
-    #         int(end_year_ref),
-    #     ) for m in model], "M").mean("M", keep_attrs=True)
-
-    #     # Obtener colormap, min y max
-    #     colorbar, min, max = map_attributes(data)
-    #     return colorbar.to_dash_leaflet(), min, max, data.attrs["units"]
-
-
-    # -------------------------------------------------
-    # Callback para crear los layers del mapa y advertencias
-    # -------------------------------------------------
-    # @APP.callback(
-    #     Output("layers_control", "children"),
-    #     Output("map_warning", "is_open"),
-    #     Input("region", "value"),
-    #     Input("submit_controls", "n_clicks"),
-    #     State("scenario", "value"),
-    #     State("model", "value"),
-    #     State("variable", "value"),
-    #     State("start_month", "value"),
-    #     State("end_month", "value"),
-    #     State("start_year", "value"),
-    #     State("end_year", "value"),
-    #     State("start_year_ref", "value"),
-    #     State("end_year_ref", "value"),
-    # )
-    # def make_map(
-    #     region,
-    #     n_clicks,
-    #     scenario,
-    #     model,
-    #     variable,
-    #     start_month,
-    #     end_month,
-    #     start_year,
-    #     end_year,
-    #     start_year_ref,
-    #     end_year_ref,
-    # ):
-    #     try:
-    #         send_alarm = False
-    #         # Construir URL de los tiles según parámetros seleccionados
-    #         url_str = (
-    #             f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{region}/{scenario}/{model}/{variable}/"
-    #             f"{start_month}/{end_month}/{start_year}/{end_year}/{start_year_ref}/"
-    #             f"{end_year_ref}"
-    #         )
-    #     except:
-    #         # En caso de error, activar alarma y dejar URL vacía
-    #         url_str= ""
-    #         send_alarm = True
-
-    #     # Generar capas de mapa y devolver estado de advertencia
-    #     return mru.layers_controls(
-    #         url_str, f"change_{region}", "Change",
-    #         GLOBAL_CONFIG["datasets"][f"shapes_adm_{region}"], GLOBAL_CONFIG,
-    #         adm_id_suffix=region,
-    #     ), send_alarm
-
-
-    # -------------------------------------------------
-    # Ruta Flask para servir los tiles del mapa
-    # -------------------------------------------------
-    # @FLASK.route(
-    #     (
-    #         f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<region>/<scenario>/<model>/<variable>/"
-    #         f"<start_month>/<end_month>/<start_year>/<end_year>/<start_year_ref>/"
-    #         f"<end_year_ref>"
-    #     ),
-    #     endpoint=f"{config['core_path']}"
-    # )
-    # def fcst_tiles(tz, tx, ty,
-    #     region,
-    #     scenario,
-    #     model,
-    #     variable,
-    #     start_month,
-    #     end_month,
-    #     start_year,
-    #     end_year,
-    #     start_year_ref,
-    #     end_year_ref,
-    # ):
-    #     # Expandir Multi-Model-Average a lista de modelos
-    #     model = [model] if model != "Multi-Model-Average" else [
-    #         "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR","MRI-ESM2-0", "UKESM1-0-LL"
-    #     ]
-
-    #     # Calcular datos de cambio estacional promedio
-    #     data = xr.concat([seasonal_change(
-    #         scenario,
-    #         m,
-    #         variable,
-    #         region,
-    #         ac.strftimeb2int(start_month),
-    #         ac.strftimeb2int(end_month),
-    #         int(start_year),
-    #         int(end_year),
-    #         int(start_year_ref),
-    #         int(end_year_ref),
-    #     ) for m in model], "M").mean("M", keep_attrs=True)
-
-    #     # Asignar atributos de colormap y escala
-    #     (
-    #         data.attrs["colormap"],
-    #         data.attrs["scale_min"],
-    #         data.attrs["scale_max"],
-    #     ) = map_attributes(data)
-
-    #     # Generar y devolver tile del mapa
-    #     resp = pingrid.tile(data, tx, ty, tz)
-    #     return resp
