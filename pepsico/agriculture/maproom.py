@@ -4,7 +4,7 @@ from dash.dependencies import Output, Input, State
 from . import layout  
 from . import extrafunctions  
 import plotly.graph_objects as pgo
-from globals_ import FLASK, GLOBAL_CONFIG  # Configuraciones globales
+from globals_ import FLASK, GLOBAL_CONFIG  # Global configuration settings
 import numpy as np
 from dash_extensions.enrich import html
 import dash_leaflet.express as dlx
@@ -16,26 +16,33 @@ HISTORICAL_VALUES = tuple(m["value"] for m in layout.HISTORICAL_YEARS)
 PROJECTED_VALUES = tuple(m["value"] for m in layout.PROJECTED_YEARS)
 
 def register(FLASK, config):
-    # Prefijos de URL para la app y los tiles
+    # -------------------------------------------------
+    # URL prefixes for the app and tile endpoints
+    # -------------------------------------------------
     PFX = f"{GLOBAL_CONFIG['url_path_prefix']}/{config['core_path']}"
     TILE_PFX = f"{PFX}/tile"
 
     # -------------------------------------------------
-    # Inicialización de la app Dash
+    # Dash app initialization
     # -------------------------------------------------
     APP = dash.Dash(
         __name__,
         server=FLASK,
         external_stylesheets=[
-            dbc.themes.BOOTSTRAP,  # Uso del tema Bootstrap para la UI
+            dbc.themes.BOOTSTRAP,  # Bootstrap theme for the UI
         ],
         url_base_pathname=f"{PFX}/",  # Base URL de la app
-        meta_tags=[  # Meta tags para responsividad y SEO
+        meta_tags=[  # Meta tags para responsividad 
             {"name": "description", "content": "Forecast"},
             {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
         ],
     )
     
+    # -------------------------------------------------
+    # Authentication setup
+    # Loads hashed user credentials and validates them
+    # using bcrypt before granting access to the app.
+    # -------------------------------------------------
     VALID_USERS = extrafunctions.load_valid_users_hash()
     def bcrypt_auth(username, password):
         if username not in VALID_USERS:
@@ -47,11 +54,15 @@ def register(FLASK, config):
     APP.enable_dev_tools(debug=True)
     
     APP.title = "Forecast"  
-    # Definición del layout de la app
+    # App layout definition
     APP.layout = layout.app_layout()
 
     # -------------------------------------------------
-    # Callback para descargar los datos como CSV
+    # Callback: Download graph data as CSV
+    # Triggered by the download button; reads the
+    # current graph data store and county info to
+    # build a long-format DataFrame (Model, Period,
+    # Value) and sends it as a CSV file download.
     # -------------------------------------------------
     @APP.callback(
     Output("download-dataframe-csv", "data"),
@@ -85,7 +96,11 @@ def register(FLASK, config):
         )
 
     # -------------------------------------------------
-    # Callback para controlar panel de control
+    # Callback: Control panel visibility toggling
+    # Adjusts the visibility of dataset containers,
+    # planting/scenario selectors, and year dropdowns
+    # depending on whether the secondary dataset type
+    # is set to "historical" or a projected scenario.
     # -------------------------------------------------
     @APP.callback(
     Output("dataset2_container", "style"),
@@ -124,7 +139,14 @@ def register(FLASK, config):
 
         return dataset2_style,dataset1_style,dataset2_scenario_style, dataset2_years_options,dataset2_value,dataset1,dataset1_years_options
 
-
+    # -------------------------------------------------
+    # Callback: Period/year controls and info panel
+    # Shows or hides the period selector, anomaly
+    # period selector, and model selector based on the
+    # selected data type (historical, projected, or an
+    # anomaly/direction-change view). Also adjusts the
+    # vertical position of the info panel accordingly.
+    # -------------------------------------------------
     @APP.callback(
     Output("period_container", "style"),
     Output("anomaly_period_container", "style"),
@@ -160,7 +182,13 @@ def register(FLASK, config):
 
         return period_style, anomaly_period_style, model_style,info_style,options, value, 
     
-
+    # -------------------------------------------------
+    # Callback: Show/hide scenario selector for bar charts
+    # The graph scenario container is only relevant
+    # when the selected graph type is a bar chart
+    # (type prefix "bars"). For line/marker charts it
+    # is hidden.
+    # -------------------------------------------------
     @APP.callback(
         Output("graph_scenario_container", "style"),
         Input("graph_type","value")
@@ -170,13 +198,31 @@ def register(FLASK, config):
             return {"display": "flex", "align-items": "center"}
         else:
             return {"display": "none"}
-
+    # -------------------------------------------------
+    # Shared input map for the local graph callback
+    # Groups variety, variable, planting style, graph
+    # type, and scenario inputs for reuse.
+    # -------------------------------------------------
     options = { 'variety':Input("variety", "value"), #args[0]
                  'variable':Input("variable", "options"), #args[0]
                  'planting':Input("graph_planting", "value"),
                  'graph_type':Input("graph_type", "value"),
                  'graph_scenario':Input("graph_scenario", "value"),
                       }
+
+    # -------------------------------------------------
+    # Callback: Local county graph rendering
+    # Fires on map click. Loads bar or line/marker data
+    # for the clicked county and builds a Plotly figure.
+    # Handles three chart types:
+    #   - "bars_*"       → grouped/stacked bar chart
+    #   - "lines" / "markers" / "lines+markers" → scatter
+    #   - "markers-scale" → bubble chart
+    # A light-blue background marks the historical
+    # period; light-red marks projected periods.
+    # Historical data is always rendered as a reference
+    # line/marker on top of projected model traces.
+    # -------------------------------------------------
     @APP.callback(
         Output("local_graph", "figure"),
         Output("graph_data_store", "data"),
@@ -197,7 +243,7 @@ def register(FLASK, config):
             x_dup = []
             y_dup = []
             for i, (x, y) in enumerate(zip(x_axis, values)):
-                x_dup.extend([i - 0.1, i + 0.1])  # offset de ±0.1 alrededor del índice
+                x_dup.extend([i - 0.1, i + 0.1])  # ±0.1 offset around the index
                 y_dup.extend([y, y])
             return x_dup, y_dup
 
@@ -205,7 +251,7 @@ def register(FLASK, config):
         data=None
         county_info=None
         ctx = dash.callback_context
-        variety_values = args[0]['variety'] #[opt["value"] for opt in args[0]['variety']]
+        variety_values = args[0]['variety'] 
         planting_values = args[0]['planting'] 
         type=args[0]['graph_type'] 
         
@@ -248,16 +294,16 @@ def register(FLASK, config):
             for trace in data:
                 periods = trace["x_axis"]
                 hist_val = None
-                # Fondo azul claro para el período histórico
+                # Light-blue background for the historical period (first bar)
                 fig.add_vrect(
-                    x0=-0.5, x1=0.5,          # cubre solo la primera barra (2006-2010)
+                    x0=-0.5, x1=0.5,         
                     fillcolor="rgba(173, 216, 230, 0.5)",
                     layer="below",
                     line_width=0,
                 )
-                # Fondo rojo claro para los períodos proyectados
+                # Light-red background for projected periods
                 fig.add_vrect(
-                    x0=0.5, x1=len(periods) - 0.5,   # desde la segunda barra hasta el final
+                    x0=0.5, x1=len(periods) - 0.5,   
                     fillcolor="rgba(255, 182, 193, 0.5)",
                     layer="below",
                     line_width=0,
@@ -268,7 +314,7 @@ def register(FLASK, config):
                     
                     for i, (model, y_values) in enumerate(trace["models"].items()):
                         if model == "Historical":
-                            # guardamos para la línea punteada
+                            # Save historical value for the reference dashed line
                             hist_val = y_values[0] if y_values else None
                         else:
                             fig.add_trace(pgo.Bar(
@@ -278,15 +324,15 @@ def register(FLASK, config):
                                 marker_color=colorbar[i % len(colorbar)] 
                             ))
 
-                    # Línea histórica encima de todo
+                    # Render historical bar and dashed reference line on top
                     if hist_val is not None:
-                        # Barra negra solo en el primer periodo (el histórico)
+                        # Black bar for the historical period only
                         fig.add_trace(pgo.Bar(
                             x=[periods[0]],
                             y=[hist_val],
                             name="Historical",
                             marker_color="black",
-                            legendgroup="historical",       # 👈 agrupa con el scatter
+                            legendgroup="historical",       
                             showlegend=True,
                         ))
                         fig.add_trace(pgo.Scatter(
@@ -301,28 +347,30 @@ def register(FLASK, config):
                             #showlegend=True,
                         ))
 
-                    fig.update_layout(barmode=type.split("_")[1], #"group",
+                    fig.update_layout(barmode=type.split("_")[1], 
                                       legend=dict(
-                                                orientation="h",        # horizontal
+                                                orientation="h",        
                                                 yanchor="bottom",
-                                                y=-0.25,                 # encima del gráfico
+                                                y=-0.25,                 
                                                 xanchor="left",
                                                 x=0
                                             ),
 
                                       )
                 elif type in ["lines","markers","lines+markers"]:
+                    # Render one trace per model; Historical is shown as a
+                    # diamond marker at its period plus a dashed horizontal
+                    # reference line across all projected periods.
                     models = trace['models']
                     for name, values in models.items():
                         is_historical = name == 'Historical'
                         x_dup, y_dup = duplicate_points(periods, values)
 
                         if is_historical:
-                            # Valor histórico (primer periodo)
                             hist_val = next((v for v in values if v is not None), None)
 
                             if hist_val is not None:
-                                # MARCAR en el primer periodo (donde está el dato real)
+                                # Diamond marker at the historical data point
                                 marker_y = values  # [hist_val, None, None, ...]
                                 fig.add_trace(pgo.Scatter(
                                     x=periods,
@@ -339,8 +387,8 @@ def register(FLASK, config):
                                     ),
                                 ))
 
-                                # LÍNEA DASH con el valor invertido:
-                                # None donde había dato, hist_val donde había None
+                                # Dashed reference line across projected periods
+                                # (None where the real data point was, hist_val elsewhere)
                                 dash_y = [None if v is not None else hist_val for v in values]
                                 fig.add_trace(pgo.Scatter(
                                     x=periods,
@@ -380,6 +428,7 @@ def register(FLASK, config):
                     )
                     fig.update_xaxes(type="category")
                 elif type in ["markers-scale"]:
+                    # Bubble chart: marker size and color both encode the y-value
                     fig.add_trace(pgo.Scatter(x=trace["x"], y=trace["y"],mode="markers", name=click["properties"]["NAME"],
                                               marker=dict(
                                                     size=trace["y"],         # tamaño variable
@@ -408,7 +457,13 @@ def register(FLASK, config):
         return fig, data, county_info
 
     # -------------------------------------------------
-    # Callback para generar descripcion 
+    # Callback: Map variable description panel
+    # Generates a human-readable description for the
+    # currently selected map variable (data_type).
+    # For anomaly types (mean_change, percentage_change,
+    # direction_change, stress_simple, yield_change_index)
+    # it also renders the equation used to compute the
+    # displayed values.
     # -------------------------------------------------
     @APP.callback(
         Output("map_description_var", "children"),
@@ -530,7 +585,12 @@ def register(FLASK, config):
 
         return description
     # -------------------------------------------------
-    # Callback para generar el título del mapa
+    # Callback: Map title generation
+    # Builds the map title string from the currently
+    # active dataset inputs. For historical/projected
+    # views a single-dataset title is used; for anomaly
+    # or direction-change views a dual-dataset
+    # comparison title is shown.
     # -------------------------------------------------
     multi_datasets = { 'model':[ Input("dataset1", "value"), Input("dataset2", "value")], 
                      'variety':[ Input("variety", "value"), Input("variety", "value")],
@@ -585,17 +645,26 @@ def register(FLASK, config):
         # Construye un título resumido del mapa mostrando periodo, escenario, modelo, variable y referencia
         return (top_title)
 
-    # -----------------------------
-    # Callback para cargar CSV según dropdown
-    # -----------------------------
-    # Callback para combinar valores
+    # -------------------------------------------------
+    # Callback: Combine anomaly period values
+    # Merges dataset1 and dataset2 year selections into
+    # a single list stored in a dcc.Store, so other
+    # callbacks can consume both values at once.
+    # -------------------------------------------------
     @APP.callback(
         Output("anomaly_period_values", "data"),
         [Input("dataset1_years", "value"), Input("dataset2_years", "value")]
     )
     def combine_inputs(dataset1, dataset2):
         return [dataset1, dataset2]
-    
+    # -------------------------------------------------
+    # Callback: Load CSV and update GeoJSON map layer
+    # Reads the appropriate CSV file based on the
+    # current dataset selections, computes value
+    # classes and a color scale via prepare_data(), and
+    # returns updated GeoJSON data, hideout styling
+    # props, and a rebuilt categorical colorbar legend.
+    # -------------------------------------------------
     multi_datasets = { 'model':[ Input("dataset1", "value"), Input("dataset2", "value")], 
                      'variety':[ Input("variety", "value"), Input("variety", "value")],
                     'planting':[ Input("dataset1_planting", "value"), Input("dataset2_planting", "value")] ,
@@ -639,8 +708,7 @@ def register(FLASK, config):
         data_filtered,new_classes,colorscale=extrafunctions.prepare_data(variety,model,planting,scenario,target_value,data_type)
         hideout = dict(colorscale=colorscale, classes=new_classes, style=layout.style_default, colorProp="HARWT")
 
-        # Colorbar
-        
+        # Build colorbar title
         if data_type not in ['historical','projected']:
             title= (
                     f"HARWT {data_type.replace('_', ' ').capitalize()} variety={variety}\n"
@@ -650,6 +718,7 @@ def register(FLASK, config):
         else:
             title=f"HARWT variety={variety} target={target_value}"
 
+        # Build categorical colorbar labels based on data type
         if data_type in ['percentage_change','yield_change_index']:
             ctg = ["{}%".format(cls) for cls in new_classes]
         elif data_type == 'direction_change':
@@ -671,16 +740,25 @@ def register(FLASK, config):
             style={"position": "absolute", "bottom": "10px", "left": "10px", "width": "420px", "height": "70px", "zIndex": 999}
         )
 
-        # IMPORTANTE: no cambiamos 'key', así el GeoJSON no se destruye
+        # NOTE: 'key' is intentionally not changed so the GeoJSON layer
+        # is updated in-place rather than destroyed and re-mounted.
         return data_filtered, hideout, new_colorbar
     
+    # -------------------------------------------------
+    # Callbacks: Border overlay flicker fix
+    # When the GeoJSON data updates, the county border
+    # overlay is briefly toggled off and then
+    # immediately turned back on. This forces a visual
+    # refresh of the overlay layer without requiring
+    # user interaction.
+    # -------------------------------------------------
     @APP.callback(
         Output("overlay-borders", "checked"),
-        Input("geojson", "data"),  # <- se dispara cuando el GeoJSON ya está listo
+        Input("geojson", "data"),  # <- this wait until the geajon is ready
         prevent_initial_call=True
     )
     def toggle_borders_after_update(_):
-        # 1er paso: apagar bordes
+        # Step 1: turn borders off to trigger a re-render
         return False
 
     @APP.callback(
@@ -689,14 +767,18 @@ def register(FLASK, config):
         prevent_initial_call=True
     )
     def turn_borders_on(checked):
-        # Cuando se apague, lo prendemos
+        # Step 2: immediately turn borders back on after they were switched off
         if checked is False:
             return True
         return dash.no_update
     
-    # -----------------------------
-    # Callback hover/click info
-    # -----------------------------
+    # -------------------------------------------------
+    # Callback: Hover info panel
+    # Updates the floating info box with feature
+    # properties when the user hovers over a county
+    # on the map. Clears the panel when no feature is
+    # hovered.
+    # -------------------------------------------------
     @APP.callback(
         Output("info", "children"),
         Input("geojson", "hoverData"),
