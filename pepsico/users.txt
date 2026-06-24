@@ -1,0 +1,2 @@
+admin:$2b$12$GWlwLI8d7leII31T6bSDGeXp8mHf7zn2H6RyCsopsgcOOAW9FxF4m
+pepsico:$2b$12$o5LJ77E1oL07d48hb8G4dekqKfShVCQBORmlXaRkeI1/L0vYhCddm
