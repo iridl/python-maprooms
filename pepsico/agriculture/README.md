@@ -82,3 +82,5 @@ pepe:$2b$12$fYfe4bfomqHLqOLLm53SiuNp2Z9rEKMcvatc.DXMeDt/uGRaegOs.
 Copy the returned value (without the surrounding single quotes, if present) and paste it into your `.users` file.
 
 If the user already exists, this operation is considered a password update. Simply replace the existing line corresponding to that user in the `.users` file with the newly generated value.
+
+> **⚠️ Warning:** Ensure that the `admin` user is always present in the `.users` file, as it is required for the application to function correctly.
