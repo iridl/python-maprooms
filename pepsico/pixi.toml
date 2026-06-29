@@ -19,6 +19,7 @@ dash-bootstrap-components = ">=2.0.4,<3"
 scipy = ">=1.17.1,<2"
 zarr = ">=3.1.6,<4"
 sqlalchemy = ">=2.0.49,<3"
+geopandas = ">=1.1.4,<2"
 
 [feature.dev.dependencies]
 pytest = "*"

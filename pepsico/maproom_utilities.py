@@ -7,6 +7,7 @@ from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry import Polygon
 import sqlalchemy
+import geopandas as geopd
 
 
 # Mapping Utilities
@@ -39,8 +40,18 @@ def get_geom(level, conf, shapes_adm_name):
     """
     if "bbox" in conf["datasets"] :
         return synthesize_geom(conf["datasets"]["bbox"], level=level)
-    else:
+    elif 'sql' in conf["datasets"][shapes_adm_name][level]:
         return sql2geom(conf["datasets"][shapes_adm_name][level]["sql"], conf["db"])
+    elif 'path' in conf["datasets"][shapes_adm_name][level]:
+        return shp2geom(
+            conf["datasets"][shapes_adm_name][level]["path"],
+            conf["datasets"][shapes_adm_name][level]["geom"],
+            conf["datasets"][shapes_adm_name][level]["label"],
+            conf["datasets"][shapes_adm_name][level]["selector"],
+            conf["datasets"][shapes_adm_name][level]["selected"],
+            #[int(s) for s in conf["datasets"][shapes_adm_name][level]["selected"].split()],
+            conf["datasets"][shapes_adm_name][level]["tolerance"],
+        )
 
 
 def sql2GeoJSON(shapes_sql, db_config):
@@ -73,6 +84,14 @@ def sql2GeoJSON(shapes_sql, db_config):
         dbname: iridb
     """
     return geom2GeoJSON(sql2geom(shapes_sql, db_config))
+
+
+def shp2geom(path, geom, label, selector, selected, tolerance):
+    df = geopd.read_file(
+        path, columns=[geom, label, selector], where=f'{selector} in {selected}'
+    ).rename(columns={geom: 'the_geom', label: 'label'})
+    #df['the_geom'] = df.the_geom.simplify(tolerance=tolerance)
+    return df
 
 
 def geom2GeoJSON(df):
