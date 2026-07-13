@@ -6,18 +6,30 @@ Follow the steps below to set up and run the application.
 
 If it does not already exist, create a `data` folder in the same path where `app.py` is located.
 
-## 2. Extract `shapes.zip`
+## 2. Download the data
 
-Inside the `data` folder, extract the `shapes.zip` file.
+Download the files `shapes.zip` and `csv_files.zip` from the link below:
 
-## 3. Extract or add CSV files
+[pepsico.sharepoint](https://pepsico.sharepoint.com/teams/IRI-PepsiCo)
 
-- **First-time installation**: extract the `csv_files.zip` file inside the `data` folder.
-- **Adding new data**: if you want to add new data afterward, place the new `.csv` files inside the `csv_files` folder (do not re-extract the zip).
+This is a restricted-access link, so you will need to request access in order to use these data files.
 
-## 4. Configure Users
+### 2.1 Extract `shapes.zip`
 
-Rename the `users.txt` file to `.users`.
+Inside the `data` folder, extract `shapes.zip`.
+
+### 2.2 Handle `csv_files.zip`
+
+- **First-time installation**:
+  - Extract `csv_files.zip` inside the `data` folder.
+
+- **Adding new data later**:
+  - Place the new `.csv` files inside the existing `csv_files` folder.
+  - Do **not** re-extract the zip.
+
+## 3. Configure Users
+
+Rename the `users.txt` file to `.users`
 
 By default, the application grants access with the following credentials:
 
@@ -26,11 +38,11 @@ By default, the application grants access with the following credentials:
 
 To change the password or add additional users, see the **Users** section below.
 
-## 5. Configure the server (optional)
+## 4. Configure the server (optional)
 
 By default, the server runs on `localhost`, port `3333`. If you need to adjust these settings, edit the `config-dev-agriculture.yaml` file, located in the same path as `app.py`.
 
-## 6. Run the application
+## 5. Run the application
 
 From the path where `app.py` is located, run:
 
@@ -38,7 +50,7 @@ From the path where `app.py` is located, run:
 CONFIG=config-dev-agriculture.yaml pixi run --manifest-path agriculture/pixi.toml python app.py
 ```
 
-## 7. View the maproom
+## 6. View the maproom
 
 Once the server is running, you can view the maproom at the address and port defined in `config-dev-agriculture.yaml`.
 
