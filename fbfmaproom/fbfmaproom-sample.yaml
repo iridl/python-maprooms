@@ -6029,7 +6029,7 @@ countries:
         rotation: 0
         marker: [ 47.875, 15.625 ]
         origin: [ .125, .125 ]
-        shapes:
+        shapes: &yemen_shapes
             - name: National
               file: yemen/shapes/2026-04/yem_admin_boundaries.shp.zip
               layer: yem_admin0
