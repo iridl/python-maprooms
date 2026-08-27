@@ -6029,7 +6029,7 @@ countries:
         rotation: 0
         marker: [ 47.875, 15.625 ]
         origin: [ .125, .125 ]
-        shapes:
+        shapes: &yemen_shapes
             - name: National
               file: yemen/shapes/2026-04/yem_admin_boundaries.shp.zip
               layer: yem_admin0
@@ -6080,9 +6080,22 @@ countries:
 #                    units: rank
             forecasts:
                 pnep-v1:
-                    label: Forecast prob non-exc v1
-                    description: NextGen forecast probability of non-exceedance of selected percentile, version 1
+                    label: Forecast prob non-exc v1 (CHIRPS)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 1, CHIRPS predictand
                     path: yemen/prcp-jas-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2 (CPC-CMAP)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2, CPC-CMAP predictand
+                    path: yemen/prcp-jas-v2.zarr
                     var_names:
                         value: pne
                         lat: Y
@@ -6099,3 +6112,293 @@ countries:
                 length: 3.0
                 issue_months: [ 3, 4, 5 ]
                 start_year: 1991
+        subpages:
+            MJJ: yemen-mjj
+            JJA: yemen-jja
+            JAS: yemen
+            ASO: yemen-aso
+            SON: yemen-son
+
+    yemen-mjj:
+        logo: Yemen_IRI_96x48.png
+        resolution: [ .25, .25 ]
+        center: [ 47.5, 15.5 ]
+        zoom: 6
+        rotation: 0
+        marker: [ 47.875, 15.625 ]
+        origin: [ .125, .125 ]
+        shapes: *yemen_shapes
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep-v1
+                    - rain
+                predictand: rain
+            observations:
+                rain:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.875/54.625/RANGE/Y/12.125/19.125/RANGE/T/(May-Jul)/seasonalAverage/30/mul//units/(mm/month)/def/'
+                    path: yemen/rain-mjj.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                enso_state: *enso_3mo
+            forecasts:
+                pnep-v1:
+                    label: Forecast prob non-exc v1 (CHIRPS)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 1, CHIRPS predictand
+                    path: yemen/prcp-mjj-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2 (CPC-CMAP)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2, CPC-CMAP predictand
+                    path: yemen/prcp-mjj-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+        seasons:
+            season1:
+                label: MJJ
+                target_month: 5.5
+                length: 3.0
+                issue_months: [ 1, 2, 3 ]
+                start_year: 1991
+        subpages:
+            MJJ: yemen-mjj
+            JJA: yemen-jja
+            JAS: yemen
+            ASO: yemen-aso
+            SON: yemen-son
+
+    yemen-jja:
+        logo: Yemen_IRI_96x48.png
+        resolution: [ .25, .25 ]
+        center: [ 47.5, 15.5 ]
+        zoom: 6
+        rotation: 0
+        marker: [ 47.875, 15.625 ]
+        origin: [ .125, .125 ]
+        shapes: *yemen_shapes
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep-v1
+                    - rain
+                predictand: rain
+            observations:
+                rain:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.875/54.625/RANGE/Y/12.125/19.125/RANGE/T/(Jun-Aug)/seasonalAverage/30/mul//units/(mm/month)/def/'
+                    path: yemen/rain-jja.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                enso_state: *enso_3mo
+            forecasts:
+                pnep-v1:
+                    label: Forecast prob non-exc v1 (CHIRPS)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 1, CHIRPS predictand
+                    path: yemen/prcp-jja-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2 (CPC-CMAP)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2, CPC-CMAP predictand
+                    path: yemen/prcp-jja-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+        seasons:
+            season1:
+                label: JJA
+                target_month: 6.5
+                length: 3.0
+                issue_months: [ 2, 3, 4 ]
+                start_year: 1991
+        subpages:
+            MJJ: yemen-mjj
+            JJA: yemen-jja
+            JAS: yemen
+            ASO: yemen-aso
+            SON: yemen-son
+
+    yemen-aso:
+        logo: Yemen_IRI_96x48.png
+        resolution: [ .25, .25 ]
+        center: [ 47.5, 15.5 ]
+        zoom: 6
+        rotation: 0
+        marker: [ 47.875, 15.625 ]
+        origin: [ .125, .125 ]
+        shapes: *yemen_shapes
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep-v1
+                    - rain
+                predictand: rain
+            observations:
+                rain:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.875/54.625/RANGE/Y/12.125/19.125/RANGE/T/(Aug-Oct)/seasonalAverage/30/mul//units/(mm/month)/def/'
+                    path: yemen/rain-aso.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                enso_state: *enso_3mo
+            forecasts:
+                pnep-v1:
+                    label: Forecast prob non-exc v1 (CHIRPS)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 1, CHIRPS predictand
+                    path: yemen/prcp-aso-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2 (CPC-CMAP)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2, CPC-CMAP predictand
+                    path: yemen/prcp-aso-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+        seasons:
+            season1:
+                label: ASO
+                target_month: 8.5
+                length: 3.0
+                issue_months: [ 4, 5, 6 ]
+                start_year: 1991
+        subpages:
+            MJJ: yemen-mjj
+            JJA: yemen-jja
+            JAS: yemen
+            ASO: yemen-aso
+            SON: yemen-son
+
+    yemen-son:
+        logo: Yemen_IRI_96x48.png
+        resolution: [ .25, .25 ]
+        center: [ 47.5, 15.5 ]
+        zoom: 6
+        rotation: 0
+        marker: [ 47.875, 15.625 ]
+        origin: [ .125, .125 ]
+        shapes: *yemen_shapes
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep-v1
+                    - rain
+                predictand: rain
+            observations:
+                rain:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    url: 'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.875/54.625/RANGE/Y/12.125/19.125/RANGE/T/(Sep-Nov)/seasonalAverage/30/mul//units/(mm/month)/def/'
+                    path: yemen/rain-son.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                enso_state: *enso_3mo
+            forecasts:
+                pnep-v1:
+                    label: Forecast prob non-exc v1 (CHIRPS)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 1, CHIRPS predictand
+                    path: yemen/prcp-son-v1.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2 (CPC-CMAP)
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2, CPC-CMAP predictand
+                    path: yemen/prcp-son-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+        seasons:
+            season1:
+                label: SON
+                target_month: 9.5
+                length: 3.0
+                issue_months: [ 5, 6, 7 ]
+                start_year: 1991
+        subpages:
+            MJJ: yemen-mjj
+            JJA: yemen-jja
+            JAS: yemen
+            ASO: yemen-aso
+            SON: yemen-son
