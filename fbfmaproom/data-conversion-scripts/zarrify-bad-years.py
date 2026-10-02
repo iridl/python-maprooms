@@ -5,9 +5,6 @@ import pandas as pd
 from pathlib import Path
 
 
-DEFAULT_ROOT = '/data/aaron/fbf-candidate'
-
-
 def convert(csvfile, target_month, zarrpath):
     # switch from 0-based counting to 1-based counting
     month = int(target_month) + 1
@@ -39,8 +36,11 @@ HELP_TEXT ="""Convert bad years data from CSV to zarr.  Expected CSV format has
 
 if __name__ == '__main__':
     import argparse
+    import os
+    import pingrid
+
     parser = argparse.ArgumentParser(description=HELP_TEXT)
-    parser.add_argument('--datadir', default=DEFAULT_ROOT)
+    parser.add_argument('--datadir', default=None)
     parser.add_argument('dataset_name')
     parser.add_argument(
         'target_month',
@@ -49,7 +49,15 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    datadir = Path(args.datadir)
+    datadir_str = args.datadir
+    if datadir_str is None:
+        config_file = os.environ.get('CONFIG')
+        if config_file is not None:
+            datadir_str = pingrid.load_config(config_file).get('data_root')
+    if datadir_str is None:
+        raise Exception('Either set CONFIG environment variable or provide --datadir argument')
+    datadir = Path(datadir_str)
     infile = datadir / f'original-data/{args.dataset_name}.csv'
     outdir = datadir / f'{args.dataset_name}.zarr'
+
     convert(infile, args.target_month, outdir)
