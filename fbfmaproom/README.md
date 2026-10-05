@@ -76,10 +76,6 @@ CONFIG=fbfmaproom-sample.yaml:config-local.yaml pixi run python fbf-update-data.
 
 Scripts for converting non-Data Library datasets to zarr are contained in the `data-conversion-scripts` directory. One of these scripts, `zarrify-forecast.py`, is used for all PyCPT forecast datasets, for all countries. Other scripts are specific to a single dataset and are kept in per-country subdirectories.
 
-For `zarrify-forecast.py`, edit the end of the script to indicate which dataset you want to update.
-
-`zarrify-forecast.py` also must be run in the `enactsmaproom` conda environment.
-
 ## Adding or removing python dependencies
 
 Use `pixi add` or `pixi remove` followed by `pixi lock`. After testing, commit changes to `pixi.toml` and `pixi.lock`.
