@@ -9,7 +9,6 @@ import xarray as xr
 import zarr
 
 
-DEFAULT_ROOT = '/data/aaron/fbf-candidate'
 
 def sqrt(x):
     return xr.apply_ufunc(np.sqrt, x)
@@ -133,9 +132,9 @@ def open_multi(paths):
     return da
 
 
-def zarrify(path, datadir):
+def zarrify(path, datadir, pycpt_dir):
     print(path)
-    pne = load_pne(datadir / 'original-data' / path)
+    pne = load_pne(pycpt_dir / path)
     pne['quantile'] = (pne['quantile'] * 100).astype(int)
     pne['pne'] = pne['pne'] * 100
     # Some input datasets are in decreasing latitude order, which
@@ -152,10 +151,33 @@ def zarrify(path, datadir):
 if __name__ == '__main__':
     import argparse
     import os
+    import pingrid
 
     os.umask(0o002)
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset_name')
-    parser.add_argument('--datadir', default=DEFAULT_ROOT)
+    parser.add_argument('--datadir', default=None)
     args = parser.parse_args()
-    zarrify(args.dataset_name, datadir=Path(args.datadir))
+
+    config_file = os.environ.get('CONFIG')
+    if config_file is None:
+        config = None
+    else:
+        config = pingrid.load_config(config_file)
+
+    datadir_str = args.datadir
+    if datadir_str is None and config is not None:
+        datadir_str = config.get('data_root')
+    if datadir_str is None:
+        raise Exception('Either set CONFIG environment variable or provide --datadir argument')
+    datadir = Path(datadir_str)
+
+    pycpt_dir_str = None
+    if config is not None:
+        pycpt_dir_str = config.get('pycpt_dir')
+    if pycpt_dir_str is None:
+        pycpt_dir = datadir / 'original-data'
+    else:
+        pycpt_dir = Path(pycpt_dir_str)
+
+    zarrify(args.dataset_name, datadir=datadir, pycpt_dir=pycpt_dir)
