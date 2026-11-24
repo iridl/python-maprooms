@@ -3759,7 +3759,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - prcp-v4
+                    - prcp-v7
                     - chirps-precip-jas
                 predictand: bad-years-humanitarian
             observations:
@@ -3907,6 +3907,34 @@ countries:
                     label: JAS fcst v5
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, with lead time from Apr to Jun, configuration selected Mar 2026
                     path: burkinafaso/JAS_fcst_V5.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+
+                prcp-v6:
+                    label: JAS fcst v6
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, with lead time from Feb to June, configuration selected Nov 2026, based on CHRIPS and as benchmark for v7
+                    path: burkinafaso/JAS_fcst_V6.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+
+                prcp-v7:
+                    label: JAS fcst v7
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, with lead time from Feb to June, configuration selected Nov 2026, based on ENACTS (TAMSAT + stations) preferred for 2027 monitoring
+                    path: burkinafaso/JAS_fcst_V7.zarr
                     var_names:
                         value: pne
                         lat: Y
